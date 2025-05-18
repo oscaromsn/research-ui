@@ -163,7 +163,11 @@ describe("executeExaSearch", () => {
     it("should handle API errors correctly", async () => {
         // Setup
         const apiError = new Error("API error");
-        (apiError as Error & { response: { status: number; data: { message: string } } }).response = {
+        (
+            apiError as Error & {
+                response: { status: number; data: { message: string } };
+            }
+        ).response = {
             status: 401,
             data: { message: "Unauthorized" },
         };
