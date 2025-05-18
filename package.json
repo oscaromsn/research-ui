@@ -10,7 +10,8 @@
     },
     "dependencies": {
         "@radix-ui/react-slot": "^1.2.2",
-        "baml-nextjs-plugin": "link:@boundaryml/baml, @boundaryml/baml-nextjs-plugin",
+        "@boundaryml/baml": "^0.88.0",
+        "@boundaryml/baml-nextjs-plugin": "^0.1.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "lucide-react": "^0.511.0",
