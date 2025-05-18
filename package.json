@@ -6,7 +6,8 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint"
+        "lint": "next lint",
+        "baml-generate": "baml-cli generate"
     },
     "dependencies": {
         "@boundaryml/baml": "^0.88.0",
