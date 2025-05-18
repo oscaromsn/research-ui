@@ -46,6 +46,11 @@ baml_client
 # dev notes
 .notes
 
+# IDEs
+.zed
+.vscode
+.idea
+
 # Claude Code
 CLAUDE.md
 .claude
