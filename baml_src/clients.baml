@@ -1,5 +1,46 @@
 // Learn more about clients at https://docs.boundaryml.com/docs/snippets/clients/overview
 
+client<llm> QueryGeneration {
+  provider google-ai
+  options {
+    model "gemini-2.0-flash"
+    api_key env.GOOGLE_API_KEY
+  }
+}
+
+client<llm> DocumentAnalysis {
+  provider google-ai
+  options {
+    model "gemini-2.0-flash"
+    api_key env.GOOGLE_API_KEY
+  }
+}
+
+client<llm> FindingsSynthetizing {
+  provider google-ai
+  options {
+    model "gemini-2.0-flash"
+    api_key env.GOOGLE_API_KEY
+  }
+}
+
+client<llm> DecidesNextStep {
+  provider google-ai
+  options {
+    model "gemini-2.0-flash"
+    api_key env.GOOGLE_API_KEY
+  }
+}
+
+client<llm> GenerateFinalReport {
+  provider google-ai
+  options {
+    model "gemini-2.0-flash"
+    api_key env.GOOGLE_API_KEY
+  }
+}
+
+
 client<llm> CustomGPT4o {
   provider openai
   options {
