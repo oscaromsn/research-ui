@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { env, publicEnv } from "./schemas/env";
+import { env } from "./schemas/env";
 
 /**
  * Application configuration with Zod validation

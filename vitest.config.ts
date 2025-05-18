@@ -1,0 +1,47 @@
+import path from "node:path";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+    plugins: [react()],
+    test: {
+        environment: "happy-dom",
+        globals: true,
+        include: ["**/*.{test,spec}.{ts,tsx}"],
+        exclude: ["node_modules", ".next", "dist", ".git"],
+        setupFiles: ["./setupTests.ts"],
+        coverage: {
+            provider: "v8",
+            reporter: ["text", "json", "html"],
+            exclude: [
+                "node_modules/**",
+                "dist/**",
+                ".next/**",
+                "**/*.d.ts",
+                "**/*.test.{ts,tsx}",
+                "**/*.config.{ts,js}",
+                "coverage/**",
+                "__mocks__/**",
+            ],
+            thresholds: {
+                // Adjust these thresholds as your project matures
+                statements: 70,
+                branches: 60,
+                functions: 70,
+                lines: 70,
+            },
+            // Only check coverage of files that have tests
+            all: false,
+
+        },
+        deps: {
+            // Handle errors with Next.js dependencies
+            inline: [/^(?!.*(@babel\/runtime|regenerator-runtime)).*$/],
+        },
+    },
+    resolve: {
+        alias: {
+            "@": path.resolve(__dirname, "./"),
+        },
+    },
+});
