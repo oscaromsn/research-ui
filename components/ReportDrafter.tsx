@@ -77,7 +77,7 @@ export function ReportDrafter() {
                         <p>
                             This report analyzes the legal framework surrounding
                             maritime salvage rights in the context of the
-                            'Oceanic' case. The analysis focuses on three key
+                            &apos;Oceanic&apos; case. The analysis focuses on three key
                             areas: jurisdictional considerations, applicable
                             maritime law, and precedential cases
                             <span className="inline-block bg-[#a0aec0] w-1.5 h-4 animate-caret-blink" />

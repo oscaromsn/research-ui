@@ -190,8 +190,8 @@ export function EvidenceAnalysis() {
                                 during COVID-19 could qualify as force majeure
                                 events, but requires specific contract language.
                                 The decision hinges on whether the clause
-                                explicitly mentions "pandemics" or "government
-                                actions"
+                                explicitly mentions &quot;pandemics&quot; or &quot;government
+                                actions&quot;
                                 <span className="inline-block bg-[#a0aec0] w-1.5 h-4 animate-caret-blink" />
                             </p>
                         </div>
