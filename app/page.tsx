@@ -1,7 +1,7 @@
-import { EvidenceAnalysis } from "@/components/EvidenceAnalysis";
-import { GuidanceStrategy } from "@/components/GuidanceStrategy";
-import { Header } from "@/components/Header";
-import { SynthesisReporting } from "@/components/SynthesisReporting";
+import { EvidenceAnalysis } from "@domain/legal-research/evidence-analysis";
+import { GuidanceStrategy } from "@domain/guidance/guidance-strategy";
+import { Header } from "@layout/header";
+import { SynthesisReporting } from "@domain/report-generation/synthesis-reporting";
 
 export default function Home() {
     return (

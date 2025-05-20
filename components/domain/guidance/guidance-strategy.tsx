@@ -41,8 +41,9 @@ export function GuidanceStrategy() {
                 </div>
                 <div className="bg-white dark:bg-[#1e2436] mb-3 p-4 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg">
                     <div className="mb-2 font-mono text-[#2d3748] dark:text-[#e2e8f0] text-sm">
-                        &quot;contract breach&quot; AND (&quot;force majeure&quot; OR
-                        &quot;impossibility&quot;) NEAR/5 &quot;COVID-19&quot;
+                        &quot;contract breach&quot; AND (&quot;force
+                        majeure&quot; OR &quot;impossibility&quot;) NEAR/5
+                        &quot;COVID-19&quot;
                     </div>
                     <div className="mt-3">
                         <p className="mb-1 font-medium text-[#4a5568] dark:text-[#a0aec0] text-xs">
@@ -85,8 +86,8 @@ export function GuidanceStrategy() {
                     </button>
                     <p className="mb-3 text-[#4a5568] dark:text-[#a0aec0] text-xs">
                         Current synthesis lacks sufficient case law from the 9th
-                        Circuit regarding &apos;unforeseen circumstances&apos;. Recommend
-                        refining queries to target this jurisdiction.
+                        Circuit regarding &apos;unforeseen circumstances&apos;.
+                        Recommend refining queries to target this jurisdiction.
                     </p>
                     {isAssessmentExpanded && (
                         <div className="mt-4 pt-4 border-[#e1e5eb] dark:border-[#2a3148] border-t">
@@ -98,8 +99,9 @@ export function GuidanceStrategy() {
                                     <ul className="space-y-2 text-[#4a5568] dark:text-[#a0aec0] text-xs">
                                         <li className="flex items-start">
                                             <div className="bg-[#3a7bb7] mt-1.5 mr-2 rounded-full w-1.5 h-1.5" />
-                                            Add &quot;JURISDICTION: &apos;9th Circuit&apos;&quot; to
-                                            search parameters
+                                            Add &quot;JURISDICTION: &apos;9th
+                                            Circuit&apos;&quot; to search
+                                            parameters
                                         </li>
                                         <li className="flex items-start">
                                             <div className="bg-[#3a7bb7] mt-1.5 mr-2 rounded-full w-1.5 h-1.5" />

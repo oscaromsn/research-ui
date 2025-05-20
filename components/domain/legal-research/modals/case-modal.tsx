@@ -1,5 +1,5 @@
+import { Modal } from "@ui/modal";
 import { BookOpen, Brain, Link, Scale } from "lucide-react";
-import { Modal } from "../ui/Modal";
 interface CaseModalProps {
     isOpen: boolean;
     onClose: () => void;

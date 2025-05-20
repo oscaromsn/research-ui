@@ -1,5 +1,5 @@
+import { Modal } from "@ui/modal";
 import { AlertTriangle, CheckCircle } from "lucide-react";
-import { Modal } from "../ui/Modal";
 
 interface SynthesisReasoningModalProps {
     isOpen: boolean;

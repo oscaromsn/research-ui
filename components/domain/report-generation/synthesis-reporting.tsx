@@ -2,8 +2,8 @@
 
 import { Brain, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { ReportDrafter } from "./ReportDrafter";
-import { SynthesisReasoningModal } from "./modals/SynthesisReasoningModal";
+import { SynthesisReasoningModal } from "./modals/synthesis-reasoning-modal";
+import { ReportDrafter } from "./report-drafter";
 export function SynthesisReporting() {
     const [activeTab, setActiveTab] = useState("synthesis");
     const [showSynthesisReasoning, setShowSynthesisReasoning] = useState(false);
@@ -45,7 +45,8 @@ export function SynthesisReporting() {
                         </div>
                         <div className="bg-white dark:bg-[#1e2436] mb-3 p-4 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg">
                             <h4 className="mb-2 font-medium text-[#2d3748] dark:text-[#e2e8f0] text-sm">
-                                Establishing &apos;Duty of Care&apos; in Negligence Claims
+                                Establishing &apos;Duty of Care&apos; in
+                                Negligence Claims
                             </h4>
                             <p className="mb-3 text-[#4a5568] dark:text-[#a0aec0] text-xs">
                                 Pre-existing duty of care considerations include

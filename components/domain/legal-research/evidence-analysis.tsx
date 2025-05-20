@@ -1,18 +1,32 @@
 "use client";
 
+import {
+    analyzedDocumentAtom,
+    analyzedDocumentsAtom,
+    setCurrentDocumentAtom,
+} from "@atoms/analyzed-document";
+import { useAtom, useAtomValue } from "jotai";
 import { Brain, Gavel, Scroll } from "lucide-react";
 import { useState } from "react";
-import { CaseModal } from "./modals/CaseModal";
+import { CaseModal } from "./modals/case-modal";
+
+interface SearchResult {
+    id: number;
+    title: string;
+    source: string;
+    date: string;
+    snippet: string;
+    type: string;
+    selected: boolean;
+}
+
 export function EvidenceAnalysis() {
-    const [selectedCase, setSelectedCase] = useState<{
-        id: number;
-        title: string;
-        source: string;
-        date: string;
-        snippet: string;
-        type: string;
-        selected: boolean;
-    } | null>(null);
+    const [selectedCase, setSelectedCase] = useState<SearchResult | null>(null);
+    const [, setCurrentDocument] = useAtom(setCurrentDocumentAtom);
+    const analyzedDocuments = useAtomValue(analyzedDocumentsAtom);
+    const currentDocument = useAtomValue(analyzedDocumentAtom);
+
+    // This would be replaced with data from the state in a real integration
     const searchResults = [
         {
             id: 1,
@@ -86,10 +100,17 @@ export function EvidenceAnalysis() {
                         <div
                             key={result.id}
                             className={`p-3 mb-2 rounded-lg cursor-pointer ${result.selected ? "bg-[#edf2f7] dark:bg-[#242a3d] border-l-4 border-[#3a7bb7]" : "bg-white dark:bg-[#1e2436] hover:bg-[#f8fafc] dark:hover:bg-[#212941]"}`}
-                            onClick={() => setSelectedCase(result)}
-                            onKeyUp={(e) =>
-                                e.key === "Enter" && setSelectedCase(result)
-                            }
+                            onClick={() => {
+                                setSelectedCase(result);
+                                // In a real integration, we would use the actual ID from BAML
+                                setCurrentDocument(result.id.toString());
+                            }}
+                            onKeyUp={(e) => {
+                                if (e.key === "Enter") {
+                                    setSelectedCase(result);
+                                    setCurrentDocument(result.id.toString());
+                                }
+                            }}
                         >
                             <div className="flex justify-between items-start">
                                 <div>
@@ -169,14 +190,14 @@ export function EvidenceAnalysis() {
                                     Relevance
                                 </span>
                                 <span className="text-[#3a7bb7] text-xs">
-                                    8/10
+                                    {currentDocument?.relevanceScore || 8}/10
                                 </span>
                             </div>
                             <div className="bg-[#e2e8f0] dark:bg-[#2a3148] rounded-full w-full h-1.5">
                                 <div
                                     className="bg-[#3a7bb7] rounded-full h-full"
                                     style={{
-                                        width: "80%",
+                                        width: `${currentDocument?.relevanceScore ? currentDocument.relevanceScore * 10 : 80}%`,
                                     }}
                                 />
                             </div>
@@ -190,8 +211,8 @@ export function EvidenceAnalysis() {
                                 during COVID-19 could qualify as force majeure
                                 events, but requires specific contract language.
                                 The decision hinges on whether the clause
-                                explicitly mentions &quot;pandemics&quot; or &quot;government
-                                actions&quot;
+                                explicitly mentions &quot;pandemics&quot; or
+                                &quot;government actions&quot;
                                 <span className="inline-block bg-[#a0aec0] w-1.5 h-4 animate-caret-blink" />
                             </p>
                         </div>
@@ -200,13 +221,29 @@ export function EvidenceAnalysis() {
                                 Key Arguments:
                             </p>
                             <ul className="pl-4 text-[#4a5568] dark:text-[#a0aec0] text-xs list-disc">
-                                <li>
-                                    Specificity of force majeure clause language
-                                </li>
-                                <li>
-                                    Foreseeability of pandemic-related
-                                    disruptions
-                                </li>
+                                {currentDocument?.keyArgumentsAndReasoning
+                                    ?.length ? (
+                                    currentDocument.keyArgumentsAndReasoning.map(
+                                        (argument, index) => (
+                                            <li
+                                                key={`argument-${argument.slice(0, 20)}-${index}`}
+                                            >
+                                                {argument}
+                                            </li>
+                                        ),
+                                    )
+                                ) : (
+                                    <>
+                                        <li>
+                                            Specificity of force majeure clause
+                                            language
+                                        </li>
+                                        <li>
+                                            Foreseeability of pandemic-related
+                                            disruptions
+                                        </li>
+                                    </>
+                                )}
                             </ul>
                         </div>
                         <div className="mb-3">
@@ -214,12 +251,34 @@ export function EvidenceAnalysis() {
                                 Extracted Entities:
                             </p>
                             <div className="flex flex-wrap gap-1">
-                                <span className="bg-[#dbeafe] dark:bg-[#1e3a8a] px-1.5 py-0.5 rounded text-[#2563eb] text-[10px] dark:text-[#93c5fd]">
-                                    CASE: Roe v. Wade
-                                </span>
-                                <span className="bg-[#dcfce7] dark:bg-[#14532d] px-1.5 py-0.5 rounded text-[#16a34a] text-[10px] dark:text-[#86efac]">
-                                    STATUTE: 15 U.S.C. § 78j(b)
-                                </span>
+                                {currentDocument?.extractedEntities?.length ? (
+                                    currentDocument.extractedEntities.map(
+                                        (entity, index) => (
+                                            <span
+                                                key={`entity-${entity.name}-${entity.type}-${index}`}
+                                                className={`px-1.5 py-0.5 rounded text-[10px] ${
+                                                    entity.type === "Case"
+                                                        ? "bg-[#dbeafe] dark:bg-[#1e3a8a] text-[#2563eb] dark:text-[#93c5fd]"
+                                                        : entity.type ===
+                                                            "Statute"
+                                                          ? "bg-[#dcfce7] dark:bg-[#14532d] text-[#16a34a] dark:text-[#86efac]"
+                                                          : "bg-[#f1f5f9] dark:bg-[#242a3d] text-[#64748b] dark:text-[#94a3b8]"
+                                                }`}
+                                            >
+                                                {entity.type}: {entity.name}
+                                            </span>
+                                        ),
+                                    )
+                                ) : (
+                                    <>
+                                        <span className="bg-[#dbeafe] dark:bg-[#1e3a8a] px-1.5 py-0.5 rounded text-[#2563eb] text-[10px] dark:text-[#93c5fd]">
+                                            CASE: Roe v. Wade
+                                        </span>
+                                        <span className="bg-[#dcfce7] dark:bg-[#14532d] px-1.5 py-0.5 rounded text-[#16a34a] text-[10px] dark:text-[#86efac]">
+                                            STATUTE: 15 U.S.C. § 78j(b)
+                                        </span>
+                                    </>
+                                )}
                             </div>
                         </div>
                         <button

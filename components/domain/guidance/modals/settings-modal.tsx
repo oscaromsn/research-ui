@@ -1,3 +1,4 @@
+import { Modal } from "@ui/modal";
 import {
     Bell,
     Globe,
@@ -7,7 +8,6 @@ import {
     Shield,
     User,
 } from "lucide-react";
-import { Modal } from "../ui/Modal";
 
 interface SettingsModalProps {
     isOpen: boolean;

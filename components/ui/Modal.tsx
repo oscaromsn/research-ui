@@ -21,7 +21,7 @@ export function Modal({
         xl: "max-w-xl",
     };
     return (
-        <div className="z-50 fixed inset-0 flex justify-center items-center bg-black bg-black/50 animate-in fade-in-0">
+        <div className="z-50 fixed inset-0 flex justify-center items-center bg-black/50 animate-in fade-in-0">
             <div
                 className={`bg-white dark:bg-[#1a1f2e] rounded-lg shadow-lg w-full ${sizeClasses[size]} mx-4`}
             >
