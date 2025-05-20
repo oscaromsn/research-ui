@@ -32,11 +32,15 @@ export default defineConfig({
             },
             // Only check coverage of files that have tests
             all: false,
-
         },
         deps: {
             // Handle errors with Next.js dependencies
-            inline: [/^(?!.*(@babel\/runtime|regenerator-runtime)).*$/],
+            optimizer: {
+                web: {
+                    include: ["*"],
+                    exclude: ["@babel/runtime", "regenerator-runtime"],
+                },
+            },
         },
     },
     resolve: {
