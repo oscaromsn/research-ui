@@ -1,21 +1,30 @@
 import { FlatCompat } from "@eslint/eslintrc";
-import { flatConfig as nextPlugin } from "@next/eslint-plugin-next";
-import { dirname } from "node:path";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const compat = new FlatCompat({
-    baseDirectory: __dirname,
+  baseDirectory: __dirname,
+  recommendedConfig: { plugins: ["@typescript-eslint"] }
 });
 
-const eslintConfig = [
-    // Extend legacy configs
-    ...compat.extends("next/core-web-vitals", "next/typescript"),
-
-    // Add Next.js plugin flat config explicitly (modern approach)
-    nextPlugin,
+export default [
+  {
+    ignores: ["node_modules/**", ".next/**", "coverage/**", "dist/**"]
+  },
+  ...compat.extends(
+    "eslint:recommended",
+    "next/core-web-vitals"
+  ),
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    rules: {
+      // Customize your rules here
+      "@typescript-eslint/no-unused-vars": ["warn", { 
+        "argsIgnorePattern": "^_", 
+        "varsIgnorePattern": "^_" 
+      }],
+      "@typescript-eslint/no-explicit-any": "warn"
+    }
+  }
 ];
-
-export default eslintConfig;
