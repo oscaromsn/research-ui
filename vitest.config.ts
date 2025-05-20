@@ -46,6 +46,11 @@ export default defineConfig({
     resolve: {
         alias: {
             "@": path.resolve(__dirname, "./"),
+            "@components": path.resolve(__dirname, "./components"),
+            "@ui": path.resolve(__dirname, "./components/ui"),
+            "@domain": path.resolve(__dirname, "./components/domain"),
+            "@atoms": path.resolve(__dirname, "./lib/state/atoms"),
+            "@lib": path.resolve(__dirname, "./lib"),
         },
     },
 });
