@@ -2,7 +2,6 @@
 
 import {
     analyzedDocumentAtom,
-    analyzedDocumentsAtom,
     setCurrentDocumentAtom,
 } from "@atoms/analyzed-document";
 import { useAtom, useAtomValue } from "jotai";
@@ -23,7 +22,6 @@ interface SearchResult {
 export function EvidenceAnalysis() {
     const [selectedCase, setSelectedCase] = useState<SearchResult | null>(null);
     const [, setCurrentDocument] = useAtom(setCurrentDocumentAtom);
-    const analyzedDocuments = useAtomValue(analyzedDocumentsAtom);
     const currentDocument = useAtomValue(analyzedDocumentAtom);
 
     // This would be replaced with data from the state in a real integration

@@ -24,7 +24,8 @@ export interface AnalyzedDocument {
 }
 
 // Initial state for an analyzed document
-const initialAnalyzedDocument: AnalyzedDocument = {
+// Prefixed with _ to indicate it's intentionally not directly used in this file
+const _initialAnalyzedDocument: AnalyzedDocument = {
   searchResultId: '',
   relevanceScore: 0,
   confidenceScore: 0,
