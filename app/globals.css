@@ -126,3 +126,18 @@
         @apply cursor-pointer;
     }
 }
+
+@layer utilities {
+    .animate-caret-blink {
+        animation: caret-blink 1s ease-in-out infinite;
+    }
+    
+    @keyframes caret-blink {
+        0%, 50% {
+            opacity: 1;
+        }
+        51%, 100% {
+            opacity: 0;
+        }
+    }
+}

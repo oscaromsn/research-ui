@@ -54,7 +54,7 @@ export function SynthesisReporting() {
                                 relationships. Courts have consistently held
                                 that professionals owe a heightened duty when
                                 their services are specially sought
-                                <span className="inline-block bg-[#a0aec0] w-1.5 h-4 animate-caret-blink" />
+                                <span className="inline-block bg-[#4a5568] dark:bg-[#a0aec0] w-0.5 h-3 ml-0.5 animate-caret-blink" style={{ verticalAlign: 'text-top' }} />
                             </p>
                             <div className="flex flex-wrap gap-1 mb-2">
                                 <span className="bg-[#edf2f7] dark:bg-[#242a3d] px-2 py-0.5 rounded text-[#4a5568] text-[10px] dark:text-[#a0aec0]">

@@ -80,7 +80,7 @@ export function ReportDrafter() {
                             &apos;Oceanic&apos; case. The analysis focuses on
                             three key areas: jurisdictional considerations,
                             applicable maritime law, and precedential cases
-                            <span className="inline-block bg-[#a0aec0] w-1.5 h-4 animate-caret-blink" />
+                            <span className="inline-block bg-[#4a5568] dark:bg-[#a0aec0] w-0.5 h-3 ml-0.5 animate-caret-blink" style={{ verticalAlign: 'text-top' }} />
                         </p>
                         <h2>Background</h2>
                         <p>

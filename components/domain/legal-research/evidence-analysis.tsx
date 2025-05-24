@@ -245,7 +245,7 @@ export function EvidenceAnalysis() {
                             </p>
                             <p className="text-[#4a5568] dark:text-[#a0aec0] text-xs">
                                 {currentDocument?.summary || "No analysis available for this document."}
-                                <span className="inline-block bg-[#a0aec0] w-1.5 h-4 animate-caret-blink" />
+                                <span className="inline-block bg-[#4a5568] dark:bg-[#a0aec0] w-0.5 h-3 ml-0.5 animate-caret-blink" style={{ verticalAlign: 'text-top' }} />
                             </p>
                         </div>
                         <div className="mb-3">
