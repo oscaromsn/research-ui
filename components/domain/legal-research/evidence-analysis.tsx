@@ -1,10 +1,5 @@
 "use client";
 
-import {
-    analyzedDocumentAtom,
-    setCurrentDocumentAtom,
-} from "@atoms/analyzed-document";
-import { useAtom, useAtomValue } from "jotai";
 import { Brain, Gavel, Scroll } from "lucide-react";
 import { useState } from "react";
 import { CaseModal } from "./modals/case-modal";
@@ -21,8 +16,52 @@ interface SearchResult {
 
 export function EvidenceAnalysis() {
     const [selectedCase, setSelectedCase] = useState<SearchResult | null>(null);
-    const [, setCurrentDocument] = useAtom(setCurrentDocumentAtom);
-    const currentDocument = useAtomValue(analyzedDocumentAtom);
+    const [currentDocumentId, setCurrentDocumentId] = useState<string | null>(
+        null,
+    );
+
+    // Mock document analysis data mapped by document ID
+    const mockDocumentAnalysis = {
+        "1": {
+            relevanceScore: 8,
+            keyArgumentsAndReasoning: [
+                "Specificity of force majeure clause language",
+                "Foreseeability of pandemic-related disruptions",
+            ],
+            extractedEntities: [
+                { name: "Smith v. Jones", type: "Case" },
+                { name: "Force Majeure", type: "Legal Concept" },
+            ],
+            summary: "The court established that government mandates during COVID-19 could qualify as force majeure events, but requires specific contract language. The decision hinges on whether the clause explicitly mentions \"pandemics\" or \"government actions\"",
+        },
+        "2": {
+            relevanceScore: 6,
+            keyArgumentsAndReasoning: [
+                "Doctrine of impossibility vs. mere hardship",
+                "Commercial impracticability standards",
+            ],
+            extractedEntities: [
+                { name: "Richards Corp. v. Global Enterprises", type: "Case" },
+                { name: "UCC § 2-615", type: "Statute" },
+            ],
+            summary: "Court distinguished between impossibility and commercial impracticability, setting a high bar for contract excuse. Economic hardship alone insufficient for relief.",
+        },
+        "3": {
+            relevanceScore: 9,
+            keyArgumentsAndReasoning: [
+                "Statutory requirements for performance excuse",
+                "Prevention by operation of law",
+            ],
+            extractedEntities: [
+                { name: "California Civil Code § 1511", type: "Statute" },
+                { name: "Prevention doctrine", type: "Legal Concept" },
+            ],
+            summary: "Statutory provision clearly defines when performance obligations are excused. Provides strong foundation for force majeure arguments when government action prevents performance.",
+        },
+    };
+
+    // Get current document analysis based on selected document ID
+    const currentDocument = currentDocumentId ? mockDocumentAnalysis[currentDocumentId as keyof typeof mockDocumentAnalysis] : mockDocumentAnalysis["1"];
 
     // This would be replaced with data from the state in a real integration
     const searchResults = [
@@ -101,12 +140,12 @@ export function EvidenceAnalysis() {
                             onClick={() => {
                                 setSelectedCase(result);
                                 // In a real integration, we would use the actual ID from BAML
-                                setCurrentDocument(result.id.toString());
+                                setCurrentDocumentId(result.id.toString());
                             }}
                             onKeyUp={(e) => {
                                 if (e.key === "Enter") {
                                     setSelectedCase(result);
-                                    setCurrentDocument(result.id.toString());
+                                    setCurrentDocumentId(result.id.toString());
                                 }
                             }}
                         >
@@ -205,12 +244,7 @@ export function EvidenceAnalysis() {
                                 Summary:
                             </p>
                             <p className="text-[#4a5568] dark:text-[#a0aec0] text-xs">
-                                The court established that government mandates
-                                during COVID-19 could qualify as force majeure
-                                events, but requires specific contract language.
-                                The decision hinges on whether the clause
-                                explicitly mentions &quot;pandemics&quot; or
-                                &quot;government actions&quot;
+                                {currentDocument?.summary || "No analysis available for this document."}
                                 <span className="inline-block bg-[#a0aec0] w-1.5 h-4 animate-caret-blink" />
                             </p>
                         </div>
@@ -222,7 +256,7 @@ export function EvidenceAnalysis() {
                                 {currentDocument?.keyArgumentsAndReasoning
                                     ?.length ? (
                                     currentDocument.keyArgumentsAndReasoning.map(
-                                        (argument, index) => (
+                                        (argument: string, index: number) => (
                                             <li
                                                 key={`argument-${argument.slice(0, 20)}-${index}`}
                                             >
@@ -251,7 +285,13 @@ export function EvidenceAnalysis() {
                             <div className="flex flex-wrap gap-1">
                                 {currentDocument?.extractedEntities?.length ? (
                                     currentDocument.extractedEntities.map(
-                                        (entity, index) => (
+                                        (
+                                            entity: {
+                                                name: string;
+                                                type: string;
+                                            },
+                                            index: number,
+                                        ) => (
                                             <span
                                                 key={`entity-${entity.name}-${entity.type}-${index}`}
                                                 className={`px-1.5 py-0.5 rounded text-[10px] ${
