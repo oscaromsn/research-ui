@@ -42,6 +42,43 @@ interface ReportData {
   appendixDocIds?: string[];
 }
 
+/**
+ * Custom React hook for managing the legal research process workflow.
+ * 
+ * This hook serves as the primary interface between UI components and the research pipeline,
+ * orchestrating the entire research lifecycle from query generation to final report creation.
+ * It manages the connection to the server-side research orchestrator and updates Jotai atoms
+ * based on streaming updates received from the backend.
+ * 
+ * @returns {Object} Research agent interface
+ * @returns {Function} returns.startResearch - Function to initiate research with a legal question
+ * @returns {Function} returns.abortResearch - Function to abort ongoing research
+ * @returns {boolean} returns.isLoading - Whether research is currently in progress
+ * @returns {ResearchStage} returns.currentStage - Current stage of the research process
+ * @returns {string|null} returns.currentMessage - Current status message from the research process
+ * @returns {string|null} returns.error - Error message if research failed
+ * 
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   const agent = useResearchAgent();
+ *   
+ *   const handleSubmit = () => {
+ *     agent.startResearch("What are the requirements for software patents?");
+ *   };
+ *   
+ *   if (agent.isLoading) {
+ *     return <div>Research in progress: {agent.currentStage}</div>;
+ *   }
+ *   
+ *   return (
+ *     <button onClick={handleSubmit}>
+ *       Start Research
+ *     </button>
+ *   );
+ * }
+ * ```
+ */
 export function useResearchAgent() {
   // Get Jotai setters
   const setResearchStatus = useSetAtom(researchStatusAtom);
@@ -55,6 +92,22 @@ export function useResearchAgent() {
   // Local state for the AbortController
   const [abortController, setAbortController] = useState<AbortController | null>(null);
 
+  /**
+   * Initiates the legal research process for a given legal question.
+   * 
+   * This function resets all previous research state, establishes a new research session,
+   * and begins streaming updates from the server-side orchestrator. It handles the complete
+   * research lifecycle including query generation, document fetching, analysis, synthesis,
+   * and report generation.
+   * 
+   * @param {string} legalQuestion - The legal question to research
+   * @throws {Error} Throws an error if the research process fails to initialize
+   * 
+   * @example
+   * ```ts
+   * await startResearch("What are the patent requirements for AI-generated inventions?");
+   * ```
+   */
   const startResearch = useCallback(async (legalQuestion: string) => {
     // Reset all relevant Jotai states before starting a new research process
     resetAllResearchState(undefined);
@@ -247,6 +300,18 @@ export function useResearchAgent() {
     }
   }, [resetAllResearchState, setResearchStatus, setResearchLog, setGeneratedQueries, setAnalyzedDocs, setSynthesisDetails, setFinalReportContent]);
 
+  /**
+   * Aborts the currently running research process.
+   * 
+   * This function safely terminates any ongoing research by aborting the stream reading
+   * and updating the research status to reflect the abortion. If no research is currently
+   * active, it logs a message but does not throw an error.
+   * 
+   * @example
+   * ```ts
+   * abortResearch(); // Safely aborts any ongoing research
+   * ```
+   */
   const abortResearch = useCallback(() => {
     if (abortController) {
       console.log("useResearchAgent: Abort signal sent.");
