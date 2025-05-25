@@ -1,10 +1,12 @@
-# CLAUDE.md for LexiSynth
+# CLAUDE.md (current)
 
 This file provides essential guidance to Claude Code (claude.ai/code) for working with the LexiSynth repository. LexiSynth is an AI-Powered Legal Research Assistant. Your goal is to produce optimized, secure, and maintainable code, adhering to the principles of clean code, robust architecture, and performance optimization. **Always follow these guidelines.**
 
 ## Project Overview
 
 LexiSynth is a Next.js 15 application designed to assist legal professionals by automating and enhancing the legal research process. It uses an AI-driven, multi-stage pipeline powered by BAML (Boundary AI Markup Language) and Large Language Models (LLMs). The core user experience involves submitting a legal question and receiving a progressively generated analysis and, ultimately, a draft report.
+
+**Architecture**: Server-first approach using Next.js App Router with React Server Components as default.
 
 **Performance Requirements**: This application prioritizes a **low-latency user experience** with real-time streaming interfaces and responsive interactions. All features should feel instantaneous and provide immediate feedback.
 
@@ -42,7 +44,7 @@ LexiSynth is a Next.js 15 application designed to assist legal professionals by 
 
 ### Directory Structure (Key Areas)
 
-- /__tests__/:  Vitest test files, mirroring source structure.
+- /**tests**/: Vitest test files, mirroring source structure.
 - **/app**: Next.js App Router.
 	- **/app/actions/**: Server Actions, including `researchAgentOrchestrator.ts`.
 - **/baml_src**: All BAML files.
@@ -59,7 +61,7 @@ LexiSynth is a Next.js 15 application designed to assist legal professionals by 
 	- **/lib/schemas/**: Zod schemas.
 	- **/lib/state/**: Jotai atom definitions, e.g., `researchAtoms.ts`.
 	- **/lib/utils/**: General utility functions.
-    - **/lib/config**:  General config-related files.
+	- **/lib/config**: General config-related files.
 
 ### Auxiliary directories (support context)
 
@@ -85,7 +87,6 @@ _notes/logs/
 ```
 
 You always read the full planning files relevant for your taks at hand, while Uuse your search tools to lookup for pertinent information on the docs files without open them entirely.
-
 
 ### Key Architectural Pattern: "Research Agent Orchestrator"
 
@@ -150,14 +151,17 @@ You always read the full planning files relevant for your taks at hand, while Uu
 1. **Single Responsibility**: Each component does one thing well
 2. **Props Interface**: Always define TypeScript interfaces
 3. **Composition**: Build complex UIs from simple components
-4. **Accessibility**: Include ARIA labels and keyboard support
-5. **Testing**: Write tests alongside components
+4. **Primitives-first**: Leverage on availabie primitives when possible, install shadcn as necessary using `pnpm dlx shadcn@latest add [component-name]`
+5. **Accessibility**: Include ARIA labels and keyboard support
+6. **Testing**: Write tests alongside components
 
 ### State Management (Jotai)
+- **Jotai**: Used for global state management, especially for frontend integration with BAML schema types.
 - Global client-side state relevant to the research process is managed by Jotai atoms in `/lib/state/researchAtoms.ts`.
 - These atoms store *client-friendly* data, updated by `useResearchAgent.ts`.
 - UI components use `useAtomValue` to read state and `useSetAtom` only if directly manipulating non-agent-driven state (rare for this app's core flow). `useResearchAgent` handles most state writes.
 - Use derived atoms for computed state if needed.
+- **Form State**: React Hook Form is recommended, potentially with Jotai for inter-component form state if needed.
 
 ## UI/UX Implementation
 - **Tailwind CSS v4**: Utility-first styling with CVA
@@ -167,8 +171,7 @@ You always read the full planning files relevant for your taks at hand, while Uu
 - **Accessibility (a11y)**: Semantic HTML, keyboard navigation, ARIA attributes, color contrast.
 - **Streaming Feedback**: UI must clearly indicate loading and streaming progress. Text should appear progressively. Lifecycle visualization should update.
 
-## Backend, API, and Database (LexiSynth Specifics)
-
+## Backend, API, and Database
 - **BAML Client**: The BAML-generated client (`baml_client/`) is the sole interface to LLMs. The server-side orchestrator uses `b` (the async BAML client instance).
 - **No Direct Database for v1**: The PRD implies no persistent storage of research sessions for v1 (beyond Jotai's potential localStorage for client state). If DB interactions were added, Prisma would be used.
 - **External APIs (Document Retrieval)**: The `fetchDocumentsFromQueries` function in the orchestrator is a placeholder for calling an external search API (e.g., Exa). This call would use Axios or `fetch`.
@@ -194,7 +197,7 @@ You always read the full planning files relevant for your taks at hand, while Uu
 1. **BAML Tests (`.test.baml` files):**
 	- Write for every BAML function covering various inputs and asserting output structure/key values.
 	- Run with BAML VSCode extension or `baml-cli test`.
-2. **Server-Side Orchestrator Tests (Vitest - Future):**
+2. **Server-Side Orchestrator Tests (Vitest):**
 	- Unit test `conductResearch`. Mock the BAML client (`b`) to simulate BAML function responses (including streams). Assert that the correct sequence of `ResearchUpdate` objects is produced on its output stream.
 3. **Client-Side Hook Tests (Vitest + RTL - PRD 6.2):**
 	- Unit test `useResearchAgent`. Mock the `conductResearch` Server Action. Provide mock streams of `ResearchUpdate` objects and assert that Jotai atoms are updated correctly. Test `startResearch` and `abortResearch`.
@@ -231,6 +234,7 @@ pnpm test:coverage
 4. **UI Component Changes**: Define how UI should look/behave for new Jotai state -> Write RTL component test -> Implement component.
 
 ## Post-Development Checklist
+
 Before considering a feature complete ensure that:
 
 1. ✅ BAML code generated & working.
@@ -244,4 +248,4 @@ Before considering a feature complete ensure that:
 9. ✅ Code adheres to these guidelines.
 10. ✅ Documentation updated if needed.
 
-By following this updated `CLAUDE.md`, development (whether AI-assisted or human) will align with the established "Research Agent Orchestrator" pattern and the specific requirements of LexiSynth.
+Remember, every line you write is an example of clean, scalable and maintainable code and you heavy relies on static validation (linting, formatters, typechecking, test coverage) to continuously validate you are on the right path and catch bugs as early as possible.
