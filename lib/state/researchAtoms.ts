@@ -121,6 +121,9 @@ export const reportSectionsDisplayAtom = atom(
   (get) => get(finalReportContentAtom).sections
 );
 
+// Atom for tracking which analyzed document is currently selected in the UI
+export const selectedAnalyzedDocIdAtom = atom<string | null>(null);
+
 // --- Reset Functionality ---
 
 // Atom to trigger reset of all research-related states
@@ -152,6 +155,7 @@ export const resetResearchStateAtom = atom(null, (get, set, _value) => {
     limitations: [],
     appendixDocIds: [],
   });
+  set(selectedAnalyzedDocIdAtom, null);
 });
 
 /*
