@@ -55,7 +55,7 @@ export function SynthesisReporting() {
                         {synthesis.topics.length > 0 ? (
                             synthesis.topics.map((topic, index) => (
                                 <div
-                                    key={`topic-${index}`}
+                                    key={topic.title || `topic-${index}`}
                                     className="bg-white dark:bg-[#1e2436] mb-3 p-4 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg"
                                 >
                                     <h4 className="mb-2 font-medium text-[#2d3748] dark:text-[#e2e8f0] text-sm">
@@ -76,7 +76,10 @@ export function SynthesisReporting() {
                                                 {topic.docIds.map(
                                                     (docId, docIndex) => (
                                                         <span
-                                                            key={`doc-${docIndex}`}
+                                                            key={
+                                                                docId ||
+                                                                `doc-${docIndex}`
+                                                            }
                                                             className="bg-[#edf2f7] dark:bg-[#242a3d] px-2 py-0.5 rounded text-[#4a5568] text-[10px] dark:text-[#a0aec0]"
                                                         >
                                                             [{docId}]
@@ -117,11 +120,13 @@ export function SynthesisReporting() {
                                     {synthesis.unansweredAspects.map(
                                         (aspect, index) => (
                                             <li
-                                                key={`aspect-${index}`}
+                                                key={
+                                                    aspect || `aspect-${index}`
+                                                }
                                                 className={
                                                     index <
-                                                    synthesis.unansweredAspects!
-                                                        .length -
+                                                    (synthesis.unansweredAspects
+                                                        ?.length ?? 0) -
                                                         1
                                                         ? "mb-1"
                                                         : ""
