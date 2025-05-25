@@ -123,7 +123,7 @@ export namespace partial_types {
     
     export interface SynthesizedTopic {
         topic_title?: (string | null)
-        synthesis?: StreamState<(string | null)>
+        synthesis?: (string | null)
         supporting_document_ids?: (string | null)[]
         confidence_score?: (number | null)
     }
