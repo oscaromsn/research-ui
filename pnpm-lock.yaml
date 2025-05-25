@@ -14,6 +14,9 @@ importers:
       '@boundaryml/baml-nextjs-plugin':
         specifier: 0.1.0
         version: 0.1.0(next@15.3.2(@babel/core@7.27.1)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
+      '@next/env':
+        specifier: 15.4.0-canary.51
+        version: 15.4.0-canary.51
       '@radix-ui/react-slot':
         specifier: 1.2.2
         version: 1.2.2(@types/react@19.1.4)(react@19.1.0)
@@ -634,6 +637,9 @@ packages:
 
   '@next/env@15.3.2':
     resolution: {integrity: sha512-xURk++7P7qR9JG1jJtLzPzf0qEvqCN0A/T3DXf8IPMKo9/6FfjxtEffRJIIew/bIL4T3C2jLLqBor8B/zVlx6g==}
+
+  '@next/env@15.4.0-canary.51':
+    resolution: {integrity: sha512-Rcwq5vbzYsNx/+SHbKlbj4RHM2YfIHzLqDVP3xCzTr0iwwqG1hykHYc3O+3AXAcdckYskAQ5CxDT2DC0WJqasw==}
 
   '@next/eslint-plugin-next@15.3.2':
     resolution: {integrity: sha512-ijVRTXBgnHT33aWnDtmlG+LJD+5vhc9AKTJPquGG5NKXjpKNjc62woIhFtrAcWdBobt8kqjCoaJ0q6sDQoX7aQ==}
@@ -3284,6 +3290,8 @@ snapshots:
     optional: true
 
   '@next/env@15.3.2': {}
+
+  '@next/env@15.4.0-canary.51': {}
 
   '@next/eslint-plugin-next@15.3.2':
     dependencies:
