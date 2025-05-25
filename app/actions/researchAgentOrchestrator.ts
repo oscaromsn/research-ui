@@ -232,20 +232,36 @@ export async function conductResearch(legalQuestion: string): Promise<ReadableSt
           const analysis: AnalyzedDocument = await b.AnalyzeSingleDocument(doc, legalQuestion);
           analyzedDocs.push(analysis);
 
-          // Send client-friendly summary of this specific document's analysis
+          // Send client-friendly summary of this specific document's analysis with extended data
           await sendUpdate(writer, encoder, {
             type: "DATA",
             stage: currentStage,
             data: {
               docId: doc.id,
               title: doc.title,
+              url: doc.url,
               relevanceScore: analysis.relevance_score,
               confidenceScore: analysis.confidence_score,
-              summarySnippet: `${analysis.summary.substring(0, 200)}...`,
-              keyEntitiesCount: analysis.extracted_entities?.length || 0,
-              keyQuotesCount: analysis.extracted_quotes?.length || 0,
+              summarySnippet: analysis.summary.substring(0, 300),
+              
+              // Extended analysis data for evidence analysis display
+              keyArguments: analysis.key_arguments_and_reasoning,
+              extractedEntities: analysis.extracted_entities?.map(entity => ({
+                name: entity.name,
+                type: entity.type,
+                details: entity.details
+              })) || [],
+              extractedQuotes: analysis.extracted_quotes || [],
+              fullText: doc.full_text?.substring(0, 5000), // Truncate for performance
+              counterArguments: analysis.counter_arguments_or_nuances || [],
+              
+              // Analysis reasoning summary for modal display
+              analysisReasoning: {
+                analyzeLegalQuestionSummary: analysis.reasoning?.analyze_legal_question?.summary?.substring(0, 500) || "",
+                considerRelevantPrinciplesSummary: analysis.reasoning?.consider_relevant_legal_principles?.summary?.substring(0, 500) || ""
+              }
             },
-            message: `Analysis complete for: ${doc.title ? `${doc.title.substring(0, 50)}...` : "Untitled"}. Relevance: ${analysis.relevance_score}`,
+            message: `Analysis complete for: ${doc.title ? `${doc.title.substring(0, 50)}...` : "Untitled"}. Relevance: ${analysis.relevance_score}/10`,
             currentProcessedDoc: i + 1,
             totalDocsToProcess: searchResultItems.length,
           });

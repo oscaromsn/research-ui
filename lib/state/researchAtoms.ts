@@ -15,16 +15,48 @@ export interface ClientSearchQuery {
 }
 
 /**
+ * Client-friendly representation of a legal entity extracted from document analysis.
+ * Simplified from the full BAML LegalEntity type for UI consumption.
+ */
+export interface ClientLegalEntity {
+  name: string;
+  type: "Case" | "Statute" | "Regulation" | "Person" | "Organization" | "LegalConcept" | "Jurisdiction";
+  details?: string;
+}
+
+/**
+ * Client-friendly representation of analysis reasoning from document processing.
+ * Contains summarized versions of the detailed reasoning steps for UI display.
+ */
+export interface ClientAnalysisReasoning {
+  analyzeLegalQuestionSummary: string;
+  considerRelevantPrinciplesSummary: string;
+  formulateSearchQueriesSummary?: string;
+  specifyExpectedInfoSummary?: string;
+  ensureComprehensiveCoverageSummary?: string;
+}
+
+/**
  * Client-friendly representation of an analyzed document from the research process.
  * Contains UI-relevant fields extracted from the full BAML AnalyzedDocument type.
  */
 export interface ClientAnalyzedDoc {
   docId: string; // Corresponds to SearchResultItem.id
   title?: string;
+  url?: string;
   relevanceScore?: number;
   confidenceScore?: number;
   summarySnippet?: string; // Potentially streaming, progressively built
-  // Add other fields as needed for display, e.g., key entities string[]
+  
+  // Extended analysis data for evidence analysis display
+  keyArguments?: string[];
+  extractedEntities?: ClientLegalEntity[];
+  extractedQuotes?: string[];
+  fullText?: string;
+  counterArguments?: string[];
+  
+  // Analysis reasoning for modal display
+  analysisReasoning?: ClientAnalysisReasoning;
 }
 
 export interface ClientSynthesisTopic {

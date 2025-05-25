@@ -6,10 +6,12 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import { analyzedDocsSummaryAtom, selectedAnalyzedDocIdAtom } from '@/lib/state/researchAtoms';
 import type { ClientAnalyzedDoc } from '@/lib/state/researchAtoms';
 import { CaseModal } from "./modals/case-modal";
+import { AnalysisReasoningModal } from "./modals/analysis-reasoning-modal";
 
 
 export function EvidenceAnalysis() {
     const [selectedCase, setSelectedCase] = useState<ClientAnalyzedDoc | null>(null);
+    const [showReasoningModal, setShowReasoningModal] = useState(false);
     const analyzedDocs = useAtomValue(analyzedDocsSummaryAtom);
     const selectedDocId = useAtomValue(selectedAnalyzedDocIdAtom);
     const setSelectedDocId = useSetAtom(selectedAnalyzedDocIdAtom);
@@ -27,6 +29,21 @@ export function EvidenceAnalysis() {
         if (event.key === 'Enter') {
             handleDocumentClick(doc);
         }
+    };
+
+    // Helper function for entity styling
+    const getEntityStyle = (type: string) => {
+        const styles = {
+            Case: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+            Statute: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200", 
+            Regulation: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+            Person: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+            Organization: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+            LegalConcept: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
+            Jurisdiction: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
+            default: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+        };
+        return styles[type as keyof typeof styles] || styles.default;
     };
 
     return (
@@ -89,9 +106,9 @@ export function EvidenceAnalysis() {
                                             {doc.title || 'Untitled Document'}
                                         </h3>
                                         <div className="flex items-center mb-1 text-[#64748b] dark:text-[#94a3b8] text-xs">
-                                            <span>Source</span>
+                                            <span>{doc.url ? new URL(doc.url).hostname : 'Unknown Source'}</span>
                                             <span className="mx-1">•</span>
-                                            <span>Date</span>
+                                            <span>Relevance: {doc.relevanceScore || 0}/10</span>
                                         </div>
                                         <p className="text-[#4a5568] dark:text-[#a0aec0] text-xs">
                                             {doc.summarySnippet || 'No summary available.'}
@@ -123,34 +140,32 @@ export function EvidenceAnalysis() {
                     selectedCase
                         ? {
                               title: selectedCase.title || '',
-                              source: 'Source',
+                              source: selectedCase.url ? new URL(selectedCase.url).hostname : 'Unknown Source',
                               court: selectedCase.title?.includes('(') 
                                   ? selectedCase.title.split('(')[1]?.replace(')', '') || ''
                                   : '',
-                              date: 'Date',
+                              date: `Relevance: ${selectedCase.relevanceScore || 0}/10`,
                           }
                         : {}
                 }
             />
             <div className="border-[#e1e5eb] dark:border-[#2a3148] border-t">
                 <div className="flex h-64">
-                    <div className="p-4 border-[#e1e5eb] dark:border-[#2a3148] border-r w-1/2 overflow-auto text-[#4a5568] dark:text-[#a0aec0] text-xs">
-                        <p className="mb-2">Section 1. Legal Framework</p>
-                        <p className="mb-2">
-                            Under the doctrine of force majeure, a party may be
-                            excused from performance of contractual obligations
-                            when circumstances beyond their control render
-                            performance impossible or impracticable.
-                        </p>
-                        <p className="mb-2">
-                            The court in{" "}
-                            <span className="bg-[#edf7ed] dark:bg-[#1e3a2d] px-1 text-[#2d3748] dark:text-[#e2e8f0]">
-                                Smith v. Jones
-                            </span>{" "}
-                            established that government-mandated closures during
-                            the COVID-19 pandemic could constitute a force
-                            majeure event when...
-                        </p>
+                    <div className="p-4 border-[#e1e5eb] dark:border-[#2a3148] border-r w-1/2 overflow-auto text-xs">
+                        {selectedDocument?.fullText ? (
+                            <div className="space-y-3">
+                                <h3 className="font-medium text-sm text-[#2d3748] dark:text-[#e2e8f0]">Document Content</h3>
+                                <div className="text-xs text-[#4a5568] dark:text-[#a0aec0] leading-relaxed">
+                                    {selectedDocument.fullText.split('\n').map((paragraph, idx) => (
+                                        <p key={idx} className="mb-2">{paragraph}</p>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-[#64748b] dark:text-[#94a3b8] italic">
+                                No document content available.
+                            </div>
+                        )}
                     </div>
                     <div className="p-4 w-1/2 text-xs">
                         <div className="mb-3">
@@ -184,9 +199,14 @@ export function EvidenceAnalysis() {
                             <p className="mb-1 font-medium text-[#4a5568] dark:text-[#a0aec0] text-xs">
                                 Key Arguments:
                             </p>
-                            <ul className="pl-4 text-[#4a5568] dark:text-[#a0aec0] text-xs list-disc">
-                                <li>Document analysis in progress...</li>
-                                <li>Key arguments will appear here as analysis completes</li>
+                            <ul className="pl-4 text-xs list-disc space-y-1">
+                                {selectedDocument?.keyArguments?.length ? (
+                                    selectedDocument.keyArguments.map((argument, idx) => (
+                                        <li key={idx} className="text-[#4a5568] dark:text-[#a0aec0]">{argument}</li>
+                                    ))
+                                ) : (
+                                    <li className="text-[#64748b] dark:text-[#94a3b8] italic">No key arguments identified.</li>
+                                )}
                             </ul>
                         </div>
                         <div className="mb-3">
@@ -194,14 +214,25 @@ export function EvidenceAnalysis() {
                                 Extracted Entities:
                             </p>
                             <div className="flex flex-wrap gap-1">
-                                <span className="bg-[#f1f5f9] dark:bg-[#242a3d] px-1.5 py-0.5 rounded text-[#64748b] dark:text-[#94a3b8] text-[10px]">
-                                    Entity extraction in progress...
-                                </span>
+                                {selectedDocument?.extractedEntities?.length ? (
+                                    selectedDocument.extractedEntities.map((entity, idx) => (
+                                        <span
+                                            key={idx}
+                                            className={`px-1.5 py-0.5 rounded text-[10px] ${getEntityStyle(entity.type)}`}
+                                            title={entity.details}
+                                        >
+                                            {entity.name}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className="text-[#64748b] dark:text-[#94a3b8] italic text-xs">No entities extracted.</span>
+                                )}
                             </div>
                         </div>
                         <button
                             type="button"
                             className="flex items-center text-[#3a7bb7] hover:text-[#2c5d8a] text-xs"
+                            onClick={() => setShowReasoningModal(true)}
                         >
                             <Brain size={12} className="mr-1" />
                             View Analysis Reasoning
@@ -209,6 +240,12 @@ export function EvidenceAnalysis() {
                     </div>
                 </div>
             </div>
+            <AnalysisReasoningModal
+                isOpen={showReasoningModal}
+                onClose={() => setShowReasoningModal(false)}
+                reasoning={selectedDocument?.analysisReasoning}
+                documentTitle={selectedDocument?.title}
+            />
         </div>
     );
 }
