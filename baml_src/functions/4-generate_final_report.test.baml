@@ -1,0 +1,319 @@
+// ----- Comprehensive Test Cases for GenerateFinalLegalReport -----
+
+test GenerateReportSimpleSynthesis {
+  functions [GenerateFinalLegalReport]
+  args {
+    original_legal_question "What is the statute of limitations for breach of contract in California?"
+    synthesis {
+      key_synthesized_topics [
+        {
+          topic_title "California Contract Statute of Limitations"
+          synthesis "California Code of Civil Procedure § 337 establishes a 4-year statute of limitations for written contracts and 2 years for oral contracts. The limitation period begins when the breach occurs or when the breach is discovered."
+          confidence_level 8
+          supporting_document_ids ["ccp_337", "case_accrual_rule", "written_vs_oral"]
+        }
+      ]
+      unanswered_aspects ["Tolling provisions", "Discovery rule exceptions"]
+      emerging_questions ["How does the discovery rule apply to latent contract breaches?"]
+      reasoning {
+        analyze_legal_question { summary "Contract limitation analysis" }
+        consider_relevant_legal_principles { summary "Accrual and discovery principles" }
+        formulate_search_queries_strategy { summary "Statutory and case law focus" }
+        specify_expected_information_strategy { summary "Time limits and exceptions" }
+        ensure_comprehensive_coverage_strategy { summary "Multiple authority types covered" }
+      }
+    }
+    query_history [
+      "California contract statute of limitations",
+      "CCP 337 breach of contract limitation period"
+    ]
+  }
+  // Basic structure assertions
+  @@assert( {{ this.report_title | length > 5 }} )
+  @@assert( {{ this.executive_summary | length > 20 }} )
+  @@assert( {{ this.conclusion | length > 20 }} )
+  @@assert( {{ this.sections | length >= 1 }} )
+  @@assert( {{ this.sections | length <= 5 }} )
+  
+  // Section structure validation
+  @@assert( {{ this.sections | selectattr("title", "defined") | list | length == (this.sections | length) }} )
+  @@assert( {{ this.sections | selectattr("content", "defined") | list | length == (this.sections | length) }} )
+  @@assert( {{ this.sections | selectattr("is_complete", "defined") | list | length == (this.sections | length) }} )
+  
+  // Content quality checks
+  @@assert( {{ this.report_title | lower | regex_search("statute|limitation|contract|california") != null }} )
+  @@assert( {{ this.executive_summary | lower | regex_search("4.year|four.year|2.year|two.year") != null }} )
+  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | lower | regex_search("ccp|code.*civil.*procedure|337")) != null }} )
+  
+  // Should have at least one complete section
+  @@assert( {{ (this.sections | selectattr("is_complete", "equalto", true) | list | length) >= 1 }} )
+}
+
+test GenerateReportComplexSynthesis {
+  functions [GenerateFinalLegalReport]
+  args {
+    original_legal_question "What are the requirements for a valid prenuptial agreement in New York?"
+    synthesis {
+      key_synthesized_topics [
+        {
+          topic_title "Formal Execution Requirements"
+          synthesis "New York requires prenuptial agreements to be in writing and signed by both parties. The agreement must be executed before marriage and should be acknowledged before a notary public."
+          confidence_level 9
+          supporting_document_ids ["ny_dom_rel_law", "execution_cases", "notary_requirements"]
+        },
+        {
+          topic_title "Financial Disclosure Requirements"
+          synthesis "Parties must provide full and fair disclosure of their assets and financial circumstances. Failure to disclose material assets can render the agreement invalid."
+          confidence_level 8
+          supporting_document_ids ["disclosure_cases", "materiality_standards", "invalidity_precedents"]
+        },
+        {
+          topic_title "Independent Counsel and Unconscionability"
+          synthesis "While not strictly required, independent counsel for both parties is strongly recommended. Courts will examine unconscionability both at execution and enforcement."
+          confidence_level 7
+          supporting_document_ids ["counsel_recommendations", "unconscionability_analysis", "enforcement_standards"]
+        }
+      ]
+      unanswered_aspects ["Specific asset valuation requirements", "Timing requirements for disclosure"]
+      emerging_questions ["What constitutes 'full and fair' disclosure in practice?", "How do courts determine unconscionability?"]
+      reasoning {
+        analyze_legal_question { summary "Comprehensive prenuptial agreement analysis" }
+        consider_relevant_legal_principles { summary "Contract formation and family law intersection" }
+        formulate_search_queries_strategy { summary "Multi-faceted research approach" }
+        specify_expected_information_strategy { summary "Procedural and substantive requirements" }
+        ensure_comprehensive_coverage_strategy { summary "Multiple requirement categories covered" }
+      }
+    }
+    query_history [
+      "New York prenuptial agreement requirements",
+      "NY prenup validity execution formal requirements",
+      "financial disclosure prenuptial New York",
+      "unconscionability prenuptial agreement NY"
+    ]
+  }
+  @@assert( {{ this.report_title | length > 5 }} )
+  @@assert( {{ this.executive_summary | length > 30 }} )
+  @@assert( {{ this.conclusion | length > 30 }} )
+  // Complex synthesis should generate multiple sections
+  @@assert( {{ this.sections | length >= 3 }} )
+  @@assert( {{ this.sections | length <= 8 }} )
+  
+  // Should cover multiple aspects from synthesis
+  @@assert( {{ (this.sections | map(attribute="title") | join(" ") | lower | regex_search("execution|disclosure|counsel")) != null }} )
+  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | lower | regex_search("writing|signed|notary")) != null }} )
+  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | lower | regex_search("disclosure|asset|financial")) != null }} )
+  
+  // Report should address the original question comprehensively
+  @@assert( {{ this.executive_summary | lower | regex_search("prenuptial|agreement|new york|requirement") != null }} )
+  @@assert( {{ this.conclusion | lower | regex_search("valid|prenuptial|new york") != null }} )
+  
+  // Should have multiple complete sections for well-covered topics
+  @@assert( {{ (this.sections | selectattr("is_complete", "equalto", true) | list | length) >= 2 }} )
+}
+
+test GenerateReportWithUnansweredAspects {
+  functions [GenerateFinalLegalReport]
+  args {
+    original_legal_question "What are the requirements for adverse possession of real property?"
+    synthesis {
+      key_synthesized_topics [
+        {
+          topic_title "General Adverse Possession Elements"
+          synthesis "Adverse possession typically requires open, notorious, exclusive, hostile, and continuous possession for the statutory period. These elements must be proven by clear and convincing evidence."
+          confidence_level 6
+          supporting_document_ids ["general_elements_overview", "evidence_standards"]
+        }
+      ]
+      unanswered_aspects ["Jurisdiction-specific statutory periods", "State-specific variations in elements", "Good faith vs. bad faith requirements", "Tacking provisions", "Payment of taxes requirements", "Rural vs. urban property distinctions"]
+      emerging_questions ["What is the statutory period in the relevant jurisdiction?", "Are there different requirements for different property types?", "How do state variations affect the analysis?"]
+      reasoning {
+        analyze_legal_question { summary "General adverse possession principles identified" }
+        consider_relevant_legal_principles { summary "Common law elements established" }
+        formulate_search_queries_strategy { summary "Broad research approach" }
+        specify_expected_information_strategy { summary "Jurisdiction-specific details needed" }
+        ensure_comprehensive_coverage_strategy { summary "Current research incomplete" }
+      }
+    }
+    query_history [
+      "adverse possession elements requirements",
+      "adverse possession real property statutory period"
+    ]
+  }
+  @@assert( {{ this.report_title | length > 5 }} )
+  @@assert( {{ this.executive_summary | length > 20 }} )
+  @@assert( {{ this.conclusion | length > 20 }} )
+  @@assert( {{ this.sections | length >= 1 }} )
+  
+  // Should acknowledge limitations due to unanswered aspects
+  @@assert( {{ this.executive_summary | lower | regex_search("general|varies|jurisdiction|specific") != null }} )
+  @@assert( {{ this.conclusion | lower | regex_search("additional|research|jurisdiction|specific|vary") != null }} )
+  
+  // Should cover what is known while noting limitations
+  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | lower | regex_search("open|notorious|exclusive|hostile|continuous")) != null }} )
+  
+  // Some sections may be incomplete due to gaps
+  @@assert( {{ (this.sections | selectattr("is_complete", "equalto", false) | list | length) >= 0 }} )
+  
+  // Should still provide useful analysis despite gaps
+  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | length) > 50 }} )
+}
+
+test GenerateReportMinimalSynthesis {
+  functions [GenerateFinalLegalReport]
+  args {
+    original_legal_question "What are the penalties for insider trading under federal securities law?"
+    synthesis {
+      key_synthesized_topics [
+        {
+          topic_title "Federal Securities Violations"
+          synthesis "Insider trading violations fall under federal securities regulations but specific penalty structures require detailed statutory analysis."
+          confidence_level 3
+          supporting_document_ids ["sec_overview"]
+        }
+      ]
+      unanswered_aspects ["Specific penalty amounts", "Criminal vs. civil penalties", "Disgorgement requirements", "Sentencing guidelines", "Factors affecting penalty determination"]
+      emerging_questions ["What are the maximum penalties under current law?", "How do courts determine appropriate penalties?", "What factors lead to criminal prosecution vs. civil enforcement?"]
+      reasoning {
+        analyze_legal_question { summary "Insider trading concept identified" }
+        consider_relevant_legal_principles { summary "Federal securities law framework" }
+        formulate_search_queries_strategy { summary "Initial research insufficient" }
+        specify_expected_information_strategy { summary "Detailed penalty analysis needed" }
+        ensure_comprehensive_coverage_strategy { summary "Significant gaps remain" }
+      }
+    }
+    query_history [
+      "insider trading federal securities law penalties"
+    ]
+  }
+  @@assert( {{ this.report_title | length > 5 }} )
+  @@assert( {{ this.executive_summary | length > 15 }} )
+  @@assert( {{ this.conclusion | length > 15 }} )
+  @@assert( {{ this.sections | length >= 1 }} )
+  @@assert( {{ this.sections | length <= 3 }} )
+  
+  // Should acknowledge limited information available
+  @@assert( {{ this.executive_summary | lower | regex_search("limited|additional|research|complex") != null }} )
+  @@assert( {{ this.conclusion | lower | regex_search("further|additional|research|analysis|required") != null }} )
+  
+  // Should still address the question as much as possible
+  @@assert( {{ this.report_title | lower | regex_search("insider.*trading|securities|penalties") != null }} )
+  
+  // Sections may be incomplete due to limited synthesis
+  @@assert( {{ (this.sections | selectattr("is_complete", "equalto", false) | list | length) >= 0 }} )
+}
+
+test GenerateReportExtensiveQueryHistory {
+  functions [GenerateFinalLegalReport]
+  args {
+    original_legal_question "What are the tax implications of cryptocurrency transactions for individuals?"
+    synthesis {
+      key_synthesized_topics [
+        {
+          topic_title "IRS Treatment of Cryptocurrency"
+          synthesis "The IRS treats cryptocurrency as property for tax purposes, meaning transactions trigger capital gains or losses. Each transaction must be reported with basis and fair market value calculations."
+          confidence_level 8
+          supporting_document_ids ["irs_notice_2014", "revenue_ruling_crypto", "tax_court_cases"]
+        },
+        {
+          topic_title "Transaction Types and Reporting"
+          synthesis "Different types of cryptocurrency transactions have varying tax implications: trading, mining, staking, airdrops, and DeFi activities each require specific reporting approaches."
+          confidence_level 7
+          supporting_document_ids ["irs_guidance_2019", "defi_tax_analysis", "mining_revenue_cases"]
+        }
+      ]
+      unanswered_aspects ["Specific DeFi protocol tax treatment", "International reporting requirements", "State tax implications"]
+      emerging_questions ["How should yield farming be taxed?", "What are the reporting requirements for cross-chain transactions?"]
+      reasoning {
+        analyze_legal_question { summary "Comprehensive cryptocurrency tax analysis" }
+        consider_relevant_legal_principles { summary "Property taxation and reporting requirements" }
+        formulate_search_queries_strategy { summary "Multiple research iterations conducted" }
+        specify_expected_information_strategy { summary "Detailed guidance and case law reviewed" }
+        ensure_comprehensive_coverage_strategy { summary "Extensive research completed" }
+      }
+    }
+    query_history [
+      "cryptocurrency tax implications individual IRS",
+      "crypto capital gains tax reporting requirements",
+      "IRS Notice 2014-21 cryptocurrency property",
+      "cryptocurrency mining tax treatment income",
+      "DeFi decentralized finance tax implications",
+      "crypto staking tax treatment rewards",
+      "cryptocurrency airdrops tax consequences",
+      "crypto trading tax basis calculation",
+      "cryptocurrency transaction reporting Form 8949",
+      "digital asset tax compliance individual"
+    ]
+  }
+  @@assert( {{ this.report_title | length > 5 }} )
+  @@assert( {{ this.executive_summary | length > 30 }} )
+  @@assert( {{ this.conclusion | length > 30 }} )
+  // Extensive research should produce comprehensive report
+  @@assert( {{ this.sections | length >= 3 }} )
+  @@assert( {{ this.sections | length <= 10 }} )
+  
+  // Should reflect the extensive research conducted
+  @@assert( {{ this.executive_summary | lower | regex_search("comprehensive|extensive|detailed") != null }} )
+  
+  // Should cover multiple aspects from synthesis
+  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | lower | regex_search("property|capital.*gains|reporting")) != null }} )
+  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | lower | regex_search("mining|trading|staking|defi")) != null }} )
+  
+  // Should have high completion rate due to extensive research
+  @@assert( {{ (this.sections | selectattr("is_complete", "equalto", true) | list | length) >= 2 }} )
+  
+  // Should reference the extensive query history appropriately
+  @@assert( {{ this.conclusion | lower | regex_search("research|analysis|comprehensive") != null }} )
+}
+
+test GenerateReportConflictingInformation {
+  functions [GenerateFinalLegalReport]
+  args {
+    original_legal_question "What notice period is required for employment termination?"
+    synthesis {
+      key_synthesized_topics [
+        {
+          topic_title "Federal Notice Requirements"
+          synthesis "The federal WARN Act requires 60 days advance notice for mass layoffs affecting 50 or more employees, but does not apply to individual terminations."
+          confidence_level 8
+          supporting_document_ids ["warn_act_text", "dol_guidance", "mass_layoff_cases"]
+        },
+        {
+          topic_title "State Law Variations"
+          synthesis "State laws vary significantly on notice requirements. Most states follow at-will employment with no notice required, while others have specific notice or pay-in-lieu requirements."
+          confidence_level 6
+          supporting_document_ids ["state_law_survey", "at_will_variations", "notice_statutes"]
+        }
+      ]
+      unanswered_aspects ["Specific state requirements", "Contract-based notice requirements", "Industry-specific regulations"]
+      emerging_questions ["Which state law applies in multi-state employment?", "How do contractual notice requirements interact with statutory requirements?"]
+      reasoning {
+        analyze_legal_question { summary "Multi-layered notice requirement analysis" }
+        consider_relevant_legal_principles { summary "Federal and state law interaction" }
+        formulate_search_queries_strategy { summary "Comprehensive approach to different law sources" }
+        specify_expected_information_strategy { summary "Federal baseline with state variations" }
+        ensure_comprehensive_coverage_strategy { summary "Multiple jurisdictional perspectives covered" }
+      }
+    }
+    query_history [
+      "employment termination notice requirements federal",
+      "WARN Act 60 day notice mass layoff",
+      "state law employment termination notice at-will",
+      "individual termination notice requirements"
+    ]
+  }
+  @@assert( {{ this.report_title | length > 5 }} )
+  @@assert( {{ this.executive_summary | length > 25 }} )
+  @@assert( {{ this.conclusion | length > 25 }} )
+  @@assert( {{ this.sections | length >= 2 }} )
+  
+  // Should address the complexity and variations
+  @@assert( {{ this.executive_summary | lower | regex_search("varies|depends|federal|state|different") != null }} )
+  @@assert( {{ this.conclusion | lower | regex_search("jurisdiction|specific|varies|depends") != null }} )
+  
+  // Should cover both federal and state aspects
+  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | lower | regex_search("warn|federal|60.*day")) != null }} )
+  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | lower | regex_search("state|at.will|varies")) != null }} )
+  
+  // Should acknowledge the complexity in structure
+  @@assert( {{ (this.sections | map(attribute="title") | join(" ") | lower | regex_search("federal|state|variation")) != null }} )
+}
