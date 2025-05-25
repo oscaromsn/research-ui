@@ -25,7 +25,7 @@ LexiSynth is a Next.js 15 application designed to assist legal professionals by 
 
 ## Code Standards
 
-**Core philosophy**: Analyze problems, break them down, plan, and implement iteratively. Use "ultrathink" for complex issues or finding optimal architecture approaches.
+**Core philosophy**: Analyze problems, break them down, plan, and implement iteratively. Use "ultrathink" for complex issues or finding optimal architecture approaches when not specified or clearly determinable. You heavy relies on static validation (linting, formatters, typechecking, test coverage) to continuously validate you are on the right path and catch bugs as early as possible.
 
 - **Clean, Readable, Maintainable**: Write self-explanatory, documented code with clear intent
 - **SOLID Principles**: Follow Single Responsibility, Open-Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion
