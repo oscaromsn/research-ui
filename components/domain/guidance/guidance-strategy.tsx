@@ -1,13 +1,16 @@
 "use client";
 
+import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
+import {
+    generatedQueriesAtom,
+    researchLogAtom,
+} from "@/lib/state/researchAtoms";
+import { useAtomValue } from "jotai";
 import { AlertTriangle, Brain, ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { useResearchAgent } from '@/lib/hooks/useResearchAgent';
-import { useAtomValue } from 'jotai';
-import { generatedQueriesAtom, researchLogAtom } from '@/lib/state/researchAtoms';
 export function GuidanceStrategy() {
     const [isAssessmentExpanded, setIsAssessmentExpanded] = useState(false);
-    const [legalQuestion, setLegalQuestion] = useState('');
+    const [legalQuestion, setLegalQuestion] = useState("");
     const agent = useResearchAgent();
     const generatedQueries = useAtomValue(generatedQueriesAtom);
     const researchLogs = useAtomValue(researchLogAtom);
@@ -50,7 +53,9 @@ export function GuidanceStrategy() {
                         disabled={agent.isLoading}
                         className="bg-[#3a7bb7] hover:bg-[#2c5d8a] disabled:bg-gray-400 disabled:cursor-not-allowed py-2 rounded-md w-full text-white text-sm transition-colors"
                     >
-                        {agent.isLoading ? `Processing: ${agent.currentStage} - ${agent.currentMessage || ''}` : "Start Research"}
+                        {agent.isLoading
+                            ? `Processing: ${agent.currentStage} - ${agent.currentMessage || ""}`
+                            : "Start Research"}
                     </button>
                     {agent.isLoading && (
                         <button
@@ -77,7 +82,10 @@ export function GuidanceStrategy() {
                         <ChevronRight size={16} className="text-[#a0aec0]" />
                     </div>
                     {generatedQueries.map((query, index) => (
-                        <div key={`query-${index}`} className="bg-white dark:bg-[#1e2436] mb-3 p-4 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg">
+                        <div
+                            key={`query-${index}`}
+                            className="bg-white dark:bg-[#1e2436] mb-3 p-4 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg"
+                        >
                             <div className="mb-2 font-mono text-[#2d3748] dark:text-[#e2e8f0] text-sm">
                                 {query.query_string}
                             </div>
@@ -102,7 +110,7 @@ export function GuidanceStrategy() {
                     </h3>
                     <div className="bg-white dark:bg-[#1e2436] p-3 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg">
                         <pre className="text-[#4a5568] dark:text-[#a0aec0] text-xs whitespace-pre-wrap">
-                            {researchLogs.join('\n')}
+                            {researchLogs.join("\n")}
                         </pre>
                     </div>
                 </div>

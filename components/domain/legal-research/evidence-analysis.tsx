@@ -1,32 +1,41 @@
 "use client";
 
+import {
+    analyzedDocsSummaryAtom,
+    selectedAnalyzedDocIdAtom,
+} from "@/lib/state/researchAtoms";
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
+import { useAtomValue, useSetAtom } from "jotai";
 import { Brain, Gavel, Scroll } from "lucide-react";
 import { useState } from "react";
-import { useAtomValue, useSetAtom } from 'jotai';
-import { analyzedDocsSummaryAtom, selectedAnalyzedDocIdAtom } from '@/lib/state/researchAtoms';
-import type { ClientAnalyzedDoc } from '@/lib/state/researchAtoms';
-import { CaseModal } from "./modals/case-modal";
 import { AnalysisReasoningModal } from "./modals/analysis-reasoning-modal";
-
+import { CaseModal } from "./modals/case-modal";
 
 export function EvidenceAnalysis() {
-    const [selectedCase, setSelectedCase] = useState<ClientAnalyzedDoc | null>(null);
+    const [selectedCase, setSelectedCase] = useState<ClientAnalyzedDoc | null>(
+        null,
+    );
     const [showReasoningModal, setShowReasoningModal] = useState(false);
     const analyzedDocs = useAtomValue(analyzedDocsSummaryAtom);
     const selectedDocId = useAtomValue(selectedAnalyzedDocIdAtom);
     const setSelectedDocId = useSetAtom(selectedAnalyzedDocIdAtom);
 
     // Get the currently selected document from our atoms
-    const selectedDocument = selectedDocId ? analyzedDocs.find(doc => doc.docId === selectedDocId) : analyzedDocs[0];
-    
+    const selectedDocument = selectedDocId
+        ? analyzedDocs.find((doc) => doc.docId === selectedDocId)
+        : analyzedDocs[0];
+
     const handleDocumentClick = (doc: ClientAnalyzedDoc) => {
         setSelectedDocId(doc.docId);
         // Convert to format expected by CaseModal
         setSelectedCase(doc);
     };
 
-    const handleDocumentKeyUp = (doc: ClientAnalyzedDoc, event: React.KeyboardEvent) => {
-        if (event.key === 'Enter') {
+    const handleDocumentKeyUp = (
+        doc: ClientAnalyzedDoc,
+        event: React.KeyboardEvent,
+    ) => {
+        if (event.key === "Enter") {
             handleDocumentClick(doc);
         }
     };
@@ -35,13 +44,19 @@ export function EvidenceAnalysis() {
     const getEntityStyle = (type: string) => {
         const styles = {
             Case: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-            Statute: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200", 
-            Regulation: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+            Statute:
+                "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+            Regulation:
+                "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
             Person: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-            Organization: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-            LegalConcept: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
-            Jurisdiction: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
-            default: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+            Organization:
+                "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+            LegalConcept:
+                "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
+            Jurisdiction:
+                "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
+            default:
+                "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
         };
         return styles[type as keyof typeof styles] || styles.default;
     };
@@ -57,6 +72,7 @@ export function EvidenceAnalysis() {
                         <button
                             type="button"
                             className="hover:bg-[#f1f5f9] dark:hover:bg-[#242a3d] p-1 rounded"
+                            aria-label="Menu options"
                         >
                             <svg
                                 width="16"
@@ -85,33 +101,42 @@ export function EvidenceAnalysis() {
                 <div className="p-4">
                     {analyzedDocs.map((doc) => {
                         const isSelected = selectedDocId === doc.docId;
-                        const documentType = doc.title?.includes('§') ? 'statute' : 'case';
-                        
+                        const documentType = doc.title?.includes("§")
+                            ? "statute"
+                            : "case";
+
                         return (
-                            <div
+                            <button
                                 key={doc.docId}
-                                className={`p-3 mb-2 rounded-lg cursor-pointer ${
-                                    isSelected 
-                                        ? "bg-[#edf2f7] dark:bg-[#242a3d] border-l-4 border-[#3a7bb7]" 
+                                type="button"
+                                className={`p-3 mb-2 rounded-lg cursor-pointer text-left w-full ${
+                                    isSelected
+                                        ? "bg-[#edf2f7] dark:bg-[#242a3d] border-l-4 border-[#3a7bb7]"
                                         : "bg-white dark:bg-[#1e2436] hover:bg-[#f8fafc] dark:hover:bg-[#212941]"
                                 }`}
                                 onClick={() => handleDocumentClick(doc)}
                                 onKeyUp={(e) => handleDocumentKeyUp(doc, e)}
-                                tabIndex={0}
-                                role="button"
                             >
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <h3 className="mb-1 font-medium text-[#2d3748] dark:text-[#e2e8f0] text-sm">
-                                            {doc.title || 'Untitled Document'}
+                                            {doc.title || "Untitled Document"}
                                         </h3>
                                         <div className="flex items-center mb-1 text-[#64748b] dark:text-[#94a3b8] text-xs">
-                                            <span>{doc.url ? new URL(doc.url).hostname : 'Unknown Source'}</span>
+                                            <span>
+                                                {doc.url
+                                                    ? new URL(doc.url).hostname
+                                                    : "Unknown Source"}
+                                            </span>
                                             <span className="mx-1">•</span>
-                                            <span>Relevance: {doc.relevanceScore || 0}/10</span>
+                                            <span>
+                                                Relevance:{" "}
+                                                {doc.relevanceScore || 0}/10
+                                            </span>
                                         </div>
                                         <p className="text-[#4a5568] dark:text-[#a0aec0] text-xs">
-                                            {doc.summarySnippet || 'No summary available.'}
+                                            {doc.summarySnippet ||
+                                                "No summary available."}
                                         </p>
                                     </div>
                                     <div className="mt-1 ml-2">
@@ -128,7 +153,7 @@ export function EvidenceAnalysis() {
                                         )}
                                     </div>
                                 </div>
-                            </div>
+                            </button>
                         );
                     })}
                 </div>
@@ -139,11 +164,15 @@ export function EvidenceAnalysis() {
                 caseData={
                     selectedCase
                         ? {
-                              title: selectedCase.title || '',
-                              source: selectedCase.url ? new URL(selectedCase.url).hostname : 'Unknown Source',
-                              court: selectedCase.title?.includes('(') 
-                                  ? selectedCase.title.split('(')[1]?.replace(')', '') || ''
-                                  : '',
+                              title: selectedCase.title || "",
+                              source: selectedCase.url
+                                  ? new URL(selectedCase.url).hostname
+                                  : "Unknown Source",
+                              court: selectedCase.title?.includes("(")
+                                  ? selectedCase.title
+                                        .split("(")[1]
+                                        ?.replace(")", "") || ""
+                                  : "",
                               date: `Relevance: ${selectedCase.relevanceScore || 0}/10`,
                           }
                         : {}
@@ -154,11 +183,20 @@ export function EvidenceAnalysis() {
                     <div className="p-4 border-[#e1e5eb] dark:border-[#2a3148] border-r w-1/2 overflow-auto text-xs">
                         {selectedDocument?.fullText ? (
                             <div className="space-y-3">
-                                <h3 className="font-medium text-sm text-[#2d3748] dark:text-[#e2e8f0]">Document Content</h3>
+                                <h3 className="font-medium text-sm text-[#2d3748] dark:text-[#e2e8f0]">
+                                    Document Content
+                                </h3>
                                 <div className="text-xs text-[#4a5568] dark:text-[#a0aec0] leading-relaxed">
-                                    {selectedDocument.fullText.split('\n').map((paragraph, idx) => (
-                                        <p key={idx} className="mb-2">{paragraph}</p>
-                                    ))}
+                                    {selectedDocument.fullText
+                                        .split("\n")
+                                        .map((paragraph, idx) => (
+                                            <p
+                                                key={`paragraph-${selectedDocument.docId}-${idx}`}
+                                                className="mb-2"
+                                            >
+                                                {paragraph}
+                                            </p>
+                                        ))}
                                 </div>
                             </div>
                         ) : (
@@ -191,8 +229,12 @@ export function EvidenceAnalysis() {
                                 Summary:
                             </p>
                             <p className="text-[#4a5568] dark:text-[#a0aec0] text-xs">
-                                {selectedDocument?.summarySnippet || "No analysis available for this document."}
-                                <span className="inline-block bg-[#4a5568] dark:bg-[#a0aec0] w-0.5 h-3 ml-0.5 animate-caret-blink" style={{ verticalAlign: 'text-top' }} />
+                                {selectedDocument?.summarySnippet ||
+                                    "No analysis available for this document."}
+                                <span
+                                    className="inline-block bg-[#4a5568] dark:bg-[#a0aec0] w-0.5 h-3 ml-0.5 animate-caret-blink"
+                                    style={{ verticalAlign: "text-top" }}
+                                />
                             </p>
                         </div>
                         <div className="mb-3">
@@ -201,11 +243,20 @@ export function EvidenceAnalysis() {
                             </p>
                             <ul className="pl-4 text-xs list-disc space-y-1">
                                 {selectedDocument?.keyArguments?.length ? (
-                                    selectedDocument.keyArguments.map((argument, idx) => (
-                                        <li key={idx} className="text-[#4a5568] dark:text-[#a0aec0]">{argument}</li>
-                                    ))
+                                    selectedDocument.keyArguments.map(
+                                        (argument, idx) => (
+                                            <li
+                                                key={`argument-${selectedDocument.docId}-${idx}`}
+                                                className="text-[#4a5568] dark:text-[#a0aec0]"
+                                            >
+                                                {argument}
+                                            </li>
+                                        ),
+                                    )
                                 ) : (
-                                    <li className="text-[#64748b] dark:text-[#94a3b8] italic">No key arguments identified.</li>
+                                    <li className="text-[#64748b] dark:text-[#94a3b8] italic">
+                                        No key arguments identified.
+                                    </li>
                                 )}
                             </ul>
                         </div>
@@ -215,17 +266,21 @@ export function EvidenceAnalysis() {
                             </p>
                             <div className="flex flex-wrap gap-1">
                                 {selectedDocument?.extractedEntities?.length ? (
-                                    selectedDocument.extractedEntities.map((entity, idx) => (
-                                        <span
-                                            key={idx}
-                                            className={`px-1.5 py-0.5 rounded text-[10px] ${getEntityStyle(entity.type)}`}
-                                            title={entity.details}
-                                        >
-                                            {entity.name}
-                                        </span>
-                                    ))
+                                    selectedDocument.extractedEntities.map(
+                                        (entity, idx) => (
+                                            <span
+                                                key={`entity-${selectedDocument.docId}-${entity.name}-${idx}`}
+                                                className={`px-1.5 py-0.5 rounded text-[10px] ${getEntityStyle(entity.type)}`}
+                                                title={entity.details}
+                                            >
+                                                {entity.name}
+                                            </span>
+                                        ),
+                                    )
                                 ) : (
-                                    <span className="text-[#64748b] dark:text-[#94a3b8] italic text-xs">No entities extracted.</span>
+                                    <span className="text-[#64748b] dark:text-[#94a3b8] italic text-xs">
+                                        No entities extracted.
+                                    </span>
                                 )}
                             </div>
                         </div>
@@ -242,7 +297,7 @@ export function EvidenceAnalysis() {
             </div>
             <AnalysisReasoningModal
                 isOpen={showReasoningModal}
-                onClose={() => setShowReasoningModal(false)}
+                onCloseAction={() => setShowReasoningModal(false)}
                 reasoning={selectedDocument?.analysisReasoning}
                 documentTitle={selectedDocument?.title}
             />

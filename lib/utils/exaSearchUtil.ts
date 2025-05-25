@@ -81,7 +81,9 @@ const EXA_API_KEY = process.env.EXA_API_KEY;
 
 // Check if API key is available
 if (!EXA_API_KEY) {
-    console.warn("EXA_API_KEY environment variable is not set. Exa searches will fail.");
+    console.warn(
+        "EXA_API_KEY environment variable is not set. Exa searches will fail.",
+    );
 }
 
 // --- Utility Function ---
@@ -103,7 +105,9 @@ export async function executeExaSearch(
     numHighlightSentences = 3, // Default to 3 sentences for highlights
 ): Promise<BamlSearchResultItem[]> {
     if (!EXA_API_KEY) {
-        throw new Error("EXA_API_KEY environment variable is not set. Please check your .env.local file.");
+        throw new Error(
+            "EXA_API_KEY environment variable is not set. Please check your .env.local file.",
+        );
     }
 
     const requestBody: ExaSearchRequestBody = {
@@ -199,12 +203,9 @@ export async function executeExaSearch(
                 `Exa API request failed with status ${axiosError.response?.status}: ${JSON.stringify(axiosError.response?.data)}`,
             );
         }
-        
+
         // Handle non-Axios errors
-        console.error(
-            "An unexpected error occurred during Exa search:",
-            error,
-        );
+        console.error("An unexpected error occurred during Exa search:", error);
         throw error;
     }
 }

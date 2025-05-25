@@ -1,5 +1,8 @@
 "use client";
 
+import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
+import { researchStatusAtom } from "@/lib/state/researchAtoms";
+import { useAtomValue } from "jotai";
 import {
     CheckSquare,
     Compass,
@@ -8,76 +11,97 @@ import {
     Pen,
     Search,
 } from "lucide-react";
-import { useAtomValue } from 'jotai';
-import { researchStatusAtom } from '@/lib/state/researchAtoms';
-import type { ResearchStage } from '@/app/actions/researchAgentOrchestrator';
-import type { ReactElement } from 'react';
+import type { ReactElement } from "react";
 
 export function ResearchLifecycle() {
     const status = useAtomValue(researchStatusAtom);
-    
+
     // Mapping from orchestrator stages to lifecycle display stages
-    const researchStageToLifecycleName = (stage: ResearchStage | null): string => {
-        if (!stage || stage === 'IDLE') return 'Ideate'; // Default or initial
+    const researchStageToLifecycleName = (
+        stage: ResearchStage | null,
+    ): string => {
+        if (!stage || stage === "IDLE") return "Ideate"; // Default or initial
         switch (stage) {
-            case 'INITIALIZING': return 'Ideate';
-            case 'GENERATING_QUERIES': return 'Plan';
-            case 'FETCHING_DOCUMENTS': return 'Research';
-            case 'ANALYZING_DOCUMENTS': return 'Analyze';
-            case 'SYNTHESIZING_FINDINGS': return 'Review';
-            case 'ASSESSING_RESEARCH': return 'Review';
-            case 'GENERATING_REPORT': return 'Draft';
-            case 'COMPLETED': return 'Draft';
-            case 'ERROR': return 'Ideate'; // Show error on first stage
-            default: return 'Ideate';
+            case "INITIALIZING":
+                return "Ideate";
+            case "GENERATING_QUERIES":
+                return "Plan";
+            case "FETCHING_DOCUMENTS":
+                return "Research";
+            case "ANALYZING_DOCUMENTS":
+                return "Analyze";
+            case "SYNTHESIZING_FINDINGS":
+                return "Review";
+            case "ASSESSING_RESEARCH":
+                return "Review";
+            case "GENERATING_REPORT":
+                return "Draft";
+            case "COMPLETED":
+                return "Draft";
+            case "ERROR":
+                return "Ideate"; // Show error on first stage
+            default:
+                return "Ideate";
         }
     };
 
-    const lifecycleStageMap: Record<string, { name: string, icon: ReactElement }> = {
+    const lifecycleStageMap: Record<
+        string,
+        { name: string; icon: ReactElement }
+    > = {
         Ideate: { name: "Ideate", icon: <Lightbulb size={16} /> },
         Plan: { name: "Plan", icon: <Compass size={16} /> },
         Research: { name: "Research", icon: <Search size={16} /> },
-        Analyze: { name: "Analyze", icon: <div style={{ width: 16, height: 16 }} /> },
+        Analyze: {
+            name: "Analyze",
+            icon: <div style={{ width: 16, height: 16 }} />,
+        },
         Review: { name: "Review", icon: <CheckSquare size={16} /> },
         Draft: { name: "Draft", icon: <Pen size={16} /> },
     };
 
     const activeLifecycleStageName = researchStageToLifecycleName(status.stage);
     const lifecycleStageOrder = Object.keys(lifecycleStageMap);
-    
-    const stages = lifecycleStageOrder.map(stageName => {
+
+    const stages = lifecycleStageOrder.map((stageName) => {
         const stageInfo = lifecycleStageMap[stageName];
         const stageIndex = lifecycleStageOrder.indexOf(stageName);
-        const activeStageIndex = lifecycleStageOrder.indexOf(activeLifecycleStageName);
-        
-        let stageStatus: 'completed' | 'active' | 'pending' = 'pending';
-        
-        if (status.stage === 'COMPLETED') {
+        const activeStageIndex = lifecycleStageOrder.indexOf(
+            activeLifecycleStageName,
+        );
+
+        let stageStatus: "completed" | "active" | "pending" = "pending";
+
+        if (status.stage === "COMPLETED") {
             // All stages completed
-            stageStatus = 'completed';
-        } else if (status.stage === 'ERROR' || status.stage === 'HUMAN_REVIEW_REQUESTED' || status.stage === 'ITERATION_PAUSED') {
+            stageStatus = "completed";
+        } else if (
+            status.stage === "ERROR" ||
+            status.stage === "HUMAN_REVIEW_REQUESTED" ||
+            status.stage === "ITERATION_PAUSED"
+        ) {
             // Error or paused states
             if (stageIndex < activeStageIndex) {
-                stageStatus = 'completed';
+                stageStatus = "completed";
             } else if (stageIndex === activeStageIndex) {
-                stageStatus = 'active';
+                stageStatus = "active";
             } else {
-                stageStatus = 'pending';
+                stageStatus = "pending";
             }
         } else if (status.isLoading) {
             // Normal progression
             if (stageIndex < activeStageIndex) {
-                stageStatus = 'completed';
+                stageStatus = "completed";
             } else if (stageIndex === activeStageIndex) {
-                stageStatus = 'active';
+                stageStatus = "active";
             } else {
-                stageStatus = 'pending';
+                stageStatus = "pending";
             }
         } else {
             // Idle state
-            stageStatus = 'pending';
+            stageStatus = "pending";
         }
-        
+
         return {
             ...stageInfo,
             status: stageStatus,
@@ -116,7 +140,10 @@ export function ResearchLifecycle() {
                             {index !== stages.length - 1 && (
                                 <div
                                     className={`absolute left-8 top-1/2 -translate-y-1/2 w-6 h-[1px] transition-colors duration-300 ${
-                                        stage.status === "pending" && stages[index + 1]?.status === 'pending' ? "bg-[#242a3d]" : "bg-green-500 dark:bg-green-600"
+                                        stage.status === "pending" &&
+                                        stages[index + 1]?.status === "pending"
+                                            ? "bg-[#242a3d]"
+                                            : "bg-green-500 dark:bg-green-600"
                                     }`}
                                 />
                             )}
