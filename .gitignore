@@ -41,16 +41,16 @@ yarn-error.log*
 next-env.d.ts
 
 # baml
-baml_client
+# baml_client
 
 # dev notes
-.notes
+# _notes
 
 # IDEs
 .zed
 .vscode
 .idea
 
-# Claude Code
-CLAUDE.md
-.claude
+# Private notes and Claude Code files
+*.local.md
+*.local.json
