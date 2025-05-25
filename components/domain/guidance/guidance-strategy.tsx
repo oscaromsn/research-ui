@@ -2,8 +2,25 @@
 
 import { AlertTriangle, Brain, ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { useResearchAgent } from '@/lib/hooks/useResearchAgent';
+import { useAtomValue } from 'jotai';
+import { generatedQueriesAtom, researchLogAtom } from '@/lib/state/researchAtoms';
 export function GuidanceStrategy() {
     const [isAssessmentExpanded, setIsAssessmentExpanded] = useState(false);
+    const [legalQuestion, setLegalQuestion] = useState('');
+    const agent = useResearchAgent();
+    const generatedQueries = useAtomValue(generatedQueriesAtom);
+    const researchLogs = useAtomValue(researchLogAtom);
+
+    const handleStartResearch = () => {
+        if (legalQuestion.trim()) {
+            agent.startResearch(legalQuestion);
+        }
+    };
+
+    const handleAbortResearch = () => {
+        agent.abortResearch();
+    };
     return (
         <div className="bg-[#f8f9fa] dark:bg-[#171c2c] p-4 border-[#e1e5eb] dark:border-[#2a3148] border-r w-full md:w-1/3 overflow-y-auto">
             <div className="mb-4">
@@ -14,6 +31,9 @@ export function GuidanceStrategy() {
                     <input
                         type="text"
                         placeholder="Enter Legal Question or Research Topic"
+                        value={legalQuestion}
+                        onChange={(e) => setLegalQuestion(e.target.value)}
+                        disabled={agent.isLoading}
                         className="bg-white dark:bg-[#1e2436] mb-3 px-4 py-3 border border-[#e1e5eb] dark:border-[#2a3148] rounded-md focus:outline-none focus:ring-1 focus:ring-[#4a90e2] w-full text-sm"
                     />
                     <div className="flex flex-wrap gap-2 mb-4">
@@ -26,36 +46,67 @@ export function GuidanceStrategy() {
                     </div>
                     <button
                         type="button"
-                        className="bg-[#3a7bb7] hover:bg-[#2c5d8a] py-2 rounded-md w-full text-white text-sm transition-colors"
+                        onClick={handleStartResearch}
+                        disabled={agent.isLoading}
+                        className="bg-[#3a7bb7] hover:bg-[#2c5d8a] disabled:bg-gray-400 disabled:cursor-not-allowed py-2 rounded-md w-full text-white text-sm transition-colors"
                     >
-                        Start Research
+                        {agent.isLoading ? `Processing: ${agent.currentStage} - ${agent.currentMessage || ''}` : "Start Research"}
                     </button>
+                    {agent.isLoading && (
+                        <button
+                            type="button"
+                            onClick={handleAbortResearch}
+                            className="mt-2 bg-red-600 hover:bg-red-700 py-2 rounded-md w-full text-white text-sm transition-colors"
+                        >
+                            Abort
+                        </button>
+                    )}
+                    {agent.error && (
+                        <div className="mt-2 p-2 bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded text-red-800 dark:text-red-200 text-sm">
+                            Error: {agent.error}
+                        </div>
+                    )}
                 </div>
             </div>
-            <div className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-medium text-[#4a5568] dark:text-[#a0aec0] text-sm">
-                        Search Query Item
+            {generatedQueries.length > 0 && (
+                <div className="mb-6">
+                    <div className="flex justify-between items-center mb-2">
+                        <h3 className="font-medium text-[#4a5568] dark:text-[#a0aec0] text-sm">
+                            Generated Search Queries
+                        </h3>
+                        <ChevronRight size={16} className="text-[#a0aec0]" />
+                    </div>
+                    {generatedQueries.map((query, index) => (
+                        <div key={`query-${index}`} className="bg-white dark:bg-[#1e2436] mb-3 p-4 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg">
+                            <div className="mb-2 font-mono text-[#2d3748] dark:text-[#e2e8f0] text-sm">
+                                {query.query_string}
+                            </div>
+                            {query.expected_information_summary && (
+                                <div className="mt-3">
+                                    <p className="mb-1 font-medium text-[#4a5568] dark:text-[#a0aec0] text-xs">
+                                        Expected Information:
+                                    </p>
+                                    <p className="text-[#4a5568] dark:text-[#a0aec0] text-xs">
+                                        {query.expected_information_summary}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+            {researchLogs.length > 0 && (
+                <div className="mb-6">
+                    <h3 className="mb-2 font-medium text-[#4a5568] dark:text-[#a0aec0] text-sm">
+                        Research Logs:
                     </h3>
-                    <ChevronRight size={16} className="text-[#a0aec0]" />
-                </div>
-                <div className="bg-white dark:bg-[#1e2436] mb-3 p-4 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg">
-                    <div className="mb-2 font-mono text-[#2d3748] dark:text-[#e2e8f0] text-sm">
-                        &quot;contract breach&quot; AND (&quot;force
-                        majeure&quot; OR &quot;impossibility&quot;) NEAR/5
-                        &quot;COVID-19&quot;
-                    </div>
-                    <div className="mt-3">
-                        <p className="mb-1 font-medium text-[#4a5568] dark:text-[#a0aec0] text-xs">
-                            Expected Information:
-                        </p>
-                        <ul className="pl-4 text-[#4a5568] dark:text-[#a0aec0] text-xs list-disc">
-                            <li>Precedent cases and rulings</li>
-                            <li>Applicable legal framework</li>
-                        </ul>
+                    <div className="bg-white dark:bg-[#1e2436] p-3 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg">
+                        <pre className="text-[#4a5568] dark:text-[#a0aec0] text-xs whitespace-pre-wrap">
+                            {researchLogs.join('\n')}
+                        </pre>
                     </div>
                 </div>
-            </div>
+            )}
             <div className="mb-4">
                 <div className="bg-white dark:bg-[#1e2436] p-4 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg">
                     <button
