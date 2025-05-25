@@ -40,9 +40,7 @@ export function ReportDrafter() {
                 report.conclusion && report.conclusion.trim().length > 0,
             );
         }
-        return Boolean(
-            section && section.content && section.content.trim().length > 0,
-        );
+        return Boolean(section?.content && section.content.trim().length > 0);
     };
 
     return (
@@ -126,7 +124,12 @@ export function ReportDrafter() {
                                     section.title !== "Conclusion",
                             )
                             .map((section, index) => (
-                                <div key={`section-content-${index}`}>
+                                <div
+                                    key={
+                                        section.title ||
+                                        `section-content-${index}`
+                                    }
+                                >
                                     <h2>{section.title}</h2>
                                     <p>
                                         {section.content}
