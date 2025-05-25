@@ -4,6 +4,7 @@ import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
 import { researchStatusAtom } from "@/lib/state/researchAtoms";
 import { useAtomValue } from "jotai";
 import {
+    Brain,
     CheckSquare,
     Compass,
     Lightbulb,
@@ -54,7 +55,7 @@ export function ResearchLifecycle() {
         Research: { name: "Research", icon: <Search size={16} /> },
         Analyze: {
             name: "Analyze",
-            icon: <div style={{ width: 16, height: 16 }} />,
+            icon: <Brain size={16} />,
         },
         Review: { name: "Review", icon: <CheckSquare size={16} /> },
         Draft: { name: "Draft", icon: <Pen size={16} /> },
