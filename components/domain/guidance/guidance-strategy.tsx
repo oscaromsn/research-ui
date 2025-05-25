@@ -83,7 +83,7 @@ export function GuidanceStrategy() {
                     </div>
                     {generatedQueries.map((query, index) => (
                         <div
-                            key={`query-${index}`}
+                            key={query.query_string || `query-${index}`}
                             className="bg-white dark:bg-[#1e2436] mb-3 p-4 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg"
                         >
                             <div className="mb-2 font-mono text-[#2d3748] dark:text-[#e2e8f0] text-sm">
