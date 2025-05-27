@@ -46,16 +46,12 @@ vi.mock("@/components/domain/legal-research/modals/case-modal", () => ({
 
 // Mock the AnalysisReasoningModal component
 vi.mock(
-    "@/components/domain/legal-research/modals/analysis-reasoning-modal",
-    () => ({
-        AnalysisReasoningModal: ({
-            isOpen,
-            onClose,
+            onCloseAction,
             reasoning,
             documentTitle,
         }: {
             isOpen: boolean;
-            onClose: () => void;
+            onCloseAction: () => void;
             reasoning?: ClientAnalysisReasoning;
             documentTitle?: string;
         }) => {
@@ -65,11 +61,10 @@ vi.mock(
                     <h3>Analysis Reasoning: {documentTitle}</h3>
                     <p data-testid="legal-question-summary">
                         {reasoning?.analyzeLegalQuestionSummary}
-                    </p>
-                    <p data-testid="relevant-principles-summary">
-                        {reasoning?.considerRelevantPrinciplesSummary}
-                    </p>
-                    <button onClick={onClose} aria-label="close-reasoning">
+                    <button
+                        onClick={onCloseAction}
+                        aria-label="close-reasoning"
+                    >
                         Close
                     </button>
                 </div>

@@ -185,11 +185,7 @@ describe("EvidenceAnalysis Component Integration", () => {
 
         renderWithProvider(createElement(EvidenceAnalysis));
 
-        const doc2Container = screen
-            .getByText(
-                "Richards Corp. v. Global Enterprises, 567 F.3d 890 (9th Cir. 2022)",
-            )
-            .closest('[role="button"]');
+            .closest("button");
 
         // Check that the selected document has highlighting classes
         expect(doc2Container).toHaveClass(
