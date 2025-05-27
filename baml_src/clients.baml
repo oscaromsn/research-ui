@@ -2,40 +2,45 @@
 
 client<llm> QueryGeneration {
   provider google-ai
+  retry_policy TestSafely
   options {
-    model "gemini-2.0-flash"
+    model "gemini-2.0-flash-lite"
     api_key env.GOOGLE_API_KEY
   }
 }
 
 client<llm> DocumentAnalysis {
   provider google-ai
+  retry_policy TestSafely
   options {
-    model "gemini-2.0-flash"
+    model "gemini-2.0-flash-lite"
     api_key env.GOOGLE_API_KEY
   }
 }
 
 client<llm> FindingsSynthetizing {
   provider google-ai
+  retry_policy TestSafely
   options {
-    model "gemini-2.0-flash"
+    model "gemini-2.0-flash-lite"
     api_key env.GOOGLE_API_KEY
   }
 }
 
 client<llm> DecidesNextStep {
   provider google-ai
+  retry_policy TestSafely
   options {
-    model "gemini-2.0-flash"
+    model "gemini-2.0-flash-lite"
     api_key env.GOOGLE_API_KEY
   }
 }
 
 client<llm> GenerateFinalReport {
   provider google-ai
+  retry_policy TestSafely
   options {
-    model "gemini-2.0-flash"
+    model "gemini-2.0-flash-lite"
     api_key env.GOOGLE_API_KEY
   }
 }
@@ -104,13 +109,12 @@ retry_policy Constant {
   }
 }
 
-retry_policy Exponential {
+retry_policy TestSafely {
   max_retries 2
-  // Strategy is optional
   strategy {
     type exponential_backoff
-    delay_ms 300
-    multiplier 1.5
-    max_delay_ms 10000
+    delay_ms 2000
+    multiplier 2
+    max_delay_ms 60000
   }
 }
