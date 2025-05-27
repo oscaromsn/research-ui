@@ -1,7 +1,4 @@
-import type {
-    SearchQueryItem,
-    SearchResultItem,
-} from "@/__mocks__/baml_client_types";
+import type { SearchQueryItem, SearchResultItem } from "@/baml_client/types";
 import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
 import axios from "axios";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -9,16 +6,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Mock axios
 vi.mock("axios");
 const mockedAxios = axios as unknown as {
-    post: ReturnType<typeof vi.fn>;
-    isAxiosError: ReturnType<typeof vi.fn>;
-};
+// Mock dotenv to prevent loading real environment variables
+vi.mock("dotenv", () => ({
+    config: vi.fn(() => ({})),
+}));
 
 // Mock environment
 const originalEnv = process.env;
+const TEST_EXA_API_KEY = "test-mock-api-key";
+
 beforeEach(() => {
     vi.resetModules();
     process.env = { ...originalEnv };
-    process.env.EXA_API_KEY = "test-exa-api-key";
+    process.env.EXA_API_KEY = TEST_EXA_API_KEY;
 });
 
 afterEach(() => {
@@ -107,11 +107,7 @@ describe("executeExaSearch", () => {
                 },
             },
         });
-
-        // Check config
-        expect(config?.headers).toEqual({
-            "Content-Type": "application/json",
-            "x-api-key": "test-exa-api-key",
+            "x-api-key": TEST_EXA_API_KEY,
         });
     });
 
