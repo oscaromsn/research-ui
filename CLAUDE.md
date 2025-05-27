@@ -196,7 +196,7 @@ You always read the full planning files relevant for your taks at hand, while Uu
 
 1. **BAML Tests (`.test.baml` files):**
 	- Write for every BAML function covering various inputs and asserting output structure/key values.
-	- Run with BAML VSCode extension or `baml-cli test`.
+	- Run with `pnpm baml-cli test`.
 2. **Server-Side Orchestrator Tests (Vitest):**
 	- Unit test `conductResearch`. Mock the BAML client (`b`) to simulate BAML function responses (including streams). Assert that the correct sequence of `ResearchUpdate` objects is produced on its output stream.
 3. **Client-Side Hook Tests (Vitest + RTL - PRD 6.2):**
@@ -209,7 +209,7 @@ You always read the full planning files relevant for your taks at hand, while Uu
 
 ```bash
 # Regenerate BAML client after baml_src changes
-pnpm generate:baml
+pnpm baml:generate
 
 # Type checking
 pnpm typecheck
@@ -228,7 +228,7 @@ pnpm test:coverage
 
 ## Development Workflow (TDD Preferred)
 
-1. **BAML Changes**: Define/modify BAML function/type -> Write `.test.baml` -> Run BAML tests -> `pnpm generate:baml`.
+1. **BAML Changes**: Define/modify BAML function/type -> Write `.test.baml` -> Run BAML tests -> `pnpm baml:test` for all tests or `pnpm baml:test -i {$FunctionName}::` to run all tests tests for the function `$FunctionName`.
 2. **Orchestrator Changes**: Define expected `ResearchUpdate` sequence for a new feature/stage -> Write Vitest unit test for `conductResearch` mocking BAML calls -> Implement orchestrator logic to pass test.
 3. **Hook Changes**: Define how Jotai atoms should change for new `ResearchUpdate` types/data -> Write Vitest unit test for `useResearchAgent` mocking `conductResearch` stream -> Implement hook logic.
 4. **UI Component Changes**: Define how UI should look/behave for new Jotai state -> Write RTL component test -> Implement component.
