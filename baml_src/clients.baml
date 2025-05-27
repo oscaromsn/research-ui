@@ -56,7 +56,6 @@ client<llm> CustomGPT4o {
 
 client<llm> CustomGPT4oMini {
   provider openai
-  retry_policy Exponential
   options {
     model "gpt-4o-mini"
     api_key env.OPENAI_API_KEY
