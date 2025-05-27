@@ -5,6 +5,7 @@ test AnalyzeHighlyRelevantCase {
     original_legal_question "What constitutes 'adverse employment action' under Title VII in the 9th Circuit?"
     document {
       id "case_123"
+      url "https://courtlistener.com/opinion/123456/smith-v-acme-corp/"
       source_name "CourtListener"
       title "Smith v. Acme Corp., 123 F.3d 456 (9th Cir. 2022)"
       snippet "The Ninth Circuit clarifies the definition of adverse employment action under Title VII, holding that a lateral transfer with no change in pay or benefits can still constitute an adverse action if it is materially adverse to a reasonable employee."
@@ -52,6 +53,7 @@ test AnalyzePartiallyRelevantStatute {
     original_legal_question "What are the requirements for a valid patent application?"
     document {
       id "statute_xyz"
+      url "https://www.law.cornell.edu/uscode/text/35/112"
       source_name "Statutes.gov"
       title "35 U.S.C. § 112 - Specification"
       snippet "The specification shall contain a written description of the invention, and of the manner and process of making and using it, in such full, clear, concise, and exact terms as to enable any person skilled in the art to which it pertains, or with which it is most nearly connected, to make and use the same, and shall set forth the best mode contemplated by the inventor or joint inventor of carrying out the invention."
@@ -84,6 +86,7 @@ test AnalyzeIrrelevantDocument {
     original_legal_question "What are the elements of a contract?"
     document {
       id "random_doc_789"
+      url "https://genericsewssite.com/local/bakery-wins-pie-contest"
       source_name "GenericNewsSite"
       title "Local Bakery Wins Pie Contest"
       snippet "The annual pie contest saw a new champion today as 'Pie in the Sky' bakery took home the grand prize for their apple crumble."
@@ -117,6 +120,7 @@ test AnalyzeDocumentWithMissingFullText {
     original_legal_question "What is the statute of limitations for tort claims in California?"
     document {
       id "incomplete_doc_001"
+      url "https://legalbriefs.com/california/tort-claims-overview"
       source_name "LegalBriefs.com"
       title "California Tort Claims Act Overview"
       snippet "A brief overview of tort claims in California, including typical statutes of limitations for personal injury and property damage."

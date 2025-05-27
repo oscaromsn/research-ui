@@ -9,7 +9,7 @@ test GenerateReportSimpleSynthesis {
         {
           topic_title "California Contract Statute of Limitations"
           synthesis "California Code of Civil Procedure § 337 establishes a 4-year statute of limitations for written contracts and 2 years for oral contracts. The limitation period begins when the breach occurs or when the breach is discovered."
-          confidence_level 8
+          confidence_score 8
           supporting_document_ids ["ccp_337", "case_accrual_rule", "written_vs_oral"]
         }
       ]
@@ -24,8 +24,25 @@ test GenerateReportSimpleSynthesis {
       }
     }
     query_history [
-      "California contract statute of limitations",
-      "CCP 337 breach of contract limitation period"
+      {
+        reasoning {
+          analyze_legal_question { summary "Contract limitation analysis" }
+          consider_relevant_legal_principles { summary "Accrual and discovery principles" }
+          formulate_search_queries_strategy { summary "Statutory and case law focus" }
+          specify_expected_information_strategy { summary "Time limits and exceptions" }
+          ensure_comprehensive_coverage_strategy { summary "Multiple authority types covered" }
+        }
+        search_queries [
+          {
+            query_string "California contract statute of limitations"
+            expected_information ["Statutory limitation periods", "Contract law timing"]
+          },
+          {
+            query_string "CCP 337 breach of contract limitation period"
+            expected_information ["Code of Civil Procedure section 337", "Breach timing rules"]
+          }
+        ]
+      }
     ]
   }
   // Basic structure assertions
@@ -58,19 +75,19 @@ test GenerateReportComplexSynthesis {
         {
           topic_title "Formal Execution Requirements"
           synthesis "New York requires prenuptial agreements to be in writing and signed by both parties. The agreement must be executed before marriage and should be acknowledged before a notary public."
-          confidence_level 9
+          confidence_score 9
           supporting_document_ids ["ny_dom_rel_law", "execution_cases", "notary_requirements"]
         },
         {
           topic_title "Financial Disclosure Requirements"
           synthesis "Parties must provide full and fair disclosure of their assets and financial circumstances. Failure to disclose material assets can render the agreement invalid."
-          confidence_level 8
+          confidence_score 8
           supporting_document_ids ["disclosure_cases", "materiality_standards", "invalidity_precedents"]
         },
         {
           topic_title "Independent Counsel and Unconscionability"
           synthesis "While not strictly required, independent counsel for both parties is strongly recommended. Courts will examine unconscionability both at execution and enforcement."
-          confidence_level 7
+          confidence_score 7
           supporting_document_ids ["counsel_recommendations", "unconscionability_analysis", "enforcement_standards"]
         }
       ]
@@ -85,10 +102,33 @@ test GenerateReportComplexSynthesis {
       }
     }
     query_history [
-      "New York prenuptial agreement requirements",
-      "NY prenup validity execution formal requirements",
-      "financial disclosure prenuptial New York",
-      "unconscionability prenuptial agreement NY"
+      {
+        reasoning {
+          analyze_legal_question { summary "Comprehensive prenuptial agreement analysis" }
+          consider_relevant_legal_principles { summary "Contract formation and family law intersection" }
+          formulate_search_queries_strategy { summary "Multi-faceted research approach" }
+          specify_expected_information_strategy { summary "Procedural and substantive requirements" }
+          ensure_comprehensive_coverage_strategy { summary "Multiple requirement categories covered" }
+        }
+        search_queries [
+          {
+            query_string "New York prenuptial agreement requirements"
+            expected_information ["NY state requirements", "Formal execution rules"]
+          },
+          {
+            query_string "NY prenup validity execution formal requirements"
+            expected_information ["Validity standards", "Execution procedures"]
+          },
+          {
+            query_string "financial disclosure prenuptial New York"
+            expected_information ["Disclosure requirements", "Financial transparency rules"]
+          },
+          {
+            query_string "unconscionability prenuptial agreement NY"
+            expected_information ["Unconscionability standards", "Enforcement limitations"]
+          }
+        ]
+      }
     ]
   }
   @@assert( {{ this.report_title | length > 5 }} )
@@ -120,7 +160,7 @@ test GenerateReportWithUnansweredAspects {
         {
           topic_title "General Adverse Possession Elements"
           synthesis "Adverse possession typically requires open, notorious, exclusive, hostile, and continuous possession for the statutory period. These elements must be proven by clear and convincing evidence."
-          confidence_level 6
+          confidence_score 6
           supporting_document_ids ["general_elements_overview", "evidence_standards"]
         }
       ]
@@ -135,8 +175,25 @@ test GenerateReportWithUnansweredAspects {
       }
     }
     query_history [
-      "adverse possession elements requirements",
-      "adverse possession real property statutory period"
+      {
+        reasoning {
+          analyze_legal_question { summary "General adverse possession principles identified" }
+          consider_relevant_legal_principles { summary "Common law elements established" }
+          formulate_search_queries_strategy { summary "Broad research approach" }
+          specify_expected_information_strategy { summary "Jurisdiction-specific details needed" }
+          ensure_comprehensive_coverage_strategy { summary "Current research incomplete" }
+        }
+        search_queries [
+          {
+            query_string "adverse possession elements requirements"
+            expected_information ["Legal elements", "Common law requirements"]
+          },
+          {
+            query_string "adverse possession real property statutory period"
+            expected_information ["Time periods", "Statutory requirements"]
+          }
+        ]
+      }
     ]
   }
   @@assert( {{ this.report_title | length > 5 }} )
@@ -167,7 +224,7 @@ test GenerateReportMinimalSynthesis {
         {
           topic_title "Federal Securities Violations"
           synthesis "Insider trading violations fall under federal securities regulations but specific penalty structures require detailed statutory analysis."
-          confidence_level 3
+          confidence_score 3
           supporting_document_ids ["sec_overview"]
         }
       ]
@@ -182,7 +239,21 @@ test GenerateReportMinimalSynthesis {
       }
     }
     query_history [
-      "insider trading federal securities law penalties"
+      {
+        reasoning {
+          analyze_legal_question { summary "Insider trading concept identified" }
+          consider_relevant_legal_principles { summary "Federal securities law framework" }
+          formulate_search_queries_strategy { summary "Initial research insufficient" }
+          specify_expected_information_strategy { summary "Detailed penalty analysis needed" }
+          ensure_comprehensive_coverage_strategy { summary "Significant gaps remain" }
+        }
+        search_queries [
+          {
+            query_string "insider trading federal securities law penalties"
+            expected_information ["Penalty structures", "Federal enforcement"]
+          }
+        ]
+      }
     ]
   }
   @@assert( {{ this.report_title | length > 5 }} )
@@ -211,13 +282,13 @@ test GenerateReportExtensiveQueryHistory {
         {
           topic_title "IRS Treatment of Cryptocurrency"
           synthesis "The IRS treats cryptocurrency as property for tax purposes, meaning transactions trigger capital gains or losses. Each transaction must be reported with basis and fair market value calculations."
-          confidence_level 8
+          confidence_score 8
           supporting_document_ids ["irs_notice_2014", "revenue_ruling_crypto", "tax_court_cases"]
         },
         {
           topic_title "Transaction Types and Reporting"
           synthesis "Different types of cryptocurrency transactions have varying tax implications: trading, mining, staking, airdrops, and DeFi activities each require specific reporting approaches."
-          confidence_level 7
+          confidence_score 7
           supporting_document_ids ["irs_guidance_2019", "defi_tax_analysis", "mining_revenue_cases"]
         }
       ]
@@ -232,16 +303,37 @@ test GenerateReportExtensiveQueryHistory {
       }
     }
     query_history [
-      "cryptocurrency tax implications individual IRS",
-      "crypto capital gains tax reporting requirements",
-      "IRS Notice 2014-21 cryptocurrency property",
-      "cryptocurrency mining tax treatment income",
-      "DeFi decentralized finance tax implications",
-      "crypto staking tax treatment rewards",
-      "cryptocurrency airdrops tax consequences",
-      "crypto trading tax basis calculation",
-      "cryptocurrency transaction reporting Form 8949",
-      "digital asset tax compliance individual"
+      {
+        reasoning {
+          analyze_legal_question { summary "Comprehensive cryptocurrency tax analysis" }
+          consider_relevant_legal_principles { summary "Property taxation and reporting requirements" }
+          formulate_search_queries_strategy { summary "Multiple research iterations conducted" }
+          specify_expected_information_strategy { summary "Detailed guidance and case law reviewed" }
+          ensure_comprehensive_coverage_strategy { summary "Extensive research completed" }
+        }
+        search_queries [
+          {
+            query_string "cryptocurrency tax implications individual IRS"
+            expected_information ["IRS guidance", "Individual tax treatment"]
+          },
+          {
+            query_string "crypto capital gains tax reporting requirements"
+            expected_information ["Capital gains rules", "Reporting obligations"]
+          },
+          {
+            query_string "IRS Notice 2014-21 cryptocurrency property"
+            expected_information ["Property classification", "Tax implications"]
+          },
+          {
+            query_string "cryptocurrency mining tax treatment income"
+            expected_information ["Mining income rules", "Tax treatment"]
+          },
+          {
+            query_string "DeFi decentralized finance tax implications"
+            expected_information ["DeFi tax rules", "Protocol implications"]
+          }
+        ]
+      }
     ]
   }
   @@assert( {{ this.report_title | length > 5 }} )
@@ -274,13 +366,13 @@ test GenerateReportConflictingInformation {
         {
           topic_title "Federal Notice Requirements"
           synthesis "The federal WARN Act requires 60 days advance notice for mass layoffs affecting 50 or more employees, but does not apply to individual terminations."
-          confidence_level 8
+          confidence_score 8
           supporting_document_ids ["warn_act_text", "dol_guidance", "mass_layoff_cases"]
         },
         {
           topic_title "State Law Variations"
           synthesis "State laws vary significantly on notice requirements. Most states follow at-will employment with no notice required, while others have specific notice or pay-in-lieu requirements."
-          confidence_level 6
+          confidence_score 6
           supporting_document_ids ["state_law_survey", "at_will_variations", "notice_statutes"]
         }
       ]
@@ -295,10 +387,33 @@ test GenerateReportConflictingInformation {
       }
     }
     query_history [
-      "employment termination notice requirements federal",
-      "WARN Act 60 day notice mass layoff",
-      "state law employment termination notice at-will",
-      "individual termination notice requirements"
+      {
+        reasoning {
+          analyze_legal_question { summary "Multi-layered notice requirement analysis" }
+          consider_relevant_legal_principles { summary "Federal and state law interaction" }
+          formulate_search_queries_strategy { summary "Comprehensive approach to different law sources" }
+          specify_expected_information_strategy { summary "Federal baseline with state variations" }
+          ensure_comprehensive_coverage_strategy { summary "Multiple jurisdictional perspectives covered" }
+        }
+        search_queries [
+          {
+            query_string "employment termination notice requirements federal"
+            expected_information ["Federal notice rules", "WARN Act requirements"]
+          },
+          {
+            query_string "WARN Act 60 day notice mass layoff"
+            expected_information ["WARN Act specifics", "Mass layoff rules"]
+          },
+          {
+            query_string "state law employment termination notice at-will"
+            expected_information ["State variations", "At-will employment rules"]
+          },
+          {
+            query_string "individual termination notice requirements"
+            expected_information ["Individual termination rules", "Notice requirements"]
+          }
+        ]
+      }
     ]
   }
   @@assert( {{ this.report_title | length > 5 }} )
