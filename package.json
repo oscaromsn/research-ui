@@ -8,12 +8,13 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
-        "generate:baml": "baml-cli generate",
+        "typecheck": "tsc --noEmit",
         "test": "vitest run",
         "test:watch": "vitest",
-        "test:ui": "vitest --ui",
         "test:coverage": "vitest run --coverage",
-        "typecheck": "tsc --noEmit"
+        "test:ui": "vitest --ui",
+        "baml:generate": "baml-cli generate",
+        "baml:test": "pnpm baml-cli test --dotenv-path .env.test"
     },
     "dependencies": {
         "@boundaryml/baml": "0.88.0",
