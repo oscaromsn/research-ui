@@ -6,6 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Mock axios
 vi.mock("axios");
 const mockedAxios = axios as unknown as {
+    post: ReturnType<typeof vi.fn>;
+    isAxiosError: ReturnType<typeof vi.fn>;
+};
+
 // Mock dotenv to prevent loading real environment variables
 vi.mock("dotenv", () => ({
     config: vi.fn(() => ({})),
@@ -107,6 +111,10 @@ describe("executeExaSearch", () => {
                 },
             },
         });
+
+        // Check config
+        expect(config?.headers).toEqual({
+            "Content-Type": "application/json",
             "x-api-key": TEST_EXA_API_KEY,
         });
     });
