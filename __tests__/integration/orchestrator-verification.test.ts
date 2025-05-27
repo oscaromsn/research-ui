@@ -4,12 +4,16 @@
  */
 
 import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
-import type {
-    ResearchStage,
-    ResearchUpdate,
-} from "@/app/actions/researchAgentOrchestrator";
+import { vi } from "vitest";
+
+// Mock the BAML client to avoid real API calls
+vi.mock("@/baml_client", () => import("@/__mocks__/baml_client"));
 
 describe("Research Orchestrator - Phase 1 Verification", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
     it("should have all required types defined", () => {
         // Verify ResearchStage enum covers all required stages
         const requiredStages: ResearchStage[] = [

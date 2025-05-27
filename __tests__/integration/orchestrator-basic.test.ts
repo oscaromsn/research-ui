@@ -1,12 +1,16 @@
 /**
  * Basic integration test for the research orchestrator
  * Tests the fundamental streaming mechanics before implementing full pipeline
- */
+import { vi } from "vitest";
 
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
-import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator";
+// Mock the BAML client to avoid real API calls
+vi.mock("@/baml_client", () => import("@/__mocks__/baml_client"));
 
 describe("Research Orchestrator - Basic Streaming", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
     it("should stream INITIALIZING and COMPLETED updates", async () => {
         const legalQuestion = "Test question";
         const stream = await conductResearch(legalQuestion);
