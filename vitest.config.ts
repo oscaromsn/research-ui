@@ -1,5 +1,6 @@
 import path from "node:path";
 import react from "@vitejs/plugin-react";
+import { config } from "dotenv";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -10,6 +11,11 @@ export default defineConfig({
         include: ["**/*.{test,spec}.{ts,tsx}"],
         exclude: ["node_modules", ".next", "dist", ".git"],
         setupFiles: ["./setupTests.ts"],
+        env: {
+            // Load environment variables from .env.test file for testing
+            ...config({ path: path.resolve(__dirname, ".env.test") }).parsed,
+            NODE_ENV: "test",
+        },
         coverage: {
             provider: "v8",
             reporter: ["text", "json", "html"],

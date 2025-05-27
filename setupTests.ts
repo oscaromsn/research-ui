@@ -1,9 +1,14 @@
 import { cleanup } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
 import "@testing-library/jest-dom";
+import path from "node:path";
+import { config } from "dotenv";
 
 // @testing-library/jest-dom adds custom matchers to Vitest automatically
 // so we don't need to explicitly extend expect
+
+// Load environment variables from .env.test file
+config({ path: path.resolve(__dirname, ".env.test") });
 
 // Mock the console methods to reduce noise during tests
 if (process.env.VITEST_SILENT_CONSOLE === "true") {
@@ -15,17 +20,6 @@ if (process.env.VITEST_SILENT_CONSOLE === "true") {
 
 // Automatically restore mocks between tests
 vi.mock("axios");
-
-// Mock the environment variables
-process.env = {
-    ...process.env,
-    // Default environment variables for testing
-    NODE_ENV: "test",
-    EXA_API_KEY: "test-exa-api-key",
-    GOOGLE_API_KEY: "test-google-api-key",
-    OPENAI_API_KEY: "test-openai-api-key",
-    ANTHROPIC_API_KEY: "test-anthropic-api-key",
-};
 
 // Add a global fetch mock if needed
 global.fetch = vi.fn();
