@@ -38,8 +38,8 @@ export namespace partial_types {
         search_result_id?: (string | null)
         relevance_score?: (number | null)
         confidence_score?: (number | null)
-        summary?: StreamState<(string | null)>
-        key_arguments_and_reasoning?: StreamState<(string | null)[]>
+        summary?: (string | null)
+        key_arguments_and_reasoning?: (string | null)[]
         extracted_entities?: (partial_types.LegalEntity | null)[]
         extracted_quotes?: (string | null)[]
         counter_arguments_or_nuances: ((string | null)[] | null)
