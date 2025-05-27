@@ -1,0 +1,5 @@
+{
+    "files": {
+        "ignore": ["**/__tests__/**", "**/__mocks__/**", "**/baml_client/**"]
+    }
+}
