@@ -203,7 +203,7 @@ You always read the full planning files relevant for your taks at hand, while Uu
 	- Unit test `useResearchAgent`. Mock the `conductResearch` Server Action. Provide mock streams of `ResearchUpdate` objects and assert that Jotai atoms are updated correctly. Test `startResearch` and `abortResearch`.
 4. **Component Tests (RTL - PRD 6.3):**
 	- Test UI components that consume Jotai atoms. Provide mock atom states and verify rendering. Test user interactions that trigger `agent.startResearch()`.
-5. **Manual E2E Testing:** Crucial for verifying the full streaming experience and pipeline flow.
+5. **E2E Testing using Playwright:** Crucial for verifying the full streaming experience and pipeline flow when a feature is fully implemented.
 
 ### Commands for Verification
 
