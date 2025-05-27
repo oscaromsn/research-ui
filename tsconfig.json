@@ -32,11 +32,7 @@
             "@utils/*": ["lib/utils/*"],
             "@types/*": ["types/*"]
         },
-        "types": [
-            "vitest/globals",
-            "@testing-library/react",
-            "node"
-        ]
+        "types": ["vitest/globals", "@testing-library/react", "node"]
     },
     "include": [
         "next-env.d.ts",

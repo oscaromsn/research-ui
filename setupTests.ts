@@ -1,5 +1,5 @@
 import { cleanup } from "@testing-library/react";
-import { afterEach, expect, vi } from "vitest";
+import { afterEach, vi } from "vitest";
 import "@testing-library/jest-dom";
 
 // @testing-library/jest-dom adds custom matchers to Vitest automatically
@@ -40,15 +40,18 @@ class ResizeObserverMock {
 // Mock IntersectionObserver
 class IntersectionObserverMock implements IntersectionObserver {
     readonly root: Element | Document | null = null;
-    readonly rootMargin: string = '0px';
+    readonly rootMargin: string = "0px";
     readonly thresholds: ReadonlyArray<number> = [0];
-    
+
     private readonly _callback: IntersectionObserverCallback;
-    
-    constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+
+    constructor(
+        callback: IntersectionObserverCallback,
+        _options?: IntersectionObserverInit,
+    ) {
         this._callback = callback;
     }
-    
+
     observe = vi.fn();
     unobserve = vi.fn();
     disconnect = vi.fn();
@@ -57,7 +60,8 @@ class IntersectionObserverMock implements IntersectionObserver {
 
 // Add to global
 global.ResizeObserver = ResizeObserverMock;
-global.IntersectionObserver = IntersectionObserverMock as unknown as typeof IntersectionObserver;
+global.IntersectionObserver =
+    IntersectionObserverMock as unknown as typeof IntersectionObserver;
 
 // Clean up after each test
 afterEach(() => {
