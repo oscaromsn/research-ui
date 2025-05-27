@@ -15,22 +15,25 @@ vi.mock("dotenv", () => ({
     config: vi.fn(() => ({})),
 }));
 
-// Mock environment
-const originalEnv = process.env;
-const TEST_EXA_API_KEY = "test-mock-api-key";
+// Get the actual API key from .env.test (loaded by Vitest config)
+const EXA_API_KEY_FROM_ENV = process.env.EXA_API_KEY;
 
 beforeEach(() => {
     vi.resetModules();
-    process.env = { ...originalEnv };
-    process.env.EXA_API_KEY = TEST_EXA_API_KEY;
 });
 
 afterEach(() => {
     vi.clearAllMocks();
-    process.env = originalEnv;
 });
 
 describe("executeExaSearch", () => {
+    it("should load EXA_API_KEY from environment variables", () => {
+        // Verify that the API key is loaded from .env.test
+        expect(EXA_API_KEY_FROM_ENV).toBeDefined();
+        expect(typeof EXA_API_KEY_FROM_ENV).toBe("string");
+        expect(EXA_API_KEY_FROM_ENV).not.toBe("");
+    });
+
     const mockSearchQuery: SearchQueryItem = {
         query_string: "legal precedents for copyright infringement",
         expected_information: [
@@ -115,7 +118,7 @@ describe("executeExaSearch", () => {
         // Check config
         expect(config?.headers).toEqual({
             "Content-Type": "application/json",
-            "x-api-key": TEST_EXA_API_KEY,
+            "x-api-key": EXA_API_KEY_FROM_ENV,
         });
     });
 
