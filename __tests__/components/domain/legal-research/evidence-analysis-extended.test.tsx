@@ -46,6 +46,10 @@ vi.mock("@/components/domain/legal-research/modals/case-modal", () => ({
 
 // Mock the AnalysisReasoningModal component
 vi.mock(
+    "@/components/domain/legal-research/modals/analysis-reasoning-modal",
+    () => ({
+        AnalysisReasoningModal: ({
+            isOpen,
             onCloseAction,
             reasoning,
             documentTitle,
@@ -61,6 +65,7 @@ vi.mock(
                     <h3>Analysis Reasoning: {documentTitle}</h3>
                     <p data-testid="legal-question-summary">
                         {reasoning?.analyzeLegalQuestionSummary}
+                    </p>
                     <button
                         onClick={onCloseAction}
                         aria-label="close-reasoning"
