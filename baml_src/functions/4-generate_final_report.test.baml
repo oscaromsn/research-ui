@@ -58,9 +58,9 @@ test GenerateReportSimpleSynthesis {
   @@assert( {{ this.sections | selectattr("is_complete", "defined") | list | length == (this.sections | length) }} )
   
   // Content quality checks
-  @@assert( {{ this.report_title | lower | regex_search("statute|limitation|contract|california") != null }} )
-  @@assert( {{ this.executive_summary | lower | regex_search("4.year|four.year|2.year|two.year") != null }} )
-  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | lower | regex_search("ccp|code.*civil.*procedure|337")) != null }} )
+  @@assert( {{ ("statute" in (this.report_title | lower)) or ("limitation" in (this.report_title | lower)) or ("contract" in (this.report_title | lower)) or ("california" in (this.report_title | lower)) }} )
+  @@assert( {{ ("4 year" in (this.executive_summary | lower)) or ("four year" in (this.executive_summary | lower)) or ("2 year" in (this.executive_summary | lower)) or ("two year" in (this.executive_summary | lower)) }} )
+  @@assert( {{ ("ccp" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("code" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("337" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
   
   // Should have at least one complete section
   @@assert( {{ (this.sections | selectattr("is_complete", "equalto", true) | list | length) >= 1 }} )
@@ -139,13 +139,13 @@ test GenerateReportComplexSynthesis {
   @@assert( {{ this.sections | length <= 8 }} )
   
   // Should cover multiple aspects from synthesis
-  @@assert( {{ (this.sections | map(attribute="title") | join(" ") | lower | regex_search("execution|disclosure|counsel")) != null }} )
-  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | lower | regex_search("writing|signed|notary")) != null }} )
-  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | lower | regex_search("disclosure|asset|financial")) != null }} )
+  @@assert( {{ ("execution" in (this.sections | map(attribute="title") | join(" ") | lower)) or ("disclosure" in (this.sections | map(attribute="title") | join(" ") | lower)) or ("counsel" in (this.sections | map(attribute="title") | join(" ") | lower)) }} )
+  @@assert( {{ ("writing" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("signed" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("notary" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
+  @@assert( {{ ("disclosure" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("asset" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("financial" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
   
   // Report should address the original question comprehensively
-  @@assert( {{ this.executive_summary | lower | regex_search("prenuptial|agreement|new york|requirement") != null }} )
-  @@assert( {{ this.conclusion | lower | regex_search("valid|prenuptial|new york") != null }} )
+  @@assert( {{ ("prenuptial" in (this.executive_summary | lower)) or ("agreement" in (this.executive_summary | lower)) or ("new york" in (this.executive_summary | lower)) or ("requirement" in (this.executive_summary | lower)) }} )
+  @@assert( {{ ("valid" in (this.conclusion | lower)) or ("prenuptial" in (this.conclusion | lower)) or ("new york" in (this.conclusion | lower)) }} )
   
   // Should have multiple complete sections for well-covered topics
   @@assert( {{ (this.sections | selectattr("is_complete", "equalto", true) | list | length) >= 2 }} )
@@ -202,11 +202,11 @@ test GenerateReportWithUnansweredAspects {
   @@assert( {{ this.sections | length >= 1 }} )
   
   // Should acknowledge limitations due to unanswered aspects
-  @@assert( {{ this.executive_summary | lower | regex_search("general|varies|jurisdiction|specific") != null }} )
-  @@assert( {{ this.conclusion | lower | regex_search("additional|research|jurisdiction|specific|vary") != null }} )
+  @@assert( {{ ("general" in (this.executive_summary | lower)) or ("varies" in (this.executive_summary | lower)) or ("jurisdiction" in (this.executive_summary | lower)) or ("specific" in (this.executive_summary | lower)) }} )
+  @@assert( {{ ("additional" in (this.conclusion | lower)) or ("research" in (this.conclusion | lower)) or ("jurisdiction" in (this.conclusion | lower)) or ("specific" in (this.conclusion | lower)) or ("vary" in (this.conclusion | lower)) }} )
   
   // Should cover what is known while noting limitations
-  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | lower | regex_search("open|notorious|exclusive|hostile|continuous")) != null }} )
+  @@assert( {{ ("open" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("notorious" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("exclusive" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("hostile" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("continuous" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
   
   // Some sections may be incomplete due to gaps
   @@assert( {{ (this.sections | selectattr("is_complete", "equalto", false) | list | length) >= 0 }} )
@@ -263,11 +263,11 @@ test GenerateReportMinimalSynthesis {
   @@assert( {{ this.sections | length <= 3 }} )
   
   // Should acknowledge limited information available
-  @@assert( {{ this.executive_summary | lower | regex_search("limited|additional|research|complex") != null }} )
-  @@assert( {{ this.conclusion | lower | regex_search("further|additional|research|analysis|required") != null }} )
+  @@assert( {{ ("limited" in (this.executive_summary | lower)) or ("additional" in (this.executive_summary | lower)) or ("research" in (this.executive_summary | lower)) or ("complex" in (this.executive_summary | lower)) }} )
+  @@assert( {{ ("further" in (this.conclusion | lower)) or ("additional" in (this.conclusion | lower)) or ("research" in (this.conclusion | lower)) or ("analysis" in (this.conclusion | lower)) or ("required" in (this.conclusion | lower)) }} )
   
   // Should still address the question as much as possible
-  @@assert( {{ this.report_title | lower | regex_search("insider.*trading|securities|penalties") != null }} )
+  @@assert( {{ ("insider" in (this.report_title | lower)) or ("trading" in (this.report_title | lower)) or ("securities" in (this.report_title | lower)) or ("penalties" in (this.report_title | lower)) }} )
   
   // Sections may be incomplete due to limited synthesis
   @@assert( {{ (this.sections | selectattr("is_complete", "equalto", false) | list | length) >= 0 }} )
@@ -344,17 +344,17 @@ test GenerateReportExtensiveQueryHistory {
   @@assert( {{ this.sections | length <= 10 }} )
   
   // Should reflect the extensive research conducted
-  @@assert( {{ this.executive_summary | lower | regex_search("comprehensive|extensive|detailed") != null }} )
+  @@assert( {{ ("comprehensive" in (this.executive_summary | lower)) or ("extensive" in (this.executive_summary | lower)) or ("detailed" in (this.executive_summary | lower)) }} )
   
   // Should cover multiple aspects from synthesis
-  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | lower | regex_search("property|capital.*gains|reporting")) != null }} )
-  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | lower | regex_search("mining|trading|staking|defi")) != null }} )
+  @@assert( {{ ("property" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("capital" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("gains" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("reporting" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
+  @@assert( {{ ("mining" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("trading" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("staking" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("defi" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
   
   // Should have high completion rate due to extensive research
   @@assert( {{ (this.sections | selectattr("is_complete", "equalto", true) | list | length) >= 2 }} )
   
   // Should reference the extensive query history appropriately
-  @@assert( {{ this.conclusion | lower | regex_search("research|analysis|comprehensive") != null }} )
+  @@assert( {{ ("research" in (this.conclusion | lower)) or ("analysis" in (this.conclusion | lower)) or ("comprehensive" in (this.conclusion | lower)) }} )
 }
 
 test GenerateReportConflictingInformation {

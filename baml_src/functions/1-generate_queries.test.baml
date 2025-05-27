@@ -33,9 +33,9 @@ test ComplexLegalQuestion {
   @@assert( {{ this.search_queries | length >= 5 }} )
   @@assert( {{ this.search_queries | length <= 12 }} )
   // Should cover multiple jurisdictions and legal areas
-  @@assert( {{ (this.search_queries | map(attribute="query_string") | join(" ") | lower | regex_search("delaware|new york")) != null }} )
-  @@assert( {{ (this.search_queries | map(attribute="query_string") | join(" ") | lower | regex_search("fiduciary|director")) != null }} )
-  @@assert( {{ (this.search_queries | map(attribute="query_string") | join(" ") | lower | regex_search("merger|securities")) != null }} )
+  @@assert( {{ ("delaware" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) or ("new york" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) }} )
+  @@assert( {{ ("fiduciary" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) or ("director" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) }} )
+  @@assert( {{ ("merger" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) or ("securities" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) }} )
 }
 
 test AmbiguousLegalQuestion {
@@ -59,10 +59,10 @@ test JurisdictionSpecificQuestion {
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 10 }} )
   @@assert( {{ this.search_queries | length >= 3 }} )
   // Should include Texas-specific searches
-  @@assert( {{ (this.search_queries | map(attribute="query_string") | join(" ") | lower | regex_search("texas")) != null }} )
-  @@assert( {{ (this.search_queries | map(attribute="query_string") | join(" ") | lower | regex_search("adverse possession")) != null }} )
+  @@assert( {{ ("texas" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) }} )
+  @@assert( {{ ("adverse possession" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) }} )
   // Check expected document types include relevant legal sources
-  @@assert( {{ (this.search_queries | map(attribute="expected_document_types") | flatten | join(" ") | lower | regex_search("statute|case|code")) != null }} )
+  @@assert( {{ ("statute" in (this.search_queries | map(attribute="expected_document_types") | flatten | join(" ") | lower)) or ("case" in (this.search_queries | map(attribute="expected_document_types") | flatten | join(" ") | lower)) or ("code" in (this.search_queries | map(attribute="expected_document_types") | flatten | join(" ") | lower)) }} )
 }
 
 test BrazilianLegalQuestion {
@@ -74,9 +74,9 @@ test BrazilianLegalQuestion {
   @@assert( {{ this.search_queries | length >= 3 }} )
   @@assert( {{ this.search_queries | length <= 10 }} )
   // Should handle Portuguese language and Brazilian legal concepts
-  @@assert( {{ (this.search_queries | map(attribute="query_string") | join(" ") | lower | regex_search("danos morais|consumidor|energia")) != null }} )
+  @@assert( {{ ("danos morais" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) or ("consumidor" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) or ("energia" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) }} )
   // Check that reasoning addresses the question appropriately
-  @@assert( {{ this.reasoning.analyze_legal_question.summary | lower | regex_search("danos|moral|consumidor|energia") != null }} )
+  @@assert( {{ ("danos" in (this.reasoning.analyze_legal_question.summary | lower)) or ("moral" in (this.reasoning.analyze_legal_question.summary | lower)) or ("consumidor" in (this.reasoning.analyze_legal_question.summary | lower)) or ("energia" in (this.reasoning.analyze_legal_question.summary | lower)) }} )
 }
 
 test CriminalLawQuestion {
@@ -87,6 +87,6 @@ test CriminalLawQuestion {
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 10 }} )
   @@assert( {{ this.search_queries | length >= 3 }} )
   // Should focus on criminal law concepts
-  @@assert( {{ (this.search_queries | map(attribute="query_string") | join(" ") | lower | regex_search("murder|criminal|federal")) != null }} )
-  @@assert( {{ (this.search_queries | map(attribute="query_string") | join(" ") | lower | regex_search("elements|first.degree")) != null }} )
+  @@assert( {{ ("murder" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) or ("criminal" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) or ("federal" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) }} )
+  @@assert( {{ ("elements" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) or ("first degree" in (this.search_queries | map(attribute="query_string") | join(" ") | lower)) }} )
 }
