@@ -4,6 +4,10 @@
  */
 
 import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
+import type {
+    ResearchStage,
+    ResearchUpdate,
+} from "@/app/actions/researchAgentOrchestrator";
 import { vi } from "vitest";
 
 // Mock the BAML client to avoid real API calls

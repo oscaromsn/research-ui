@@ -1,6 +1,10 @@
 /**
  * Basic integration test for the research orchestrator
  * Tests the fundamental streaming mechanics before implementing full pipeline
+ */
+
+import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
+import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator";
 import { vi } from "vitest";
 
 // Mock the BAML client to avoid real API calls
