@@ -3,11 +3,17 @@
 function AnalyzeSingleDocument(document: SearchResultItem, original_legal_question: string) -> AnalyzedDocument {
   client DocumentAnalysis
   prompt #"
-    You are a legal analyst. Given the legal question and the content of the retrieved document (SearchResultItem), perform a detailed analysis.
+You are a legal analyst tasked with analyzing a document in relation to a specific legal question. Your goal is to provide a comprehensive analysis following a structured approach. Here are your instructions:
 
-    Original Legal Question: {{ original_legal_question }}
+1. First, carefully read the following legal question:
 
-    Document to Analyze:
+<legal_question>
+{{ original_legal_question }}
+</legal_question>
+
+2. Now, carefully read the document to be analyzed:
+
+<document>
     Document ID: {{ document.id }}
     Title: {{ document.title }}
     Source: {{ document.source_name }}
@@ -17,20 +23,27 @@ function AnalyzeSingleDocument(document: SearchResultItem, original_legal_questi
     // For example, you might pass a pre-truncated version: document.processed_full_text
     Full Text: {{ document.full_text | default('No full text available') }}
     Metadata: {{ document.metadata | default({}) }}
+</document>
 
-    IMPORTANT: You must set the search_result_id field to exactly: {{ document.id }}
+3. Perform a detailed analysis of the document in relation to the legal question. Follow these steps:
 
-    Tasks:
-    1.  Set search_result_id to the document ID provided above.
-    2.  Assess relevance to the original legal question (1-10).
-    3.  Provide a confidence score for your relevance assessment (1-10).
-    4.  Summarize key findings/holdings pertinent to the question.
-    5.  Extract key legal arguments, judicial reasoning, or statutory interpretations.
-    6.  Identify and list key legal entities (cases, statutes, persons, organizations, concepts).
-    7.  Extract direct quotes that are highly relevant.
-    8.  Note any counter-arguments or important nuances.
-    9.  Provide your detailed reasoning for this analysis, following the 5-step process: analyze legal question, consider relevant legal principles, formulate search queries strategy, specify expected information strategy, ensure comprehensive coverage strategy.
+   a) Assess the relevance of the document to the legal question on a scale of 1 to 10.
+   b) Provide a confidence score for your relevance assessment on a scale of 1 to 10.
+   c) Summarize key findings or holdings pertinent to the question.
+   d) Extract key legal arguments, judicial reasoning, or statutory interpretations.
+   e) Identify and list key legal entities (cases, statutes, persons, organizations, concepts).
+   f) Extract direct quotes that are highly relevant.
+   g) Note any counter-arguments or important nuances.
+   h) Provide your detailed reasoning for this analysis, following the 5-step process outlined in the schema.
+
+4. Present your analysis in JSON format using the following schema:
 
     {{ ctx.output_format }}
+
+5. It is crucial that you follow the 5-step reasoning process in detail, providing comprehensive summaries and specific items considered for each step.
+
+IMPORTANT: You must set the search_result_id field to exactly: {{ document.id }}
+
+Your final output should consist of only the JSON object containing your analysis. Do not include any additional text or explanations outside of the JSON structure.
   "#
 }

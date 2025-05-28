@@ -3,12 +3,15 @@
 function SynthesizeAllFindings(analyzed_docs: AnalyzedDocument[], original_legal_question: string) -> OverallSynthesis {
   client FindingsSynthetizing
   prompt #"
-    You are a senior legal researcher. You have received analyses of multiple documents related to a legal question.
-    Your task is to synthesize these findings into a coherent understanding.
+You are a senior legal researcher tasked with synthesizing analyses of multiple documents related to a legal question. Your goal is to create a coherent understanding of the information provided.
 
-    Original Legal Question: {{ original_legal_question }}
+Here is the original legal question:
+<legal_question>
+{{ original_legal_question }}
+</legal_question>
 
-    Analyzed Documents (Summaries and Key Points):
+Here are the analyzed documents, including summaries and key points:
+<analyzed_documents>
     {% for doc in analyzed_docs %}
     --- Document ID: {{ doc.search_result_id }} ---
     Relevance: {{ doc.relevance_score }}/10
@@ -25,25 +28,30 @@ function SynthesizeAllFindings(analyzed_docs: AnalyzedDocument[], original_legal
     - {{ entity.name }} ({{ entity.type }})
     {% endfor %}
     {% endfor %}
+</analyzed_documents>
 
-    Tasks:
-    1.  Identify overarching legal themes, principles, or topics that emerge from the analyzed documents.
-    2.  For each theme/topic, provide a synthesis that explains convergences, divergences, and key takeaways, referencing the supporting document IDs.
-    3.  Identify any aspects of the original legal question that remain unanswered or poorly addressed.
-    4.  List any new questions or research avenues that have emerged.
-    5.  Provide your detailed reasoning for this synthesis.
+Your task is to synthesize these findings into a comprehensive analysis. Follow these steps:
 
-    IMPORTANT GUIDANCE:
-    - Aim to identify 3-5 distinct synthesized topics when multiple relevant documents are provided
-    - Each topic should address a different aspect or facet of the legal question
-    - Look for both convergent themes (where documents agree) and divergent perspectives
-    - Consider creating separate topics for different legal elements, jurisdictions, or principles
-    - When assigning confidence scores for synthesized topics:
-      * If most supporting documents have low relevance scores (below 5/10), the confidence should be low (1-4)
-      * If supporting documents have mixed relevance, confidence should be moderate (4-7)
-      * Only assign high confidence (8-10) when supporting documents are highly relevant (7+/10)
-      * Consider the quality and completeness of information when determining confidence
+1. Identify 3-5 overarching legal themes, principles, or topics that emerge from the analyzed documents.
+2. For each theme/topic, provide a synthesis that explains convergences, divergences, and key takeaways, referencing the supporting document IDs.
+3. Identify any aspects of the original legal question that remain unanswered or poorly addressed.
+4. List any new questions or research avenues that have emerged.
+5. Provide your detailed reasoning for this synthesis.
 
-    {{ ctx.output_format }}
+Important guidance:
+- Each topic should address a different aspect or facet of the legal question
+- Look for both convergent themes (where documents agree) and divergent perspectives
+- Consider creating separate topics for different legal elements, jurisdictions, or principles
+- When assigning confidence scores for synthesized topics:
+  * If most supporting documents have low relevance scores (below 5/10), the confidence should be low (1-4)
+  * If supporting documents have mixed relevance, confidence should be moderate (4-7)
+  * Only assign high confidence (8-10) when supporting documents are highly relevant (7+/10)
+  * Consider the quality and completeness of information when determining confidence
+
+Your answer should be in JSON format, following this schema:
+
+{{ ctx.output_format }}
+
+Your final output should consist of only the JSON object described above, without any additional text or explanation.
   "#
 }
