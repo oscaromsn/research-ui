@@ -138,7 +138,7 @@ test GenerateReportComplexSynthesis {
   @@assert( {{ this.sections | length <= 8 }} )
   
   // Should cover multiple aspects from synthesis
-  @@assert( {{ ("execution" in (this.sections | map(attribute="title") | join(" ") | lower)) or ("disclosure" in (this.sections | map(attribute="title") | join(" ") | lower)) or ("counsel" in (this.sections | map(attribute="title") | join(" ") | lower)) }} )
+  @@assert( {{ ("execution" in (this.sections | map(attribute="section_title") | join(" ") | lower)) or ("disclosure" in (this.sections | map(attribute="section_title") | join(" ") | lower)) or ("counsel" in (this.sections | map(attribute="section_title") | join(" ") | lower)) }} )
   @@assert( {{ ("writing" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("signed" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("notary" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
   @@assert( {{ ("disclosure" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("asset" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("financial" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
   
