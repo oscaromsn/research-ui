@@ -33,6 +33,17 @@ function SynthesizeAllFindings(analyzed_docs: AnalyzedDocument[], original_legal
     4.  List any new questions or research avenues that have emerged.
     5.  Provide your detailed reasoning for this synthesis.
 
+    IMPORTANT GUIDANCE:
+    - Aim to identify 3-5 distinct synthesized topics when multiple relevant documents are provided
+    - Each topic should address a different aspect or facet of the legal question
+    - Look for both convergent themes (where documents agree) and divergent perspectives
+    - Consider creating separate topics for different legal elements, jurisdictions, or principles
+    - When assigning confidence scores for synthesized topics:
+      * If most supporting documents have low relevance scores (below 5/10), the confidence should be low (1-4)
+      * If supporting documents have mixed relevance, confidence should be moderate (4-7)
+      * Only assign high confidence (8-10) when supporting documents are highly relevant (7+/10)
+      * Consider the quality and completeness of information when determining confidence
+
     {{ ctx.output_format }}
   "#
 }
