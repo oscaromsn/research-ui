@@ -17,7 +17,7 @@
         "baml:test": "pnpm baml-cli test --dotenv-path .env.test"
     },
     "dependencies": {
-        "@boundaryml/baml": "0.88.0",
+        "@boundaryml/baml": "0.89.0",
         "@boundaryml/baml-nextjs-plugin": "0.1.0",
         "@next/env": "15.4.0-canary.51",
         "@radix-ui/react-slot": "1.2.2",

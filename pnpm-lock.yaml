@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@boundaryml/baml':
-        specifier: 0.88.0
-        version: 0.88.0
+        specifier: 0.89.0
+        version: 0.89.0
       '@boundaryml/baml-nextjs-plugin':
         specifier: 0.1.0
         version: 0.1.0(next@15.3.2(@babel/core@7.27.1)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
@@ -205,6 +205,10 @@ packages:
     resolution: {integrity: sha512-1x3D2xEk2fRo3PAhwQwu5UubzgiVWSXTBfWpVd2Mx2AzRqJuDJCsgaDVZ7HB5iGzDW1Hl1sWN2mFyKjmR9uAog==}
     engines: {node: '>=6.9.0'}
 
+  '@babel/runtime@7.27.3':
+    resolution: {integrity: sha512-7EYtGezsdiDMyY80+65EzwiGmcJqpmcZCojSXaRgdrBaGtWTgDZKq69cPIVped6MkIM78cTQ2GOiEYjwOlG4xw==}
+    engines: {node: '>=6.9.0'}
+
   '@babel/template@7.27.2':
     resolution: {integrity: sha512-LPDZ85aEJyYSd18/DkjNh4/y1ntkE5KwUHWTiqgRxruuZL2F1yuHligVHLvcHY2vMHXttKFpJn6LwfI7cw7ODw==}
     engines: {node: '>=6.9.0'}
@@ -221,38 +225,38 @@ packages:
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
 
-  '@boundaryml/baml-darwin-arm64@0.88.0':
-    resolution: {integrity: sha512-Y2qAYADkwVsqfm7lQNHP7l0YYPxRqXLmepfqPf8D7rKuTHqYjzB40DfJ1S9dS+RuOUmubytZAm9S2Gknor2big==}
+  '@boundaryml/baml-darwin-arm64@0.89.0':
+    resolution: {integrity: sha512-1d53fSVG98NRdhXUvEvjk+L51WIH7/lWn619XvxGQQsOnnHmuotK3zLztHlXGdK3vRjYkq1iAZ2E8zC2VHvrhQ==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
 
-  '@boundaryml/baml-darwin-x64@0.88.0':
-    resolution: {integrity: sha512-rShetofKIptwbIswZndZjX0jxGoMmLSWfZlZTLRUZB837N+cyrSJY2txYVh917xRaClj2rI1y/jF5zmKfhVrJA==}
+  '@boundaryml/baml-darwin-x64@0.89.0':
+    resolution: {integrity: sha512-SBXWXVaqWaenpxZXLbk7Dv/D8XlyxELGzMTL3eTcEKOXiq1ecNDf78nKDHwFyNce97/ZZiXJj8ClFhgTcplXbg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
 
-  '@boundaryml/baml-linux-arm64-gnu@0.88.0':
-    resolution: {integrity: sha512-Nmlo6WCydc+Vjm6hW0w4wLUj0VhwBCoQ4WRAbDJ5U24xAEDfELR67m8AWqGFZeBHsoAR/6SIJEdWN7iapqF2rg==}
+  '@boundaryml/baml-linux-arm64-gnu@0.89.0':
+    resolution: {integrity: sha512-2Op33fUXfbEumLsAFWubw2fYHpRU7pjrlhQ8Rrw4DO2+efS2+HFRaHdaVH+QyvPrx20RN2sQcEQJG/R2y8c0lg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
-  '@boundaryml/baml-linux-arm64-musl@0.88.0':
-    resolution: {integrity: sha512-m+THEjsQ0rK5hrFs/LnMId/AyLka4BWij48N5wekJrmpiuIXmjxdw5HhoF4BAMygo2JXX6yd+UWgxe9JCozNYQ==}
+  '@boundaryml/baml-linux-arm64-musl@0.89.0':
+    resolution: {integrity: sha512-WbPmzmZ2lkFCZpTDVik0hPtBIzJBp5FyEXPLMN9vfE+Ne7YNUMTunJR79/DH0lJ0vfW5eDnAe38HHE11VpNs8Q==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
-  '@boundaryml/baml-linux-x64-gnu@0.88.0':
-    resolution: {integrity: sha512-kyJ+Z4mSauOR6+yd/fS/oGXAB3F9IbpDGCm7V3O5/CjiGsuk+Vw/SDrhXzFkHHp2FGA1Dx6S6MIFd+xs6I8aig==}
+  '@boundaryml/baml-linux-x64-gnu@0.89.0':
+    resolution: {integrity: sha512-/gvla2kvF8rZGwQmQ0Z1dtSAuQxrXb3ymaC+2gbXYLXbdac7O6A+f8zxuwFX1dRMcwrwbN8nKQpNCpCL+Uifng==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
-  '@boundaryml/baml-linux-x64-musl@0.88.0':
-    resolution: {integrity: sha512-I15vc1CAA3RPWqOgGcAa0JoaPrrf5iWXfrxeRLYJ3JngY6B0u9Sqx91qkyoo3JA9HgepQOqBsvvPnJolcpY00g==}
+  '@boundaryml/baml-linux-x64-musl@0.89.0':
+    resolution: {integrity: sha512-S6mVB6sWPh8YhxGI/LCWXWQtkp4AmMe3D0lfIFPyTF0s+MN4mBgQxcd4LMx68Vr19HWJy8lGwxmriuH3ROuATQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
@@ -264,14 +268,14 @@ packages:
       next: '*'
       react: '*'
 
-  '@boundaryml/baml-win32-x64-msvc@0.88.0':
-    resolution: {integrity: sha512-vvOvNYixufOG31MdnLqfveFfZsZc/ffsvDD3erPOW5xjndlGsS1TenNXE1zzgdWHNtL6j6epvcOM0QoHXOhLng==}
+  '@boundaryml/baml-win32-x64-msvc@0.89.0':
+    resolution: {integrity: sha512-dVfwU/O5eIuvYFvx+XwNS5bQASMpcOeQxRTygHAVXS4+HA+mSyPENSW6ohcp1i2M9aMBQxHAxwm+uMR1eulnYQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
 
-  '@boundaryml/baml@0.88.0':
-    resolution: {integrity: sha512-hszZpff0hJuwe+aFpIf6uhsZmJRDZj7FghCEtCnqCcBv6Cw715f3n69sAVrp0kh4aowsjTpkS0ISqPHX65Vfyg==}
+  '@boundaryml/baml@0.89.0':
+    resolution: {integrity: sha512-Zc/xVov6MhmjW15dCFh3nf+yM4AA4Kfj4SOwKX891FsG6+qNuJmS/jPLxSnLZ+xFkvSdsA/qw7PpJJm4FK74CQ==}
     engines: {node: '>= 10'}
     hasBin: true
 
@@ -2961,6 +2965,8 @@ snapshots:
 
   '@babel/runtime@7.27.1': {}
 
+  '@babel/runtime@7.27.3': {}
+
   '@babel/template@7.27.2':
     dependencies:
       '@babel/code-frame': 7.27.1
@@ -2986,22 +2992,22 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@boundaryml/baml-darwin-arm64@0.88.0':
+  '@boundaryml/baml-darwin-arm64@0.89.0':
     optional: true
 
-  '@boundaryml/baml-darwin-x64@0.88.0':
+  '@boundaryml/baml-darwin-x64@0.89.0':
     optional: true
 
-  '@boundaryml/baml-linux-arm64-gnu@0.88.0':
+  '@boundaryml/baml-linux-arm64-gnu@0.89.0':
     optional: true
 
-  '@boundaryml/baml-linux-arm64-musl@0.88.0':
+  '@boundaryml/baml-linux-arm64-musl@0.89.0':
     optional: true
 
-  '@boundaryml/baml-linux-x64-gnu@0.88.0':
+  '@boundaryml/baml-linux-x64-gnu@0.89.0':
     optional: true
 
-  '@boundaryml/baml-linux-x64-musl@0.88.0':
+  '@boundaryml/baml-linux-x64-musl@0.89.0':
     optional: true
 
   '@boundaryml/baml-nextjs-plugin@0.1.0(next@15.3.2(@babel/core@7.27.1)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)':
@@ -3009,20 +3015,20 @@ snapshots:
       next: 15.3.2(@babel/core@7.27.1)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react: 19.1.0
 
-  '@boundaryml/baml-win32-x64-msvc@0.88.0':
+  '@boundaryml/baml-win32-x64-msvc@0.89.0':
     optional: true
 
-  '@boundaryml/baml@0.88.0':
+  '@boundaryml/baml@0.89.0':
     dependencies:
       '@scarf/scarf': 1.4.0
     optionalDependencies:
-      '@boundaryml/baml-darwin-arm64': 0.88.0
-      '@boundaryml/baml-darwin-x64': 0.88.0
-      '@boundaryml/baml-linux-arm64-gnu': 0.88.0
-      '@boundaryml/baml-linux-arm64-musl': 0.88.0
-      '@boundaryml/baml-linux-x64-gnu': 0.88.0
-      '@boundaryml/baml-linux-x64-musl': 0.88.0
-      '@boundaryml/baml-win32-x64-msvc': 0.88.0
+      '@boundaryml/baml-darwin-arm64': 0.89.0
+      '@boundaryml/baml-darwin-x64': 0.89.0
+      '@boundaryml/baml-linux-arm64-gnu': 0.89.0
+      '@boundaryml/baml-linux-arm64-musl': 0.89.0
+      '@boundaryml/baml-linux-x64-gnu': 0.89.0
+      '@boundaryml/baml-linux-x64-musl': 0.89.0
+      '@boundaryml/baml-win32-x64-msvc': 0.89.0
 
   '@emnapi/core@1.4.3':
     dependencies:
@@ -3504,7 +3510,7 @@ snapshots:
   '@testing-library/dom@10.4.0':
     dependencies:
       '@babel/code-frame': 7.27.1
-      '@babel/runtime': 7.27.1
+      '@babel/runtime': 7.27.3
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
       chalk: 4.1.2
