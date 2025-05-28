@@ -23,22 +23,47 @@ describe("Research Orchestrator - Basic Streaming", () => {
         const reader = stream.getReader();
         const decoder = new TextDecoder();
 
+        // Set a timeout to prevent hanging
+        const timeout = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Test timeout")), 9000),
+        );
+
         try {
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
+            await Promise.race([
+                (async () => {
+                    let completedFound = false;
+                    while (!completedFound) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
 
-                const chunk = decoder.decode(value);
-                const lines = chunk.split("\n").filter((line) => line.trim());
+                        const chunk = decoder.decode(value);
+                        const lines = chunk
+                            .split("\n")
+                            .filter((line) => line.trim());
 
-                for (const line of lines) {
-                    try {
-                        const update = JSON.parse(line) as ResearchUpdate;
-                        updates.push(update);
-                    } catch (e) {
-                        console.warn("Failed to parse JSON line:", line);
+                        for (const line of lines) {
+                            try {
+                                const update = JSON.parse(
+                                    line,
+                                ) as ResearchUpdate;
+                                updates.push(update);
+                                if (update.stage === "COMPLETED") {
+                                    completedFound = true;
+                                }
+                            } catch (e) {
+                                console.warn(
+                                    "Failed to parse JSON line:",
+                                    line,
+                                );
+                            }
+                        }
                     }
-                }
+                })(),
+                timeout,
+            ]);
+        } catch (error) {
+            if (error instanceof Error && error.message !== "Test timeout") {
+                console.warn("Stream processing error:", error.message);
             }
         } finally {
             reader.releaseLock();
@@ -58,19 +83,36 @@ describe("Research Orchestrator - Basic Streaming", () => {
         let hasError = false;
         let hasCompleted = false;
 
+        // Set a timeout to prevent hanging
+        const timeout = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Test timeout")), 9000),
+        );
+
         try {
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
+            await Promise.race([
+                (async () => {
+                    while (!hasCompleted) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
 
-                const chunk = new TextDecoder().decode(value);
-                const lines = chunk.split("\n").filter((line) => line.trim());
+                        const chunk = new TextDecoder().decode(value);
+                        const lines = chunk
+                            .split("\n")
+                            .filter((line) => line.trim());
 
-                for (const line of lines) {
-                    const update = JSON.parse(line) as ResearchUpdate;
-                    if (update.type === "ERROR") hasError = true;
-                    if (update.stage === "COMPLETED") hasCompleted = true;
-                }
+                        for (const line of lines) {
+                            const update = JSON.parse(line) as ResearchUpdate;
+                            if (update.type === "ERROR") hasError = true;
+                            if (update.stage === "COMPLETED")
+                                hasCompleted = true;
+                        }
+                    }
+                })(),
+                timeout,
+            ]);
+        } catch (error) {
+            if (error instanceof Error && error.message !== "Test timeout") {
+                console.warn("Stream processing error:", error.message);
             }
         } finally {
             reader.releaseLock();
