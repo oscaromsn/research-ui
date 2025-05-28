@@ -29,7 +29,10 @@ export function AnalysisReasoningModal({
                         <h3 className="font-medium mb-2 text-[#2d3748] dark:text-[#e2e8f0]">
                             Legal Question Analysis
                         </h3>
-                        <p className="text-sm text-[#4a5568] dark:text-[#a0aec0] leading-relaxed bg-[#f8fafc] dark:bg-[#1e2436] p-3 rounded">
+                        <p 
+                            data-testid="legal-question-summary"
+                            className="text-sm text-[#4a5568] dark:text-[#a0aec0] leading-relaxed bg-[#f8fafc] dark:bg-[#1e2436] p-3 rounded"
+                        >
                             {reasoning?.analyzeLegalQuestionSummary ||
                                 "No reasoning available for the legal question analysis."}
                         </p>
@@ -39,7 +42,10 @@ export function AnalysisReasoningModal({
                         <h3 className="font-medium mb-2 text-[#2d3748] dark:text-[#e2e8f0]">
                             Relevant Legal Principles
                         </h3>
-                        <p className="text-sm text-[#4a5568] dark:text-[#a0aec0] leading-relaxed bg-[#f8fafc] dark:bg-[#1e2436] p-3 rounded">
+                        <p 
+                            data-testid="relevant-principles-summary"
+                            className="text-sm text-[#4a5568] dark:text-[#a0aec0] leading-relaxed bg-[#f8fafc] dark:bg-[#1e2436] p-3 rounded"
+                        >
                             {reasoning?.considerRelevantPrinciplesSummary ||
                                 "No reasoning available for legal principles consideration."}
                         </p>

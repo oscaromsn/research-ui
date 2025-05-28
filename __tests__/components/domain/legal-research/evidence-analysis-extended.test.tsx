@@ -66,6 +66,9 @@ vi.mock(
                     <p data-testid="legal-question-summary">
                         {reasoning?.analyzeLegalQuestionSummary}
                     </p>
+                    <p data-testid="relevant-principles-summary">
+                        {reasoning?.considerRelevantPrinciplesSummary}
+                    </p>
                     <button
                         onClick={onCloseAction}
                         aria-label="close-reasoning"
