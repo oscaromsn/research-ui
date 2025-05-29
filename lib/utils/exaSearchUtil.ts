@@ -1,4 +1,4 @@
-import axios, { isAxiosError, type AxiosError } from "axios";
+import axios, { type AxiosError } from "axios";
 import * as dotenv from "dotenv";
 
 // Load environment variables
@@ -173,7 +173,7 @@ export async function executeExaSearch(
           url: exaRes.url,
           title: exaRes.title ?? null,
           source_name: "Exa Search",
-          snippet: snippet ?? null,
+          snippet: snippet,
           // highlights: exaRes.highlights ?? null, // If you changed SearchResultItem to have highlights: string[]
           full_text: exaRes.text ?? null,
           published_date: exaRes.publishedDate ?? null,
@@ -189,7 +189,7 @@ export async function executeExaSearch(
     console.log(`Exa search yielded ${bamlResults.length} results.`);
     return bamlResults;
   } catch (error) {
-    if (isAxiosError(error)) {
+    if (axios.isAxiosError(error)) {
       const axiosError = error as AxiosError;
       console.error(
         `Error executing Exa search for query "${bamlSearchQuery.query_string}":`,
