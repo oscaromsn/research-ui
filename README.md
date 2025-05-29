@@ -1,36 +1,265 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LexiSynth - AI-Powered Legal Research Assistant
+
+LexiSynth is a cutting-edge Next.js 15 application designed to streamline and enhance the legal research process. By leveraging the power of Large Language Models (LLMs) through BAML (Boundary AI Markup Language), LexiSynth provides legal professionals with an intelligent assistant capable of generating search queries, analyzing documents, synthesizing findings, and drafting initial reports—all with a real-time, streaming user experience.
+
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Core Features](#core-features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+  - [Directory Structure](#directory-structure)
+  - [Research Agent Orchestrator Pattern](#research-agent-orchestrator-pattern)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Environment Variables](#environment-variables)
+  - [Running the Development Server](#running-the-development-server)
+- [Running Tests](#running-tests)
+  - [BAML Tests](#baml-tests)
+  - [Unit/Component Tests (Vitest)](#unitcomponent-tests-vitest)
+  - [End-to-End Tests (Playwright)](#end-to-end-tests-playwright)
+- [Development Workflow](#development-workflow)
+  - [BAML Development](#baml-development)
+  - [Frontend Development](#frontend-development)
+  - [Code Quality & Conventions](#code-quality--conventions)
+- [Key Scripts](#key-scripts)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Project Overview
+
+LexiSynth guides users through a multi-stage legal research pipeline:
+
+1.  **Query Generation:** Transforms a natural language legal question into effective search queries.
+2.  **Document Retrieval:** Fetches relevant legal documents from external sources (e.g., Exa Search).
+3.  **Document Analysis:** Extracts key information, arguments, and entities from each retrieved document.
+4.  **Synthesis:** Consolidates insights from multiple documents into coherent themes and summaries.
+5.  **Assessment & Iteration:** Evaluates research sufficiency and plans next steps, potentially iterating on previous stages.
+6.  **Report Generation:** Drafts a structured legal report based on the synthesized findings.
+
+The application emphasizes a server-first approach using Next.js App Router with React Server Components (RSC) and leverages client-side state management with Jotai for a dynamic, streaming UI.
+
+## Core Features
+
+*   **AI-Powered Research Pipeline:** Automates key stages of legal research.
+*   **BAML Integration:** Utilizes BAML for defining LLM interactions, schemas, and generating type-safe clients.
+*   **Streaming UI:** Provides real-time updates as research progresses and report content is generated.
+*   **Interactive Guidance:** Allows users to input legal questions and monitor the research lifecycle.
+*   **Evidence Analysis:** Displays analyzed documents with relevance scores, summaries, key arguments, and extracted entities.
+*   **Synthesis Studio:** Presents synthesized topics, unanswered questions, and AI reasoning.
+*   **Report Drafter:** Allows users to view and edit the progressively generated legal report.
+*   **Modular Component Architecture:** Built with reusable React components.
+
+## Tech Stack
+
+*   **Framework:** Next.js 15 (App Router, RSC, Server Actions)
+*   **Language:** TypeScript (strict mode)
+*   **Package Manager:** pnpm (v10.11.0+)
+*   **AI/LLM Layer:** BAML (Boundary AI Markup Language) v0.89.0+
+*   **State Management (Client):** Jotai v2.12.4+
+*   **Styling:** Tailwind CSS v4, Class Variance Authority (CVA)
+*   **UI Primitives:** Shadcn/ui, Radix UI
+*   **HTTP Client:** Axios (for external APIs like Exa Search)
+*   **Schema Validation (Non-LLM):** Zod v3.25.7+
+*   **Testing:**
+    *   BAML Native Tests
+    *   Vitest & React Testing Library (Unit/Component/Integration)
+    *   Playwright (End-to-End)
+*   **Code Quality:** Biome (formatting) ESLint (linting)
+*   **DevOps & Tooling:** Husky, lint-staged, commitlint, Knip, Dependency-Cruiser
+
+## Architecture
+
+LexiSynth follows a well-defined architecture centered around the "Research Agent Orchestrator" pattern.
+
+### Directory Structure
+
+A brief overview of key directories:
+
+*   `/__mocks__/`: Mock implementations for testing.
+*   `/__tests__/`: Vitest tests, mirroring the source structure.
+*   `/app/`: Next.js App Router, including Server Actions (`app/actions/`).
+*   `/baml_src/`: All BAML source files (functions, types, clients, tests).
+*   `/baml_client/`: **Auto-generated** BAML client code (DO NOT EDIT MANUALLY).
+*   `/components/`: React UI components, categorized into `ui/`, `domain/`, and `layout/`.
+*   `/lib/`: Shared utilities, custom React hooks (`lib/hooks/`), Zod schemas (`lib/schemas/`), and Jotai atoms (`lib/state/`).
+*   `/e2e/`: Playwright end-to-end tests.
+*   (Root): Configuration files for Next.js, TypeScript, ESLint, Biome, Vitest, Playwright, Husky, etc.
+
+### Research Agent Orchestrator Pattern
+
+1.  **Client Initiates:** User submits a legal question via the UI.
+2.  **Hook Invokes Action:** `useResearchAgent` (client-side hook) calls `conductResearch` (Server Action).
+3.  **Server Orchestrates:** `conductResearch` in `app/actions/researchAgentOrchestrator.ts` manages the BAML pipeline server-side.
+    *   Calls BAML functions for each research stage (query generation, analysis, synthesis, etc.).
+    *   Streams `ResearchUpdate` objects (newline-separated JSON) to the client, containing stage progress, data, logs, or errors.
+4.  **Hook Processes Stream:** `useResearchAgent` consumes the stream.
+5.  **State Updates:** Jotai atoms in `lib/state/researchAtoms.ts` are updated based on `ResearchUpdate` payloads.
+6.  **UI Reacts:** Components subscribed to Jotai atoms re-render, displaying live progress and results.
+
+This pattern ensures that complex AI logic remains server-side, while the client receives structured, streamable updates for a responsive UI.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+*   Node.js (v18.17 or later recommended for Next.js 15)
+*   pnpm (v10.11.0 or later)
+*   Access to LLM APIs (e.g., OpenAI, Google AI/Vertex AI, Anthropic) and an Exa Search API key.
+
+### Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd lexisynth
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    pnpm install
+    ```
+
+3.  **Initialize Husky Git hooks:**
+    ```bash
+    pnpm prepare
+    ```
+
+### Environment Variables
+
+Copy the `.env.example` file (if provided, otherwise create one) to `.env.local` and populate it with your API keys and other necessary environment variables.
+
+Example `.env.local`:
+```env
+# LLM Provider API Keys
+OPENAI_API_KEY=sk-your_openai_api_key
+GOOGLE_API_KEY=your_google_api_key
+ANTHROPIC_API_KEY=your_anthropic_api_key
+
+# Exa Search API Key (for document retrieval)
+EXA_API_KEY=your_exa_api_key
+
+# BAML Observability (Optional - sign up at Boundary Studio: https://app.boundaryml.com)
+# BOUNDARY_PROJECT_ID=your_project_uuid
+# BOUNDARY_SECRET=your_token
+
+# Next.js specific (usually not needed unless customizing)
+# NODE_ENV=development
 ```
+A `.env.test` file is also used for loading test-specific environment variables (see `vitest.config.ts`).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Running the Development Server
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1.  **Generate BAML client (if `baml_src` has changed or first time setup):**
+    ```bash
+    pnpm baml:generate
+    ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2.  **Start the Next.js development server:**
+    ```bash
+    pnpm dev
+    ```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-To learn more about Next.js, take a look at the following resources:
+## Running Tests
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+LexiSynth uses a multi-layered testing approach.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### BAML Tests
 
-## Deploy on Vercel
+These tests validate the logic within your BAML functions (prompts and schema definitions).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+*   Run all BAML tests:
+    ```bash
+    pnpm baml:test
+    ```
+*   Run tests for a specific BAML function:
+    ```bash
+    pnpm baml:test -i {$FunctionName}::
+    ```
+    (Replace `{$FunctionName}` with the actual BAML function name)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+BAML tests use `.test.baml` files located alongside their corresponding `.baml` function files.
+
+### Unit/Component Tests (Vitest)
+
+These tests cover individual functions, React components, and client-side hooks.
+
+*   Run all Vitest tests:
+    ```bash
+    pnpm test
+    ```
+*   Run Vitest tests in watch mode:
+    ```bash
+    pnpm test:watch
+    ```
+*   Run Vitest tests with UI:
+    ```bash
+    pnpm test:ui
+    ```
+*   Generate coverage report:
+    ```bash
+    pnpm test:coverage
+    ```
+    Coverage reports are typically found in the `/coverage` directory.
+
+Test files are located in the `__tests__` directory, mirroring the source structure.
+
+### End-to-End Tests (Playwright)
+
+These tests validate complete user flows through the application.
+
+*   Run all Playwright tests:
+    ```bash
+    pnpm test:e2e
+    ```
+*   Run Playwright tests with UI mode for debugging:
+    ```bash
+    pnpm test:e2e:ui
+    ```
+E2E test files are located in the `/e2e` directory. Ensure the development server (`pnpm dev`) is running or use Playwright's `webServer` option (configured in `playwright.config.ts`).
+
+## Development Workflow
+
+### BAML Development
+
+1.  Define or modify BAML functions and types in the `baml_src/` directory.
+2.  Write corresponding tests in `.test.baml` files.
+3.  Run BAML tests: `pnpm baml:test`.
+4.  If tests pass and changes are made, regenerate the BAML client: `pnpm baml:generate`. This updates the `baml_client/` directory.
+
+### Frontend Development
+
+1.  **Server Actions (`app/actions/`):** Implement or update server-side orchestration logic.
+2.  **Client Hooks (`lib/hooks/`):** Modify `useResearchAgent.ts` to handle new `ResearchUpdate` types or data structures, and to update Jotai atoms.
+3.  **State (`lib/state/`):** Define or update Jotai atoms in `researchAtoms.ts` to store client-side state.
+4.  **UI Components (`components/`):** Create or modify React components to consume Jotai state (using `useAtomValue`) and interact with client hooks.
+5.  **Testing:** Write Vitest tests for hooks and components.
+
+### Code Quality & Conventions
+
+*   **Formatting:** Code is automatically formatted by Biome (and ESLint for certain aspects). Run `pnpm format` to format manually.
+*   **Linting:** ESLint is configured for comprehensive linting. Run `pnpm lint` or `pnpm lint:fix`.
+*   **Commit Messages:** Follow Conventional Commits. `pnpm commit` can be used for guided commits (via `git-cz`), and `commitlint` (triggered by Husky) enforces this.
+*   **Type Checking:** Run `pnpm typecheck` regularly.
+*   **Husky Hooks:** Pre-commit and pre-push hooks are configured in `.husky/` to run lint-staged, type checks, etc.
+
+## Key Scripts
+
+(Refer to `package.json` for a full list)
+
+*   `pnpm dev`: Starts the Next.js development server.
+*   `pnpm build`: Builds the application for production.
+*   `pnpm start`: Starts the production server.
+*   `pnpm format`: Formats code using Biome.
+*   `pnpm lint`: Lints code using ESLint.
+*   `pnpm typecheck`: Runs TypeScript compiler checks.
+*   `pnpm test`: Runs all Vitest unit/component tests.
+*   `pnpm test:e2e`: Runs all Playwright E2E tests.
+*   `pnpm baml:generate`: Regenerates the `baml_client/` directory.
+*   `pnpm baml:test`: Runs all BAML native tests.
+*   `pnpm validate`: Runs a comprehensive suite of checks (typecheck, lint, tests, format, knip, typecov, deps).
+*   `pnpm knip`: Finds unused files, dependencies, and exports.
+*   `pnpm deps:check`: Checks for dependency issues using dependency-cruiser.
