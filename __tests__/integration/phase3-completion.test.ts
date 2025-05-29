@@ -6,10 +6,10 @@ import { createElement } from "react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it , vi } from "vitest";
 
+import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
     analyzedDocsSummaryAtom,
-    finalReportContentAtom,
     generatedQueriesAtom,
     researchLogAtom,
     researchStatusAtom,
@@ -20,8 +20,6 @@ import {
 vi.mock("@/app/actions/researchAgentOrchestrator", () => ({
     conductResearch: vi.fn(),
 }));
-
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 const mockedConductResearch = vi.mocked(conductResearch);
 
 describe("Phase 3 Completion - Client-Side Orchestrator Hook", () => {
@@ -556,10 +554,10 @@ describe("Phase 3 Completion - Client-Side Orchestrator Hook", () => {
 
     describe("6. abortResearch Functionality", () => {
         it("should call abort() on the active AbortController", async () => {
-            let streamController: ReadableStreamDefaultController<Uint8Array>;
+            let _streamController: ReadableStreamDefaultController<Uint8Array>;
             const mockStream = new ReadableStream({
                 start(controller) {
-                    streamController = controller;
+                    _streamController = controller;
                 },
             });
             mockedConductResearch.mockResolvedValue(mockStream);
@@ -601,10 +599,10 @@ describe("Phase 3 Completion - Client-Side Orchestrator Hook", () => {
         });
 
         it("should lead to stream processing termination when called", async () => {
-            let streamController: ReadableStreamDefaultController<Uint8Array>;
+            let _streamController: ReadableStreamDefaultController<Uint8Array>;
             const mockStream = new ReadableStream({
                 start(controller) {
-                    streamController = controller;
+                    _streamController = controller;
                 },
             });
             mockedConductResearch.mockResolvedValue(mockStream);

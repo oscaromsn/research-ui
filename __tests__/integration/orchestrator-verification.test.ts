@@ -1,3 +1,5 @@
+/// <reference types="../../types/test-globals" />
+
 /**
  * Verification test for Phase 1 completion criteria
  * Tests that all required components are properly implemented
@@ -105,7 +107,7 @@ describe("Research Orchestrator - Phase 1 Verification", () => {
                                     line,
                                 ) as ResearchUpdate;
                                 updates.push(update);
-                            } catch (e) {
+                            } catch {
                                 console.warn(
                                     "Failed to parse JSON line:",
                                     line,

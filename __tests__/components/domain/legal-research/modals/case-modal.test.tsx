@@ -57,9 +57,9 @@ describe("CaseModal Component", () => {
         expect(content).toBeInTheDocument();
 
         // Check if case metadata is rendered
-        expect(content).toHaveTextContent(new RegExp(mockCaseData.source));
-        expect(content).toHaveTextContent(new RegExp(mockCaseData.court));
-        expect(content).toHaveTextContent(new RegExp(mockCaseData.date));
+        expect(content).toHaveTextContent(mockCaseData.source);
+        expect(content).toHaveTextContent(mockCaseData.court);
+        expect(content).toHaveTextContent(mockCaseData.date);
     });
 
     it("does not render when isOpen is false", () => {

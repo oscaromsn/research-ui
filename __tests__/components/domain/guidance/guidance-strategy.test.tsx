@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider, createStore } from "jotai";
 import { type ReactNode, createElement } from "react";
@@ -9,8 +9,6 @@ import * as useResearchAgentModule from "@/lib/hooks/useResearchAgent";
 import {
     generatedQueriesAtom,
     researchLogAtom,
-    researchStatusAtom,
-    resetResearchStateAtom,
 } from "@/lib/state/researchAtoms";
 
 // Mock the useResearchAgent hook

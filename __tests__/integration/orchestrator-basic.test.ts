@@ -3,7 +3,7 @@
  * Tests the fundamental streaming mechanics before implementing full pipeline
  */
 
-import { vi } from "vitest";
+import { beforeEach, vi } from "vitest";
 
 import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator";
@@ -51,7 +51,7 @@ describe("Research Orchestrator - Basic Streaming", () => {
                                 if (update.stage === "COMPLETED") {
                                     completedFound = true;
                                 }
-                            } catch (e) {
+                            } catch {
                                 console.warn(
                                     "Failed to parse JSON line:",
                                     line,
@@ -81,7 +81,6 @@ describe("Research Orchestrator - Basic Streaming", () => {
         const stream = await conductResearch("");
         const reader = stream.getReader();
 
-        let hasError = false;
         let hasCompleted = false;
 
         // Set a timeout to prevent hanging
@@ -103,7 +102,6 @@ describe("Research Orchestrator - Basic Streaming", () => {
 
                         for (const line of lines) {
                             const update = JSON.parse(line) as ResearchUpdate;
-                            if (update.type === "ERROR") hasError = true;
                             if (update.stage === "COMPLETED")
                                 hasCompleted = true;
                         }

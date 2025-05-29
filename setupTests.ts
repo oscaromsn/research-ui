@@ -24,8 +24,8 @@ beforeAll(() => {
     const message = args[0];
     if (
       typeof message === 'string' &&
-      (message.includes('An update to') && message.includes('was not wrapped in act')) ||
-      (message.includes('Warning: An update to') && message.includes('was not wrapped in act'))
+      ((message.includes('An update to') && message.includes('was not wrapped in act')) ||
+      (message.includes('Warning: An update to') && message.includes('was not wrapped in act')))
     ) {
       return; // Suppress act() warnings
     }
@@ -47,7 +47,7 @@ beforeAll(() => {
     ) {
       return true; // Suppress act() warnings from stderr
     }
-    return originalStderrWrite.call(this, chunk, ...args);
+    return (originalStderrWrite as any).call(this, chunk, ...args);
   };
 });
 

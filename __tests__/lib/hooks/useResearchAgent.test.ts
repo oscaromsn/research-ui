@@ -7,16 +7,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import type {
     ResearchStage,
-    ResearchUpdate,
 } from "@/app/actions/researchAgentOrchestrator";
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
     analyzedDocsSummaryAtom,
-    finalReportContentAtom,
     generatedQueriesAtom,
     researchLogAtom,
     researchStatusAtom,
-    resetResearchStateAtom,
     synthesisDetailsAtom,
 } from "@/lib/state/researchAtoms";
 

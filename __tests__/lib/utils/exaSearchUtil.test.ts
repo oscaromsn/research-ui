@@ -1,7 +1,7 @@
 import axios from "axios";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { SearchQueryItem, SearchResultItem } from "@/baml_client/types";
+import type { SearchQueryItem } from "@/baml_client/types";
 import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
 
 // Mock axios

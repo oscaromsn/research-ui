@@ -38,7 +38,7 @@ export class MockIntersectionObserver implements IntersectionObserver {
 
   constructor(
     callback: IntersectionObserverCallback,
-    options?: IntersectionObserverInit,
+    _options?: IntersectionObserverInit,
   ) {
     this._callback = callback;
   }

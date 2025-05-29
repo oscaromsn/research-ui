@@ -1,4 +1,6 @@
-import type { ReadableStream } from "stream/web";
+/// <reference types="../../types/test-globals" />
+
+import type { ReadableStream as _ReadableStream } from "stream/web";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
