@@ -115,3 +115,4 @@ export function createMockLegalEntity(overrides = {}) {
 }
 // Test updated rules
 // Test with gitmoji
+// Test invalid
