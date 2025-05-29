@@ -207,15 +207,21 @@ export function useResearchAgent(): UseResearchAgentReturn {
                         : prevStatus.totalDocsToProcess;
                     const newCurrentStreamingField =
                       update.fieldName || prevStatus.currentStreamingField;
-                    
+
                     return {
                       ...prevStatus,
                       stage: update.stage,
                       isLoading: true, // Still loading while stream is active
                       ...(newMessage && { message: newMessage }),
-                      ...(newCurrentProcessedDoc !== undefined && { currentProcessedDoc: newCurrentProcessedDoc }),
-                      ...(newTotalDocsToProcess !== undefined && { totalDocsToProcess: newTotalDocsToProcess }),
-                      ...(newCurrentStreamingField && { currentStreamingField: newCurrentStreamingField }),
+                      ...(newCurrentProcessedDoc !== undefined && {
+                        currentProcessedDoc: newCurrentProcessedDoc,
+                      }),
+                      ...(newTotalDocsToProcess !== undefined && {
+                        totalDocsToProcess: newTotalDocsToProcess,
+                      }),
+                      ...(newCurrentStreamingField && {
+                        currentStreamingField: newCurrentStreamingField,
+                      }),
                     };
                   });
 

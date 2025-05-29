@@ -31,7 +31,9 @@ export function safeParse<T extends z.ZodType>(
   schema: T,
   data: unknown
 ): z.infer<T> | undefined {
-  const result: z.SafeParseReturnType<unknown, z.infer<T>> = schema.safeParse(data);
+  const result: z.SafeParseReturnType<unknown, z.infer<T>> = schema.safeParse(
+    data
+  );
   return result.success ? result.data : undefined;
 }
 

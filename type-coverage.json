@@ -22,7 +22,7 @@
     "__mocks__/**/*",
     "setupTests.ts",
     "**/*.config.js",
-    "**/*.config.mjs", 
+    "**/*.config.mjs",
     "**/*.config.ts",
     "next-env.d.ts",
     "playwright.config.ts",
