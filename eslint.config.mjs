@@ -158,11 +158,10 @@ export default tseslint.config(
     },
   },
 
-  // Testing configuration
+  // Testing configuration (Vitest/RTL - excludes e2e)
   {
     files: [
       "**/*.test.{ts,tsx}",
-      "**/*.spec.{ts,tsx}",
       "**/__tests__/**/*.{ts,tsx}",
       "**/__mocks__/**/*.{ts,tsx}",
       "__mocks__/**/*.{ts,tsx}",
@@ -204,6 +203,32 @@ export default tseslint.config(
       "promise/param-names": "off",
       // Disable vitest expect-expect for tests with implicit assertions
       "vitest/expect-expect": "off",
+    },
+  },
+
+  // E2E Testing configuration (Playwright)
+  {
+    files: ["e2e/**/*.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+    languageOptions: {
+      parser: parser,
+      parserOptions: {
+        project: false, // Disable TypeScript project for e2e test files
+        ecmaVersion: "latest",
+        sourceType: "module",
+      },
+      globals: {
+        ...globals.node,
+        ...globals.es2021,
+      },
+    },
+    rules: {
+      // Relax strict rules for e2e tests
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "no-console": "off", // Allow console in e2e tests for debugging
     },
   },
 
