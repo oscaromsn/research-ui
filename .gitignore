@@ -54,3 +54,11 @@ next-env.d.ts
 # Private notes and Claude Code files
 *.local.md
 *.local.json
+
+# Size limit and dependency analysis generated files
+dependency-graph.svg
+dependency-report.html
+bundle-analysis.json
+
+# Husky generated files
+.husky/_

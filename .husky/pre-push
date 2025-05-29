@@ -1,0 +1,10 @@
+echo "🔍 Running pre-push validations..."
+
+# Run typecheck and format check (skip lint to avoid blocking on pre-existing issues)
+echo "⚡ Running typecheck..."
+pnpm typecheck
+
+echo "⚡ Running format check..."
+pnpm format:check
+
+echo "✅ Pre-push validations completed successfully!"
