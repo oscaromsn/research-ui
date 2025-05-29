@@ -65,10 +65,10 @@ LexiSynth is a Next.js 15 application designed to assist legal professionals by 
 
 ### Auxiliary directories (support context)
 
-Inside the `_notes` directory there's some documents to support you in your tasks and provide better context. The main files are:
+Inside the `docs` directory there's some documents to support you in your tasks and provide better context. The main files are:
 
 ```
-_notes/planning/
+docs/planning/
     1.0. Project Requirements Document (PRD).md           # Project requirements
     2.0. Implementation plan overview (high-level description of phases 1 to 5).md              # General overview of the implementation plan
     2.1. Implementation plan - Phase 1.md       # Detailed guidance for phase 1 of the implementation plan
@@ -76,12 +76,12 @@ _notes/planning/
     2.3. Implementation plan - Phase 3.md       # Detailed guidance for phase 3 of the implementation plan
     2.4. Implementation plan - Phase 4.md       # Detailed guidance for phase 4 of the implementation plan
     2.5. Implementation plan - Phase 5.md       # Detailed guidance for phase 5 of the implementation plan
-_notes/references/
+docs/references/
     4-BamlExample-2(blogpost).md                # Blogpost describing the implementation of a simple agent developed also using Next.js, BAML and Jotai for state management
     5-BamlExample-2(codebase).md                # The full codebase of the blogpost's project
-_notes/docs/
+docs/docs/
     exa_docs.md                                 # Full (extensive) documentation of the Exa Search API, the search framework used on this project (`lib/utils/exaSearchUtil`)
-_notes/logs/
+docs/logs/
     TESTING_README.md                           # Instructions for using the testing suite
     TESTING_SUMMARY.md                          # Instructions for using the testing suite
 ```
