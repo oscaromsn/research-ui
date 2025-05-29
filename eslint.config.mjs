@@ -1,6 +1,7 @@
 import { FlatCompat } from "@eslint/eslintrc";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import vitest from "@vitest/eslint-plugin";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const compat = new FlatCompat({
@@ -15,8 +16,6 @@ const eslintConfig = [
             ".next/**",
             "coverage/**",
             "dist/**",
-            "__tests__/**",
-            "__mocks__/**",
             "baml_client/**",
         ],
     },
@@ -33,6 +32,20 @@ const eslintConfig = [
                 },
             ],
             "@typescript-eslint/no-explicit-any": "warn",
+        },
+    },
+    {
+        files: ["**/__tests__/**/*.{ts,tsx}", "**/__mocks__/**/*.{ts,tsx}", "**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+        plugins: {
+            vitest,
+        },
+        rules: {
+            ...vitest.configs.recommended.rules,
+        },
+        languageOptions: {
+            globals: {
+                ...vitest.environments.env.globals,
+            },
         },
     },
 ];
