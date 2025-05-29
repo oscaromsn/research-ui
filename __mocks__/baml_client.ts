@@ -1,6 +1,7 @@
 // Mock for BAML client to avoid real API calls during testing
 
 import { vi } from "vitest";
+
 import type {
     LegalQueryAnalysis,
     AnalyzedDocument,
@@ -138,7 +139,7 @@ export const b = {
             const generator = (async function* () {
                 yield createMockLegalQueryAnalysis();
             })();
-            (generator as any).getFinalResponse = vi
+            (generator as unknown as { getFinalResponse: ReturnType<typeof vi.fn> }).getFinalResponse = vi
                 .fn()
                 .mockResolvedValue(createMockLegalQueryAnalysis());
             return generator;
@@ -147,7 +148,7 @@ export const b = {
             const generator = (async function* () {
                 yield createMockAnalyzedDocument();
             })();
-            (generator as any).getFinalResponse = vi
+            (generator as unknown as { getFinalResponse: ReturnType<typeof vi.fn> }).getFinalResponse = vi
                 .fn()
                 .mockResolvedValue(createMockAnalyzedDocument());
             return generator;
@@ -156,7 +157,7 @@ export const b = {
             const generator = (async function* () {
                 yield createMockResearchAssessment();
             })();
-            (generator as any).getFinalResponse = vi
+            (generator as unknown as { getFinalResponse: ReturnType<typeof vi.fn> }).getFinalResponse = vi
                 .fn()
                 .mockResolvedValue(createMockResearchAssessment());
             return generator;
@@ -165,7 +166,7 @@ export const b = {
             const generator = (async function* () {
                 yield createMockOverallSynthesis();
             })();
-            (generator as any).getFinalResponse = vi
+            (generator as unknown as { getFinalResponse: ReturnType<typeof vi.fn> }).getFinalResponse = vi
                 .fn()
                 .mockResolvedValue(createMockOverallSynthesis());
             return generator;
@@ -174,7 +175,7 @@ export const b = {
             const generator = (async function* () {
                 yield createMockFinalReport();
             })();
-            (generator as any).getFinalResponse = vi
+            (generator as unknown as { getFinalResponse: ReturnType<typeof vi.fn> }).getFinalResponse = vi
                 .fn()
                 .mockResolvedValue(createMockFinalReport());
             return generator;
