@@ -41,13 +41,11 @@
     "**/*.tsx",
     "**/*.mjs",
     ".next/types/**/*.ts",
-    "types/**/*.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
+    "types/**/*.d.ts",
     "**/*.test.ts",
     "**/*.test.tsx",
     "__tests__/**/*",
     "setupTests.ts"
-  ]
+  ],
+  "exclude": ["node_modules"]
 }

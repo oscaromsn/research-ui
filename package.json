@@ -11,7 +11,7 @@
     "format:check": "biome format .",
     "lint": "eslint . --ext .ts,.tsx --quiet",
     "lint:fix": "eslint . --ext .ts,.tsx --fix --quiet",
-    "lint:strict": "eslint . --ext .ts,.tsx --max-warnings 0",
+    "lint:strict": "eslint . --ext .ts,.tsx --max-warnings 0 --fix",
     "typecheck": "tsc --noEmit --pretty",
     "typecheck:strict": "tsc --noEmit --strict --exactOptionalPropertyTypes --pretty",
     "knip": "knip",

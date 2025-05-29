@@ -1,4 +1,5 @@
 import path from "node:path";
+
 import react from "@vitejs/plugin-react";
 import { config } from "dotenv";
 import { defineConfig } from "vitest/config";
@@ -8,6 +9,9 @@ export default defineConfig({
   test: {
     environment: "happy-dom",
     globals: true,
+    typecheck: {
+      tsconfig: "./tsconfig.test.json",
+    },
     include: ["**/*.{test,spec}.{ts,tsx}"],
     exclude: ["node_modules", ".next", "dist", ".git", "e2e/**"],
     setupFiles: ["./setupTests.ts"],

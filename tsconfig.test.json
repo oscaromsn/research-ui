@@ -1,0 +1,64 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"],
+      "@components/*": ["./components/*"],
+      "@ui/*": ["./components/ui/*"],
+      "@domain/*": ["./components/domain/*"],
+      "@layout/*": ["./components/layout/*"],
+      "@lib/*": ["./lib/*"],
+      "@state/*": ["./lib/state/*"],
+      "@atoms/*": ["./lib/state/atoms/*"],
+      "@api/*": ["./lib/api/*"],
+      "@utils/*": ["./lib/utils/*"],
+      "@types/*": ["./types/*"]
+    },
+    "types": ["node", "vitest/globals"],
+    "typeRoots": ["./node_modules/@types", "./types"]
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.mjs",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "__tests__/**/*",
+    "__mocks__/**/*",
+    "setupTests.ts",
+    "vitest.config.ts",
+    "types/**/*.d.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next/cache",
+    "dist",
+    "coverage",
+    "e2e/**",
+    "build",
+    "out"
+  ]
+}
