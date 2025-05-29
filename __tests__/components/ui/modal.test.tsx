@@ -1,7 +1,8 @@
-import { Modal } from "@/components/ui/modal";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+
+import { Modal } from "@/components/ui/modal";
 
 describe("Modal Component", () => {
     it("renders when isOpen is true", () => {

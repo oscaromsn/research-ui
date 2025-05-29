@@ -3,12 +3,13 @@
  * Tests that all required components are properly implemented
  */
 
+import { vi } from "vitest";
+
 import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import type {
     ResearchStage,
     ResearchUpdate,
 } from "@/app/actions/researchAgentOrchestrator";
-import { vi } from "vitest";
 
 // Mock the BAML client to avoid real API calls
 vi.mock("@/baml_client", () => import("@/__mocks__/baml_client"));

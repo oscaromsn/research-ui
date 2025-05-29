@@ -1,3 +1,8 @@
+import { render, screen, within } from "@testing-library/react";
+import { Provider, createStore } from "jotai";
+import { type ReactNode, createElement } from "react";
+import { beforeEach, describe, expect, it } from "vitest";
+
 import { ReportDrafter } from "@/components/domain/report-generation/report-drafter";
 import { SynthesisReporting } from "@/components/domain/report-generation/synthesis-reporting";
 import {
@@ -8,10 +13,6 @@ import type {
     ClientFinalReport,
     ClientSynthesis,
 } from "@/lib/state/researchAtoms";
-import { render, screen, within } from "@testing-library/react";
-import { Provider, createStore } from "jotai";
-import { type ReactNode, createElement } from "react";
-import { beforeEach, describe, expect, it } from "vitest";
 
 describe("Phase 4 Completion Validation", () => {
     let store: ReturnType<typeof createStore>;

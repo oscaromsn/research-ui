@@ -1,11 +1,12 @@
-import { SynthesisReporting } from "@/components/domain/report-generation/synthesis-reporting";
-import { synthesisDetailsAtom } from "@/lib/state/researchAtoms";
-import type { ClientSynthesis } from "@/lib/state/researchAtoms";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider, createStore } from "jotai";
 import { type ReactNode, createElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { SynthesisReporting } from "@/components/domain/report-generation/synthesis-reporting";
+import type { ClientSynthesis } from "@/lib/state/researchAtoms";
+import { synthesisDetailsAtom } from "@/lib/state/researchAtoms";
 
 // Mock the SynthesisReasoningModal component
 vi.mock(

@@ -1,14 +1,15 @@
-import { EvidenceAnalysis } from "@/components/domain/legal-research/evidence-analysis";
-import {
-    analyzedDocsSummaryAtom,
-    selectedAnalyzedDocIdAtom,
-} from "@/lib/state/researchAtoms";
-import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider, createStore } from "jotai";
 import { type ReactNode, createElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { EvidenceAnalysis } from "@/components/domain/legal-research/evidence-analysis";
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
+import {
+    analyzedDocsSummaryAtom,
+    selectedAnalyzedDocIdAtom,
+} from "@/lib/state/researchAtoms";
 
 // Mock the CaseModal component
 vi.mock("@/components/domain/legal-research/modals/case-modal", () => ({

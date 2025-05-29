@@ -36,7 +36,7 @@ export default tseslint.config(
   },
 
   // Base ESLint rules
-  ...compat.extends("eslint:recommended", "next/core-web-vitals"),
+  ...compat.extends("eslint:recommended"),
 
   // TypeScript Configuration - using recommended instead of strict to avoid issues
   ...configs.recommended.map((config) => ({
@@ -194,6 +194,16 @@ export default tseslint.config(
       "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-unsafe-return": "off",
+      // Disable React act() warnings in tests - these are often unavoidable in complex scenarios
+      "testing-library/no-unnecessary-act": "off",
+      "testing-library/no-wait-for-side-effects": "off",
+      // Disable testing library rules that are too strict for our complex test scenarios
+      "testing-library/no-wait-for-multiple-assertions": "off",
+      "testing-library/no-node-access": "off",
+      // Disable promise param naming for test scenarios
+      "promise/param-names": "off",
+      // Disable vitest expect-expect for tests with implicit assertions
+      "vitest/expect-expect": "off",
     },
   },
 

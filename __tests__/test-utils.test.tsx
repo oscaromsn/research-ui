@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { createElement } from "react";
 import { describe, expect, it, vi } from "vitest";
+
 import {
     MockIntersectionObserver,
     MockResizeObserver,
@@ -18,9 +19,9 @@ const TestComponent = () => (
 describe("test-utils", () => {
     describe("renderWithProviders", () => {
         it("renders components with providers", () => {
-            const { getByTestId } = renderWithProviders(<TestComponent />);
-            expect(getByTestId("test-component")).toBeInTheDocument();
-            expect(getByTestId("test-component")).toHaveTextContent(
+            renderWithProviders(<TestComponent />);
+            expect(screen.getByTestId("test-component")).toBeInTheDocument();
+            expect(screen.getByTestId("test-component")).toHaveTextContent(
                 "Test Content",
             );
         });

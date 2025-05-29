@@ -1,7 +1,8 @@
-import { Header } from "@/components/layout/header";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+
+import { Header } from "@/components/layout/header";
 
 // Mock the components used by Header
 vi.mock("@/components/domain/guidance/research-lifecycle", () => ({

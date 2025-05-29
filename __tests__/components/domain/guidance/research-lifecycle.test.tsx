@@ -1,10 +1,10 @@
-import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
-import { ResearchLifecycle } from "@/components/domain/guidance/research-lifecycle";
-import { researchStatusAtom } from "@/lib/state/researchAtoms";
 import { render, screen } from "@testing-library/react";
 import { Provider, createStore } from "jotai";
 import { type ReactNode, createElement } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
+
+import { ResearchLifecycle } from "@/components/domain/guidance/research-lifecycle";
+import { researchStatusAtom } from "@/lib/state/researchAtoms";
 
 describe("ResearchLifecycle Component Integration", () => {
     let store: ReturnType<typeof createStore>;
@@ -44,9 +44,7 @@ describe("ResearchLifecycle Component Integration", () => {
 
         renderWithProvider(createElement(ResearchLifecycle));
 
-        const ideateStage = screen
-            .getByText("Ideate")
-            .parentElement?.querySelector("div");
+        const ideateStage = screen.getByTestId("stage-icon-ideate");
         expect(ideateStage).toHaveClass("bg-[#3a7bb7]"); // Active color
     });
 
@@ -63,15 +61,11 @@ describe("ResearchLifecycle Component Integration", () => {
 
         renderWithProvider(createElement(ResearchLifecycle));
 
-        const planStage = screen
-            .getByText("Plan")
-            .parentElement?.querySelector("div");
+        const planStage = screen.getByTestId("stage-icon-plan");
         expect(planStage).toHaveClass("bg-[#3a7bb7]"); // Active color
 
         // Previous stage should be completed
-        const ideateStage = screen
-            .getByText("Ideate")
-            .parentElement?.querySelector("div");
+        const ideateStage = screen.getByTestId("stage-icon-ideate");
         expect(ideateStage).toHaveClass("bg-green-500"); // Completed color
     });
 
@@ -88,9 +82,7 @@ describe("ResearchLifecycle Component Integration", () => {
 
         renderWithProvider(createElement(ResearchLifecycle));
 
-        const researchStage = screen
-            .getByText("Research")
-            .parentElement?.querySelector("div");
+        const researchStage = screen.getByTestId("stage-icon-research");
         expect(researchStage).toHaveClass("bg-[#3a7bb7]"); // Active color
     });
 
@@ -107,9 +99,7 @@ describe("ResearchLifecycle Component Integration", () => {
 
         renderWithProvider(createElement(ResearchLifecycle));
 
-        const analyzeStage = screen
-            .getByText("Analyze")
-            .parentElement?.querySelector("div");
+        const analyzeStage = screen.getByTestId("stage-icon-analyze");
         expect(analyzeStage).toHaveClass("bg-[#3a7bb7]"); // Active color
     });
 
@@ -126,9 +116,7 @@ describe("ResearchLifecycle Component Integration", () => {
 
         renderWithProvider(createElement(ResearchLifecycle));
 
-        const reviewStage = screen
-            .getByText("Review")
-            .parentElement?.querySelector("div");
+        const reviewStage = screen.getByTestId("stage-icon-review");
         expect(reviewStage).toHaveClass("bg-[#3a7bb7]"); // Active color
     });
 
@@ -145,9 +133,7 @@ describe("ResearchLifecycle Component Integration", () => {
 
         renderWithProvider(createElement(ResearchLifecycle));
 
-        const draftStage = screen
-            .getByText("Draft")
-            .parentElement?.querySelector("div");
+        const draftStage = screen.getByTestId("stage-icon-draft");
         expect(draftStage).toHaveClass("bg-[#3a7bb7]"); // Active color
     });
 
@@ -165,12 +151,7 @@ describe("ResearchLifecycle Component Integration", () => {
         renderWithProvider(createElement(ResearchLifecycle));
 
         // Should show spinner on active stage when loading
-        const analyzeStage = screen
-            .getByText("Analyze")
-            .parentElement?.querySelector("div");
-        const spinner =
-            analyzeStage?.querySelector('[data-testid="loader"]') ||
-            analyzeStage?.querySelector(".animate-spin");
+        const spinner = screen.getByTestId("loader");
         expect(spinner).toBeInTheDocument();
     });
 
@@ -197,9 +178,7 @@ describe("ResearchLifecycle Component Integration", () => {
             "Draft",
         ];
         stages.forEach((stageName) => {
-            const stage = screen
-                .getByText(stageName)
-                .parentElement?.querySelector("div");
+            const stage = screen.getByTestId(`stage-icon-${stageName.toLowerCase()}`);
             expect(stage).toHaveClass("bg-green-500"); // Completed color
         });
     });
@@ -237,8 +216,8 @@ describe("ResearchLifecycle Component Integration", () => {
 
         // Connectors between completed stages should be green
         // This tests the visual progression indicators
-        const lifecycle = screen.getByText("Ideate").closest(".flex");
-        expect(lifecycle).toBeInTheDocument();
+        const ideateStage = screen.getByText("Ideate");
+        expect(ideateStage).toBeInTheDocument();
     });
 
     it("handles IDLE state correctly", () => {
@@ -264,9 +243,7 @@ describe("ResearchLifecycle Component Integration", () => {
             "Draft",
         ];
         stages.forEach((stageName) => {
-            const stage = screen
-                .getByText(stageName)
-                .parentElement?.querySelector("div");
+            const stage = screen.getByTestId(`stage-icon-${stageName.toLowerCase()}`);
             expect(stage).toHaveClass("bg-[#242a3d]"); // Pending color
         });
     });

@@ -1,5 +1,8 @@
 // __tests__/lib/state/researchAtoms.test.ts
 
+import { createStore } from "jotai";
+import { beforeEach, describe, expect, it } from "vitest";
+
 import {
     type ClientAnalyzedDoc,
     type ClientFinalReport,
@@ -23,8 +26,6 @@ import {
     resetResearchStateAtom,
     synthesisDetailsAtom,
 } from "@/lib/state/researchAtoms";
-import { createStore } from "jotai";
-import { beforeEach, describe, expect, it } from "vitest";
 
 describe("ResearchAtoms - Type Definitions and Initial States", () => {
     let store: ReturnType<typeof createStore>;

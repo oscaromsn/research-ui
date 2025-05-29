@@ -1,7 +1,8 @@
-import { CaseModal } from "@/components/domain/legal-research/modals/case-modal";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+
+import { CaseModal } from "@/components/domain/legal-research/modals/case-modal";
 
 // Mock the Modal component
 vi.mock("@/components/ui/modal", () => ({

@@ -1,11 +1,12 @@
-import { ReportDrafter } from "@/components/domain/report-generation/report-drafter";
-import { finalReportContentAtom } from "@/lib/state/researchAtoms";
-import type { ClientFinalReport } from "@/lib/state/researchAtoms";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider, createStore } from "jotai";
 import { type ReactNode, createElement } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
+
+import { ReportDrafter } from "@/components/domain/report-generation/report-drafter";
+import type { ClientFinalReport } from "@/lib/state/researchAtoms";
+import { finalReportContentAtom } from "@/lib/state/researchAtoms";
 
 describe("ReportDrafter Component Integration", () => {
     let store: ReturnType<typeof createStore>;

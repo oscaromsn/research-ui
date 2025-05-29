@@ -1,3 +1,9 @@
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { Provider, createStore } from "jotai";
+import { type ReactNode, createElement } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { GuidanceStrategy } from "@/components/domain/guidance/guidance-strategy";
 import * as useResearchAgentModule from "@/lib/hooks/useResearchAgent";
 import {
@@ -6,11 +12,6 @@ import {
     researchStatusAtom,
     resetResearchStateAtom,
 } from "@/lib/state/researchAtoms";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { Provider, createStore } from "jotai";
-import { type ReactNode, createElement } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the useResearchAgent hook
 vi.mock("@/lib/hooks/useResearchAgent", () => ({

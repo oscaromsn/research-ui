@@ -1,8 +1,9 @@
 // __tests__/integration/phase2-completion.test.ts
 
-import * as researchAtoms from "@/lib/state/researchAtoms";
 import { createStore } from "jotai";
 import { describe, expect, it } from "vitest";
+
+import * as researchAtoms from "@/lib/state/researchAtoms";
 
 describe("Phase 2 Completion Criteria Validation", () => {
     describe("1. All Files and Types Created", () => {

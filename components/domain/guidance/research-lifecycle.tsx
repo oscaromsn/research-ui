@@ -124,6 +124,7 @@ export function ResearchLifecycle() {
               ${stage.status === "active" ? "bg-[#3a7bb7] text-white" : stage.status === "completed" ? "bg-green-500 dark:bg-green-600 text-white" : "bg-[#242a3d] text-[#6b7280]"}
               ${index !== stages.length - 1 ? "relative" : ""}
             `}
+              data-testid={`stage-icon-${stage.name.toLowerCase()}`}
             >
               {stage.status === "active" && status.isLoading ? (
                 <div className="relative w-full h-full flex items-center justify-center">

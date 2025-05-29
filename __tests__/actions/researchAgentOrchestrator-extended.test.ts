@@ -1,3 +1,7 @@
+import type { ReadableStream } from "stream/web";
+
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import type {
     AnalyzedDocument,
     DetailedReasoning,
@@ -5,8 +9,6 @@ import type {
     ReasoningStep,
     SearchResultItem,
 } from "@/baml_client/types";
-import type { ReadableStream } from "stream/web";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock BAML client
 const mockBamlClient = {

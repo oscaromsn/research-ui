@@ -181,10 +181,12 @@ describe("useResearchAgent Hook", () => {
             await waitFor(() => {
                 const status = store.get(researchStatusAtom);
                 expect(status.stage).toBe("INITIALIZING");
-                expect(status.isLoading).toBe(true);
-                expect(status.error).toBe(null);
-                expect(status.message).toBe("Initializing research...");
             });
+            
+            const status = store.get(researchStatusAtom);
+            expect(status.isLoading).toBe(true);
+            expect(status.error).toBe(null);
+            expect(status.message).toBe("Initializing research...");
 
             // Clean up by closing the stream
             streamController!.close();

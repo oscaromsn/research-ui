@@ -1,7 +1,8 @@
-import { Button, buttonVariants } from "@/components/ui/button";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+
+import { Button, buttonVariants } from "@/components/ui/button";
 
 describe("Button Component", () => {
     it("renders correctly with default props", () => {
