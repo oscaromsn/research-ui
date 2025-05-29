@@ -286,8 +286,8 @@ export function EvidenceAnalysis() {
       <AnalysisReasoningModal
         isOpen={showReasoningModal}
         onCloseAction={() => setShowReasoningModal(false)}
-        reasoning={selectedDocument?.analysisReasoning}
-        documentTitle={selectedDocument?.title}
+        {...(selectedDocument?.analysisReasoning && { reasoning: selectedDocument.analysisReasoning })}
+        {...(selectedDocument?.title && { documentTitle: selectedDocument.title })}
       />
     </div>
   );

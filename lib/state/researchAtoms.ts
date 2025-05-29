@@ -123,7 +123,6 @@ export const researchStatusAtom = atom<ResearchStatus>({
   message: "Ready to start research.",
   currentProcessedDoc: 0,
   totalDocsToProcess: 0,
-  currentStreamingField: undefined,
 });
 
 // FR3.1.2: researchLogAtom
@@ -208,7 +207,6 @@ export const resetResearchStateAtom = atom(null, (get, set, _value) => {
     message: "Ready.",
     currentProcessedDoc: 0,
     totalDocsToProcess: 0,
-    currentStreamingField: undefined,
   });
   set(researchLogAtom, []);
   set(generatedQueriesAtom, []);

@@ -20,6 +20,7 @@ import {
 import type {
   ClientAnalyzedDoc,
   ClientSynthesis,
+  ResearchStatus,
 } from "@/lib/state/researchAtoms";
 
 interface QueryData {
@@ -122,7 +123,6 @@ export function useResearchAgent(): UseResearchAgentReturn {
         message: "Initializing research...",
         currentProcessedDoc: 0,
         totalDocsToProcess: 0,
-        currentStreamingField: undefined,
       });
       setResearchLog((prev) => [
         ...prev,
@@ -153,21 +153,22 @@ export function useResearchAgent(): UseResearchAgentReturn {
             if (done) {
               // Stream finished successfully from the server side
               let finalStatus: "ERROR" | "COMPLETED" = "COMPLETED";
-              setResearchStatus((prev) => {
+              setResearchStatus((prev: ResearchStatus) => {
                 const finalStage =
                   prev.stage === "INITIALIZING" && !prev.error
                     ? "COMPLETED"
                     : prev.stage;
                 finalStatus = prev.error ? "ERROR" : "COMPLETED";
+                const newMessage =
+                  prev.stage === "INITIALIZING" && !prev.error
+                    ? "Research process completed."
+                    : prev.message;
                 return {
                   ...prev,
                   isLoading: false,
                   // Don't override stage; only set COMPLETED if still INITIALIZING and no error
                   stage: finalStage,
-                  message:
-                    prev.stage === "INITIALIZING" && !prev.error
-                      ? "Research process completed."
-                      : prev.message,
+                  ...(newMessage && { message: newMessage }),
                 };
               });
               setResearchLog((prev) => [
@@ -194,22 +195,29 @@ export function useResearchAgent(): UseResearchAgentReturn {
                   ]);
 
                   // Update researchStatusAtom based on any incoming status
-                  setResearchStatus((prevStatus) => ({
-                    ...prevStatus,
-                    stage: update.stage,
-                    isLoading: true, // Still loading while stream is active
-                    message: update.message || prevStatus.message,
-                    currentProcessedDoc:
+                  setResearchStatus((prevStatus: ResearchStatus) => {
+                    const newMessage = update.message || prevStatus.message;
+                    const newCurrentProcessedDoc =
                       update.currentProcessedDoc !== undefined
                         ? update.currentProcessedDoc
-                        : prevStatus.currentProcessedDoc,
-                    totalDocsToProcess:
+                        : prevStatus.currentProcessedDoc;
+                    const newTotalDocsToProcess =
                       update.totalDocsToProcess !== undefined
                         ? update.totalDocsToProcess
-                        : prevStatus.totalDocsToProcess,
-                    currentStreamingField:
-                      update.fieldName || prevStatus.currentStreamingField,
-                  }));
+                        : prevStatus.totalDocsToProcess;
+                    const newCurrentStreamingField =
+                      update.fieldName || prevStatus.currentStreamingField;
+                    
+                    return {
+                      ...prevStatus,
+                      stage: update.stage,
+                      isLoading: true, // Still loading while stream is active
+                      ...(newMessage && { message: newMessage }),
+                      ...(newCurrentProcessedDoc !== undefined && { currentProcessedDoc: newCurrentProcessedDoc }),
+                      ...(newTotalDocsToProcess !== undefined && { totalDocsToProcess: newTotalDocsToProcess }),
+                      ...(newCurrentStreamingField && { currentStreamingField: newCurrentStreamingField }),
+                    };
+                  });
 
                   switch (update.type) {
                     case "STATUS_CHANGE":
@@ -368,7 +376,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
                         error:
                           update.message ||
                           "An error occurred during streaming.",
-                        message: update.message,
+                        ...(update.message && { message: update.message }),
                       });
                       // Don't throw here, just set the error state and continue reading stream
                       // The stream will naturally end with the done condition above
@@ -400,7 +408,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
 
             if (controller.signal.aborted || errorName === "AbortError") {
               console.log("Stream reading was aborted.");
-              setResearchStatus((prev) => ({
+              setResearchStatus((prev: ResearchStatus) => ({
                 ...prev,
                 isLoading: false,
                 message: prev.error || "Research aborted.",
@@ -481,7 +489,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
     if (abortController) {
       console.log("useResearchAgent: Abort signal sent.");
       abortController.abort();
-      setResearchStatus((prev) => ({
+      setResearchStatus((prev: ResearchStatus) => ({
         ...prev,
         isLoading: false,
         error: "Research manually aborted.",

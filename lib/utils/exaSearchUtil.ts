@@ -171,15 +171,15 @@ export async function executeExaSearch(
         return {
           id: exaRes.url, // Using URL as the primary ID for simplicity in BAML
           url: exaRes.url,
-          title: exaRes.title ?? undefined,
+          title: exaRes.title ?? null,
           source_name: "Exa Search",
-          snippet: snippet,
-          // highlights: exaRes.highlights ?? undefined, // If you changed SearchResultItem to have highlights: string[]
-          full_text: exaRes.text ?? undefined,
-          published_date: exaRes.publishedDate ?? undefined,
+          snippet: snippet ?? null,
+          // highlights: exaRes.highlights ?? null, // If you changed SearchResultItem to have highlights: string[]
+          full_text: exaRes.text ?? null,
+          published_date: exaRes.publishedDate ?? null,
           retrieval_date: retrievalDate,
-          author: exaRes.author ?? undefined,
-          score: exaRes.score ?? undefined,
+          author: exaRes.author ?? null,
+          score: exaRes.score ?? null,
           original_query: bamlSearchQuery, // Pass through the original BAML query
           metadata: metadata,
         };

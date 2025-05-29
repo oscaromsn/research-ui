@@ -80,8 +80,8 @@ const createMockResearchAssessment = (): ResearchAssessment => ({
         "Research is sufficient to generate a comprehensive report",
     identified_gaps: [],
     next_action: "GENERATE_REPORT" as NextActionType,
-    suggested_queries_for_refinement: undefined,
-    document_ids_for_deeper_analysis: undefined,
+    suggested_queries_for_refinement: null,
+    document_ids_for_deeper_analysis: null,
     reasoning: createMockDetailedReasoning(),
 });
 
