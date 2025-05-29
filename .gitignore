@@ -40,6 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# bundle analysis
+bundle-analysis.json
+dependency-graph.svg
+dependency-report.html
+
 # baml
 # baml_client
 

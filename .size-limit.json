@@ -4,11 +4,11 @@
     "limit": "50 KB"
   },
   {
-    "path": ".next/static/chunks/pages/_app-*.js",
-    "limit": "150 KB"
-  },
-  {
     "path": ".next/static/chunks/app/page-*.js",
     "limit": "100 KB"
+  },
+  {
+    "path": ".next/static/chunks/app/layout-*.js",
+    "limit": "50 KB"
   }
 ]
