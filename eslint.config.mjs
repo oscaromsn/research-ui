@@ -165,6 +165,7 @@ export default tseslint.config(
       "**/*.spec.{ts,tsx}",
       "**/__tests__/**/*.{ts,tsx}",
       "**/__mocks__/**/*.{ts,tsx}",
+      "__mocks__/**/*.{ts,tsx}",
       "setupTests.ts",
     ],
     plugins: {
@@ -250,9 +251,32 @@ export default tseslint.config(
         "warn",
         { prefer: "type-imports" },
       ],
-      "@typescript-eslint/no-unnecessary-type-assertion": "warn",
       "prefer-const": "warn",
       "no-var": "error",
+    },
+  },
+
+  // TypeScript rules that require type information - only for non-test files
+  {
+    files: ["**/*.{ts,tsx}"],
+    ignores: [
+      "**/*.test.{ts,tsx}",
+      "**/*.spec.{ts,tsx}",
+      "**/__tests__/**/*.{ts,tsx}",
+      "**/__mocks__/**/*.{ts,tsx}",
+      "__mocks__/**/*.{ts,tsx}",
+      "setupTests.ts",
+      "*.config.{js,mjs,ts}",
+      "**/*.config.{js,mjs,ts}",
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: true,
+        tsconfigRootDir: __dirname,
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-unnecessary-type-assertion": "warn",
     },
   },
 );

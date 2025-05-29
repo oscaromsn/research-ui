@@ -36,22 +36,22 @@ const config: UserConfig = {
     ],
     "subject-empty": [2, "never"],
     "subject-full-stop": [2, "never", "."],
-    
+
     // More lenient length rules
     "subject-max-length": [1, "always", 120], // Warning only, longer limit
     "header-max-length": [1, "always", 120], // Warning only, longer limit
-    
+
     // Relaxed case rules - allow more flexibility
     "subject-case": [0], // Disabled - allow any case
-    
+
     // Optional/warning body rules
     "body-leading-blank": [1, "always"],
     "body-max-line-length": [0], // Disabled - no body line limit
-    
+
     // Optional footer rules
     "footer-leading-blank": [0], // Disabled
     "footer-max-line-length": [0], // Disabled
-    
+
     // Scope rules - optional but helpful
     "scope-case": [1, "always", "lower-case"], // Warning only
     "scope-empty": [0], // Allow empty scopes

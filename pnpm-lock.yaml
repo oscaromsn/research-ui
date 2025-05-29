@@ -202,6 +202,15 @@ importers:
         specifier: 3.1.4
         version: 3.1.4(@types/node@22.15.19)(@vitest/ui@3.1.4)(happy-dom@17.4.7)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.40.0)(yaml@2.8.0)
 
+  node_modules/.pnpm/@size-limit+preset-app@11.2.0_size-limit@11.2.0/node_modules/@size-limit/preset-app:
+    dependencies:
+      '@size-limit/file':
+        specifier: 11.2.0
+        version: 11.2.0(size-limit@11.2.0)
+      size-limit:
+        specifier: 11.2.0
+        version: 11.2.0
+
 packages:
 
   '@adobe/css-tools@4.4.3':

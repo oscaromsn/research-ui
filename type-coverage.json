@@ -1,6 +1,6 @@
 {
   "project": "./tsconfig.json",
-  "atLeast": 90,
+  "atLeast": 98.9,
   "detail": true,
   "strict": true,
   "cache": true,
@@ -22,9 +22,16 @@
     "__mocks__/**/*",
     "setupTests.ts",
     "**/*.config.js",
-    "**/*.config.mjs",
+    "**/*.config.mjs", 
     "**/*.config.ts",
-    "next-env.d.ts"
+    "next-env.d.ts",
+    "playwright.config.ts",
+    "vitest.config.ts",
+    "next.config.ts",
+    "eslint.config.mjs",
+    "postcss.config.mjs",
+    "tailwind.config.js",
+    "commitlint.config.ts"
   ],
   "ignoreCatch": false,
   "reportSemanticError": true,
