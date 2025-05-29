@@ -1,0 +1,33 @@
+{
+  "project": "./tsconfig.json",
+  "atLeast": 90,
+  "detail": true,
+  "strict": true,
+  "cache": true,
+  "ignoreFiles": [
+    "node_modules/**/*",
+    ".next/**/*",
+    "coverage/**/*",
+    "dist/**/*",
+    "build/**/*",
+    "baml_client/**/*",
+    "public/**/*",
+    ".claude/**/*",
+    ".zed/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "__tests__/**/*",
+    "__mocks__/**/*",
+    "setupTests.ts",
+    "**/*.config.js",
+    "**/*.config.mjs",
+    "**/*.config.ts",
+    "next-env.d.ts"
+  ],
+  "ignoreCatch": false,
+  "reportSemanticError": true,
+  "enableCache": true,
+  "showRelativePath": true
+}

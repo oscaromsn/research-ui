@@ -1,0 +1,50 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "app/**/*.{ts,tsx}",
+    "components/**/*.{ts,tsx}",
+    "lib/**/*.{ts,tsx}",
+    "types/**/*.ts"
+  ],
+  "project": [
+    "app/**/*.{ts,tsx}",
+    "components/**/*.{ts,tsx}",
+    "lib/**/*.{ts,tsx}",
+    "types/**/*.ts",
+    "**/*.config.{js,mjs,ts}",
+    "**/*.test.{ts,tsx}",
+    "**/*.spec.{ts,tsx}",
+    "__tests__/**/*.{ts,tsx}",
+    "__mocks__/**/*.{ts,tsx}"
+  ],
+  "ignore": [
+    "node_modules/**",
+    ".next/**",
+    "coverage/**",
+    "dist/**",
+    "build/**",
+    "baml_client/**",
+    "public/**",
+    ".claude/**",
+    ".zed/**"
+  ],
+  "ignoreDependencies": [
+    "@next/env",
+    "postcss",
+    "tailwindcss",
+    "tw-animate-css"
+  ],
+  "rules": {
+    "files": "error",
+    "dependencies": "error",
+    "unlisted": "error",
+    "exports": "warn",
+    "nsExports": "warn",
+    "classMembers": "warn",
+    "types": "warn",
+    "nsTypes": "warn",
+    "enumMembers": "warn",
+    "duplicates": "error"
+  },
+  "includeEntryExports": false
+}
