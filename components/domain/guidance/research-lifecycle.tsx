@@ -1,7 +1,5 @@
 "use client";
 
-import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
-import { researchStatusAtom } from "@/lib/state/researchAtoms";
 import { useAtomValue } from "jotai";
 import {
     Brain,
@@ -13,6 +11,9 @@ import {
     Search,
 } from "lucide-react";
 import type { ReactElement } from "react";
+
+import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
+import { researchStatusAtom } from "@/lib/state/researchAtoms";
 
 export function ResearchLifecycle() {
     const status = useAtomValue(researchStatusAtom);

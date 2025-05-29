@@ -1,4 +1,4 @@
-import axios, { type AxiosError } from "axios";
+import axios, { isAxiosError, type AxiosError } from "axios";
 import * as dotenv from "dotenv";
 
 // Load environment variables
@@ -191,7 +191,7 @@ export async function executeExaSearch(
         console.log(`Exa search yielded ${bamlResults.length} results.`);
         return bamlResults;
     } catch (error) {
-        if (axios.isAxiosError(error)) {
+        if (isAxiosError(error)) {
             const axiosError = error as AxiosError;
             console.error(
                 `Error executing Exa search for query "${bamlSearchQuery.query_string}":`,

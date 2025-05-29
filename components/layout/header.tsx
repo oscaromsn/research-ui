@@ -1,9 +1,10 @@
 "use client";
 
-import { SettingsModal } from "@domain/guidance/modals/settings-modal";
-import { ResearchLifecycle } from "@domain/guidance/research-lifecycle";
 import { Play, Save, User } from "lucide-react";
 import { useState } from "react";
+
+import { SettingsModal } from "@domain/guidance/modals/settings-modal";
+import { ResearchLifecycle } from "@domain/guidance/research-lifecycle";
 export function Header() {
     const [showSettings, setShowSettings] = useState(false);
     return (

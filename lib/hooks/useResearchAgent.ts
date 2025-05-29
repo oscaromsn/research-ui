@@ -1,5 +1,8 @@
 "use client";
 
+import { useAtomValue, useSetAtom } from "jotai";
+import { useCallback, useState } from "react";
+
 import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import type {
     ResearchStage,
@@ -18,8 +21,6 @@ import type {
     ClientAnalyzedDoc,
     ClientSynthesis,
 } from "@/lib/state/researchAtoms";
-import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useState } from "react";
 
 interface QueryData {
     query_string: string;

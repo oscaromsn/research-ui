@@ -4,7 +4,6 @@ import { b } from "@/baml_client";
 import type {
     AnalyzedDocument,
     FinalLegalReport,
-    LegalQueryAnalysis,
     NextActionType,
     OverallSynthesis,
     ResearchAssessment,
@@ -163,7 +162,6 @@ export async function conductResearch(
             });
 
             // Pipeline variables
-            let queryAnalysis: LegalQueryAnalysis;
             let searchResultItems: SearchResultItem[] = [];
             let analyzedDocs: AnalyzedDocument[] = [];
 
@@ -175,7 +173,7 @@ export async function conductResearch(
                 message: "Generating initial search queries...",
             });
 
-            queryAnalysis = await b.GenerateLegalSearchQueries(legalQuestion);
+            const queryAnalysis = await b.GenerateLegalSearchQueries(legalQuestion);
 
             // Send client-friendly summary
             await sendUpdate(writer, encoder, {

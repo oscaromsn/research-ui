@@ -1,13 +1,15 @@
 "use client";
 
+import { useAtomValue, useSetAtom } from "jotai";
+import { Brain, Gavel, Scroll } from "lucide-react";
+import { useState } from "react";
+
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 import {
     analyzedDocsSummaryAtom,
     selectedAnalyzedDocIdAtom,
 } from "@/lib/state/researchAtoms";
-import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
-import { useAtomValue, useSetAtom } from "jotai";
-import { Brain, Gavel, Scroll } from "lucide-react";
-import { useState } from "react";
+
 import { AnalysisReasoningModal } from "./modals/analysis-reasoning-modal";
 import { CaseModal } from "./modals/case-modal";
 

@@ -1,9 +1,10 @@
 "use client";
 
-import { finalReportContentAtom } from "@/lib/state/researchAtoms";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Download, FileText, Save, Share2 } from "lucide-react";
 import { useState } from "react";
+
+import { finalReportContentAtom } from "@/lib/state/researchAtoms";
 
 export function ReportDrafter() {
     const report = useAtomValue(finalReportContentAtom);

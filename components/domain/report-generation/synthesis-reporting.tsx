@@ -1,9 +1,11 @@
 "use client";
 
-import { synthesisDetailsAtom } from "@/lib/state/researchAtoms";
 import { useAtomValue } from "jotai";
 import { Brain, ChevronRight } from "lucide-react";
 import { useState } from "react";
+
+import { synthesisDetailsAtom } from "@/lib/state/researchAtoms";
+
 import { SynthesisReasoningModal } from "./modals/synthesis-reasoning-modal";
 import { ReportDrafter } from "./report-drafter";
 export function SynthesisReporting() {

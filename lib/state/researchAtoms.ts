@@ -1,7 +1,8 @@
 // lib/state/researchAtoms.ts
 
-import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
 import { atom } from "jotai";
+
+import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
 
 // --- Client-Friendly Data Structures ---
 

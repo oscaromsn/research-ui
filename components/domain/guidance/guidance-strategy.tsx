@@ -1,13 +1,14 @@
 "use client";
 
+import { useAtomValue } from "jotai";
+import { AlertTriangle, Brain, ChevronDown, ChevronRight } from "lucide-react";
+import { useState } from "react";
+
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
     generatedQueriesAtom,
     researchLogAtom,
 } from "@/lib/state/researchAtoms";
-import { useAtomValue } from "jotai";
-import { AlertTriangle, Brain, ChevronDown, ChevronRight } from "lucide-react";
-import { useState } from "react";
 export function GuidanceStrategy() {
     const [isAssessmentExpanded, setIsAssessmentExpanded] = useState(false);
     const [legalQuestion, setLegalQuestion] = useState("");
