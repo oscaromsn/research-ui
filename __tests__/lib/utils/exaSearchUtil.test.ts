@@ -231,7 +231,7 @@ describe("executeExaSearch", () => {
 
         // Verify
         expect(results).toHaveLength(1);
-        expect(results[0].snippet).toBeUndefined();
+        expect(results[0].snippet).toBeNull();
     });
 
     it("should set contents.text=true when fetchFullText is true", async () => {

@@ -151,7 +151,7 @@ export async function executeExaSearch(
 
     const bamlResults: BamlSearchResultItem[] = exaResults.map(
       (exaRes: ExaApiResult) => {
-        let snippet: string | undefined = undefined;
+        let snippet: string | null = null;
         if (exaRes.highlights && exaRes.highlights.length > 0) {
           // Combine highlights into a single snippet, or take the first few.
           // For legal, multiple distinct highlights might be better represented as string[]

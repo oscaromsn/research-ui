@@ -42,7 +42,7 @@ describe("Phase 2 Completion Criteria Validation", () => {
                 message: expect.any(String),
                 currentProcessedDoc: 0,
                 totalDocsToProcess: 0,
-                currentStreamingField: undefined,
+                currentStreamingField: null,
             });
         });
 

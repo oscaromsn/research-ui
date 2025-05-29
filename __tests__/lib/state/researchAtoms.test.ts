@@ -45,7 +45,7 @@ describe("ResearchAtoms - Type Definitions and Initial States", () => {
                 message: "Ready to start research.",
                 currentProcessedDoc: 0,
                 totalDocsToProcess: 0,
-                currentStreamingField: undefined,
+                currentStreamingField: null,
             });
         });
 
@@ -371,7 +371,7 @@ describe("ResearchAtoms - Reset Functionality", () => {
             message: "Ready.",
             currentProcessedDoc: 0,
             totalDocsToProcess: 0,
-            currentStreamingField: undefined,
+            currentStreamingField: null,
         });
 
         expect(store.get(researchLogAtom)).toEqual([]);

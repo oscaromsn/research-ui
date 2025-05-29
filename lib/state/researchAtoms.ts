@@ -110,7 +110,7 @@ export interface ResearchStatus {
   message?: string; // General status message from orchestrator
   currentProcessedDoc?: number;
   totalDocsToProcess?: number;
-  currentStreamingField?: string; // e.g., "executiveSummary", "sections[0].content"
+  currentStreamingField?: string | null; // e.g., "executiveSummary", "sections[0].content"
 }
 
 // --- Core Jotai Atoms ---
@@ -123,7 +123,7 @@ export const researchStatusAtom = atom<ResearchStatus>({
   message: "Ready to start research.",
   currentProcessedDoc: 0,
   totalDocsToProcess: 0,
-  currentStreamingField: undefined,
+  currentStreamingField: null,
 });
 
 // FR3.1.2: researchLogAtom
@@ -208,7 +208,7 @@ export const resetResearchStateAtom = atom(null, (get, set, _value) => {
     message: "Ready.",
     currentProcessedDoc: 0,
     totalDocsToProcess: 0,
-    currentStreamingField: undefined,
+    currentStreamingField: null,
   });
   set(researchLogAtom, []);
   set(generatedQueriesAtom, []);

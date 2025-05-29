@@ -39,7 +39,7 @@ describe("ResearchLifecycle Component Integration", () => {
             message: "Starting research...",
             currentProcessedDoc: 0,
             totalDocsToProcess: 0,
-            currentStreamingField: undefined,
+            currentStreamingField: null,
         });
 
         renderWithProvider(createElement(ResearchLifecycle));
@@ -56,7 +56,7 @@ describe("ResearchLifecycle Component Integration", () => {
             message: "Generating search queries...",
             currentProcessedDoc: 0,
             totalDocsToProcess: 0,
-            currentStreamingField: undefined,
+            currentStreamingField: null,
         });
 
         renderWithProvider(createElement(ResearchLifecycle));
@@ -77,7 +77,7 @@ describe("ResearchLifecycle Component Integration", () => {
             message: "Fetching documents...",
             currentProcessedDoc: 0,
             totalDocsToProcess: 5,
-            currentStreamingField: undefined,
+            currentStreamingField: null,
         });
 
         renderWithProvider(createElement(ResearchLifecycle));
@@ -94,7 +94,7 @@ describe("ResearchLifecycle Component Integration", () => {
             message: "Analyzing documents...",
             currentProcessedDoc: 2,
             totalDocsToProcess: 5,
-            currentStreamingField: undefined,
+            currentStreamingField: null,
         });
 
         renderWithProvider(createElement(ResearchLifecycle));
@@ -111,7 +111,7 @@ describe("ResearchLifecycle Component Integration", () => {
             message: "Synthesizing findings...",
             currentProcessedDoc: 5,
             totalDocsToProcess: 5,
-            currentStreamingField: undefined,
+            currentStreamingField: null,
         });
 
         renderWithProvider(createElement(ResearchLifecycle));
@@ -145,7 +145,7 @@ describe("ResearchLifecycle Component Integration", () => {
             message: "Analyzing documents...",
             currentProcessedDoc: 2,
             totalDocsToProcess: 5,
-            currentStreamingField: undefined,
+            currentStreamingField: null,
         });
 
         renderWithProvider(createElement(ResearchLifecycle));
@@ -163,7 +163,7 @@ describe("ResearchLifecycle Component Integration", () => {
             message: "Research completed successfully.",
             currentProcessedDoc: 5,
             totalDocsToProcess: 5,
-            currentStreamingField: undefined,
+            currentStreamingField: null,
         });
 
         renderWithProvider(createElement(ResearchLifecycle));
@@ -191,7 +191,7 @@ describe("ResearchLifecycle Component Integration", () => {
             message: "An error occurred during analysis.",
             currentProcessedDoc: 2,
             totalDocsToProcess: 5,
-            currentStreamingField: undefined,
+            currentStreamingField: null,
         });
 
         renderWithProvider(createElement(ResearchLifecycle));
@@ -209,7 +209,7 @@ describe("ResearchLifecycle Component Integration", () => {
             message: "Analyzing documents...",
             currentProcessedDoc: 2,
             totalDocsToProcess: 5,
-            currentStreamingField: undefined,
+            currentStreamingField: null,
         });
 
         renderWithProvider(createElement(ResearchLifecycle));
@@ -228,7 +228,7 @@ describe("ResearchLifecycle Component Integration", () => {
             message: "Ready to start research.",
             currentProcessedDoc: 0,
             totalDocsToProcess: 0,
-            currentStreamingField: undefined,
+            currentStreamingField: null,
         });
 
         renderWithProvider(createElement(ResearchLifecycle));
