@@ -1,7 +1,10 @@
-/** @type {import('lint-staged').Config} */
-module.exports = {
-  // TypeScript and JavaScript files
-  "**/*.{ts,tsx,js,jsx}": [
+/**
+ * Lint-staged configuration for LexiSynth project
+ * @type {import('lint-staged').Configuration}
+ */
+const config = {
+  // TypeScript and JavaScript files (app & components)
+  "{app,components,lib}/**/*.{ts,tsx,js,jsx}": [
     "biome format --write",
     "eslint --fix --quiet",
     "vitest related --run --reporter=verbose",
@@ -11,28 +14,24 @@ module.exports = {
   "baml_src/**/*.baml": [() => "pnpm baml:generate", () => "pnpm baml:test"],
 
   // JSON files
-  "**/*.json": ["biome format --write"],
+  "**/*.{json,jsonc}": ["biome format --write"],
 
-  // CSS files
-  "**/*.{css,scss,sass}": ["biome format --write"],
-
-  // Markdown files (skip biome as it doesn't support .md)
-  "**/*.md": [
-    // Skip formatting for markdown files
-  ],
+  // Configuration files (JS/MJS/TS) - use ESLint only for config files
+  "*.{js,mjs,ts}": ["eslint --fix --quiet"],
 
   // Package.json changes - run install
   "package.json": [() => "pnpm install --frozen-lockfile"],
 
-  // Configuration file changes - run typecheck
+  // TypeScript configuration changes - run typecheck
   "{tsconfig.json,eslint.config.mjs,biome.json,next.config.ts}": [
     () => "pnpm typecheck",
   ],
 
-  // Test file changes - run related tests
+  // Test files - use ESLint only since biome ignores test files
   "**/*.{test,spec}.{ts,tsx,js,jsx}": [
     "eslint --fix --quiet",
-    "biome format --write",
     "vitest related --run --reporter=verbose",
   ],
 };
+
+export default config;
