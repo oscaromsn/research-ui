@@ -65,11 +65,13 @@
         "eslint-plugin-tailwindcss": "^3.18.0",
         "eslint-plugin-testing-library": "^7.2.2",
         "eslint-plugin-unicorn": "^59.0.1",
+        "globals": "^16.2.0",
         "happy-dom": "17.4.7",
         "tailwindcss": "4.1.7",
         "tw-animate-css": "1.3.0",
         "type-coverage": "^2.29.7",
         "typescript": "5.8.3",
+        "typescript-eslint": "^8.33.0",
         "vitest": "3.1.4"
     }
 }
