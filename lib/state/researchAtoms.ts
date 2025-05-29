@@ -11,8 +11,8 @@ import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
  * Simplified from the full BAML SearchQueryItem type for UI consumption.
  */
 export interface ClientSearchQuery {
-    query_string: string;
-    expected_information_summary?: string; // Summarized from BAML type
+  query_string: string;
+  expected_information_summary?: string; // Summarized from BAML type
 }
 
 /**
@@ -20,16 +20,16 @@ export interface ClientSearchQuery {
  * Simplified from the full BAML LegalEntity type for UI consumption.
  */
 export interface ClientLegalEntity {
-    name: string;
-    type:
-        | "Case"
-        | "Statute"
-        | "Regulation"
-        | "Person"
-        | "Organization"
-        | "LegalConcept"
-        | "Jurisdiction";
-    details?: string;
+  name: string;
+  type:
+    | "Case"
+    | "Statute"
+    | "Regulation"
+    | "Person"
+    | "Organization"
+    | "LegalConcept"
+    | "Jurisdiction";
+  details?: string;
 }
 
 /**
@@ -37,11 +37,11 @@ export interface ClientLegalEntity {
  * Contains summarized versions of the detailed reasoning steps for UI display.
  */
 export interface ClientAnalysisReasoning {
-    analyzeLegalQuestionSummary: string;
-    considerRelevantPrinciplesSummary: string;
-    formulateSearchQueriesSummary?: string;
-    specifyExpectedInfoSummary?: string;
-    ensureComprehensiveCoverageSummary?: string;
+  analyzeLegalQuestionSummary: string;
+  considerRelevantPrinciplesSummary: string;
+  formulateSearchQueriesSummary?: string;
+  specifyExpectedInfoSummary?: string;
+  ensureComprehensiveCoverageSummary?: string;
 }
 
 /**
@@ -49,41 +49,41 @@ export interface ClientAnalysisReasoning {
  * Contains UI-relevant fields extracted from the full BAML AnalyzedDocument type.
  */
 export interface ClientAnalyzedDoc {
-    docId: string; // Corresponds to SearchResultItem.id
-    title?: string;
-    url?: string;
-    relevanceScore?: number;
-    confidenceScore?: number;
-    summarySnippet?: string; // Potentially streaming, progressively built
+  docId: string; // Corresponds to SearchResultItem.id
+  title?: string;
+  url?: string;
+  relevanceScore?: number;
+  confidenceScore?: number;
+  summarySnippet?: string; // Potentially streaming, progressively built
 
-    // Extended analysis data for evidence analysis display
-    keyArguments?: string[];
-    extractedEntities?: ClientLegalEntity[];
-    extractedQuotes?: string[];
-    fullText?: string;
-    counterArguments?: string[];
+  // Extended analysis data for evidence analysis display
+  keyArguments?: string[];
+  extractedEntities?: ClientLegalEntity[];
+  extractedQuotes?: string[];
+  fullText?: string;
+  counterArguments?: string[];
 
-    // Analysis reasoning for modal display
-    analysisReasoning?: ClientAnalysisReasoning;
+  // Analysis reasoning for modal display
+  analysisReasoning?: ClientAnalysisReasoning;
 }
 
 export interface ClientSynthesisTopic {
-    title: string;
-    synthesisSnippet: string; // Potentially streaming
-    confidence?: number;
-    docIds?: string[];
+  title: string;
+  synthesisSnippet: string; // Potentially streaming
+  confidence?: number;
+  docIds?: string[];
 }
 
 export interface ClientSynthesis {
-    topics: ClientSynthesisTopic[];
-    unansweredAspects?: string[];
-    emergingQuestions?: string[];
-    reasoningSummary?: string; // Summarized
+  topics: ClientSynthesisTopic[];
+  unansweredAspects?: string[];
+  emergingQuestions?: string[];
+  reasoningSummary?: string; // Summarized
 }
 
 export interface ClientReportSection {
-    title: string;
-    content: string; // Potentially streaming
+  title: string;
+  content: string; // Potentially streaming
 }
 
 /**
@@ -91,12 +91,12 @@ export interface ClientReportSection {
  * Optimized for UI display with support for progressive text streaming.
  */
 export interface ClientFinalReport {
-    title: string;
-    executiveSummary: string; // Potentially streaming
-    sections: ClientReportSection[];
-    conclusion: string; // Potentially streaming
-    limitations?: string[];
-    appendixDocIds?: string[];
+  title: string;
+  executiveSummary: string; // Potentially streaming
+  sections: ClientReportSection[];
+  conclusion: string; // Potentially streaming
+  limitations?: string[];
+  appendixDocIds?: string[];
 }
 
 /**
@@ -104,26 +104,26 @@ export interface ClientFinalReport {
  * Contains all information needed for UI status display and progress tracking.
  */
 export interface ResearchStatus {
-    stage: ResearchStage | null;
-    isLoading: boolean;
-    error: string | null;
-    message?: string; // General status message from orchestrator
-    currentProcessedDoc?: number;
-    totalDocsToProcess?: number;
-    currentStreamingField?: string; // e.g., "executiveSummary", "sections[0].content"
+  stage: ResearchStage | null;
+  isLoading: boolean;
+  error: string | null;
+  message?: string; // General status message from orchestrator
+  currentProcessedDoc?: number;
+  totalDocsToProcess?: number;
+  currentStreamingField?: string; // e.g., "executiveSummary", "sections[0].content"
 }
 
 // --- Core Jotai Atoms ---
 
 // FR3.1.1: researchStatusAtom
 export const researchStatusAtom = atom<ResearchStatus>({
-    stage: "IDLE", // Initial stage
-    isLoading: false,
-    error: null,
-    message: "Ready to start research.",
-    currentProcessedDoc: 0,
-    totalDocsToProcess: 0,
-    currentStreamingField: undefined,
+  stage: "IDLE", // Initial stage
+  isLoading: false,
+  error: null,
+  message: "Ready to start research.",
+  currentProcessedDoc: 0,
+  totalDocsToProcess: 0,
+  currentStreamingField: undefined,
 });
 
 // FR3.1.2: researchLogAtom
@@ -138,41 +138,41 @@ export const analyzedDocsSummaryAtom = atom<ClientAnalyzedDoc[]>([]);
 
 // FR3.1.5: synthesisDetailsAtom
 export const synthesisDetailsAtom = atom<ClientSynthesis>({
-    topics: [],
-    unansweredAspects: [],
-    emergingQuestions: [],
-    reasoningSummary: "",
+  topics: [],
+  unansweredAspects: [],
+  emergingQuestions: [],
+  reasoningSummary: "",
 });
 
 // FR3.1.6: finalReportContentAtom
 export const finalReportContentAtom = atom<ClientFinalReport>({
-    title: "",
-    executiveSummary: "",
-    sections: [],
-    conclusion: "",
-    limitations: [],
-    appendixDocIds: [],
+  title: "",
+  executiveSummary: "",
+  sections: [],
+  conclusion: "",
+  limitations: [],
+  appendixDocIds: [],
 });
 
 // --- Derived Atoms (Optional but Recommended for UI Convenience) ---
 
 export const isResearchLoadingAtom = atom(
-    (get) => get(researchStatusAtom).isLoading,
+  (get) => get(researchStatusAtom).isLoading
 );
 
 export const currentResearchStageAtom = atom(
-    (get) => get(researchStatusAtom).stage,
+  (get) => get(researchStatusAtom).stage
 );
 
 export const researchErrorAtom = atom((get) => get(researchStatusAtom).error);
 
 // Example: Atom for a specific streaming text field for easier consumption
 export const executiveSummaryDisplayAtom = atom(
-    (get) => get(finalReportContentAtom).executiveSummary,
+  (get) => get(finalReportContentAtom).executiveSummary
 );
 
 export const reportSectionsDisplayAtom = atom(
-    (get) => get(finalReportContentAtom).sections,
+  (get) => get(finalReportContentAtom).sections
 );
 
 // Atom for tracking which analyzed document is currently selected in the UI
@@ -201,33 +201,33 @@ export const selectedAnalyzedDocIdAtom = atom<string | null>(null);
  * ```
  */
 export const resetResearchStateAtom = atom(null, (get, set, _value) => {
-    set(researchStatusAtom, {
-        stage: "IDLE",
-        isLoading: false,
-        error: null,
-        message: "Ready.",
-        currentProcessedDoc: 0,
-        totalDocsToProcess: 0,
-        currentStreamingField: undefined,
-    });
-    set(researchLogAtom, []);
-    set(generatedQueriesAtom, []);
-    set(analyzedDocsSummaryAtom, []);
-    set(synthesisDetailsAtom, {
-        topics: [],
-        unansweredAspects: [],
-        emergingQuestions: [],
-        reasoningSummary: "",
-    });
-    set(finalReportContentAtom, {
-        title: "",
-        executiveSummary: "",
-        sections: [],
-        conclusion: "",
-        limitations: [],
-        appendixDocIds: [],
-    });
-    set(selectedAnalyzedDocIdAtom, null);
+  set(researchStatusAtom, {
+    stage: "IDLE",
+    isLoading: false,
+    error: null,
+    message: "Ready.",
+    currentProcessedDoc: 0,
+    totalDocsToProcess: 0,
+    currentStreamingField: undefined,
+  });
+  set(researchLogAtom, []);
+  set(generatedQueriesAtom, []);
+  set(analyzedDocsSummaryAtom, []);
+  set(synthesisDetailsAtom, {
+    topics: [],
+    unansweredAspects: [],
+    emergingQuestions: [],
+    reasoningSummary: "",
+  });
+  set(finalReportContentAtom, {
+    title: "",
+    executiveSummary: "",
+    sections: [],
+    conclusion: "",
+    limitations: [],
+    appendixDocIds: [],
+  });
+  set(selectedAnalyzedDocIdAtom, null);
 });
 
 /*

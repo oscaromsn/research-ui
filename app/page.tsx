@@ -4,14 +4,14 @@ import { SynthesisReporting } from "@domain/report-generation/synthesis-reportin
 import { Header } from "@layout/header";
 
 export default function Home() {
-    return (
-        <>
-            <Header />
-            <main className="flex md:flex-row flex-col flex-1 w-full overflow-hidden">
-                <GuidanceStrategy />
-                <EvidenceAnalysis />
-                <SynthesisReporting />
-            </main>
-        </>
-    );
+  return (
+    <>
+      <Header />
+      <main className="flex md:flex-row flex-col flex-1 w-full overflow-hidden">
+        <GuidanceStrategy />
+        <EvidenceAnalysis />
+        <SynthesisReporting />
+      </main>
+    </>
+  );
 }

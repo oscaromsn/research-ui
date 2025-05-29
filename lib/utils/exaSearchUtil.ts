@@ -7,71 +7,71 @@ dotenv.config();
 // Assuming BAML-generated types are available.
 // You might need to adjust the import path based on your `generators.baml` output_dir.
 import type {
-    SearchResultItem as BamlSearchResultItem,
-    SearchQueryItem,
+  SearchResultItem as BamlSearchResultItem,
+  SearchQueryItem,
 } from "@/baml_client/types";
 
 // --- Interfaces for Exa API Response (based on OpenAPI spec and examples) ---
 
 interface ExaHighlightOptions {
-    num_sentences?: number;
-    highlights_per_url?: number;
-    query?: string; // A query to focus highlights, different from the main search query
+  num_sentences?: number;
+  highlights_per_url?: number;
+  query?: string; // A query to focus highlights, different from the main search query
 }
 
 interface ExaTextOptions {
-    max_characters?: number;
-    include_html_tags?: boolean;
+  max_characters?: number;
+  include_html_tags?: boolean;
 }
 
 interface ExaContentsOptions {
-    text?: boolean | ExaTextOptions;
-    highlights?: boolean | ExaHighlightOptions;
-    // summary?: boolean | { query?: string; schema?: any }; // If you plan to use Exa's summary
+  text?: boolean | ExaTextOptions;
+  highlights?: boolean | ExaHighlightOptions;
+  // summary?: boolean | { query?: string; schema?: any }; // If you plan to use Exa's summary
 }
 
 interface ExaSearchRequestBody {
-    query: string;
-    num_results?: number;
-    include_domains?: string[];
-    exclude_domains?: string[];
-    start_crawl_date?: string; // ISO 8601
-    end_crawl_date?: string; // ISO 8601
-    start_published_date?: string; // ISO 8601
-    end_published_date?: string; // ISO 8601
-    type?: "keyword" | "neural" | "auto";
-    category?:
-        | "company"
-        | "research paper"
-        | "news"
-        | "pdf"
-        | "github"
-        | "tweet"
-        | "personal site"
-        | "linkedin profile"
-        | "financial report"; // and others
-    contents?: ExaContentsOptions;
-    // use_autoprompt?: boolean; // This seems to be part of older or specific SDK methods, for API it's often handled by query phrasing
+  query: string;
+  num_results?: number;
+  include_domains?: string[];
+  exclude_domains?: string[];
+  start_crawl_date?: string; // ISO 8601
+  end_crawl_date?: string; // ISO 8601
+  start_published_date?: string; // ISO 8601
+  end_published_date?: string; // ISO 8601
+  type?: "keyword" | "neural" | "auto";
+  category?:
+    | "company"
+    | "research paper"
+    | "news"
+    | "pdf"
+    | "github"
+    | "tweet"
+    | "personal site"
+    | "linkedin profile"
+    | "financial report"; // and others
+  contents?: ExaContentsOptions;
+  // use_autoprompt?: boolean; // This seems to be part of older or specific SDK methods, for API it's often handled by query phrasing
 }
 
 interface ExaApiResult {
-    id: string; // Exa's internal ID for the document
-    url: string;
-    title?: string | null;
-    author?: string | null;
-    score?: number | null;
-    publishedDate?: string | null; // Format "YYYY-MM-DD" or full ISO8601 from Exa
-    text?: string; // Full text content if requested
-    highlights?: string[];
-    highlightScores?: number[];
-    // Other fields like 'image', 'favicon' might exist
+  id: string; // Exa's internal ID for the document
+  url: string;
+  title?: string | null;
+  author?: string | null;
+  score?: number | null;
+  publishedDate?: string | null; // Format "YYYY-MM-DD" or full ISO8601 from Exa
+  text?: string; // Full text content if requested
+  highlights?: string[];
+  highlightScores?: number[];
+  // Other fields like 'image', 'favicon' might exist
 }
 
 interface ExaSearchApiResponse {
-    results: ExaApiResult[];
-    autopromptString?: string | null; // If Exa modifies the query
-    requestId?: string;
-    // resolvedSearchType?: 'keyword' | 'neural'; // If type='auto'
+  results: ExaApiResult[];
+  autopromptString?: string | null; // If Exa modifies the query
+  requestId?: string;
+  // resolvedSearchType?: 'keyword' | 'neural'; // If type='auto'
 }
 
 // --- Configuration ---
@@ -81,9 +81,9 @@ const EXA_API_KEY = process.env.EXA_API_KEY;
 
 // Check if API key is available
 if (!EXA_API_KEY) {
-    console.warn(
-        "EXA_API_KEY environment variable is not set. Exa searches will fail.",
-    );
+  console.warn(
+    "EXA_API_KEY environment variable is not set. Exa searches will fail."
+  );
 }
 
 // --- Utility Function ---
@@ -99,113 +99,111 @@ if (!EXA_API_KEY) {
  * @returns A promise that resolves to an array of BamlSearchResultItem.
  */
 export async function executeExaSearch(
-    bamlSearchQuery: SearchQueryItem,
-    numResults = 5, // Default to 5 results
-    fetchFullText = true,
-    numHighlightSentences = 3, // Default to 3 sentences for highlights
+  bamlSearchQuery: SearchQueryItem,
+  numResults = 5, // Default to 5 results
+  fetchFullText = true,
+  numHighlightSentences = 3 // Default to 3 sentences for highlights
 ): Promise<BamlSearchResultItem[]> {
-    if (!EXA_API_KEY) {
-        throw new Error(
-            "EXA_API_KEY environment variable is not set. Please check your .env.local file.",
-        );
-    }
+  if (!EXA_API_KEY) {
+    throw new Error(
+      "EXA_API_KEY environment variable is not set. Please check your .env.local file."
+    );
+  }
 
-    const requestBody: ExaSearchRequestBody = {
-        query: bamlSearchQuery.query_string,
-        num_results: numResults,
-        type: "auto", // Leveraging Exa's auto search type selection
-        contents: {},
+  const requestBody: ExaSearchRequestBody = {
+    query: bamlSearchQuery.query_string,
+    num_results: numResults,
+    type: "auto", // Leveraging Exa's auto search type selection
+    contents: {},
+  };
+
+  if (fetchFullText) {
+    if (!requestBody.contents) requestBody.contents = {};
+    requestBody.contents.text = true; // Request full text
+  }
+
+  if (numHighlightSentences > 0) {
+    if (!requestBody.contents) requestBody.contents = {};
+    requestBody.contents.highlights = {
+      num_sentences: numHighlightSentences,
+      // You could potentially use parts of bamlSearchQuery.expected_information
+      // to formulate a more targeted highlight query if desired.
+      // query: `Information related to: ${bamlSearchQuery.expected_information[0]}`
     };
+  }
 
-    if (fetchFullText) {
-        if (!requestBody.contents) requestBody.contents = {};
-        requestBody.contents.text = true; // Request full text
-    }
+  try {
+    console.log(`Executing Exa search for: "${bamlSearchQuery.query_string}"`);
+    const response = await axios.post<ExaSearchApiResponse>(
+      `${EXA_API_BASE_URL}/search`,
+      requestBody,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": EXA_API_KEY, // Exa uses x-api-key header for authentication
+          // 'Authorization': `Bearer ${EXA_API_KEY}`, // Some APIs use Bearer
+        },
+      }
+    );
 
-    if (numHighlightSentences > 0) {
-        if (!requestBody.contents) requestBody.contents = {};
-        requestBody.contents.highlights = {
-            num_sentences: numHighlightSentences,
-            // You could potentially use parts of bamlSearchQuery.expected_information
-            // to formulate a more targeted highlight query if desired.
-            // query: `Information related to: ${bamlSearchQuery.expected_information[0]}`
-        };
-    }
+    const retrievalDate = new Date().toISOString();
+    const exaResults = response.data.results || [];
 
-    try {
-        console.log(
-            `Executing Exa search for: "${bamlSearchQuery.query_string}"`,
-        );
-        const response = await axios.post<ExaSearchApiResponse>(
-            `${EXA_API_BASE_URL}/search`,
-            requestBody,
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-api-key": EXA_API_KEY, // Exa uses x-api-key header for authentication
-                    // 'Authorization': `Bearer ${EXA_API_KEY}`, // Some APIs use Bearer
-                },
-            },
-        );
-
-        const retrievalDate = new Date().toISOString();
-        const exaResults = response.data.results || [];
-
-        const bamlResults: BamlSearchResultItem[] = exaResults.map(
-            (exaRes: ExaApiResult) => {
-                let snippet: string | undefined = undefined;
-                if (exaRes.highlights && exaRes.highlights.length > 0) {
-                    // Combine highlights into a single snippet, or take the first few.
-                    // For legal, multiple distinct highlights might be better represented as string[]
-                    snippet = exaRes.highlights.slice(0, 2).join(" ... "); // Example: join first 2 highlights
-                }
-
-                const metadata: Record<string, string> = {
-                    exa_internal_id: exaRes.id,
-                };
-                if (response.data.autopromptString) {
-                    metadata.exa_autoprompt = response.data.autopromptString;
-                }
-                // if (response.data.resolvedSearchType) {
-                //   metadata.exa_resolved_search_type = response.data.resolvedSearchType;
-                // }
-
-                return {
-                    id: exaRes.url, // Using URL as the primary ID for simplicity in BAML
-                    url: exaRes.url,
-                    title: exaRes.title ?? undefined,
-                    source_name: "Exa Search",
-                    snippet: snippet,
-                    // highlights: exaRes.highlights ?? undefined, // If you changed SearchResultItem to have highlights: string[]
-                    full_text: exaRes.text ?? undefined,
-                    published_date: exaRes.publishedDate ?? undefined,
-                    retrieval_date: retrievalDate,
-                    author: exaRes.author ?? undefined,
-                    score: exaRes.score ?? undefined,
-                    original_query: bamlSearchQuery, // Pass through the original BAML query
-                    metadata: metadata,
-                };
-            },
-        );
-
-        console.log(`Exa search yielded ${bamlResults.length} results.`);
-        return bamlResults;
-    } catch (error) {
-        if (isAxiosError(error)) {
-            const axiosError = error as AxiosError;
-            console.error(
-                `Error executing Exa search for query "${bamlSearchQuery.query_string}":`,
-                axiosError.response?.status,
-                axiosError.response?.data,
-            );
-            // Consider re-throwing a custom error or returning an empty array based on agent's needs
-            throw new Error(
-                `Exa API request failed with status ${axiosError.response?.status}: ${JSON.stringify(axiosError.response?.data)}`,
-            );
+    const bamlResults: BamlSearchResultItem[] = exaResults.map(
+      (exaRes: ExaApiResult) => {
+        let snippet: string | undefined = undefined;
+        if (exaRes.highlights && exaRes.highlights.length > 0) {
+          // Combine highlights into a single snippet, or take the first few.
+          // For legal, multiple distinct highlights might be better represented as string[]
+          snippet = exaRes.highlights.slice(0, 2).join(" ... "); // Example: join first 2 highlights
         }
 
-        // Handle non-Axios errors
-        console.error("An unexpected error occurred during Exa search:", error);
-        throw error;
+        const metadata: Record<string, string> = {
+          exa_internal_id: exaRes.id,
+        };
+        if (response.data.autopromptString) {
+          metadata.exa_autoprompt = response.data.autopromptString;
+        }
+        // if (response.data.resolvedSearchType) {
+        //   metadata.exa_resolved_search_type = response.data.resolvedSearchType;
+        // }
+
+        return {
+          id: exaRes.url, // Using URL as the primary ID for simplicity in BAML
+          url: exaRes.url,
+          title: exaRes.title ?? undefined,
+          source_name: "Exa Search",
+          snippet: snippet,
+          // highlights: exaRes.highlights ?? undefined, // If you changed SearchResultItem to have highlights: string[]
+          full_text: exaRes.text ?? undefined,
+          published_date: exaRes.publishedDate ?? undefined,
+          retrieval_date: retrievalDate,
+          author: exaRes.author ?? undefined,
+          score: exaRes.score ?? undefined,
+          original_query: bamlSearchQuery, // Pass through the original BAML query
+          metadata: metadata,
+        };
+      }
+    );
+
+    console.log(`Exa search yielded ${bamlResults.length} results.`);
+    return bamlResults;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      const axiosError = error as AxiosError;
+      console.error(
+        `Error executing Exa search for query "${bamlSearchQuery.query_string}":`,
+        axiosError.response?.status,
+        axiosError.response?.data
+      );
+      // Consider re-throwing a custom error or returning an empty array based on agent's needs
+      throw new Error(
+        `Exa API request failed with status ${axiosError.response?.status}: ${JSON.stringify(axiosError.response?.data)}`
+      );
     }
+
+    // Handle non-Axios errors
+    console.error("An unexpected error occurred during Exa search:", error);
+    throw error;
+  }
 }
