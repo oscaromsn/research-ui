@@ -9,7 +9,7 @@ export default defineConfig({
     environment: "happy-dom",
     globals: true,
     include: ["**/*.{test,spec}.{ts,tsx}"],
-    exclude: ["node_modules", ".next", "dist", ".git"],
+    exclude: ["node_modules", ".next", "dist", ".git", "e2e/**"],
     setupFiles: ["./setupTests.ts"],
     env: {
       // Load environment variables from .env.test file for testing
