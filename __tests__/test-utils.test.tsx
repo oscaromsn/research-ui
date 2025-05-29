@@ -20,7 +20,7 @@ describe("test-utils", () => {
         it("renders components with providers", () => {
             const { getByTestId } = renderWithProviders(<TestComponent />);
             expect(getByTestId("test-component")).toBeInTheDocument();
-            expect(getByTestId("test-component").textContent).toBe(
+            expect(getByTestId("test-component")).toHaveTextContent(
                 "Test Content",
             );
         });

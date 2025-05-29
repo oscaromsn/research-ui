@@ -11,8 +11,8 @@ describe("Button Component", () => {
         expect(button).toBeInTheDocument();
 
         // Check default variant classes
-        expect(button.className).toContain("bg-primary");
-        expect(button.className).toContain("text-primary-foreground");
+        expect(button).toHaveClass("bg-primary");
+        expect(button).toHaveClass("text-primary-foreground");
     });
 
     it("renders the correct variant classes", () => {
@@ -20,49 +20,49 @@ describe("Button Component", () => {
             <Button variant="destructive">Destructive</Button>,
         );
         let button = screen.getByRole("button", { name: /destructive/i });
-        expect(button.className).toContain("bg-destructive");
+        expect(button).toHaveClass("bg-destructive");
 
         rerender(<Button variant="outline">Outline</Button>);
         button = screen.getByRole("button", { name: /outline/i });
-        expect(button.className).toContain("border");
-        expect(button.className).toContain("bg-background");
+        expect(button).toHaveClass("border");
+        expect(button).toHaveClass("bg-background");
 
         rerender(<Button variant="secondary">Secondary</Button>);
         button = screen.getByRole("button", { name: /secondary/i });
-        expect(button.className).toContain("bg-secondary");
+        expect(button).toHaveClass("bg-secondary");
 
         rerender(<Button variant="ghost">Ghost</Button>);
         button = screen.getByRole("button", { name: /ghost/i });
-        expect(button.className).toContain("hover:bg-accent");
+        expect(button).toHaveClass("hover:bg-accent");
 
         rerender(<Button variant="link">Link</Button>);
         button = screen.getByRole("button", { name: /link/i });
-        expect(button.className).toContain("text-primary");
-        expect(button.className).toContain("hover:underline");
+        expect(button).toHaveClass("text-primary");
+        expect(button).toHaveClass("hover:underline");
     });
 
     it("renders different sizes correctly", () => {
         const { rerender } = render(<Button size="sm">Small</Button>);
         let button = screen.getByRole("button", { name: /small/i });
-        expect(button.className).toContain("h-8");
+        expect(button).toHaveClass("h-8");
 
         rerender(<Button size="default">Default</Button>);
         button = screen.getByRole("button", { name: /default/i });
-        expect(button.className).toContain("h-9");
+        expect(button).toHaveClass("h-9");
 
         rerender(<Button size="lg">Large</Button>);
         button = screen.getByRole("button", { name: /large/i });
-        expect(button.className).toContain("h-10");
+        expect(button).toHaveClass("h-10");
 
         rerender(<Button size="icon">Icon</Button>);
         button = screen.getByRole("button", { name: /icon/i });
-        expect(button.className).toContain("size-9");
+        expect(button).toHaveClass("size-9");
     });
 
     it("applies additional className correctly", () => {
         render(<Button className="test-class">With Class</Button>);
         const button = screen.getByRole("button", { name: /with class/i });
-        expect(button.className).toContain("test-class");
+        expect(button).toHaveClass("test-class");
     });
 
     it("supports asChild prop", () => {
@@ -75,8 +75,8 @@ describe("Button Component", () => {
         const linkButton = screen.getByRole("link", { name: /link button/i });
         expect(linkButton).toBeInTheDocument();
         expect(linkButton.tagName).toBe("A");
-        expect(linkButton.getAttribute("href")).toBe("https://example.com");
-        expect(linkButton.className).toContain("bg-primary");
+        expect(linkButton).toHaveAttribute("href", "https://example.com");
+        expect(linkButton).toHaveClass("bg-primary");
     });
 
     it("passes through HTML attributes", () => {

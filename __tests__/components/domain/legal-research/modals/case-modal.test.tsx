@@ -47,7 +47,7 @@ describe("CaseModal Component", () => {
         );
 
         // Check title is passed to Modal
-        expect(screen.getByTestId("modal-title").textContent).toBe(
+        expect(screen.getByTestId("modal-title")).toHaveTextContent(
             mockCaseData.title,
         );
 
@@ -56,9 +56,9 @@ describe("CaseModal Component", () => {
         expect(content).toBeInTheDocument();
 
         // Check if case metadata is rendered
-        expect(content.textContent).toContain(mockCaseData.source);
-        expect(content.textContent).toContain(mockCaseData.court);
-        expect(content.textContent).toContain(mockCaseData.date);
+        expect(content).toHaveTextContent(new RegExp(mockCaseData.source));
+        expect(content).toHaveTextContent(new RegExp(mockCaseData.court));
+        expect(content).toHaveTextContent(new RegExp(mockCaseData.date));
     });
 
     it("does not render when isOpen is false", () => {
@@ -150,7 +150,7 @@ describe("CaseModal Component", () => {
         );
 
         // Title should be displayed
-        expect(screen.getByTestId("modal-title").textContent).toBe(
+        expect(screen.getByTestId("modal-title")).toHaveTextContent(
             "Minimal Case",
         );
 
