@@ -113,5 +113,3 @@ export function createMockLegalEntity(overrides = {}) {
     ...overrides,
   };
 }
-// Test comment
-// Test comment for hooks
