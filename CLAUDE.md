@@ -23,7 +23,7 @@ LexiSynth is a Next.js 15 application designed to assist legal professionals by 
 - **Axios**: HTTP client for external API calls.
 - **Vitest & React Testing Library**: unit/component tests.
 - **Playwright**: E2E tests.
-- **ESLint & Prettier**: Code quality and formatting
+- **Biome & ESLint**: Code quality and formatting
 
 ## Code Standards
 

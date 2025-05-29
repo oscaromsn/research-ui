@@ -183,7 +183,7 @@ pnpm build
 
 ### Import Ordering Warnings
 **Issue**: Many warnings about import order
-**Solution**: Either fix manually or use an auto-formatter. Consider adding Prettier for automatic import sorting.
+**Solution**: Either fix manually or use an auto-formatter.
 
 ### TypeScript Project References
 **Issue**: `project: true` requires proper tsconfig.json
