@@ -1,9 +1,9 @@
 {
   "project": "./tsconfig.json",
-  "atLeast": 98.9,
+  "atLeast": 99.0,
   "detail": true,
   "strict": true,
-  "cache": true,
+  "cache": false,
   "ignoreFiles": [
     "node_modules/**/*",
     ".next/**/*",
@@ -35,6 +35,6 @@
   ],
   "ignoreCatch": false,
   "reportSemanticError": true,
-  "enableCache": true,
-  "showRelativePath": true
+  "enableCache": false,
+  "showRelativePath": false
 }
