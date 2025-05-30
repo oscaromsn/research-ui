@@ -1,6 +1,9 @@
 /**
  * Basic integration test for the research orchestrator
  * Tests the fundamental streaming mechanics before implementing full pipeline
+ * 
+ * NOTE: This test uses mocked BAML client to avoid requiring API keys
+ * For real API tests, see integration tests with API key requirements
  */
 
 import { beforeEach, vi } from "vitest";
@@ -9,6 +12,7 @@ import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator";
 
 // Mock the BAML client to avoid real API calls
+// This allows the test to run without requiring API keys
 vi.mock("@/baml_client", () => import("@/__mocks__/baml_client"));
 
 // Mock the executeExaSearch function to avoid real search API calls during testing

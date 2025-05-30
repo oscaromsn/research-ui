@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { CaseModal } from "@/components/domain/legal-research/modals/case-modal";
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 
 // Mock the Modal component
 vi.mock("@/components/ui/modal", () => ({
@@ -31,11 +32,28 @@ vi.mock("@/components/ui/modal", () => ({
 }));
 
 describe("CaseModal Component", () => {
-    const mockCaseData = {
+    const mockDocumentData: ClientAnalyzedDoc = {
+        docId: "doc-123",
         title: "Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)",
-        source: "Westlaw",
-        court: "N.D. Cal. 2023",
-        date: "Nov 15, 2023",
+        url: "https://westlaw.com/doc/123",
+        relevanceScore: 8.5,
+        confidenceScore: 0.9,
+        summarySnippet: "This case discusses force majeure clauses in contracts during the pandemic.",
+        keyArguments: [
+            "Force majeure clauses must explicitly mention pandemic-related events",
+            "Government mandates may constitute qualifying events",
+            "Mere economic hardship insufficient for impossibility defense"
+        ],
+        extractedEntities: [
+            { name: "N.D. Cal.", type: "Jurisdiction", details: "Northern District of California" },
+            { name: "Smith v. Jones", type: "Case", details: "Legal case" }
+        ],
+        extractedQuotes: [
+            "The court held that force majeure clauses must be interpreted narrowly.",
+            "Economic hardship alone does not trigger impossibility doctrine."
+        ],
+        fullText: "The court, in considering the application of force majeure provisions in the context of the COVID-19 pandemic, held that such clauses must be interpreted narrowly and in accordance with their explicit terms. Furthermore, the mere existence of economic hardship, without more, does not trigger the doctrine of impossibility.",
+        timestamp: "2023-11-15T10:30:00Z"
     };
 
     it("renders when isOpen is true", () => {
@@ -43,23 +61,23 @@ describe("CaseModal Component", () => {
             <CaseModal
                 isOpen={true}
                 onClose={() => {}}
-                caseData={mockCaseData}
+                documentData={mockDocumentData}
             />,
         );
 
         // Check title is passed to Modal
         expect(screen.getByTestId("modal-title")).toHaveTextContent(
-            mockCaseData.title,
+            mockDocumentData.title!,
         );
 
         // Check content is rendered
         const content = screen.getByTestId("modal-content");
         expect(content).toBeInTheDocument();
 
-        // Check if case metadata is rendered
-        expect(content).toHaveTextContent(mockCaseData.source);
-        expect(content).toHaveTextContent(mockCaseData.court);
-        expect(content).toHaveTextContent(mockCaseData.date);
+        // Check if document metadata is rendered
+        expect(content).toHaveTextContent("Case"); // Document type
+        expect(content).toHaveTextContent("N.D. Cal."); // Jurisdiction
+        expect(content).toHaveTextContent("Relevance: 85%"); // Relevance score
     });
 
     it("does not render when isOpen is false", () => {
@@ -67,7 +85,7 @@ describe("CaseModal Component", () => {
             <CaseModal
                 isOpen={false}
                 onClose={() => {}}
-                caseData={mockCaseData}
+                documentData={mockDocumentData}
             />,
         );
 
@@ -82,7 +100,7 @@ describe("CaseModal Component", () => {
             <CaseModal
                 isOpen={true}
                 onClose={onCloseMock}
-                caseData={mockCaseData}
+                documentData={mockDocumentData}
             />,
         );
 
@@ -93,20 +111,21 @@ describe("CaseModal Component", () => {
         expect(onCloseMock).toHaveBeenCalledTimes(1);
     });
 
-    it("renders all case content sections", () => {
+    it("renders all document content sections", () => {
         render(
             <CaseModal
                 isOpen={true}
                 onClose={() => {}}
-                caseData={mockCaseData}
+                documentData={mockDocumentData}
             />,
         );
 
-        // Check main sections
-        expect(screen.getByText("Key Holdings")).toBeInTheDocument();
-        expect(screen.getByText("Full Text")).toBeInTheDocument();
+        // Check main sections that should be rendered with data
+        expect(screen.getByText("Key Arguments & Reasoning")).toBeInTheDocument();
+        expect(screen.getByText("Key Quotes")).toBeInTheDocument();
+        expect(screen.getByText("Summary")).toBeInTheDocument();
 
-        // Check key holdings
+        // Check key arguments
         expect(
             screen.getByText(
                 "Force majeure clauses must explicitly mention pandemic-related events",
@@ -123,30 +142,41 @@ describe("CaseModal Component", () => {
             ),
         ).toBeInTheDocument();
 
-        // Check full text
+        // Check quotes
         expect(
             screen.getByText(
-                /The court, in considering the application of force majeure provisions/,
+                /The court held that force majeure clauses must be interpreted narrowly/,
             ),
         ).toBeInTheDocument();
         expect(
             screen.getByText(
-                /Furthermore, the mere existence of economic hardship/,
+                /Economic hardship alone does not trigger impossibility doctrine/,
             ),
         ).toBeInTheDocument();
 
-        // Check action buttons
-        expect(screen.getByText("View AI Analysis")).toBeInTheDocument();
-        expect(screen.getByText("Cite This Case")).toBeInTheDocument();
+        // Check summary
+        expect(
+            screen.getByText(
+                /This case discusses force majeure clauses in contracts during the pandemic/,
+            ),
+        ).toBeInTheDocument();
+
+        // Check action button - original source link
+        expect(screen.getByText("View Original Source")).toBeInTheDocument();
     });
 
-    it("handles incomplete caseData gracefully", () => {
-        // Render with minimal caseData
+    it("handles incomplete documentData gracefully", () => {
+        // Render with minimal documentData
+        const minimalData: ClientAnalyzedDoc = {
+            docId: "minimal-123",
+            title: "Minimal Case"
+        };
+        
         render(
             <CaseModal
                 isOpen={true}
                 onClose={() => {}}
-                caseData={{ title: "Minimal Case" }}
+                documentData={minimalData}
             />,
         );
 
@@ -155,8 +185,11 @@ describe("CaseModal Component", () => {
             "Minimal Case",
         );
 
-        // Other case data should not cause errors even if missing
+        // Should show default values for missing data
         const content = screen.getByTestId("modal-content");
         expect(content).toBeInTheDocument();
+        expect(content).toHaveTextContent("Case"); // Document type for "Minimal Case" (contains "case")
+        expect(content).toHaveTextContent("Jurisdiction not specified");
+        expect(content).toHaveTextContent("Date not available");
     });
 });

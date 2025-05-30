@@ -3,6 +3,22 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { SearchQueryItem } from "@/baml_client/types";
 import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
+import {
+    ExaConfigError,
+    ExaRateLimitError,
+    ExaAuthError,
+    ExaServerError,
+    ExaClientError,
+    ExaNetworkError,
+    ExaParsingError,
+    isExaRateLimitError,
+    isExaAuthError,
+    isExaServerError,
+    isExaClientError,
+    isExaNetworkError,
+    isExaConfigError,
+    isExaParsingError,
+} from "@/lib/utils/exaSearchErrors";
 
 // Mock axios
 vi.mock("axios", () => ({
@@ -84,7 +100,7 @@ describe("executeExaSearch", () => {
         },
     };
 
-    it("should throw an error with empty EXA_API_KEY", async () => {
+    it("should throw ExaConfigError with empty EXA_API_KEY", async () => {
         // Mock the environment variable to be undefined
         const originalEnv = process.env.EXA_API_KEY;
         delete process.env.EXA_API_KEY;
@@ -95,7 +111,7 @@ describe("executeExaSearch", () => {
 
         try {
             await expect(executeExaSearchWithoutKey(mockSearchQuery)).rejects.toThrow(
-                "EXA_API_KEY environment variable is not set. Please check your .env.local file."
+                "EXA_API_KEY environment variable is not set"
             );
         } finally {
             // Restore the original environment variable
@@ -310,9 +326,9 @@ describe("executeExaSearch", () => {
 
         vi.spyOn(console, "error").mockImplementation(() => {}); // Silence console errors
 
-        // Execute & Verify
+        // Execute & Verify - now expects authentication error with new message format
         await expect(executeExaSearch(mockSearchQuery)).rejects.toThrow(
-            'Exa API authentication failed. Status 401: {"message":"Unauthorized"}',
+            'Invalid or expired API key'
         );
     });
 
@@ -346,9 +362,9 @@ describe("executeExaSearch", () => {
 
         vi.spyOn(console, "error").mockImplementation(() => {});
 
-        // Execute & Verify
+        // Execute & Verify - now expects rate limit error with new message format
         await expect(executeExaSearch(mockSearchQuery)).rejects.toThrow(
-            'Rate limit exceeded for Exa API. Status 429: {"error":"Too many requests"}',
+            'Request rate limit exceeded'
         );
     });
 
@@ -368,9 +384,9 @@ describe("executeExaSearch", () => {
 
         vi.spyOn(console, "error").mockImplementation(() => {});
 
-        // Execute & Verify
+        // Execute & Verify - now expects authorization error with new message format
         await expect(executeExaSearch(mockSearchQuery)).rejects.toThrow(
-            'Exa API authentication failed. Status 403: {"message":"Invalid API key"}',
+            'Insufficient permissions'
         );
     });
 
@@ -390,9 +406,9 @@ describe("executeExaSearch", () => {
 
         vi.spyOn(console, "error").mockImplementation(() => {});
 
-        // Execute & Verify
+        // Execute & Verify - now expects server error with new message format
         await expect(executeExaSearch(mockSearchQuery)).rejects.toThrow(
-            'Exa API server error. Status 500: {"error":"Internal server error"}',
+            'Internal server error'
         );
     });
 
@@ -450,5 +466,342 @@ describe("executeExaSearch", () => {
         const [, requestBody] = mockedAxios.post.mock.calls[0];
         expect(requestBody.contents.text).toBeUndefined();
         expect(requestBody.contents.highlights).toBeUndefined();
+    });
+
+    describe("Custom Error Types", () => {
+        beforeEach(() => {
+            vi.spyOn(console, "error").mockImplementation(() => {}); // Silence console errors
+        });
+
+        it("should throw ExaRateLimitError for 429 status", async () => {
+            const rateLimitError = new Error("Rate limit exceeded");
+            (rateLimitError as any).response = {
+                status: 429,
+                data: { error: "Too many requests", type: "rate_limit" },
+                headers: { "retry-after": "60" },
+            };
+            mockedAxios.post.mockRejectedValueOnce(rateLimitError);
+            mockedIsAxiosError.mockReturnValueOnce(true);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaRateLimitError(error)).toBe(true);
+                if (isExaRateLimitError(error)) {
+                    expect(error.status).toBe(429);
+                    expect(error.retryAfter).toBe(60);
+                    expect(error.rateLimitType).toBe('requests');
+                    expect(error.query).toBe(mockSearchQuery.query_string);
+                    expect(error.getSuggestedRetryDelay()).toBe(60000); // 60 seconds
+                }
+            }
+        });
+
+        it("should detect quota rate limit type", async () => {
+            const rateLimitError = new Error("Quota exceeded");
+            (rateLimitError as any).response = {
+                status: 429,
+                data: { error: "Monthly usage quota exceeded" },
+            };
+            mockedAxios.post.mockRejectedValueOnce(rateLimitError);
+            mockedIsAxiosError.mockReturnValueOnce(true);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaRateLimitError(error)).toBe(true);
+                if (isExaRateLimitError(error)) {
+                    expect(error.rateLimitType).toBe('quota');
+                    expect(error.message).toContain('Monthly usage quota exceeded');
+                }
+            }
+        });
+
+        it("should throw ExaAuthError for 401 status", async () => {
+            const authError = new Error("Unauthorized");
+            (authError as any).response = {
+                status: 401,
+                data: { error: "Invalid API key" },
+            };
+            mockedAxios.post.mockRejectedValueOnce(authError);
+            mockedIsAxiosError.mockReturnValueOnce(true);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaAuthError(error)).toBe(true);
+                if (isExaAuthError(error)) {
+                    expect(error.status).toBe(401);
+                    expect(error.authType).toBe('invalid_key');
+                    expect(error.isRecoverable()).toBe(false);
+                    expect(error.message).toContain('Invalid or expired API key');
+                }
+            }
+        });
+
+        it("should throw ExaAuthError for 403 status with insufficient permissions", async () => {
+            const authError = new Error("Forbidden");
+            (authError as any).response = {
+                status: 403,
+                data: { error: "Insufficient permissions for this operation" },
+            };
+            mockedAxios.post.mockRejectedValueOnce(authError);
+            mockedIsAxiosError.mockReturnValueOnce(true);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaAuthError(error)).toBe(true);
+                if (isExaAuthError(error)) {
+                    expect(error.status).toBe(403);
+                    expect(error.authType).toBe('insufficient_permissions');
+                    expect(error.isRecoverable()).toBe(true);
+                    expect(error.message).toContain('Insufficient permissions');
+                }
+            }
+        });
+
+        it("should throw ExaServerError for 500 status", async () => {
+            const serverError = new Error("Internal server error");
+            (serverError as any).response = {
+                status: 500,
+                data: { error: "Internal server error" },
+            };
+            mockedAxios.post.mockRejectedValueOnce(serverError);
+            mockedIsAxiosError.mockReturnValueOnce(true);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaServerError(error)).toBe(true);
+                if (isExaServerError(error)) {
+                    expect(error.status).toBe(500);
+                    expect(error.isTemporary).toBe(true);
+                    expect(error.message).toContain('Internal server error');
+                    expect(error.getSuggestedRetryDelay(2)).toBe(1000); // 1 second for retry attempt 2
+                }
+            }
+        });
+
+        it("should throw ExaServerError with permanent flag for 501", async () => {
+            const serverError = new Error("Not implemented");
+            (serverError as any).response = {
+                status: 501,
+                data: { error: "Not implemented" },
+            };
+            mockedAxios.post.mockRejectedValueOnce(serverError);
+            mockedIsAxiosError.mockReturnValueOnce(true);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaServerError(error)).toBe(true);
+                if (isExaServerError(error)) {
+                    expect(error.status).toBe(501);
+                    expect(error.isTemporary).toBe(false); // 501 is permanent
+                }
+            }
+        });
+
+        it("should throw ExaClientError for 400 status", async () => {
+            const clientError = new Error("Bad request");
+            (clientError as any).response = {
+                status: 400,
+                data: { 
+                    error: "Validation failed",
+                    code: "VALIDATION_ERROR",
+                    errors: [
+                        { field: "query", message: "Query cannot be empty" }
+                    ]
+                },
+            };
+            mockedAxios.post.mockRejectedValueOnce(clientError);
+            mockedIsAxiosError.mockReturnValueOnce(true);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaClientError(error)).toBe(true);
+                if (isExaClientError(error)) {
+                    expect(error.status).toBe(400);
+                    expect(error.errorCode).toBe('VALIDATION_ERROR');
+                    expect(error.validationErrors).toHaveLength(1);
+                    expect(error.validationErrors![0].field).toBe('query');
+                    expect(error.isRetryable()).toBe(false);
+                }
+            }
+        });
+
+        it("should throw ExaClientError that is retryable for 408 timeout", async () => {
+            const clientError = new Error("Request timeout");
+            (clientError as any).response = {
+                status: 408,
+                data: { error: "Request timeout" },
+            };
+            mockedAxios.post.mockRejectedValueOnce(clientError);
+            mockedIsAxiosError.mockReturnValueOnce(true);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaClientError(error)).toBe(true);
+                if (isExaClientError(error)) {
+                    expect(error.status).toBe(408);
+                    expect(error.isRetryable()).toBe(true);
+                }
+            }
+        });
+
+        it("should throw ExaNetworkError for connection errors", async () => {
+            const networkError = new Error("Network error");
+            (networkError as any).code = 'ECONNREFUSED';
+            mockedAxios.post.mockRejectedValueOnce(networkError);
+            mockedIsAxiosError.mockReturnValueOnce(true);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaNetworkError(error)).toBe(true);
+                if (isExaNetworkError(error)) {
+                    expect(error.isConnectionError).toBe(true);
+                    expect(error.isTimeout).toBe(false);
+                    expect(error.query).toBe(mockSearchQuery.query_string);
+                    expect(error.getSuggestedRetryDelay(1)).toBe(1000); // 1 second for connection errors
+                }
+            }
+        });
+
+        it("should throw ExaNetworkError for timeout errors", async () => {
+            const timeoutError = new Error("Request timeout");
+            (timeoutError as any).code = 'ECONNABORTED';
+            mockedAxios.post.mockRejectedValueOnce(timeoutError);
+            mockedIsAxiosError.mockReturnValueOnce(true);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaNetworkError(error)).toBe(true);
+                if (isExaNetworkError(error)) {
+                    expect(error.isTimeout).toBe(true);
+                    expect(error.isConnectionError).toBe(false);
+                    expect(error.getSuggestedRetryDelay(1)).toBe(2000); // 2 seconds for timeouts
+                }
+            }
+        });
+
+        it("should throw ExaNetworkError for generic timeout messages", async () => {
+            const timeoutError = new Error("Request timeout occurred");
+            mockedAxios.post.mockRejectedValueOnce(timeoutError);
+            mockedIsAxiosError.mockReturnValueOnce(false);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaNetworkError(error)).toBe(true);
+                if (isExaNetworkError(error)) {
+                    expect(error.isTimeout).toBe(true);
+                    expect(error.query).toBe(mockSearchQuery.query_string);
+                }
+            }
+        });
+
+        it("should throw ExaParsingError for invalid response structure", async () => {
+            // Mock response with invalid structure (no results array)
+            const invalidResponse = {
+                data: {
+                    // Missing results array
+                    message: "Success"
+                }
+            };
+            mockedAxios.post.mockResolvedValueOnce(invalidResponse);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaParsingError(error)).toBe(true);
+                if (isExaParsingError(error)) {
+                    expect(error.message).toContain('Results field is not an array');
+                    expect(error.expectedFormat).toBe('array of search results');
+                    expect(error.response).toBe(invalidResponse.data);
+                }
+            }
+        });
+
+        it("should throw ExaParsingError for null response data", async () => {
+            const nullResponse = { data: null };
+            mockedAxios.post.mockResolvedValueOnce(nullResponse);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaParsingError(error)).toBe(true);
+                if (isExaParsingError(error)) {
+                    expect(error.message).toContain('Response data is missing or not an object');
+                    expect(error.expectedFormat).toBe('object with results array');
+                }
+            }
+        });
+
+        it("should throw ExaParsingError for invalid result object", async () => {
+            const invalidResultResponse = {
+                data: {
+                    results: [
+                        null, // Invalid result object
+                    ]
+                }
+            };
+            mockedAxios.post.mockResolvedValueOnce(invalidResultResponse);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaParsingError(error)).toBe(true);
+                if (isExaParsingError(error)) {
+                    expect(error.message).toContain('Invalid result format at index 0');
+                    expect(error.expectedFormat).toBe('search result object');
+                }
+            }
+        });
+
+        it("should throw ExaParsingError for missing URL in result", async () => {
+            const missingUrlResponse = {
+                data: {
+                    results: [
+                        {
+                            id: "test-id",
+                            title: "Test title",
+                            // Missing url field
+                        }
+                    ]
+                }
+            };
+            mockedAxios.post.mockResolvedValueOnce(missingUrlResponse);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaParsingError(error)).toBe(true);
+                if (isExaParsingError(error)) {
+                    expect(error.message).toContain('Missing or invalid URL');
+                    expect(error.expectedFormat).toBe('string URL');
+                }
+            }
+        });
+
+        it("should wrap unknown errors in ExaParsingError", async () => {
+            const unknownError = { weird: "object" };
+            mockedAxios.post.mockRejectedValueOnce(unknownError);
+            mockedIsAxiosError.mockReturnValueOnce(false);
+
+            try {
+                await executeExaSearch(mockSearchQuery);
+            } catch (error) {
+                expect(isExaParsingError(error)).toBe(true);
+                if (isExaParsingError(error)) {
+                    expect(error.message).toContain('Unexpected error during Exa search');
+                    expect(error.response).toBe(unknownError);
+                }
+            }
+        });
     });
 });
