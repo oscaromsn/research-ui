@@ -4,92 +4,100 @@ subgraph 0["app"]
 subgraph 1["actions"]
 2["researchAgentOrchestrator.ts"]
 end
-3["layout.tsx"]
-4["globals.css"]
-5["page.tsx"]
+6["layout.tsx"]
+7["globals.css"]
+B["page.tsx"]
 end
-subgraph 6["components"]
-subgraph 7["domain"]
-subgraph 8["guidance"]
-9["guidance-strategy.tsx"]
-subgraph T["modals"]
-U["settings-modal.tsx"]
+subgraph 3["lib"]
+subgraph 4["utils"]
+5["exaSearchUtil.ts"]
 end
-V["research-lifecycle.tsx"]
+H["utils.ts"]
+subgraph I["hooks"]
+J["useResearchAgent.ts"]
 end
-subgraph F["legal-research"]
-G["evidence-analysis.tsx"]
-subgraph H["modals"]
-I["analysis-reasoning-modal.tsx"]
-L["case-modal.tsx"]
+subgraph K["state"]
+L["researchAtoms.ts"]
+end
+13["config.ts"]
+subgraph 14["schemas"]
+15["env.ts"]
+16["common.ts"]
+17["index.ts"]
+18["utils.ts"]
 end
 end
-subgraph M["report-generation"]
-N["synthesis-reporting.tsx"]
+subgraph 8["components"]
+subgraph 9["providers"]
+A["jotai-provider.tsx"]
+end
+subgraph C["domain"]
+subgraph D["guidance"]
+E["guidance-strategy.tsx"]
+subgraph Z["modals"]
+10["settings-modal.tsx"]
+end
+11["research-lifecycle.tsx"]
+end
+subgraph M["legal-research"]
+N["evidence-analysis.tsx"]
 subgraph O["modals"]
-P["synthesis-reasoning-modal.tsx"]
-end
-Q["report-drafter.tsx"]
-end
-end
-subgraph J["ui"]
-K["modal.tsx"]
-W["button.tsx"]
-end
-subgraph R["layout"]
-S["header.tsx"]
+P["analysis-reasoning-modal.tsx"]
+R["case-modal.tsx"]
 end
 end
-subgraph A["lib"]
-subgraph B["hooks"]
-C["useResearchAgent.ts"]
+subgraph S["report-generation"]
+T["synthesis-reporting.tsx"]
+subgraph U["modals"]
+V["synthesis-reasoning-modal.tsx"]
 end
-subgraph D["state"]
-E["researchAtoms.ts"]
-end
-X["utils.ts"]
-Y["config.ts"]
-subgraph Z["schemas"]
-10["env.ts"]
-11["common.ts"]
-12["index.ts"]
-13["utils.ts"]
-end
-subgraph 14["utils"]
-15["exaSearchUtil.ts"]
+W["report-drafter.tsx"]
 end
 end
-3-->4
-5-->9
-5-->G
-5-->N
-5-->S
-9-->C
-9-->E
-C-->2
-C-->2
-C-->E
-C-->E
-E-->2
-G-->I
-G-->L
-G-->E
-G-->E
-I-->K
-I-->E
-L-->K
+subgraph F["ui"]
+G["switch.tsx"]
+Q["modal.tsx"]
+12["button.tsx"]
+end
+subgraph X["layout"]
+Y["header.tsx"]
+end
+end
+2-->5
+6-->7
+6-->A
+B-->E
+B-->N
+B-->T
+B-->Y
+E-->G
+E-->J
+E-->L
+G-->H
+J-->2
+J-->2
+J-->L
+J-->L
+L-->2
 N-->P
-N-->Q
-N-->E
-P-->K
-Q-->E
-S-->U
-S-->V
-U-->K
-V-->2
-V-->E
-W-->X
+N-->R
+N-->L
+N-->L
+P-->Q
+P-->L
+R-->Q
+T-->V
+T-->W
+T-->L
+V-->Q
+W-->L
 Y-->10
-12-->11
-12-->10
-12-->13
+Y-->11
+10-->Q
+11-->2
+11-->L
+12-->H
+13-->15
+17-->16
+17-->15
+17-->18

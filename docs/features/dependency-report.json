@@ -2,12 +2,40 @@
   "modules": [
     {
       "source": "app/actions/researchAgentOrchestrator.ts",
-      "dependencies": [],
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/lib/utils/exaSearchUtil",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-base-url",
+            "local",
+            "import"
+          ],
+          "resolved": "lib/utils/exaSearchUtil.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
       "dependents": [
         "lib/hooks/useResearchAgent.ts",
         "lib/state/researchAtoms.ts",
         "components/domain/guidance/research-lifecycle.tsx"
       ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "lib/utils/exaSearchUtil.ts",
+      "dependencies": [],
+      "dependents": ["app/actions/researchAgentOrchestrator.ts"],
       "orphan": false,
       "valid": true
     },
@@ -27,6 +55,26 @@
           "matchesDoNotFollow": false,
           "circular": false,
           "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/components/providers/jotai-provider",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-base-url",
+            "local",
+            "import"
+          ],
+          "resolved": "components/providers/jotai-provider.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
         }
       ],
       "dependents": [],
@@ -40,6 +88,13 @@
       "couldNotResolve": false,
       "matchesDoNotFollow": false,
       "dependencyTypes": ["local", "import"],
+      "dependencies": [],
+      "dependents": ["app/layout.tsx"],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "components/providers/jotai-provider.tsx",
       "dependencies": [],
       "dependents": ["app/layout.tsx"],
       "orphan": false,
@@ -138,6 +193,26 @@
       "dependencies": [
         {
           "dynamic": false,
+          "module": "@/components/ui/switch",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-base-url",
+            "local",
+            "import"
+          ],
+          "resolved": "components/ui/switch.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
           "module": "@/lib/hooks/useResearchAgent",
           "moduleSystem": "es6",
           "exoticallyRequired": false,
@@ -178,6 +253,41 @@
         }
       ],
       "dependents": ["app/page.tsx"],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "components/ui/switch.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/lib/utils",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-base-url",
+            "local",
+            "import"
+          ],
+          "resolved": "lib/utils.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": ["components/domain/guidance/guidance-strategy.tsx"],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "lib/utils.ts",
+      "dependencies": [],
+      "dependents": ["components/ui/switch.tsx", "components/ui/button.tsx"],
       "orphan": false,
       "valid": true
     },
@@ -744,13 +854,6 @@
       "valid": true
     },
     {
-      "source": "lib/utils.ts",
-      "dependencies": [],
-      "dependents": ["components/ui/button.tsx"],
-      "orphan": false,
-      "valid": true
-    },
-    {
       "source": "lib/config.ts",
       "dependencies": [
         {
@@ -842,39 +945,16 @@
       "dependents": ["lib/schemas/index.ts"],
       "orphan": false,
       "valid": true
-    },
-    {
-      "source": "lib/utils/exaSearchUtil.ts",
-      "dependencies": [],
-      "dependents": [],
-      "orphan": true,
-      "valid": false,
-      "rules": [
-        {
-          "severity": "warn",
-          "name": "no-orphans"
-        }
-      ]
     }
   ],
   "summary": {
-    "violations": [
-      {
-        "type": "module",
-        "from": "lib/utils/exaSearchUtil.ts",
-        "to": "lib/utils/exaSearchUtil.ts",
-        "rule": {
-          "severity": "warn",
-          "name": "no-orphans"
-        }
-      }
-    ],
+    "violations": [],
     "error": 0,
-    "warn": 1,
+    "warn": 0,
     "info": 0,
     "ignore": 0,
-    "totalCruised": 25,
-    "totalDependenciesCruised": 34,
+    "totalCruised": 27,
+    "totalDependenciesCruised": 38,
     "optionsUsed": {
       "baseDir": "/Users/oscar/Projects/jurisconsulta-new/next-app",
       "combinedDependencies": false,
