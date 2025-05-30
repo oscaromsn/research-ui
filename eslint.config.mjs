@@ -19,6 +19,7 @@ const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
   baseDirectory: __dirname,
   recommendedConfig: {},
+  resolvePluginsRelativeTo: __dirname,
 });
 
 export default tseslint.config(
@@ -37,6 +38,9 @@ export default tseslint.config(
 
   // Base ESLint rules
   ...compat.extends("eslint:recommended"),
+
+  // Next.js Configuration (using compat for proper detection)
+  ...compat.extends("next/core-web-vitals"),
 
   // TypeScript Configuration - using recommended instead of strict to avoid issues
   ...configs.recommended.map((config) => ({
@@ -62,15 +66,16 @@ export default tseslint.config(
     },
   },
 
-  // Next.js Configuration
+  // Additional Next.js rules (supplementing the extended config)
   {
     files: ["**/*.{ts,tsx,js,jsx}"],
     plugins: {
       "@next/next": nextPlugin,
     },
     rules: {
-      ...nextPlugin.configs.recommended.rules,
-      ...nextPlugin.configs["core-web-vitals"].rules,
+      // Additional Next.js rules that might not be in the extended config
+      "@next/next/no-img-element": "error",
+      "@next/next/no-unwanted-polyfillio": "error",
     },
   },
 
