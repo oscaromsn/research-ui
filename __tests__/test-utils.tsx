@@ -1,5 +1,6 @@
 import { type RenderOptions, render } from "@testing-library/react";
 import { Provider } from "jotai/react";
+import { createStore } from "jotai/vanilla";
 import { type ReactElement, createElement } from "react";
 import { vi } from "vitest";
 
@@ -11,7 +12,8 @@ export function renderWithProviders(
   options?: Omit<RenderOptions, "wrapper">,
 ) {
   const AllProviders = ({ children }: { children: React.ReactNode }) => {
-    return createElement(Provider, {}, children);
+    const testStore = createStore();
+    return createElement(Provider, { store: testStore }, children);
   };
 
   return render(ui, { wrapper: AllProviders, ...options });
