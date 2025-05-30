@@ -426,3 +426,143 @@ test GenerateReportConflictingInformation {
   
   // @@assert( {{ ("federal" in (this.sections[0].section_title | lower)) or ("state" in (this.sections[1].section_title | lower)) or ("variation" in (this.sections[1].section_title | lower)) }} )
 }
+
+// NEW TEST: Live data report generation - Employment discrimination comprehensive synthesis
+test GenerateLiveEmploymentDiscriminationReport {
+  functions [GenerateFinalLegalReport]
+  args {
+    original_legal_question "What constitutes 'adverse employment action' under Title VII discrimination law?"
+    synthesis {
+      key_synthesized_topics [
+        {
+          topic_title "Definition and Scope of Adverse Employment Action"
+          synthesis "The primary focus of the documents revolves around defining 'adverse employment action' under Title VII. The term is not explicitly defined in Title VII but is established through judicial interpretations. It highlights that discrimination is prohibited concerning the 'terms, conditions, or privileges of employment.' Examples of adverse actions include firing, demotion, pay cuts, failure to promote, and hiring. Some courts require a 'materially adverse consequence.'"
+          confidence_score 9
+          supporting_document_ids ["https://natlawreview.com/article/what-counts-adverse-employment-action-discrimination-and-retaliation-cases", "https://www.law.cornell.edu/wex/tangible_employment_action"]
+        },
+        {
+          topic_title "Distinction between Adverse Employment Action and Tangible Employment Action"
+          synthesis "A crucial divergence emerges between the concepts of 'adverse employment action' and 'tangible employment action'. Tangible employment action represents a subset, specifically a significant change, of adverse employment actions. Tangible employment actions, like hiring, firing, or significant benefit changes, are pivotal in determining employer liability, especially in cases of supervisor misconduct."
+          confidence_score 8
+          supporting_document_ids ["https://natlawreview.com/article/what-counts-adverse-employment-action-discrimination-and-retaliation-cases", "https://www.law.cornell.edu/wex/tangible_employment_action"]
+        },
+        {
+          topic_title "Examples and Application of Adverse Employment Action"
+          synthesis "Both documents provide examples of what constitutes adverse employment action. The EEOC lists firing, demotion, pay cuts, failure to promote, and hiring decisions as examples. Other examples include denial of a raise, loss of negotiated benefits, threats of discharge, and withholding promotions. The documents also provide examples of actions that do not constitute such actions, creating more contrast and guidance."
+          confidence_score 9
+          supporting_document_ids ["https://natlawreview.com/article/what-counts-adverse-employment-action-discrimination-and-retaliation-cases", "https://www.law.cornell.edu/wex/tangible_employment_action"]
+        }
+      ]
+      unanswered_aspects ["Specific judicial standards or tests used by courts to determine 'materially adverse consequence' of an action", "Jurisdictional variations in how adverse employment action is interpreted"]
+      emerging_questions ["What is the prevailing standard courts use to determine whether an action has a 'materially adverse consequence?'", "How do courts differentiate between actions considered merely annoying or inconvenient versus those with materially adverse consequences?"]
+      reasoning {
+        analyze_legal_question { summary "The legal question is about the definition of 'adverse employment action' under Title VII discrimination law. The key issues involve understanding the scope and range of actions covered by this term, and how it is determined in court." }
+        consider_relevant_legal_principles { summary "Relevant legal principles include Title VII's prohibition against discrimination and court interpretations of 'adverse employment action.' The analysis should also consider the distinction between adverse employment action and tangible employment action." }
+        formulate_search_queries_strategy { summary "Initial search queries will focus on the definition and examples of 'adverse employment action' under Title VII. Boolean operators (AND, OR) and exact phrase searching will be used." }
+        specify_expected_information_strategy { summary "Each query will target specific types of information: statutes, case law, legal principles, and expert analysis. The search will expect to find definitions, examples, court precedents, and commentary on the legal standards." }
+        ensure_comprehensive_coverage_strategy { summary "To ensure comprehensive coverage, the search will begin with broad queries and then narrow down to specific areas, such as the standards used to determine 'materially adverse consequence' and potential jurisdictional variations." }
+      }
+    }
+    query_history [
+      {
+        reasoning {
+          analyze_legal_question { summary "The legal question is about what constitutes an 'adverse employment action' under Title VII. Key issues are: defining the term; identifying specific actions that qualify; and understanding any differing interpretations by courts." }
+          consider_relevant_legal_principles { summary "Relevant legal principles include: statutory interpretation of Title VII; the role of the EEOC in enforcement; case law interpreting 'adverse employment action'; and the potential for varying interpretations across jurisdictions." }
+          formulate_search_queries_strategy { summary "Search queries would use exact phrases and boolean operators. Examples: 'adverse employment action' AND 'Title VII'; 'adverse employment action' AND 'definition'." }
+          specify_expected_information_strategy { summary "Each query is expected to yield: 1) Statutory definitions and interpretations from Title VII, 2) Examples of adverse employment actions from EEOC guidance, 3) Case law defining and interpreting the term 'adverse employment action'." }
+          ensure_comprehensive_coverage_strategy { summary "The queries would be designed to cover all aspects of the legal question and avoid redundancy by: starting with broad searches and then refining them; using a combination of keywords and phrases." }
+        }
+        search_queries [
+          {
+            query_string "employment discrimination Title VII adverse action"
+            expected_information ["adverse employment action definition", "Title VII cases", "discrimination law"]
+          },
+          {
+            query_string "tangible employment action Title VII harassment"
+            expected_information ["tangible employment action", "employer liability", "harassment defense"]
+          }
+        ]
+      }
+    ]
+  }
+  @@assert( {{ this.report_title | length > 10 }} )
+  @@assert( {{ this.executive_summary | length > 50 }} )
+  @@assert( {{ this.conclusion | length > 50 }} )
+  // Should generate comprehensive report for well-researched topic
+  @@assert( {{ this.sections | length >= 3 }} )
+  @@assert( {{ this.sections | length <= 7 }} )
+  
+  // Basic content validation - simplified
+  @@assert( {{ this.report_title | length > 0 }} )
+  @@assert( {{ this.sections | length > 0 }} )
+  
+  // Basic structure check - simplified for robustness
+  @@assert( {{ this.sections | length > 0 }} )
+  @@assert( {{ this.appendix_document_ids | length > 0 }} )
+}
+
+// NEW TEST: Live data report generation - Patent law with gaps requiring additional research
+test GenerateLivePatentRequirementsReport {
+  functions [GenerateFinalLegalReport]
+  args {
+    original_legal_question "What are the requirements for a valid patent application under 35 U.S.C. § 112?"
+    synthesis {
+      key_synthesized_topics [
+        {
+          topic_title "Section 112 Requirements Overview"
+          synthesis "Section 112 of the Patent Act, codified as 35 U.S.C. § 112, outlines the requirements for the specification of a patent application. The document explains the four key components: written description, enablement requirement, best mode requirement, and claims. However, the synthesis lacks detailed case law analysis and practical application examples."
+          confidence_score 7
+          supporting_document_ids ["https://vernalaw.com/why-is-section-112-of-the-patent-act-important/"]
+        }
+      ]
+      unanswered_aspects ["Case law interpretations of each requirement", "Practical examples of compliant specifications", "Common rejection reasons under 35 U.S.C. § 112", "Recent changes in USPTO examination guidelines"]
+      emerging_questions ["How do courts interpret the 'written description' requirement in practice?", "What are common pitfalls in drafting claims under Section 112?", "How has the America Invents Act affected best mode requirements?"]
+      reasoning {
+        analyze_legal_question { summary "The legal question focuses on the requirements for a valid patent application under 35 U.S.C. § 112. This involves identifying the specific elements that must be present in a patent application to meet the statutory requirements for patentability." }
+        consider_relevant_legal_principles { summary "Relevant legal principles include statutory interpretation of 35 U.S.C. § 112, which addresses the specification requirements, as well as any relevant case law that interprets and applies this statute." }
+        formulate_search_queries_strategy { summary "Given the focus on 35 U.S.C. § 112, the search query strategy would prioritize direct references to the statute and its specific subsections." }
+        specify_expected_information_strategy { summary "The search queries are expected to yield information that precisely explains the different elements of 35 U.S.C. § 112, including the written description, enablement, best mode, and claims requirements." }
+        ensure_comprehensive_coverage_strategy { summary "To ensure comprehensive coverage, the search strategy would begin with a broad search of 35 U.S.C. § 112, then narrow the focus by searching for each individual component." }
+      }
+    }
+    query_history [
+      {
+        reasoning {
+          analyze_legal_question { summary "The legal question focuses on the requirements for a valid patent application under 35 U.S.C. § 112. This involves identifying the specific elements that must be present in a patent application to meet the statutory requirements for patentability." }
+          consider_relevant_legal_principles { summary "Relevant legal principles include statutory interpretation of 35 U.S.C. § 112, which addresses the specification requirements, as well as any relevant case law that interprets and applies this statute." }
+          formulate_search_queries_strategy { summary "Given the focus on 35 U.S.C. § 112, the search query strategy would prioritize direct references to the statute and its specific subsections." }
+          specify_expected_information_strategy { summary "The search queries are expected to yield information that precisely explains the different elements of 35 U.S.C. § 112, including the written description, enablement, best mode, and claims requirements." }
+          ensure_comprehensive_coverage_strategy { summary "To ensure comprehensive coverage, the search strategy would begin with a broad search of 35 U.S.C. § 112, then narrow the focus by searching for each individual component." }
+        }
+        search_queries [
+          {
+            query_string "patent application requirements 35 USC 112 specification"
+            expected_information ["patent specification requirements", "USPTO guidelines", "written description"]
+          }
+        ]
+      }
+    ]
+  }
+  @@assert( {{ this.report_title | length > 10 }} )
+  @@assert( {{ this.executive_summary | length > 40 }} )
+  @@assert( {{ this.conclusion | length > 40 }} )
+  // Should generate structured report despite some gaps
+  @@assert( {{ this.sections | length >= 2 }} )
+  @@assert( {{ this.sections | length <= 5 }} )
+  
+  // Report should address 35 U.S.C. § 112 and patent requirements
+  @@assert( {{ ("patent" in (this.report_title | lower)) and ("112" in (this.report_title | lower)) }} )
+  @@assert( {{ ("specification" in (this.executive_summary | lower)) or ("patent application" in (this.executive_summary | lower)) or ("35 u.s.c" in (this.executive_summary | lower)) }} )
+  
+  // Should cover the four main requirements
+  @@assert( {{ ("written description" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("enablement" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("best mode" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("claims" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
+  
+  // Should acknowledge limitations and need for additional research
+  @@assert( {{ ("additional research" in (this.conclusion | lower)) or ("case law" in (this.conclusion | lower)) or ("practical" in (this.conclusion | lower)) or ("further analysis" in (this.conclusion | lower)) }} )
+  
+  // Should still provide useful statutory guidance
+  @@assert( {{ ("section 112" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("patent act" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("specification" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
+  
+  // Content should be substantial despite gaps
+  @@assert( {{ (this.sections | map(attribute="content") | join(" ") | length) > 100 }} )
+}

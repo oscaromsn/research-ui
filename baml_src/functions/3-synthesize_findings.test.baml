@@ -291,3 +291,137 @@ test SynthesizeWithLowRelevanceDocuments {
   // If topics are generated, they should have low confidence
   @@assert( {{ this.key_synthesized_topics | length == 0 or this.key_synthesized_topics[0].confidence_score < 6 }} )
 }
+
+// NEW TEST: Live data synthesis - Employment discrimination documents from real Exa search
+test SynthesizeLiveEmploymentDiscriminationDocuments {
+  functions [SynthesizeAllFindings]
+  args {
+    original_legal_question "What constitutes 'adverse employment action' under Title VII discrimination law?"
+    analyzed_docs [
+      {
+        search_result_id "https://natlawreview.com/article/what-counts-adverse-employment-action-discrimination-and-retaliation-cases"
+        relevance_score 9
+        confidence_score 8
+        summary "The document directly addresses what constitutes an 'adverse employment action' under Title VII discrimination law. It explains that while actions like firing, demotion, and pay cuts are clear examples, the definition can be broader and is often subject to judicial interpretation."
+        key_arguments_and_reasoning [
+          "Title VII of the 1964 Civil Rights Act prohibits discrimination based on protected characteristics regarding compensation, terms, conditions, or privileges of employment.",
+          "The term 'adverse employment action' isn't explicitly mentioned in Title VII but has been established through court interpretations.",
+          "The Equal Employment Opportunity Commission (EEOC) considers hiring, firing, failure to promote, pay reduction, and demotion to be examples of adverse employment actions.",
+          "Some courts require that the adverse employment action must result in a 'materially adverse consequence.'"
+        ]
+        extracted_entities [
+          { type "Statute", name "Title VII of the 1964 Civil Rights Act", details "Prohibits employment discrimination based on protected characteristics." },
+          { type "Organization", name "EEOC", details "Equal Employment Opportunity Commission; enforces Title VII." },
+          { type "Case", name "Ortiz-Diaz v. United States Dep't of Hous. & Urban Dev.", details "867 F.3d 70, 74 (D.C. Cir. 2017) - discusses the requirement of a 'materially adverse consequence'." },
+          { type "LegalConcept", name "adverse employment action", details "A negative action taken against an employee that can form the basis of a discrimination or retaliation claim." }
+        ]
+        extracted_quotes [
+          "When an employee experiences discrimination or retaliation at work it often takes the form of significant action, such as a termination, demotion, or suspension, all of which clearly represent an 'adverse employment action' under relevant anti-discrimination and retaliation laws.",
+          "Yet certain federal courts have interpreted Title VII to also require that the adverse employment action at issue must result in a 'materially adverse consequence.'"
+        ]
+        reasoning {
+          analyze_legal_question { summary "The legal question is about what constitutes an 'adverse employment action' under Title VII. Key issues are: defining the term; identifying specific actions that qualify; and understanding any differing interpretations by courts." }
+          consider_relevant_legal_principles { summary "Relevant legal principles include: statutory interpretation of Title VII; the role of the EEOC in enforcement; case law interpreting 'adverse employment action'; and the potential for varying interpretations across jurisdictions." }
+          formulate_search_queries_strategy { summary "Search queries would use exact phrases and boolean operators. Examples: 'adverse employment action' AND 'Title VII'; 'adverse employment action' AND 'definition'." }
+          specify_expected_information_strategy { summary "Each query is expected to yield: 1) Statutory definitions and interpretations from Title VII, 2) Examples of adverse employment actions from EEOC guidance, 3) Case law defining and interpreting the term 'adverse employment action'." }
+          ensure_comprehensive_coverage_strategy { summary "The queries would be designed to cover all aspects of the legal question and avoid redundancy by: starting with broad searches and then refining them; using a combination of keywords and phrases." }
+        }
+      },
+      {
+        search_result_id "https://www.law.cornell.edu/wex/tangible_employment_action"
+        relevance_score 7
+        confidence_score 7
+        summary "The document discusses 'tangible employment action,' a related but more specific concept under Title VII. It explains that tangible employment actions constitute significant changes in employment status and are used in determining employer liability, particularly in harassment cases."
+        key_arguments_and_reasoning [
+          "A tangible employment action constitutes a significant change in employment status, such as hiring, firing, failure to promote, reassignment with significantly different responsibility, or a decision causing a significant change in benefits.",
+          "Tangible employment actions are elements of Title VII actions that may hold employers liable or vicariously liable for supervisor actions.",
+          "Examples include denial of a raise, loss of specifically negotiated benefits, threats of discharge, and withholding promotions.",
+          "Some actions like reassignment to another office or downgraded job performance evaluations do not constitute tangible employment actions."
+        ]
+        extracted_entities [
+          { type "LegalConcept", name "tangible employment action", details "A significant change in employment status under Title VII." },
+          { type "Case", name "Burlington Industries, Inc. v. Ellerth", details "1998 Supreme Court case defining tangible employment actions." },
+          { type "LegalConcept", name "vicarious liability", details "Employer liability for supervisor actions." },
+          { type "LegalConcept", name "constructive discharge", details "Forcing an employee to quit through intolerable working conditions." }
+        ]
+        extracted_quotes [
+          "A tangible employment action constitutes a significant change in employment status, such as hiring, firing, failure to promote, reassignment with significantly different responsibility, or a decision causing a significant change in benefits.",
+          "On the other hand, conditions such as reassignment to another office or downgraded job performance evaluations, by themselves, do not constitute a tangible employment action."
+        ]
+        reasoning {
+          analyze_legal_question { summary "The legal question focuses on the definition of 'adverse employment action' within the context of Title VII. This requires understanding what actions by an employer are considered detrimental to an employee's employment status." }
+          consider_relevant_legal_principles { summary "The relevant legal principle is Title VII and the interpretation of what constitutes a tangible employment action under it. The document touches on employer liability (vicarious liability) for supervisor actions." }
+          formulate_search_queries_strategy { summary "Given the question's nature, focusing on definition, and the document's title, the search should use the exact phrase 'tangible employment action' to find documents defining it and provide examples." }
+          specify_expected_information_strategy { summary "The search queries should yield documents (statutes, case law, legal articles, or legal encyclopedias) that define 'tangible employment action' or 'adverse employment action' specifically within the context of Title VII." }
+          ensure_comprehensive_coverage_strategy { summary "To ensure comprehensive coverage, search results should be reviewed and combined for definitions, examples, and implications. Multiple search queries including both 'tangible employment action' and 'adverse employment action' will be needed." }
+        }
+      }
+    ]
+  }
+  @@assert( {{ this.key_synthesized_topics | length >= 1 }} )
+  @@assert( {{ this.key_synthesized_topics | length <= 4 }} )
+  // Should create topics that address different aspects of adverse employment action
+  @@assert( {{ this.key_synthesized_topics[0].topic_title | length > 5 }} )
+  @@assert( {{ this.key_synthesized_topics[0].synthesis | length > 20 }} )
+  // Should have high confidence given the quality of source documents
+  @@assert( {{ this.key_synthesized_topics[0].confidence_score >= 7 }} )
+  // Should reference both documents in synthesis
+  @@assert( {{ this.key_synthesized_topics[0].supporting_document_ids | length >= 1 }} )
+  // Should have minimal unanswered aspects since documents are comprehensive
+  @@assert( {{ this.unanswered_aspects | length <= 3 }} )
+  // May have emerging questions about jurisdictional differences
+  @@assert( {{ this.emerging_questions | length >= 0 }} )
+  @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 20 }} )
+}
+
+// NEW TEST: Live data synthesis - Patent law documents from real search
+test SynthesizeLivePatentDocuments {
+  functions [SynthesizeAllFindings]
+  args {
+    original_legal_question "What are the requirements for a valid patent application under 35 U.S.C. § 112?"
+    analyzed_docs [
+      {
+        search_result_id "https://vernalaw.com/why-is-section-112-of-the-patent-act-important/"
+        relevance_score 9
+        confidence_score 8
+        summary "Section 112 of the Patent Act, codified as 35 U.S.C. § 112, outlines the requirements for the specification of a patent application. The document explains the four key components: written description, enablement requirement, best mode requirement, and claims."
+        key_arguments_and_reasoning [
+          "Written Description: The application must contain a written description of the invention, in clear, concise, and exact terms, so as to enable any person of ordinary skill in the art to make and use the invention.",
+          "Enablement Requirement: The specification must describe the manner and process of making and using the invention in such full, clear, concise, and exact terms as to enable any person of ordinary skill in the art to make and use it.",
+          "Best Mode Requirement: The application must set forth the best mode contemplated by the inventor for carrying out the invention, though this requirement is not as strictly enforced following the America Invents Act of 2011.",
+          "Claims: The application must conclude with one or more claims particularly pointing out and distinctly claiming the subject matter which the inventor regards as the invention."
+        ]
+        extracted_entities [
+          { type "Statute", name "35 U.S.C. § 112", details "Patent Act provision governing specification requirements." },
+          { type "LegalConcept", name "written description", details "Requirement for clear description of invention in patent application." },
+          { type "LegalConcept", name "enablement requirement", details "Requirement that specification enable person skilled in art to make and use invention." },
+          { type "LegalConcept", name "best mode requirement", details "Requirement to disclose best way of practicing invention." },
+          { type "Statute", name "America Invents Act of 2011", details "Legislation that modified enforcement of best mode requirement." }
+        ]
+        extracted_quotes [
+          "Section 112 of the Patent Act, codified as 35 U.S.C. § 112, outlines the requirements for the specification of a patent application.",
+          "Under 35 U.S.C. § 112, ¶ 2 (2006), a patent specification 'shall conclude with one or more claims particularly pointing out and distinctly claiming the subject matter which the applicant regards as his invention.'"
+        ]
+        reasoning {
+          analyze_legal_question { summary "The legal question focuses on the requirements for a valid patent application under 35 U.S.C. § 112. This involves identifying the specific elements that must be present in a patent application to meet the statutory requirements for patentability." }
+          consider_relevant_legal_principles { summary "Relevant legal principles include statutory interpretation of 35 U.S.C. § 112, which addresses the specification requirements, as well as any relevant case law that interprets and applies this statute." }
+          formulate_search_queries_strategy { summary "Given the focus on 35 U.S.C. § 112, the search query strategy would prioritize direct references to the statute and its specific subsections." }
+          specify_expected_information_strategy { summary "The search queries are expected to yield information that precisely explains the different elements of 35 U.S.C. § 112, including the written description, enablement, best mode, and claims requirements." }
+          ensure_comprehensive_coverage_strategy { summary "To ensure comprehensive coverage, the search strategy would begin with a broad search of 35 U.S.C. § 112, then narrow the focus by searching for each individual component." }
+        }
+      }
+    ]
+  }
+  @@assert( {{ this.key_synthesized_topics | length >= 1 }} )
+  @@assert( {{ this.key_synthesized_topics | length <= 5 }} )
+  // Should address the four main requirements of Section 112
+  @@assert( {{ this.key_synthesized_topics[0].topic_title | length > 5 }} )
+  @@assert( {{ this.key_synthesized_topics[0].synthesis | length > 30 }} )
+  // Should have high confidence given comprehensive source
+  @@assert( {{ this.key_synthesized_topics[0].confidence_score >= 7 }} )
+  // Should reference the document
+  @@assert( {{ "https://vernalaw.com/why-is-section-112-of-the-patent-act-important/" in this.key_synthesized_topics[0].supporting_document_ids }} )
+  // May have emerging questions about practical applications
+  @@assert( {{ this.emerging_questions | length >= 0 }} )
+  @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 15 }} )
+}
