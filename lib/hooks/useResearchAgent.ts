@@ -10,10 +10,12 @@ import type {
 } from "@/app/actions/researchAgentOrchestrator";
 import {
   analyzedDocsSummaryAtom,
+  autoModeStateAtom,
   finalReportContentAtom,
   generatedQueriesAtom,
   researchAssessmentAtom,
   researchLogAtom,
+  researchSessionAtom,
   researchStatusAtom,
   resetResearchStateAtom,
   synthesisDetailsAtom,
@@ -47,11 +49,17 @@ interface ReportData {
 
 interface UseResearchAgentReturn {
   startResearch: (legalQuestion: string) => Promise<void>;
+  resumeResearch: () => Promise<void>;
+  pauseResearch: () => void;
   abortResearch: () => void;
   isLoading: boolean;
   currentStage: ResearchStage | null;
   currentMessage: string | undefined;
   error: string | null;
+  isPaused: boolean;
+  canResume: boolean;
+  autoModeEnabled: boolean;
+  toggleAutoMode: () => void;
 }
 
 /**
@@ -84,7 +92,7 @@ interface UseResearchAgentReturn {
  * ```
  */
 export function useResearchAgent(): UseResearchAgentReturn {
-  // Get Jotai setters
+  // Get Jotai setters and readers
   const setResearchStatus = useSetAtom(researchStatusAtom);
   const setResearchLog = useSetAtom(researchLogAtom);
   const setGeneratedQueries = useSetAtom(generatedQueriesAtom);
@@ -92,7 +100,10 @@ export function useResearchAgent(): UseResearchAgentReturn {
   const setSynthesisDetails = useSetAtom(synthesisDetailsAtom);
   const setFinalReportContent = useSetAtom(finalReportContentAtom);
   const setResearchAssessment = useSetAtom(researchAssessmentAtom);
+  const setAutoModeState = useSetAtom(autoModeStateAtom);
+  const setResearchSession = useSetAtom(researchSessionAtom);
   const resetAllResearchState = useSetAtom(resetResearchStateAtom);
+  const autoModeState = useAtomValue(autoModeStateAtom);
 
   // Local state for the AbortController
   const [abortController, setAbortController] =
@@ -119,6 +130,20 @@ export function useResearchAgent(): UseResearchAgentReturn {
       // Reset all relevant Jotai states before starting a new research process
       resetAllResearchState(undefined);
 
+      // Set up auto mode state
+      setAutoModeState((prev) => ({
+        ...prev,
+        originalQuestion: legalQuestion,
+        currentIteration: 0,
+      }));
+
+      // Generate session ID for tracking
+      const sessionId = `research_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setResearchSession((prev) => ({
+        ...prev,
+        sessionId,
+      }));
+
       setResearchStatus({
         stage: "INITIALIZING",
         isLoading: true,
@@ -126,6 +151,8 @@ export function useResearchAgent(): UseResearchAgentReturn {
         message: "Initializing research...",
         currentProcessedDoc: 0,
         totalDocsToProcess: 0,
+        isPaused: false,
+        canResume: false,
       });
       setResearchLog((prev) => [
         ...prev,
@@ -136,7 +163,11 @@ export function useResearchAgent(): UseResearchAgentReturn {
       setAbortController(controller);
 
       try {
-        const stream = await conductResearch(legalQuestion);
+        const stream = await conductResearch(legalQuestion, {
+          isEnabled: autoModeState.isEnabled,
+          maxIterations: autoModeState.maxIterations,
+          currentIteration: autoModeState.currentIteration,
+        });
 
         const reader = stream
           .pipeThrough(new TextDecoderStream(), {
@@ -155,28 +186,25 @@ export function useResearchAgent(): UseResearchAgentReturn {
 
             if (done) {
               // Stream finished successfully from the server side
-              let finalStatus: "ERROR" | "COMPLETED" = "COMPLETED";
               setResearchStatus((prev: ResearchStatus) => {
-                const finalStage =
-                  prev.stage === "INITIALIZING" && !prev.error
-                    ? "COMPLETED"
-                    : prev.stage;
-                finalStatus = prev.error ? "ERROR" : "COMPLETED";
-                const newMessage =
-                  prev.stage === "INITIALIZING" && !prev.error
-                    ? "Research process completed."
-                    : prev.message;
+                const finalStage = prev.error
+                  ? "ERROR"
+                  : prev.stage || "COMPLETED";
+                const newMessage = prev.error
+                  ? prev.message || "Research failed."
+                  : prev.message || "Research process completed.";
                 return {
                   ...prev,
                   isLoading: false,
-                  // Don't override stage; only set COMPLETED if still INITIALIZING and no error
                   stage: finalStage,
-                  ...(newMessage && { message: newMessage }),
+                  message: newMessage,
+                  isPaused: false,
+                  canResume: false,
                 };
               });
               setResearchLog((prev) => [
                 ...prev,
-                `${new Date().toISOString()} [${finalStatus}] Stream ended.`,
+                `${new Date().toISOString()} [COMPLETED] Stream ended.`,
               ]);
               setAbortController(null);
               break;
@@ -245,13 +273,27 @@ export function useResearchAgent(): UseResearchAgentReturn {
                         const queryData = update.data as {
                           queries: QueryData[];
                         };
-                        setGeneratedQueries(
-                          queryData.queries.map((q: QueryData) => ({
+                        const timestamp = new Date().toISOString();
+                        const newQueries = queryData.queries.map(
+                          (q: QueryData) => ({
                             query_string: q.query_string,
                             expected_information_summary:
                               q.expected_information_summary,
-                          }))
+                            timestamp,
+                          })
                         );
+
+                        // Update current queries (for immediate display)
+                        setGeneratedQueries(newQueries);
+
+                        // Accumulate queries for session tracking
+                        setResearchSession((prev) => ({
+                          ...prev,
+                          accumulatedQueries: [
+                            ...prev.accumulatedQueries,
+                            ...newQueries,
+                          ],
+                        }));
                       } else if (
                         update.stage === "ANALYZING_DOCUMENTS" &&
                         update.data &&
@@ -262,6 +304,12 @@ export function useResearchAgent(): UseResearchAgentReturn {
                           update.data as Partial<ClientAnalyzedDoc> & {
                             docId: string;
                           };
+                        const timestamp = new Date().toISOString();
+                        const docWithTimestamp = {
+                          ...docData,
+                          timestamp,
+                        } as ClientAnalyzedDoc;
+
                         setAnalyzedDocs((prevDocs) => {
                           const existingDocIndex = prevDocs.findIndex(
                             (d) => d.docId === docData.docId
@@ -270,11 +318,39 @@ export function useResearchAgent(): UseResearchAgentReturn {
                             const updatedDocs = [...prevDocs];
                             updatedDocs[existingDocIndex] = {
                               ...updatedDocs[existingDocIndex],
-                              ...docData,
+                              ...docWithTimestamp,
                             };
                             return updatedDocs;
                           }
-                          return [...prevDocs, docData as ClientAnalyzedDoc];
+                          return [...prevDocs, docWithTimestamp];
+                        });
+
+                        // Accumulate documents for session tracking
+                        setResearchSession((prev) => {
+                          const existingAccumulatedIndex =
+                            prev.accumulatedDocuments.findIndex(
+                              (d) => d.docId === docData.docId
+                            );
+                          if (existingAccumulatedIndex > -1) {
+                            const updatedAccumulated = [
+                              ...prev.accumulatedDocuments,
+                            ];
+                            updatedAccumulated[existingAccumulatedIndex] = {
+                              ...updatedAccumulated[existingAccumulatedIndex],
+                              ...docWithTimestamp,
+                            };
+                            return {
+                              ...prev,
+                              accumulatedDocuments: updatedAccumulated,
+                            };
+                          }
+                          return {
+                            ...prev,
+                            accumulatedDocuments: [
+                              ...prev.accumulatedDocuments,
+                              docWithTimestamp,
+                            ],
+                          };
                         });
                       } else if (
                         update.stage === "SYNTHESIZING_FINDINGS" &&
@@ -282,7 +358,30 @@ export function useResearchAgent(): UseResearchAgentReturn {
                         typeof update.data === "object" &&
                         "topics" in update.data
                       ) {
-                        setSynthesisDetails(update.data as ClientSynthesis);
+                        const synthesisData = update.data as ClientSynthesis;
+                        const timestamp = new Date().toISOString();
+                        const topicsWithTimestamp = synthesisData.topics.map(
+                          (topic) => ({
+                            ...topic,
+                            timestamp,
+                          })
+                        );
+
+                        const updatedSynthesis = {
+                          ...synthesisData,
+                          topics: topicsWithTimestamp,
+                        };
+
+                        setSynthesisDetails(updatedSynthesis);
+
+                        // Accumulate topics for session tracking
+                        setResearchSession((prev) => ({
+                          ...prev,
+                          accumulatedTopics: [
+                            ...prev.accumulatedTopics,
+                            ...topicsWithTimestamp,
+                          ],
+                        }));
                       } else if (
                         update.stage === "ASSESSING_RESEARCH" &&
                         update.data &&
@@ -489,6 +588,9 @@ export function useResearchAgent(): UseResearchAgentReturn {
       setSynthesisDetails,
       setFinalReportContent,
       setResearchAssessment,
+      setResearchSession,
+      setAutoModeState,
+      autoModeState,
     ]
   );
 
@@ -504,6 +606,47 @@ export function useResearchAgent(): UseResearchAgentReturn {
    * abortResearch(); // Safely aborts any ongoing research
    * ```
    */
+  /**
+   * Pauses the currently running research process.
+   */
+  const pauseResearch = useCallback(() => {
+    if (abortController) {
+      console.log("useResearchAgent: Pause signal sent.");
+      setResearchStatus((prev: ResearchStatus) => ({
+        ...prev,
+        isPaused: true,
+        canResume: true,
+        message: "Research paused by user.",
+      }));
+      setResearchLog((prev) => [
+        ...prev,
+        `${new Date().toISOString()} [USER_ACTION] Research paused.`,
+      ]);
+    }
+  }, [abortController, setResearchStatus, setResearchLog]);
+
+  /**
+   * Resumes a paused research process with accumulated data.
+   */
+  const resumeResearch = useCallback(async () => {
+    // Implementation will depend on orchestrator support for resume
+    console.log("useResearchAgent: Resume functionality not yet implemented.");
+    setResearchLog((prev) => [
+      ...prev,
+      `${new Date().toISOString()} [USER_ACTION] Resume requested (not yet implemented).`,
+    ]);
+  }, [setResearchLog]);
+
+  /**
+   * Toggles auto mode on/off.
+   */
+  const toggleAutoMode = useCallback(() => {
+    setAutoModeState((prev) => ({
+      ...prev,
+      isEnabled: !prev.isEnabled,
+    }));
+  }, [setAutoModeState]);
+
   const abortResearch = useCallback(() => {
     if (abortController) {
       console.log("useResearchAgent: Abort signal sent.");
@@ -513,6 +656,8 @@ export function useResearchAgent(): UseResearchAgentReturn {
         isLoading: false,
         error: "Research manually aborted.",
         message: "Research process aborted by user.",
+        isPaused: false,
+        canResume: false,
       }));
       setResearchLog((prev) => [
         ...prev,
@@ -528,10 +673,16 @@ export function useResearchAgent(): UseResearchAgentReturn {
 
   return {
     startResearch,
+    resumeResearch,
+    pauseResearch,
     abortResearch,
     isLoading: currentStatus.isLoading,
     currentStage: currentStatus.stage,
     currentMessage: currentStatus.message,
     error: currentStatus.error,
+    isPaused: currentStatus.isPaused || false,
+    canResume: currentStatus.canResume || false,
+    autoModeEnabled: autoModeState.isEnabled,
+    toggleAutoMode,
   };
 }

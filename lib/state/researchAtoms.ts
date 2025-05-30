@@ -13,6 +13,8 @@ import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
 export interface ClientSearchQuery {
   query_string: string;
   expected_information_summary?: string; // Summarized from BAML type
+  iterationIndex?: number; // Track which iteration this query came from
+  timestamp?: string; // ISO timestamp when query was generated
 }
 
 /**
@@ -65,6 +67,10 @@ export interface ClientAnalyzedDoc {
 
   // Analysis reasoning for modal display
   analysisReasoning?: ClientAnalysisReasoning;
+
+  // Tracking metadata for accumulative display
+  iterationIndex?: number; // Track which iteration this analysis came from
+  timestamp?: string; // ISO timestamp when document was analyzed
 }
 
 export interface ClientSynthesisTopic {
@@ -72,6 +78,8 @@ export interface ClientSynthesisTopic {
   synthesisSnippet: string; // Potentially streaming
   confidence?: number;
   docIds?: string[];
+  iterationIndex?: number; // Track which iteration this synthesis came from
+  timestamp?: string; // ISO timestamp when synthesis was created
 }
 
 export interface ClientSynthesis {
@@ -130,6 +138,19 @@ export interface ResearchStatus {
   currentProcessedDoc?: number;
   totalDocsToProcess?: number;
   currentStreamingField?: string | null; // e.g., "executiveSummary", "sections[0].content"
+  isPaused?: boolean; // Track if research is manually paused
+  canResume?: boolean; // Track if research can be resumed
+}
+
+/**
+ * Auto mode configuration and state for the research process.
+ * Controls automatic execution of refinement queries and iterations.
+ */
+export interface AutoModeState {
+  isEnabled: boolean; // Whether auto mode is currently enabled
+  maxIterations: number; // Maximum number of iterations before stopping
+  currentIteration: number; // Current iteration count
+  originalQuestion: string; // Original legal question for context
 }
 
 // --- Core Jotai Atoms ---
@@ -177,6 +198,27 @@ export const finalReportContentAtom = atom<ClientFinalReport>({
 export const researchAssessmentAtom = atom<ClientResearchAssessment | null>(
   null
 );
+
+// Auto mode state atom
+export const autoModeStateAtom = atom<AutoModeState>({
+  isEnabled: false,
+  maxIterations: 3, // Default maximum iterations
+  currentIteration: 0,
+  originalQuestion: "",
+});
+
+// Research session state for pause/resume functionality
+export const researchSessionAtom = atom<{
+  sessionId: string | null;
+  accumulatedQueries: ClientSearchQuery[];
+  accumulatedDocuments: ClientAnalyzedDoc[];
+  accumulatedTopics: ClientSynthesisTopic[];
+}>({
+  sessionId: null,
+  accumulatedQueries: [],
+  accumulatedDocuments: [],
+  accumulatedTopics: [],
+});
 
 // --- Derived Atoms (Optional but Recommended for UI Convenience) ---
 
@@ -233,6 +275,8 @@ export const resetResearchStateAtom = atom(null, (get, set, _value) => {
     currentProcessedDoc: 0,
     totalDocsToProcess: 0,
     currentStreamingField: null,
+    isPaused: false,
+    canResume: false,
   });
   set(researchLogAtom, []);
   set(generatedQueriesAtom, []);
@@ -253,6 +297,22 @@ export const resetResearchStateAtom = atom(null, (get, set, _value) => {
   });
   set(selectedAnalyzedDocIdAtom, null);
   set(researchAssessmentAtom, null);
+
+  // Reset auto mode state but preserve isEnabled setting
+  const currentAutoMode = get(autoModeStateAtom);
+  set(autoModeStateAtom, {
+    ...currentAutoMode,
+    currentIteration: 0,
+    originalQuestion: "",
+  });
+
+  // Reset research session
+  set(researchSessionAtom, {
+    sessionId: null,
+    accumulatedQueries: [],
+    accumulatedDocuments: [],
+    accumulatedTopics: [],
+  });
 });
 
 /*

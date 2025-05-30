@@ -197,7 +197,11 @@ describe("Phase 3 Completion - Client-Side Orchestrator Hook", () => {
                 await result.current.startResearch(testQuestion);
             });
 
-            expect(mockedConductResearch).toHaveBeenCalledWith(testQuestion);
+            expect(mockedConductResearch).toHaveBeenCalledWith(testQuestion, {
+                currentIteration: 0,
+                isEnabled: false,
+                maxIterations: 3,
+            });
             expect(mockedConductResearch).toHaveBeenCalledTimes(1);
         });
 
@@ -382,10 +386,12 @@ describe("Phase 3 Completion - Client-Side Orchestrator Hook", () => {
                 expect(queries[0]).toEqual({
                     query_string: "AI healthcare liability",
                     expected_information_summary: "Liability cases",
+                    timestamp: expect.any(String),
                 });
                 expect(queries[1]).toEqual({
                     query_string: "medical AI regulations",
                     expected_information_summary: "Regulatory framework",
+                    timestamp: expect.any(String),
                 });
             });
         });
@@ -441,6 +447,7 @@ describe("Phase 3 Completion - Client-Side Orchestrator Hook", () => {
                     relevanceScore: 0.9,
                     summarySnippet: "This document discusses AI liability",
                     confidenceScore: 0.85,
+                    timestamp: expect.any(String),
                 });
             });
         });
@@ -484,7 +491,13 @@ describe("Phase 3 Completion - Client-Side Orchestrator Hook", () => {
 
             await waitFor(() => {
                 const synthesis = store.get(synthesisDetailsAtom);
-                expect(synthesis).toEqual(synthesisData);
+                expect(synthesis).toEqual({
+                    ...synthesisData,
+                    topics: synthesisData.topics.map(topic => ({
+                        ...topic,
+                        timestamp: expect.any(String),
+                    })),
+                });
             });
         });
     });
@@ -515,7 +528,7 @@ describe("Phase 3 Completion - Client-Side Orchestrator Hook", () => {
 
             await waitFor(() => {
                 const status = store.get(researchStatusAtom);
-                expect(status.stage).toBe("GENERATING_QUERIES");
+                expect(status.stage).toBe("ERROR");
                 expect(status.isLoading).toBe(false);
                 expect(status.error).toBe("Failed to generate search queries");
             });

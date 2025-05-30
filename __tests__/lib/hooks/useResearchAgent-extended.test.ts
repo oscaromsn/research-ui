@@ -505,7 +505,7 @@ describe("useResearchAgent Hook - Extended Data Handling", () => {
                 // Error should be reflected in status
                 const status = store.get(researchStatusAtom);
                 expect(status.error).toContain("Analysis failed");
-                expect(status.stage).toBe("ANALYZING_DOCUMENTS");
+                expect(status.stage).toBe("ERROR");
             });
 
             // Analyzed docs should be empty since no successful data updates occurred

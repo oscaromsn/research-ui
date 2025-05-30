@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import { Provider, createStore } from "jotai";
-import { type ReactNode, createElement } from "react";
+import React, { type ReactNode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { ReportDrafter } from "@/components/domain/report-generation/report-drafter";
@@ -21,11 +21,12 @@ describe("Phase 4 Completion Validation", () => {
         store = createStore();
     });
 
-    const JotaiProvider = ({ children }: { children: ReactNode }) =>
-        createElement(Provider, { store }, children);
+    const JotaiProvider = ({ children }: { children: ReactNode }) => (
+        <Provider store={store}>{children}</Provider>
+    );
 
     const renderWithProvider = (component: React.ReactElement) => {
-        return render(createElement(JotaiProvider, { children: component }));
+        return render(<JotaiProvider>{component}</JotaiProvider>);
     };
 
     describe("SynthesisReporting Component Integration", () => {
@@ -58,7 +59,7 @@ describe("Phase 4 Completion Validation", () => {
 
             store.set(synthesisDetailsAtom, mockSynthesis);
 
-            renderWithProvider(createElement(SynthesisReporting));
+            renderWithProvider(<SynthesisReporting />);
 
             // Verify atom integration - should display topics from atom
             expect(
@@ -103,7 +104,7 @@ describe("Phase 4 Completion Validation", () => {
 
             store.set(synthesisDetailsAtom, emptySynthesis);
 
-            renderWithProvider(createElement(SynthesisReporting));
+            renderWithProvider(<SynthesisReporting />);
 
             // Should still render the component structure
             expect(
@@ -148,7 +149,7 @@ describe("Phase 4 Completion Validation", () => {
 
             store.set(finalReportContentAtom, mockReport);
 
-            renderWithProvider(createElement(ReportDrafter));
+            renderWithProvider(<ReportDrafter />);
 
             // Verify title integration
             expect(
@@ -226,7 +227,7 @@ describe("Phase 4 Completion Validation", () => {
 
             store.set(finalReportContentAtom, partialReport);
 
-            renderWithProvider(createElement(ReportDrafter));
+            renderWithProvider(<ReportDrafter />);
 
             const docStructure = screen
                 .getByText("Document Structure")
@@ -296,7 +297,7 @@ describe("Phase 4 Completion Validation", () => {
 
             // Render both components
             const { unmount: unmountSynthesis } = renderWithProvider(
-                createElement(SynthesisReporting),
+                <SynthesisReporting />
             );
             expect(screen.getByText("Test Topic")).toBeInTheDocument();
             expect(
@@ -305,7 +306,7 @@ describe("Phase 4 Completion Validation", () => {
             unmountSynthesis();
 
             const { unmount: unmountReport } = renderWithProvider(
-                createElement(ReportDrafter),
+                <ReportDrafter />
             );
             expect(
                 screen.getByDisplayValue("Integration Test Report"),
@@ -337,7 +338,7 @@ describe("Phase 4 Completion Validation", () => {
             store.set(synthesisDetailsAtom, initialSynthesis);
 
             const { rerender } = renderWithProvider(
-                createElement(SynthesisReporting),
+                <SynthesisReporting />
             );
             expect(screen.getByText("Initial Topic")).toBeInTheDocument();
             expect(screen.getByText("Low (50%)")).toBeInTheDocument();
@@ -359,9 +360,7 @@ describe("Phase 4 Completion Validation", () => {
 
             store.set(synthesisDetailsAtom, updatedSynthesis);
             rerender(
-                createElement(JotaiProvider, {
-                    children: createElement(SynthesisReporting),
-                }),
+                <JotaiProvider><SynthesisReporting /></JotaiProvider>
             );
 
             // Verify component reflects changes

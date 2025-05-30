@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider, createStore } from "jotai";
-import { type ReactNode, createElement } from "react";
+import React, { type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GuidanceStrategy } from "@/components/domain/guidance/guidance-strategy";
@@ -37,23 +37,30 @@ describe("GuidanceStrategy Component Integration", () => {
         // Set default mock return value
         mockUseResearchAgent.mockReturnValue({
             startResearch: mockStartResearch,
+            resumeResearch: vi.fn(),
+            pauseResearch: vi.fn(),
             abortResearch: mockAbortResearch,
             isLoading: false,
             currentStage: "IDLE",
             currentMessage: "Ready to start research.",
             error: null,
+            isPaused: false,
+            canResume: false,
+            autoModeEnabled: false,
+            toggleAutoMode: vi.fn(),
         });
     });
 
-    const JotaiProvider = ({ children }: { children: ReactNode }) =>
-        createElement(Provider, { store }, children);
+    const JotaiProvider = ({ children }: { children: ReactNode }) => (
+        <Provider store={store}>{children}</Provider>
+    );
 
     const renderWithProvider = (component: React.ReactElement) => {
-        return render(createElement(JotaiProvider, { children: component }));
+        return render(<JotaiProvider>{component}</JotaiProvider>);
     };
 
     it("renders the component with initial state", () => {
-        renderWithProvider(createElement(GuidanceStrategy));
+        renderWithProvider(<GuidanceStrategy />);
 
         expect(screen.getByText("Guidance & Strategy")).toBeInTheDocument();
         expect(
@@ -65,7 +72,7 @@ describe("GuidanceStrategy Component Integration", () => {
     });
 
     it("captures and submits legal question through useResearchAgent", async () => {
-        renderWithProvider(createElement(GuidanceStrategy));
+        renderWithProvider(<GuidanceStrategy />);
 
         const input = screen.getByPlaceholderText(
             "Enter Legal Question or Research Topic",
@@ -105,7 +112,7 @@ describe("GuidanceStrategy Component Integration", () => {
             },
         ]);
 
-        renderWithProvider(createElement(GuidanceStrategy));
+        renderWithProvider(<GuidanceStrategy />);
 
         // Check that the first query is displayed
         expect(
@@ -120,45 +127,58 @@ describe("GuidanceStrategy Component Integration", () => {
         ).toBeInTheDocument();
     });
 
-    it("disables input and button during loading state", () => {
+    it("disables input and shows status during loading state", () => {
         // Mock loading state
         mockUseResearchAgent.mockReturnValue({
             startResearch: mockStartResearch,
+            resumeResearch: vi.fn(),
+            pauseResearch: vi.fn(),
             abortResearch: mockAbortResearch,
             isLoading: true,
             currentStage: "GENERATING_QUERIES",
             currentMessage: "Generating search queries...",
             error: null,
+            isPaused: false,
+            canResume: false,
+            autoModeEnabled: false,
+            toggleAutoMode: vi.fn(),
         });
 
-        renderWithProvider(createElement(GuidanceStrategy));
+        renderWithProvider(<GuidanceStrategy />);
 
         const input = screen.getByPlaceholderText(
             "Enter Legal Question or Research Topic",
         );
-        const startButton = screen.getByText(/Processing:/);
 
         expect(input).toBeDisabled();
-        expect(startButton).toBeDisabled();
+        expect(screen.queryByText("Start Research")).not.toBeInTheDocument();
         expect(
             screen.getByText(
                 "Processing: GENERATING_QUERIES - Generating search queries...",
             ),
         ).toBeInTheDocument();
+        expect(screen.getByText("Pause")).toBeInTheDocument();
+        expect(screen.getByText("Abort")).toBeInTheDocument();
     });
 
     it("shows abort button during loading and calls abortResearch", async () => {
         // Mock loading state
         mockUseResearchAgent.mockReturnValue({
             startResearch: mockStartResearch,
+            resumeResearch: vi.fn(),
+            pauseResearch: vi.fn(),
             abortResearch: mockAbortResearch,
             isLoading: true,
             currentStage: "ANALYZING_DOCUMENTS",
             currentMessage: "Analyzing retrieved documents...",
             error: null,
+            isPaused: false,
+            canResume: false,
+            autoModeEnabled: false,
+            toggleAutoMode: vi.fn(),
         });
 
-        renderWithProvider(createElement(GuidanceStrategy));
+        renderWithProvider(<GuidanceStrategy />);
 
         const abortButton = screen.getByText("Abort");
         await userEvent.click(abortButton);
@@ -170,14 +190,20 @@ describe("GuidanceStrategy Component Integration", () => {
         // Mock error state
         mockUseResearchAgent.mockReturnValue({
             startResearch: mockStartResearch,
+            resumeResearch: vi.fn(),
+            pauseResearch: vi.fn(),
             abortResearch: mockAbortResearch,
             isLoading: false,
             currentStage: "ERROR",
             currentMessage: null,
             error: "Failed to connect to document search service",
+            isPaused: false,
+            canResume: false,
+            autoModeEnabled: false,
+            toggleAutoMode: vi.fn(),
         });
 
-        renderWithProvider(createElement(GuidanceStrategy));
+        renderWithProvider(<GuidanceStrategy />);
 
         expect(
             screen.getByText(
@@ -195,7 +221,7 @@ describe("GuidanceStrategy Component Integration", () => {
             "Analyzing document relevance...",
         ]);
 
-        renderWithProvider(createElement(GuidanceStrategy));
+        renderWithProvider(<GuidanceStrategy />);
 
         expect(screen.getByText("Research Logs:")).toBeInTheDocument();
         expect(
@@ -211,7 +237,7 @@ describe("GuidanceStrategy Component Integration", () => {
     });
 
     it("prevents submission with empty legal question", async () => {
-        renderWithProvider(createElement(GuidanceStrategy));
+        renderWithProvider(<GuidanceStrategy />);
 
         const input = screen.getByPlaceholderText(
             "Enter Legal Question or Research Topic",
@@ -242,7 +268,7 @@ describe("GuidanceStrategy Component Integration", () => {
         };
         store.set(researchAssessmentAtom, mockAssessment);
 
-        renderWithProvider(createElement(GuidanceStrategy));
+        renderWithProvider(<GuidanceStrategy />);
 
         // Assessment section should be visible but details not expanded initially
         expect(screen.getByText(/Agent Assessment/)).toBeInTheDocument();
@@ -274,7 +300,7 @@ describe("GuidanceStrategy Component Integration", () => {
         // Ensure assessment atom is null (default state)
         store.set(researchAssessmentAtom, null);
         
-        renderWithProvider(createElement(GuidanceStrategy));
+        renderWithProvider(<GuidanceStrategy />);
 
         // Assessment section should not be visible
         expect(screen.queryByText(/Agent Assessment/)).not.toBeInTheDocument();

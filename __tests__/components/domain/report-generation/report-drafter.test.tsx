@@ -1,7 +1,7 @@
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider, createStore } from "jotai";
-import { type ReactNode, createElement } from "react";
+import React, { type ReactNode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { ReportDrafter } from "@/components/domain/report-generation/report-drafter";
@@ -15,11 +15,12 @@ describe("ReportDrafter Component Integration", () => {
         store = createStore();
     });
 
-    const JotaiProvider = ({ children }: { children: ReactNode }) =>
-        createElement(Provider, { store }, children);
+    const JotaiProvider = ({ children }: { children: ReactNode }) => (
+        <Provider store={store}>{children}</Provider>
+    );
 
     const renderWithProvider = (component: React.ReactElement) => {
-        return render(createElement(JotaiProvider, { children: component }));
+        return render(<JotaiProvider>{component}</JotaiProvider>);
     };
 
     const mockReportData: ClientFinalReport = {
@@ -53,7 +54,7 @@ describe("ReportDrafter Component Integration", () => {
     };
 
     it("renders the component with initial state", () => {
-        renderWithProvider(createElement(ReportDrafter));
+        renderWithProvider(<ReportDrafter />);
 
         expect(screen.getByText("Document Structure")).toBeInTheDocument();
         // Should show action buttons
@@ -63,7 +64,7 @@ describe("ReportDrafter Component Integration", () => {
     it("displays report title from atom state", () => {
         store.set(finalReportContentAtom, mockReportData);
 
-        renderWithProvider(createElement(ReportDrafter));
+        renderWithProvider(<ReportDrafter />);
 
         expect(
             screen.getByDisplayValue(
@@ -75,7 +76,7 @@ describe("ReportDrafter Component Integration", () => {
     it("allows editing the report title", async () => {
         store.set(finalReportContentAtom, mockReportData);
 
-        renderWithProvider(createElement(ReportDrafter));
+        renderWithProvider(<ReportDrafter />);
 
         const titleInput = screen.getByDisplayValue(
             "Force Majeure Analysis in COVID-19 Context",
@@ -92,7 +93,7 @@ describe("ReportDrafter Component Integration", () => {
     it("displays executive summary from atom state", () => {
         store.set(finalReportContentAtom, mockReportData);
 
-        renderWithProvider(createElement(ReportDrafter));
+        renderWithProvider(<ReportDrafter />);
 
         expect(
             screen.getByText(
@@ -104,7 +105,7 @@ describe("ReportDrafter Component Integration", () => {
     it("displays report sections from atom state", () => {
         store.set(finalReportContentAtom, mockReportData);
 
-        renderWithProvider(createElement(ReportDrafter));
+        renderWithProvider(<ReportDrafter />);
 
         // Check section titles in document structure (use more specific selectors)
         const docStructure = screen
@@ -139,7 +140,7 @@ describe("ReportDrafter Component Integration", () => {
     it("displays conclusion from atom state", () => {
         store.set(finalReportContentAtom, mockReportData);
 
-        renderWithProvider(createElement(ReportDrafter));
+        renderWithProvider(<ReportDrafter />);
 
         expect(
             screen.getByText(
@@ -168,7 +169,7 @@ describe("ReportDrafter Component Integration", () => {
 
         store.set(finalReportContentAtom, streamingReport);
 
-        renderWithProvider(createElement(ReportDrafter));
+        renderWithProvider(<ReportDrafter />);
 
         // Check for animated caret in streaming text
         const carets = document.querySelectorAll(".animate-caret-blink");
@@ -196,7 +197,7 @@ describe("ReportDrafter Component Integration", () => {
 
         store.set(finalReportContentAtom, partialReport);
 
-        renderWithProvider(createElement(ReportDrafter));
+        renderWithProvider(<ReportDrafter />);
 
         // Check that completed sections have different styling than incomplete ones
         const docStructure = screen
@@ -229,7 +230,7 @@ describe("ReportDrafter Component Integration", () => {
 
         store.set(finalReportContentAtom, emptyReport);
 
-        renderWithProvider(createElement(ReportDrafter));
+        renderWithProvider(<ReportDrafter />);
 
         expect(screen.getByText("Document Structure")).toBeInTheDocument();
         // Should show default title input or placeholder
@@ -255,7 +256,7 @@ describe("ReportDrafter Component Integration", () => {
 
         store.set(finalReportContentAtom, partialReport);
 
-        const { rerender } = renderWithProvider(createElement(ReportDrafter));
+        const { rerender } = renderWithProvider(<ReportDrafter />);
 
         // Check initial partial content
         expect(screen.getByText(/This report examines/)).toBeInTheDocument();
@@ -282,9 +283,7 @@ describe("ReportDrafter Component Integration", () => {
         });
 
         rerender(
-            createElement(JotaiProvider, {
-                children: createElement(ReportDrafter),
-            }),
+            <JotaiProvider><ReportDrafter /></JotaiProvider>
         );
 
         // Check updated content
@@ -306,7 +305,7 @@ describe("ReportDrafter Component Integration", () => {
     });
 
     it("displays action buttons (save, download, share)", () => {
-        renderWithProvider(createElement(ReportDrafter));
+        renderWithProvider(<ReportDrafter />);
 
         const buttons = screen.getAllByRole("button");
         expect(buttons.length).toBeGreaterThanOrEqual(3);
@@ -343,7 +342,7 @@ describe("ReportDrafter Component Integration", () => {
 
         store.set(finalReportContentAtom, reportWithMixedSections);
 
-        renderWithProvider(createElement(ReportDrafter));
+        renderWithProvider(<ReportDrafter />);
 
         // Use document structure area specifically to avoid conflicts with content area
         const docStructure = screen

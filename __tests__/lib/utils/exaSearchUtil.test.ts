@@ -1,15 +1,21 @@
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { SearchQueryItem } from "@/baml_client/types";
 import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
 
 // Mock axios
-vi.mock("axios");
+vi.mock("axios", () => ({
+    default: {
+        post: vi.fn(),
+    },
+    isAxiosError: vi.fn(),
+}));
+
 const mockedAxios = axios as unknown as {
     post: ReturnType<typeof vi.fn>;
-    isAxiosError: ReturnType<typeof vi.fn>;
 };
+const mockedIsAxiosError = isAxiosError as unknown as ReturnType<typeof vi.fn>;
 
 // Mock dotenv to prevent loading real environment variables
 vi.mock("dotenv", () => ({
@@ -300,7 +306,7 @@ describe("executeExaSearch", () => {
             data: { message: "Unauthorized" },
         };
         mockedAxios.post.mockRejectedValueOnce(apiError);
-        mockedAxios.isAxiosError = vi.fn().mockReturnValueOnce(true);
+        mockedIsAxiosError.mockReturnValueOnce(true);
 
         vi.spyOn(console, "error").mockImplementation(() => {}); // Silence console errors
 
@@ -314,7 +320,7 @@ describe("executeExaSearch", () => {
         // Setup
         const genericError = new Error("Something went wrong");
         mockedAxios.post.mockRejectedValueOnce(genericError);
-        mockedAxios.isAxiosError = vi.fn().mockReturnValueOnce(false);
+        mockedIsAxiosError.mockReturnValueOnce(false);
 
         vi.spyOn(console, "error").mockImplementation(() => {}); // Silence console errors
 
@@ -336,7 +342,7 @@ describe("executeExaSearch", () => {
             data: { error: "Too many requests" },
         };
         mockedAxios.post.mockRejectedValueOnce(rateLimitError);
-        mockedAxios.isAxiosError = vi.fn().mockReturnValueOnce(true);
+        mockedIsAxiosError.mockReturnValueOnce(true);
 
         vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -358,7 +364,7 @@ describe("executeExaSearch", () => {
             data: { message: "Invalid API key" },
         };
         mockedAxios.post.mockRejectedValueOnce(forbiddenError);
-        mockedAxios.isAxiosError = vi.fn().mockReturnValueOnce(true);
+        mockedIsAxiosError.mockReturnValueOnce(true);
 
         vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -380,7 +386,7 @@ describe("executeExaSearch", () => {
             data: { error: "Internal server error" },
         };
         mockedAxios.post.mockRejectedValueOnce(serverError);
-        mockedAxios.isAxiosError = vi.fn().mockReturnValueOnce(true);
+        mockedIsAxiosError.mockReturnValueOnce(true);
 
         vi.spyOn(console, "error").mockImplementation(() => {});
 

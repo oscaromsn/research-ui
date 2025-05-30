@@ -107,14 +107,18 @@ async function fetchDocumentsFromQueries(
       console.log(
         `Orchestrator: Query "${query.query_string}" yielded ${results.length} results.`
       );
-    } catch (searchError: any) {
+    } catch (searchError: unknown) {
+      const errorMessage =
+        searchError instanceof Error
+          ? searchError.message
+          : String(searchError);
       console.error(
         `Orchestrator: Error during live search for query "${query.query_string}":`,
-        searchError.message
+        errorMessage
       );
 
       // Handle rate limiting specifically - consider stopping further searches
-      if (searchError.message.includes("Rate limit exceeded")) {
+      if (errorMessage.includes("Rate limit exceeded")) {
         console.warn(
           "Orchestrator: Rate limit reached for Exa API. Stopping further search queries for this session."
         );
@@ -142,9 +146,17 @@ async function fetchDocumentsFromQueries(
   return searchResultItems;
 }
 
+// Auto mode configuration interface
+interface AutoModeConfig {
+  isEnabled: boolean;
+  maxIterations: number;
+  currentIteration: number;
+}
+
 // Main orchestrator function
 export async function conductResearch(
-  legalQuestion: string
+  legalQuestion: string,
+  autoModeConfig?: AutoModeConfig
 ): Promise<ReadableStream<Uint8Array>> {
   const { stream, writer, encoder, closeStream } = createStream();
   let currentStage: ResearchStage = "IDLE";
@@ -227,15 +239,16 @@ export async function conductResearch(
             isFinalForStage: true,
           });
         }
-      } catch (searchError: any) {
-        console.error(
-          "Orchestrator: Complete search failure:",
-          searchError.message
-        );
+      } catch (searchError: unknown) {
+        const errorMessage =
+          searchError instanceof Error
+            ? searchError.message
+            : String(searchError);
+        console.error("Orchestrator: Complete search failure:", errorMessage);
         await sendUpdate(writer, encoder, {
           type: "ERROR",
           stage: currentStage,
-          message: `Failed to retrieve documents from search API: ${searchError.message}`,
+          message: `Failed to retrieve documents from search API: ${errorMessage}`,
         });
         // Set empty results and continue - the assessment stage will handle this gracefully
         searchResultItems = [];
@@ -427,19 +440,194 @@ export async function conductResearch(
         });
       }
 
-      // Simplified Iteration Logic
+      // Enhanced Iteration Logic with Auto Mode Support
       if (assessment.next_action !== "GENERATE_REPORT") {
-        currentStage =
-          assessment.next_action === "REQUEST_HUMAN_REVIEW"
-            ? "HUMAN_REVIEW_REQUESTED"
-            : "ITERATION_PAUSED";
-        await sendUpdate(writer, encoder, {
-          type: "STATUS_CHANGE",
-          stage: currentStage,
-          message: `Research paused. Suggested next action: ${assessment.next_action}. Summary: ${assessment.assessment_summary}`,
-        });
-        await closeStream();
-        return;
+        // Check if auto mode is enabled and we should continue automatically
+        const shouldContinueAutomatically =
+          autoModeConfig?.isEnabled &&
+          (assessment.next_action === "REFINE_QUERIES" ||
+            assessment.next_action === "NEW_QUERIES") &&
+          autoModeConfig.currentIteration < autoModeConfig.maxIterations;
+
+        if (shouldContinueAutomatically) {
+          await sendUpdate(writer, encoder, {
+            type: "STATUS_CHANGE",
+            stage: "GENERATING_QUERIES",
+            message: `Auto mode: Executing ${assessment.next_action}. Iteration ${autoModeConfig.currentIteration + 1}/${autoModeConfig.maxIterations}`,
+          });
+
+          // Use suggested refinement queries if available, otherwise generate new ones
+          let newQueries: SearchQueryItem[] = [];
+          if (
+            assessment.suggested_queries_for_refinement &&
+            assessment.suggested_queries_for_refinement.length > 0
+          ) {
+            newQueries = assessment.suggested_queries_for_refinement;
+          } else {
+            // Generate new queries based on the updated context
+            const refinedQueryAnalysis = await b.GenerateLegalSearchQueries(
+              `${legalQuestion}\n\nPrevious research gaps identified: ${assessment.identified_gaps?.join(", ") || "None"}`
+            );
+            newQueries = refinedQueryAnalysis.search_queries;
+          }
+
+          // Send updated queries to client
+          await sendUpdate(writer, encoder, {
+            type: "DATA",
+            stage: "GENERATING_QUERIES",
+            data: {
+              queries: newQueries.map((q) => ({
+                query_string: q.query_string,
+                expected_information_summary: `${q.expected_information.join(" ").substring(0, 100)}...`,
+              })),
+            },
+            message: `${newQueries.length} refinement queries generated for iteration ${autoModeConfig.currentIteration + 1}.`,
+            isFinalForStage: true,
+          });
+
+          // Continue with document fetching for the new queries
+          currentStage = "FETCHING_DOCUMENTS";
+          await sendUpdate(writer, encoder, {
+            type: "STATUS_CHANGE",
+            stage: currentStage,
+            message: "Auto mode: Retrieving additional documents...",
+          });
+
+          try {
+            const newSearchResults =
+              await fetchDocumentsFromQueries(newQueries);
+
+            if (newSearchResults.length > 0) {
+              // Analyze new documents
+              currentStage = "ANALYZING_DOCUMENTS";
+              await sendUpdate(writer, encoder, {
+                type: "STATUS_CHANGE",
+                stage: currentStage,
+                message: `Auto mode: Analyzing ${newSearchResults.length} additional documents...`,
+                totalDocsToProcess: newSearchResults.length,
+                currentProcessedDoc: 0,
+              });
+
+              for (let i = 0; i < newSearchResults.length; i++) {
+                const doc = newSearchResults[i];
+                const analysis: AnalyzedDocument =
+                  await b.AnalyzeSingleDocument(doc, legalQuestion);
+                analyzedDocs.push(analysis);
+
+                // Send incremental analysis updates
+                await sendUpdate(writer, encoder, {
+                  type: "DATA",
+                  stage: currentStage,
+                  data: {
+                    docId: doc.id,
+                    title: doc.title,
+                    url: doc.url,
+                    relevanceScore: analysis.relevance_score,
+                    confidenceScore: analysis.confidence_score,
+                    summarySnippet: analysis.summary.substring(0, 300),
+                    keyArguments: analysis.key_arguments_and_reasoning,
+                    extractedEntities:
+                      analysis.extracted_entities?.map((entity) => ({
+                        name: entity.name,
+                        type: entity.type,
+                        details: entity.details,
+                      })) || [],
+                    extractedQuotes: analysis.extracted_quotes || [],
+                    counterArguments:
+                      analysis.counter_arguments_or_nuances || [],
+                  },
+                  currentProcessedDoc: i + 1,
+                  totalDocsToProcess: newSearchResults.length,
+                });
+              }
+
+              // Generate updated synthesis
+              currentStage = "SYNTHESIZING_FINDINGS";
+              await sendUpdate(writer, encoder, {
+                type: "STATUS_CHANGE",
+                stage: currentStage,
+                message:
+                  "Auto mode: Synthesizing findings with new documents...",
+              });
+
+              synthesis = await b.SynthesizeAllFindings(
+                analyzedDocs,
+                legalQuestion
+              );
+
+              await sendUpdate(writer, encoder, {
+                type: "DATA",
+                stage: currentStage,
+                data: {
+                  topics:
+                    synthesis?.key_synthesized_topics?.map((topic) => ({
+                      title: topic.topic_title,
+                      synthesisSnippet: topic.synthesis.substring(0, 300),
+                      confidence: topic.confidence_score,
+                      docIds: topic.supporting_document_ids,
+                    })) || [],
+                  unansweredAspects: synthesis?.unanswered_aspects || [],
+                  emergingQuestions: synthesis?.emerging_questions || [],
+                },
+                message: "Auto mode: Updated synthesis complete.",
+                isFinalForStage: true,
+              });
+
+              // Continue to final report generation
+              currentStage = "GENERATING_REPORT";
+              await sendUpdate(writer, encoder, {
+                type: "STATUS_CHANGE",
+                stage: currentStage,
+                message:
+                  "Auto mode: Generating final report with accumulated findings...",
+              });
+            } else {
+              // No new documents found, proceed to report
+              await sendUpdate(writer, encoder, {
+                type: "LOG",
+                stage: "FETCHING_DOCUMENTS",
+                message:
+                  "Auto mode: No additional documents found. Proceeding to report generation.",
+              });
+              currentStage = "GENERATING_REPORT";
+            }
+          } catch (autoModeError: unknown) {
+            const errorMessage =
+              autoModeError instanceof Error
+                ? autoModeError.message
+                : String(autoModeError);
+            console.error("Auto mode execution error:", autoModeError);
+            await sendUpdate(writer, encoder, {
+              type: "ERROR",
+              stage: currentStage,
+              message: `Auto mode error: ${errorMessage}. Falling back to manual review.`,
+            });
+
+            currentStage = "HUMAN_REVIEW_REQUESTED";
+            await sendUpdate(writer, encoder, {
+              type: "STATUS_CHANGE",
+              stage: currentStage,
+              message: `Auto mode failed. Manual review required: ${assessment.assessment_summary}`,
+            });
+            await closeStream();
+            return;
+          }
+        } else {
+          // Manual review required or auto mode disabled
+          currentStage =
+            assessment.next_action === "REQUEST_HUMAN_REVIEW"
+              ? "HUMAN_REVIEW_REQUESTED"
+              : "ITERATION_PAUSED";
+          await sendUpdate(writer, encoder, {
+            type: "STATUS_CHANGE",
+            stage: currentStage,
+            message: autoModeConfig?.isEnabled
+              ? `Auto mode: Max iterations (${autoModeConfig.maxIterations}) reached. Manual review required.`
+              : `Research paused. Suggested next action: ${assessment.next_action}. Summary: ${assessment.assessment_summary}`,
+          });
+          await closeStream();
+          return;
+        }
       }
 
       // --- Stage 6: Generate Final Report ---

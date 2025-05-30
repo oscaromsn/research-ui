@@ -372,6 +372,8 @@ describe("ResearchAtoms - Reset Functionality", () => {
             currentProcessedDoc: 0,
             totalDocsToProcess: 0,
             currentStreamingField: null,
+            isPaused: false,
+            canResume: false,
         });
 
         expect(store.get(researchLogAtom)).toEqual([]);

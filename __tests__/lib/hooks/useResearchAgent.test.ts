@@ -47,11 +47,17 @@ describe("useResearchAgent Hook", () => {
 
             expect(result.current).toEqual({
                 startResearch: expect.any(Function),
+                resumeResearch: expect.any(Function),
+                pauseResearch: expect.any(Function),
                 abortResearch: expect.any(Function),
                 isLoading: false,
                 currentStage: "IDLE",
                 currentMessage: "Ready to start research.",
                 error: null,
+                isPaused: false,
+                canResume: false,
+                autoModeEnabled: false,
+                toggleAutoMode: expect.any(Function),
             });
         });
 
@@ -208,7 +214,11 @@ describe("useResearchAgent Hook", () => {
                 await result.current.startResearch(legalQuestion);
             });
 
-            expect(mockedConductResearch).toHaveBeenCalledWith(legalQuestion);
+            expect(mockedConductResearch).toHaveBeenCalledWith(legalQuestion, {
+                currentIteration: 0,
+                isEnabled: false,
+                maxIterations: 3,
+            });
             expect(mockedConductResearch).toHaveBeenCalledTimes(1);
         });
 
@@ -377,10 +387,12 @@ describe("useResearchAgent Hook", () => {
                 expect(queries[0]).toEqual({
                     query_string: "AI liability healthcare",
                     expected_information_summary: "Cases on AI liability",
+                    timestamp: expect.any(String),
                 });
                 expect(queries[1]).toEqual({
                     query_string: "medical malpractice automation",
                     expected_information_summary: "Malpractice precedents",
+                    timestamp: expect.any(String),
                 });
             });
         });
@@ -422,7 +434,10 @@ describe("useResearchAgent Hook", () => {
             await waitFor(() => {
                 const docs = store.get(analyzedDocsSummaryAtom);
                 expect(docs).toHaveLength(1);
-                expect(docs[0]).toEqual(docData);
+                expect(docs[0]).toEqual({
+                    ...docData,
+                    timestamp: expect.any(String),
+                });
             });
         });
 
@@ -479,6 +494,7 @@ describe("useResearchAgent Hook", () => {
                     relevanceScore: 0.7,
                     summarySnippet: "Updated summary snippet",
                     confidenceScore: 0.88,
+                    timestamp: expect.any(String),
                 });
             });
         });
@@ -529,7 +545,13 @@ describe("useResearchAgent Hook", () => {
 
             await waitFor(() => {
                 const synthesis = store.get(synthesisDetailsAtom);
-                expect(synthesis).toEqual(synthesisData);
+                expect(synthesis).toEqual({
+                    ...synthesisData,
+                    topics: synthesisData.topics.map(topic => ({
+                        ...topic,
+                        timestamp: expect.any(String),
+                    })),
+                });
             });
         });
 
@@ -560,7 +582,7 @@ describe("useResearchAgent Hook", () => {
 
             await waitFor(() => {
                 const status = store.get(researchStatusAtom);
-                expect(status.stage).toBe("GENERATING_QUERIES");
+                expect(status.stage).toBe("ERROR");
                 expect(status.isLoading).toBe(false);
                 expect(status.error).toBe("Failed to generate queries");
             });

@@ -1,4 +1,4 @@
-import axios, { type AxiosError } from "axios";
+import axios, { type AxiosError, isAxiosError } from "axios";
 import * as dotenv from "dotenv";
 
 // Load environment variables
@@ -190,7 +190,7 @@ export async function executeExaSearch(
     console.log(`Exa search yielded ${bamlResults.length} results.`);
     return bamlResults;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
+    if (isAxiosError(error)) {
       const axiosError = error as AxiosError;
       const status = axiosError.response?.status;
       const responseData = axiosError.response?.data;
@@ -217,10 +217,15 @@ export async function executeExaSearch(
         throw new Error(
           `Exa API server error. Status ${status}: ${JSON.stringify(responseData)}`
         );
-      } else {
+      } else if (status) {
         // Other client errors (400, etc.)
         throw new Error(
           `Exa API request failed with status ${status}: ${JSON.stringify(responseData)}`
+        );
+      } else {
+        // Axios error without response (network error, etc.)
+        throw new Error(
+          `Network error during Exa API request: ${axiosError.message}`
         );
       }
     }

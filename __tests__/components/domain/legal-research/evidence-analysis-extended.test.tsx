@@ -3,7 +3,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider, createStore } from "jotai";
-import { type ReactNode, createElement } from "react";
+import React, { type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { EvidenceAnalysis } from "@/components/domain/legal-research/evidence-analysis";
@@ -92,11 +92,12 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
         vi.clearAllMocks();
     });
 
-    const JotaiProvider = ({ children }: { children: ReactNode }) =>
-        createElement(Provider, { store }, children);
+    const JotaiProvider = ({ children }: { children: ReactNode }) => (
+        <Provider store={store}>{children}</Provider>
+    );
 
     const renderWithProvider = (component: React.ReactElement) => {
-        return render(createElement(JotaiProvider, { children: component }));
+        return render(<JotaiProvider>{component}</JotaiProvider>);
     };
 
     const mockLegalEntities: ClientLegalEntity[] = [
@@ -156,7 +157,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
             store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-            renderWithProvider(createElement(EvidenceAnalysis));
+            renderWithProvider(<EvidenceAnalysis />);
 
             expect(screen.getByText("Key Arguments:")).toBeInTheDocument();
             expect(
@@ -184,7 +185,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(analyzedDocsSummaryAtom, [docWithoutArguments]);
             store.set(selectedAnalyzedDocIdAtom, "doc-no-args");
 
-            renderWithProvider(createElement(EvidenceAnalysis));
+            renderWithProvider(<EvidenceAnalysis />);
 
             expect(screen.getByText("Key Arguments:")).toBeInTheDocument();
             expect(
@@ -198,7 +199,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
             store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-            renderWithProvider(createElement(EvidenceAnalysis));
+            renderWithProvider(<EvidenceAnalysis />);
 
             expect(screen.getByText("Extracted Entities:")).toBeInTheDocument();
             expect(screen.getByText("Smith v. Jones")).toBeInTheDocument(); // Only in entities now
@@ -210,7 +211,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
             store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-            renderWithProvider(createElement(EvidenceAnalysis));
+            renderWithProvider(<EvidenceAnalysis />);
 
             const entityElement = screen.getByText("Smith v. Jones");
             expect(entityElement).toHaveAttribute(
@@ -223,7 +224,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
             store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-            renderWithProvider(createElement(EvidenceAnalysis));
+            renderWithProvider(<EvidenceAnalysis />);
 
             // Check that entities have different styling classes based on type
             const caseEntity = screen.getByText("Smith v. Jones");
@@ -247,7 +248,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(analyzedDocsSummaryAtom, [docWithoutEntities]);
             store.set(selectedAnalyzedDocIdAtom, "doc-no-entities");
 
-            renderWithProvider(createElement(EvidenceAnalysis));
+            renderWithProvider(<EvidenceAnalysis />);
 
             expect(screen.getByText("Extracted Entities:")).toBeInTheDocument();
             expect(
@@ -261,7 +262,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
             store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-            renderWithProvider(createElement(EvidenceAnalysis));
+            renderWithProvider(<EvidenceAnalysis />);
 
             // Check for document content display - look for the full text
             expect(screen.getByText("Document Content")).toBeInTheDocument();
@@ -280,7 +281,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(analyzedDocsSummaryAtom, [docWithoutFullText]);
             store.set(selectedAnalyzedDocIdAtom, "doc-no-text");
 
-            renderWithProvider(createElement(EvidenceAnalysis));
+            renderWithProvider(<EvidenceAnalysis />);
 
             expect(
                 screen.getByText(/No document content available/),
@@ -297,7 +298,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(analyzedDocsSummaryAtom, [docWithMultilineText]);
             store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-            renderWithProvider(createElement(EvidenceAnalysis));
+            renderWithProvider(<EvidenceAnalysis />);
 
             expect(screen.getByText("First paragraph.")).toBeInTheDocument();
             expect(screen.getByText("Second paragraph.")).toBeInTheDocument();
@@ -310,7 +311,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
             store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-            renderWithProvider(createElement(EvidenceAnalysis));
+            renderWithProvider(<EvidenceAnalysis />);
 
             const reasoningButton = screen.getByText(/View Analysis Reasoning/);
             await userEvent.click(reasoningButton);
@@ -329,7 +330,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
             store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-            renderWithProvider(createElement(EvidenceAnalysis));
+            renderWithProvider(<EvidenceAnalysis />);
 
             const reasoningButton = screen.getByText(/View Analysis Reasoning/);
             await userEvent.click(reasoningButton);
@@ -350,7 +351,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
             store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-            renderWithProvider(createElement(EvidenceAnalysis));
+            renderWithProvider(<EvidenceAnalysis />);
 
             const reasoningButton = screen.getByText(/View Analysis Reasoning/);
             await userEvent.click(reasoningButton);
@@ -375,7 +376,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
             const { rerender } = renderWithProvider(
-                createElement(EvidenceAnalysis),
+                <EvidenceAnalysis />
             );
 
             expect(
@@ -392,9 +393,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
 
             store.set(analyzedDocsSummaryAtom, [updatedDoc]);
             rerender(
-                createElement(JotaiProvider, {
-                    children: createElement(EvidenceAnalysis),
-                }),
+                <JotaiProvider><EvidenceAnalysis /></JotaiProvider>
             );
 
             expect(screen.getByText("Updated argument 1")).toBeInTheDocument();
@@ -412,7 +411,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
             const { rerender } = renderWithProvider(
-                createElement(EvidenceAnalysis),
+                <EvidenceAnalysis />
             );
 
             expect(
@@ -427,9 +426,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
 
             store.set(analyzedDocsSummaryAtom, [updatedDoc]);
             rerender(
-                createElement(JotaiProvider, {
-                    children: createElement(EvidenceAnalysis),
-                }),
+                <JotaiProvider><EvidenceAnalysis /></JotaiProvider>
             );
 
             expect(screen.getByText("Smith v. Jones")).toBeInTheDocument();
@@ -454,7 +451,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(analyzedDocsSummaryAtom, [docWithLongEntities]);
             store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-            renderWithProvider(createElement(EvidenceAnalysis));
+            renderWithProvider(<EvidenceAnalysis />);
 
             // Should render without crashing
             expect(
@@ -476,7 +473,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
             store.set(analyzedDocsSummaryAtom, [docWithEmptyArrays]);
             store.set(selectedAnalyzedDocIdAtom, "doc-empty");
 
-            renderWithProvider(createElement(EvidenceAnalysis));
+            renderWithProvider(<EvidenceAnalysis />);
 
             expect(
                 screen.getByText(/No key arguments identified/),

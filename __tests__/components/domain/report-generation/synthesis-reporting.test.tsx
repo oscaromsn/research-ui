@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider, createStore } from "jotai";
-import { type ReactNode, createElement } from "react";
+import React, { type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SynthesisReporting } from "@/components/domain/report-generation/synthesis-reporting";
@@ -50,11 +50,12 @@ describe("SynthesisReporting Component Integration", () => {
         vi.clearAllMocks();
     });
 
-    const JotaiProvider = ({ children }: { children: ReactNode }) =>
-        createElement(Provider, { store }, children);
+    const JotaiProvider = ({ children }: { children: ReactNode }) => (
+        <Provider store={store}>{children}</Provider>
+    );
 
     const renderWithProvider = (component: React.ReactElement) => {
-        return render(createElement(JotaiProvider, { children: component }));
+        return render(<JotaiProvider>{component}</JotaiProvider>);
     };
 
     const mockSynthesisData: ClientSynthesis = {
@@ -87,7 +88,7 @@ describe("SynthesisReporting Component Integration", () => {
     };
 
     it("renders the component with initial state", () => {
-        renderWithProvider(createElement(SynthesisReporting));
+        renderWithProvider(<SynthesisReporting />);
 
         expect(screen.getByText("Synthesis & Reporting")).toBeInTheDocument();
         expect(screen.getByText("Synthesis Studio")).toBeInTheDocument();
@@ -95,7 +96,7 @@ describe("SynthesisReporting Component Integration", () => {
     });
 
     it("displays tabs and switches between them", async () => {
-        renderWithProvider(createElement(SynthesisReporting));
+        renderWithProvider(<SynthesisReporting />);
 
         const synthesisTab = screen.getByText("Synthesis Studio");
         const reportTab = screen.getByText("Report Drafter");
@@ -136,7 +137,7 @@ describe("SynthesisReporting Component Integration", () => {
     it("displays synthesized topics from atom state", () => {
         store.set(synthesisDetailsAtom, mockSynthesisData);
 
-        renderWithProvider(createElement(SynthesisReporting));
+        renderWithProvider(<SynthesisReporting />);
 
         // Check that topics are displayed
         expect(
@@ -173,7 +174,7 @@ describe("SynthesisReporting Component Integration", () => {
     it("displays unanswered aspects from atom state", () => {
         store.set(synthesisDetailsAtom, mockSynthesisData);
 
-        renderWithProvider(createElement(SynthesisReporting));
+        renderWithProvider(<SynthesisReporting />);
 
         expect(screen.getByText("Unanswered Aspects:")).toBeInTheDocument();
         expect(
@@ -204,7 +205,7 @@ describe("SynthesisReporting Component Integration", () => {
 
         store.set(synthesisDetailsAtom, streamingData);
 
-        renderWithProvider(createElement(SynthesisReporting));
+        renderWithProvider(<SynthesisReporting />);
 
         // Check for animated caret in synthesis snippet
         const caret = document.querySelector(".animate-caret-blink");
@@ -214,7 +215,7 @@ describe("SynthesisReporting Component Integration", () => {
     it("opens synthesis reasoning modal when button is clicked", async () => {
         store.set(synthesisDetailsAtom, mockSynthesisData);
 
-        renderWithProvider(createElement(SynthesisReporting));
+        renderWithProvider(<SynthesisReporting />);
 
         const reasoningButton = screen.getByText("View Synthesis Reasoning");
         await userEvent.click(reasoningButton);
@@ -230,7 +231,7 @@ describe("SynthesisReporting Component Integration", () => {
     it("closes synthesis reasoning modal when close button is clicked", async () => {
         store.set(synthesisDetailsAtom, mockSynthesisData);
 
-        renderWithProvider(createElement(SynthesisReporting));
+        renderWithProvider(<SynthesisReporting />);
 
         // Open modal
         const reasoningButton = screen.getByText("View Synthesis Reasoning");
@@ -278,7 +279,7 @@ describe("SynthesisReporting Component Integration", () => {
 
         store.set(synthesisDetailsAtom, confidenceTestData);
 
-        renderWithProvider(createElement(SynthesisReporting));
+        renderWithProvider(<SynthesisReporting />);
 
         // Should show appropriate confidence labels
         expect(screen.getByText("High (90%)")).toBeInTheDocument(); // For 90%
@@ -295,7 +296,7 @@ describe("SynthesisReporting Component Integration", () => {
 
         store.set(synthesisDetailsAtom, emptySynthesis);
 
-        renderWithProvider(createElement(SynthesisReporting));
+        renderWithProvider(<SynthesisReporting />);
 
         expect(screen.getByText("Synthesis & Reporting")).toBeInTheDocument();
         expect(screen.getByText("Synthesized Topics")).toBeInTheDocument();
@@ -322,7 +323,7 @@ describe("SynthesisReporting Component Integration", () => {
         store.set(synthesisDetailsAtom, partialSynthesis);
 
         const { rerender } = renderWithProvider(
-            createElement(SynthesisReporting),
+            <SynthesisReporting />
         );
 
         // Check initial partial content
@@ -348,9 +349,7 @@ describe("SynthesisReporting Component Integration", () => {
 
         store.set(synthesisDetailsAtom, updatedSynthesis);
         rerender(
-            createElement(JotaiProvider, {
-                children: createElement(SynthesisReporting),
-            }),
+            <JotaiProvider><SynthesisReporting /></JotaiProvider>
         );
 
         // Check updated content
@@ -380,7 +379,7 @@ describe("SynthesisReporting Component Integration", () => {
 
         store.set(synthesisDetailsAtom, dataWithReasoning);
 
-        renderWithProvider(createElement(SynthesisReporting));
+        renderWithProvider(<SynthesisReporting />);
 
         // The reasoning summary should be available when modal opens
         expect(

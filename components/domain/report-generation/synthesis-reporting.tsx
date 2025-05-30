@@ -4,7 +4,10 @@ import { useAtomValue } from "jotai";
 import { Brain, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
-import { synthesisDetailsAtom } from "@/lib/state/researchAtoms";
+import {
+  synthesisDetailsAtom,
+  researchSessionAtom,
+} from "@/lib/state/researchAtoms";
 
 import { SynthesisReasoningModal } from "./modals/synthesis-reasoning-modal";
 import { ReportDrafter } from "./report-drafter";
@@ -12,6 +15,20 @@ export function SynthesisReporting() {
   const [activeTab, setActiveTab] = useState("synthesis");
   const [showSynthesisReasoning, setShowSynthesisReasoning] = useState(false);
   const synthesis = useAtomValue(synthesisDetailsAtom);
+  const researchSession = useAtomValue(researchSessionAtom);
+
+  // Use accumulated topics if available, otherwise fall back to current session
+  const allTopics =
+    researchSession.accumulatedTopics.length > 0
+      ? researchSession.accumulatedTopics
+      : synthesis.topics;
+
+  // Sort topics by timestamp (most recent first)
+  const sortedTopics = [...allTopics].sort((a, b) => {
+    const aTime = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+    const bTime = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+    return bTime - aTime;
+  });
 
   const getConfidenceLabel = (confidence?: number): string => {
     if (!confidence) return "Unknown";
@@ -47,19 +64,31 @@ export function SynthesisReporting() {
           <div className="mb-3">
             <div className="flex justify-between items-center mb-2 cursor-pointer">
               <h3 className="font-medium text-[#4a5568] dark:text-[#a0aec0] text-sm">
-                Synthesized Topics
+                Synthesized Topics{" "}
+                {researchSession.accumulatedTopics.length > 0 &&
+                  `(${sortedTopics.length} total)`}
               </h3>
               <ChevronRight size={16} className="text-[#a0aec0]" />
             </div>
-            {synthesis.topics.length > 0 ? (
-              synthesis.topics.map((topic, index) => (
+            {sortedTopics.length > 0 ? (
+              sortedTopics.map((topic, index) => (
                 <div
                   key={topic.title || `topic-${index}`}
                   className="bg-white dark:bg-[#1e2436] mb-3 p-4 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg"
                 >
-                  <h4 className="mb-2 font-medium text-[#2d3748] dark:text-[#e2e8f0] text-sm">
-                    {topic.title}
-                  </h4>
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-medium text-[#2d3748] dark:text-[#e2e8f0] text-sm flex-1">
+                      {topic.title}
+                    </h4>
+                    {topic.timestamp && (
+                      <div className="text-[#64748b] dark:text-[#94a3b8] text-xs ml-2">
+                        {new Date(topic.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                    )}
+                  </div>
                   <p className="mb-3 text-[#4a5568] dark:text-[#a0aec0] text-xs">
                     {topic.synthesisSnippet}
                     <span

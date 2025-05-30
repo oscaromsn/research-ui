@@ -7,6 +7,7 @@ import { useState } from "react";
 import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 import {
   analyzedDocsSummaryAtom,
+  researchSessionAtom,
   selectedAnalyzedDocIdAtom,
 } from "@/lib/state/researchAtoms";
 
@@ -19,13 +20,27 @@ export function EvidenceAnalysis() {
   );
   const [showReasoningModal, setShowReasoningModal] = useState(false);
   const analyzedDocs = useAtomValue(analyzedDocsSummaryAtom);
+  const researchSession = useAtomValue(researchSessionAtom);
   const selectedDocId = useAtomValue(selectedAnalyzedDocIdAtom);
   const setSelectedDocId = useSetAtom(selectedAnalyzedDocIdAtom);
 
+  // Use accumulated documents if available, otherwise fall back to current session
+  const allDocuments =
+    researchSession.accumulatedDocuments.length > 0
+      ? researchSession.accumulatedDocuments
+      : analyzedDocs;
+
+  // Sort documents by timestamp (most recent first)
+  const sortedDocuments = [...allDocuments].sort((a, b) => {
+    const aTime = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+    const bTime = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+    return bTime - aTime;
+  });
+
   // Get the currently selected document from our atoms
   const selectedDocument = selectedDocId
-    ? analyzedDocs.find((doc) => doc.docId === selectedDocId)
-    : analyzedDocs[0];
+    ? sortedDocuments.find((doc) => doc.docId === selectedDocId)
+    : sortedDocuments[0];
 
   const handleDocumentClick = (doc: ClientAnalyzedDoc) => {
     setSelectedDocId(doc.docId);
@@ -101,7 +116,7 @@ export function EvidenceAnalysis() {
       </div>
       <div className="flex-grow overflow-auto">
         <div className="p-4">
-          {analyzedDocs.map((doc) => {
+          {sortedDocuments.map((doc) => {
             const isSelected = selectedDocId === doc.docId;
             const documentType = doc.title?.includes("§") ? "statute" : "case";
 
@@ -128,6 +143,17 @@ export function EvidenceAnalysis() {
                       </span>
                       <span className="mx-1">•</span>
                       <span>Relevance: {doc.relevanceScore || 0}/10</span>
+                      {doc.timestamp && (
+                        <>
+                          <span className="mx-1">•</span>
+                          <span>
+                            {new Date(doc.timestamp).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </>
+                      )}
                     </div>
                     <p className="text-[#4a5568] dark:text-[#a0aec0] text-xs">
                       {doc.summarySnippet || "No summary available."}

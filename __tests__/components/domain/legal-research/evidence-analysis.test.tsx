@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider, createStore } from "jotai";
-import { type ReactNode, createElement } from "react";
+import React, { type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { EvidenceAnalysis } from "@/components/domain/legal-research/evidence-analysis";
@@ -49,11 +49,12 @@ describe("EvidenceAnalysis Component Integration", () => {
         vi.clearAllMocks();
     });
 
-    const JotaiProvider = ({ children }: { children: ReactNode }) =>
-        createElement(Provider, { store }, children);
+    const JotaiProvider = ({ children }: { children: ReactNode }) => (
+        <Provider store={store}>{children}</Provider>
+    );
 
     const renderWithProvider = (component: React.ReactElement) => {
-        return render(createElement(JotaiProvider, { children: component }));
+        return render(<JotaiProvider>{component}</JotaiProvider>);
     };
 
     const mockAnalyzedDocs: ClientAnalyzedDoc[] = [
@@ -84,7 +85,7 @@ describe("EvidenceAnalysis Component Integration", () => {
     ];
 
     it("renders the component with initial state", () => {
-        renderWithProvider(createElement(EvidenceAnalysis));
+        renderWithProvider(<EvidenceAnalysis />);
 
         expect(screen.getByText("Evidence & Analysis")).toBeInTheDocument();
     });
@@ -92,7 +93,7 @@ describe("EvidenceAnalysis Component Integration", () => {
     it("displays analyzed documents from atom state", () => {
         store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
 
-        renderWithProvider(createElement(EvidenceAnalysis));
+        renderWithProvider(<EvidenceAnalysis />);
 
         // Check that all documents are displayed
         expect(
@@ -128,7 +129,7 @@ describe("EvidenceAnalysis Component Integration", () => {
     it("handles document selection through selectedAnalyzedDocIdAtom", async () => {
         store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
 
-        renderWithProvider(createElement(EvidenceAnalysis));
+        renderWithProvider(<EvidenceAnalysis />);
 
         const doc1Element = screen.getByText(
             "Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)",
@@ -148,7 +149,7 @@ describe("EvidenceAnalysis Component Integration", () => {
         store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
         store.set(selectedAnalyzedDocIdAtom, "doc-1");
 
-        renderWithProvider(createElement(EvidenceAnalysis));
+        renderWithProvider(<EvidenceAnalysis />);
 
         // Check that relevance score is displayed
         expect(screen.getByText("8/10")).toBeInTheDocument();
@@ -165,7 +166,7 @@ describe("EvidenceAnalysis Component Integration", () => {
         store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
         store.set(selectedAnalyzedDocIdAtom, "doc-1");
 
-        renderWithProvider(createElement(EvidenceAnalysis));
+        renderWithProvider(<EvidenceAnalysis />);
 
         // Click on a different document
         const doc2Element = screen.getByText(
@@ -184,7 +185,7 @@ describe("EvidenceAnalysis Component Integration", () => {
         store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
         store.set(selectedAnalyzedDocIdAtom, "doc-2");
 
-        renderWithProvider(createElement(EvidenceAnalysis));
+        renderWithProvider(<EvidenceAnalysis />);
 
         const doc2Container = screen
             .getByText(
@@ -203,7 +204,7 @@ describe("EvidenceAnalysis Component Integration", () => {
     it("opens case modal when document is clicked and modal is supported", async () => {
         store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
 
-        renderWithProvider(createElement(EvidenceAnalysis));
+        renderWithProvider(<EvidenceAnalysis />);
 
         const doc1Element = screen.getByText(
             "Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)",
@@ -232,7 +233,7 @@ describe("EvidenceAnalysis Component Integration", () => {
         store.set(analyzedDocsSummaryAtom, docsWithStreamingText);
         store.set(selectedAnalyzedDocIdAtom, "doc-1");
 
-        renderWithProvider(createElement(EvidenceAnalysis));
+        renderWithProvider(<EvidenceAnalysis />);
 
         // Check for animated caret in summary
         const caret = document.querySelector(".animate-caret-blink");
@@ -242,7 +243,7 @@ describe("EvidenceAnalysis Component Integration", () => {
     it("displays document type icons correctly", () => {
         store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
 
-        renderWithProvider(createElement(EvidenceAnalysis));
+        renderWithProvider(<EvidenceAnalysis />);
 
         // Should show gavel icons for case documents and scroll icons for statutes
         // This tests that the component differentiates between document types
@@ -253,7 +254,7 @@ describe("EvidenceAnalysis Component Integration", () => {
     it("handles empty document list gracefully", () => {
         store.set(analyzedDocsSummaryAtom, []);
 
-        renderWithProvider(createElement(EvidenceAnalysis));
+        renderWithProvider(<EvidenceAnalysis />);
 
         expect(screen.getByText("Evidence & Analysis")).toBeInTheDocument();
         // Should not crash and should show empty state appropriately
@@ -262,7 +263,7 @@ describe("EvidenceAnalysis Component Integration", () => {
     it("handles keyboard navigation for document selection", async () => {
         store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
 
-        renderWithProvider(createElement(EvidenceAnalysis));
+        renderWithProvider(<EvidenceAnalysis />);
 
         const doc1Element = screen.getByText(
             "Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)",
@@ -291,7 +292,7 @@ describe("EvidenceAnalysis Component Integration", () => {
         store.set(selectedAnalyzedDocIdAtom, "doc-1");
 
         const { rerender } = renderWithProvider(
-            createElement(EvidenceAnalysis),
+            <EvidenceAnalysis />
         );
 
         // Check initial partial text
@@ -308,9 +309,7 @@ describe("EvidenceAnalysis Component Integration", () => {
 
         store.set(analyzedDocsSummaryAtom, [updatedDoc]);
         rerender(
-            createElement(JotaiProvider, {
-                children: createElement(EvidenceAnalysis),
-            }),
+            <JotaiProvider><EvidenceAnalysis /></JotaiProvider>
         );
 
         // Check updated text

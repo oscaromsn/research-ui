@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { Provider, createStore } from "jotai";
-import { type ReactNode, createElement } from "react";
+import React, { type ReactNode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { ResearchLifecycle } from "@/components/domain/guidance/research-lifecycle";
@@ -13,15 +13,16 @@ describe("ResearchLifecycle Component Integration", () => {
         store = createStore();
     });
 
-    const JotaiProvider = ({ children }: { children: ReactNode }) =>
-        createElement(Provider, { store }, children);
+    const JotaiProvider = ({ children }: { children: ReactNode }) => (
+        <Provider store={store}>{children}</Provider>
+    );
 
     const renderWithProvider = (component: React.ReactElement) => {
-        return render(createElement(JotaiProvider, { children: component }));
+        return render(<JotaiProvider>{component}</JotaiProvider>);
     };
 
     it("renders all lifecycle stages", () => {
-        renderWithProvider(createElement(ResearchLifecycle));
+        renderWithProvider(<ResearchLifecycle />);
 
         expect(screen.getByText("Ideate")).toBeInTheDocument();
         expect(screen.getByText("Plan")).toBeInTheDocument();
@@ -42,7 +43,7 @@ describe("ResearchLifecycle Component Integration", () => {
             currentStreamingField: null,
         });
 
-        renderWithProvider(createElement(ResearchLifecycle));
+        renderWithProvider(<ResearchLifecycle />);
 
         const ideateStage = screen.getByTestId("stage-icon-ideate");
         expect(ideateStage).toHaveClass("bg-[#3a7bb7]"); // Active color
@@ -59,7 +60,7 @@ describe("ResearchLifecycle Component Integration", () => {
             currentStreamingField: null,
         });
 
-        renderWithProvider(createElement(ResearchLifecycle));
+        renderWithProvider(<ResearchLifecycle />);
 
         const planStage = screen.getByTestId("stage-icon-plan");
         expect(planStage).toHaveClass("bg-[#3a7bb7]"); // Active color
@@ -80,7 +81,7 @@ describe("ResearchLifecycle Component Integration", () => {
             currentStreamingField: null,
         });
 
-        renderWithProvider(createElement(ResearchLifecycle));
+        renderWithProvider(<ResearchLifecycle />);
 
         const researchStage = screen.getByTestId("stage-icon-research");
         expect(researchStage).toHaveClass("bg-[#3a7bb7]"); // Active color
@@ -97,7 +98,7 @@ describe("ResearchLifecycle Component Integration", () => {
             currentStreamingField: null,
         });
 
-        renderWithProvider(createElement(ResearchLifecycle));
+        renderWithProvider(<ResearchLifecycle />);
 
         const analyzeStage = screen.getByTestId("stage-icon-analyze");
         expect(analyzeStage).toHaveClass("bg-[#3a7bb7]"); // Active color
@@ -114,7 +115,7 @@ describe("ResearchLifecycle Component Integration", () => {
             currentStreamingField: null,
         });
 
-        renderWithProvider(createElement(ResearchLifecycle));
+        renderWithProvider(<ResearchLifecycle />);
 
         const reviewStage = screen.getByTestId("stage-icon-review");
         expect(reviewStage).toHaveClass("bg-[#3a7bb7]"); // Active color
@@ -131,7 +132,7 @@ describe("ResearchLifecycle Component Integration", () => {
             currentStreamingField: "executiveSummary",
         });
 
-        renderWithProvider(createElement(ResearchLifecycle));
+        renderWithProvider(<ResearchLifecycle />);
 
         const draftStage = screen.getByTestId("stage-icon-draft");
         expect(draftStage).toHaveClass("bg-[#3a7bb7]"); // Active color
@@ -148,7 +149,7 @@ describe("ResearchLifecycle Component Integration", () => {
             currentStreamingField: null,
         });
 
-        renderWithProvider(createElement(ResearchLifecycle));
+        renderWithProvider(<ResearchLifecycle />);
 
         // Should show spinner on active stage when loading
         const spinner = screen.getByTestId("loader");
@@ -166,7 +167,7 @@ describe("ResearchLifecycle Component Integration", () => {
             currentStreamingField: null,
         });
 
-        renderWithProvider(createElement(ResearchLifecycle));
+        renderWithProvider(<ResearchLifecycle />);
 
         // All stages should be completed (green)
         const stages = [
@@ -194,7 +195,7 @@ describe("ResearchLifecycle Component Integration", () => {
             currentStreamingField: null,
         });
 
-        renderWithProvider(createElement(ResearchLifecycle));
+        renderWithProvider(<ResearchLifecycle />);
 
         // Should still indicate which stage had the error
         // Implementation may vary - this tests that error states are handled
@@ -212,7 +213,7 @@ describe("ResearchLifecycle Component Integration", () => {
             currentStreamingField: null,
         });
 
-        renderWithProvider(createElement(ResearchLifecycle));
+        renderWithProvider(<ResearchLifecycle />);
 
         // Connectors between completed stages should be green
         // This tests the visual progression indicators
@@ -231,7 +232,7 @@ describe("ResearchLifecycle Component Integration", () => {
             currentStreamingField: null,
         });
 
-        renderWithProvider(createElement(ResearchLifecycle));
+        renderWithProvider(<ResearchLifecycle />);
 
         // In IDLE state, all stages should be pending
         const stages = [
