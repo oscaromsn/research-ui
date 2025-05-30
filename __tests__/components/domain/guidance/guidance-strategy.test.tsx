@@ -223,7 +223,7 @@ describe("GuidanceStrategy Component Integration", () => {
 
         renderWithProvider(<GuidanceStrategy />);
 
-        expect(screen.getByText("Research Logs:")).toBeInTheDocument();
+        expect(screen.getByText("Research Logs (4)")).toBeInTheDocument();
         expect(
             screen.getByText(/Starting research for legal question/),
         ).toBeInTheDocument();

@@ -8,10 +8,16 @@ import {
   ChevronRight,
   Pause,
   Play,
+  FileText,
 } from "lucide-react";
 import { useState } from "react";
 
 import { Switch } from "@/components/ui/switch";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
   generatedQueriesAtom,
@@ -21,6 +27,7 @@ import {
 } from "@/lib/state/researchAtoms";
 export function GuidanceStrategy() {
   const [isAssessmentExpanded, setIsAssessmentExpanded] = useState(false);
+  const [isLogExpanded, setIsLogExpanded] = useState(true);
   const [legalQuestion, setLegalQuestion] = useState("");
   const agent = useResearchAgent();
   const generatedQueries = useAtomValue(generatedQueriesAtom);
@@ -65,6 +72,45 @@ export function GuidanceStrategy() {
           <span className="mr-2">Guidance & Strategy</span>
         </h2>
         <div className="mb-6">
+          {/* Research Logs */}
+          {researchLogs.length > 0 && (
+            <div className="mb-4">
+              <Collapsible open={isLogExpanded} onOpenChange={setIsLogExpanded}>
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center justify-between w-full p-3 bg-white dark:bg-[#1e2436] border border-[#e1e5eb] dark:border-[#2a3148] rounded-md hover:bg-gray-50 dark:hover:bg-[#242a3d] transition-colors"
+                  >
+                    <div className="flex items-center">
+                      <FileText
+                        size={16}
+                        className="mr-2 text-[#4a5568] dark:text-[#a0aec0]"
+                      />
+                      <span className="font-medium text-[#4a5568] dark:text-[#a0aec0] text-sm">
+                        Research Logs ({researchLogs.length})
+                      </span>
+                    </div>
+                    <ChevronDown
+                      size={16}
+                      className={`text-[#64748b] dark:text-[#94a3b8] transform transition-transform ${
+                        isLogExpanded ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="mt-2 bg-white dark:bg-[#1e2436] p-3 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg">
+                    <div className="h-32 overflow-y-auto">
+                      <pre className="text-[#4a5568] dark:text-[#a0aec0] text-xs whitespace-pre-wrap">
+                        {researchLogs.join("\n")}
+                      </pre>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+          )}
+
           {/* Auto Mode Switch */}
           <div className="flex items-center justify-between mb-4 p-3 bg-white dark:bg-[#1e2436] border border-[#e1e5eb] dark:border-[#2a3148] rounded-md">
             <div className="flex flex-col">
@@ -201,18 +247,7 @@ export function GuidanceStrategy() {
           ))}
         </div>
       )}
-      {researchLogs.length > 0 && (
-        <div className="mb-6">
-          <h3 className="mb-2 font-medium text-[#4a5568] dark:text-[#a0aec0] text-sm">
-            Research Logs:
-          </h3>
-          <div className="bg-white dark:bg-[#1e2436] p-3 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg">
-            <pre className="text-[#4a5568] dark:text-[#a0aec0] text-xs whitespace-pre-wrap">
-              {researchLogs.join("\n")}
-            </pre>
-          </div>
-        </div>
-      )}
+
       {assessment && (
         <div className="mb-4">
           <div className="bg-white dark:bg-[#1e2436] p-4 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg">
