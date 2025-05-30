@@ -23,7 +23,7 @@ When I ask you to find information or understand project context, refer to these
 - **Implementation Plans & History**:
 	- **`@sprints/` directory**: This is critical for understanding the **evolution of the project and the rationale behind specific implementations.**
 		- `@sprints/1-past/sprint-1/`: Contains detailed implementation plans for each phase of Sprint 1 (e.g., `Sprint 1 - Phase 1 implementation plan.md`). Use these to understand how foundational features were built.
-		- `@sprints/1-past/sprint-1/logs/PHASE_5_COMPLETION_REPORT.md`: **A vital document summarizing the v1.0 completion state**, including extensive testing results, architecture validation, and technical achievements. Refer to this for understanding the baseline quality and features of v1.0.
+		- `@sprints/1-past/sprint-1/logs/PHASE_5_COMPLETION_REPORT.md`: **A vital document summarizing the v0.1 completion state**, including extensive testing results, architecture validation, and technical achievements. Refer to this for understanding the baseline quality and features of v0.1.
 		- `@sprints/2-current/sprint-2/`: Contains ongoing sprint plans. Useful for understanding current development focus, such as integrating live search (`Sprint 2 - Phase 1 implementation plan.md`) and refining BAML pipelines (`Sprint 2 - Phase 2 implementation plan.md`).
 		- `@sprints/3-future/`: Contains roadmaps for future enhancements, like `AUTOMATED_QUALITY_GATES_ROADMAP.md`.
 
@@ -55,7 +55,7 @@ When I ask you to perform tasks related to LexiSynth:
 ## 4. Specific Document Notes
 
 - **Sprint Plans (e.g., `Sprint 1 - Phase X implementation plan.md`)**: These are highly detailed and provide step-by-step instructions and acceptance criteria for features. They are excellent for understanding the intended implementation details and breaking down complex tasks.
-- **`PHASE_5_COMPLETION_REPORT.md`**: This is a key historical document. It details the state of LexiSynth v1.0, including extensive testing results, architectural validation, and NFR achievements. It's a good reference for the baseline quality and functionality.
+- **`PHASE_5_COMPLETION_REPORT.md`**: This is a key historical document. It details the state of LexiSynth v0.1, including extensive testing results, architectural validation, and NFR achievements. It's a good reference for the baseline quality and functionality.
 - **Tooling Docs (`@tooling/*`)**: These often refer to specific configuration files at the project root (e.g., `eslint.config.mjs`, `.dependency-cruiser.js`). Be prepared to cross-reference these.
 
 ## 5. General Tips for Navigating `docs/`

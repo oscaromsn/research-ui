@@ -282,7 +282,7 @@ Okay, Phase 5 focuses on Testing and Refinement. This is crucial for ensuring Le
 	- ✅ Key non-functional requirements (NFR) are addressed.
 
 **Checkpoint 2 (Final for Phase 5):**
-- The application is stable, well-tested, and performs according to initial expectations for v1.0.
+- The application is stable, well-tested, and performs according to initial expectations for v0.1.
 - The core research pipeline is functional end-to-end from UI input to display of (potentially streamed) results and status.
 - The codebase is clean and adheres to project standards.
 

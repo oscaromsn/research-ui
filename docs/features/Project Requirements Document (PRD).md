@@ -111,7 +111,7 @@ This section details the specific technical requirements for each feature, follo
 		- **FR2.4.2:** On error, an `ERROR` type `ResearchUpdate` containing the error message and current stage shall be sent.
 		- **FR2.4.3:** The orchestrator must ensure the stream is properly closed using `writer.close()` in a `finally` block or upon error.
 	- **FR2.5. Iterative Loop (Simplified Initial Implementation):**
-		- **FR2.5.1:** If `AssessResearchAndPlanNextSteps` returns an action other than `GENERATE_REPORT` or `REQUEST_HUMAN_REVIEW`, the orchestrator shall send a "LOG" update indicating the suggested next step and then gracefully terminate the stream (e.g., by sending a `STATUS_CHANGE` to a specific "ITERATION_PAUSED" stage and then closing). Full iterative looping is out of scope for v1.0 but the architecture should allow for its future addition.
+		- **FR2.5.1:** If `AssessResearchAndPlanNextSteps` returns an action other than `GENERATE_REPORT` or `REQUEST_HUMAN_REVIEW`, the orchestrator shall send a "LOG" update indicating the suggested next step and then gracefully terminate the stream (e.g., by sending a `STATUS_CHANGE` to a specific "ITERATION_PAUSED" stage and then closing). Full iterative looping is out of scope for v0.1 but the architecture should allow for its future addition.
 
 - **3.3. Client-Side State Management (Jotai)**
 	- **FR3.1. Atom Definitions (`lib/state/researchAtoms.ts`):**
