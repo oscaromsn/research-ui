@@ -181,20 +181,10 @@ export function EvidenceAnalysis() {
       <CaseModal
         isOpen={selectedCase !== null}
         onClose={() => setSelectedCase(null)}
-        caseData={
-          selectedCase
-            ? {
-                title: selectedCase.title || "",
-                source: selectedCase.url
-                  ? new URL(selectedCase.url).hostname
-                  : "Unknown Source",
-                court: selectedCase.title?.includes("(")
-                  ? selectedCase.title.split("(")[1]?.replace(")", "") || ""
-                  : "",
-                date: `Relevance: ${selectedCase.relevanceScore || 0}/10`,
-              }
-            : {}
-        }
+        {...(selectedCase && { documentData: selectedCase })}
+        {...(selectedCase?.analysisReasoning && {
+          onViewAnalysis: () => setShowReasoningModal(true),
+        })}
       />
       <div className="border-[#e1e5eb] dark:border-[#2a3148] border-t">
         <div className="flex h-64">

@@ -172,6 +172,15 @@ export function SynthesisReporting() {
       <SynthesisReasoningModal
         isOpen={showSynthesisReasoning}
         onClose={() => setShowSynthesisReasoning(false)}
+        synthesisData={synthesis}
+        sourcesUsed={sortedTopics.flatMap(
+          (topic) =>
+            topic.docIds?.map((docId) => ({
+              docId,
+              title: topic.title,
+              confidence: (topic.confidence || 0) / 100,
+            })) || []
+        )}
       />
     </div>
   );
