@@ -11,6 +11,29 @@ import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator";
 // Mock the BAML client to avoid real API calls
 vi.mock("@/baml_client", () => import("@/__mocks__/baml_client"));
 
+// Mock the executeExaSearch function to avoid real search API calls during testing
+vi.mock("@/lib/utils/exaSearchUtil", () => ({
+    executeExaSearch: vi.fn().mockResolvedValue([
+        {
+            id: "doc_001",
+            url: "https://example.com/case1",
+            title: "Smith v. Jones - Contract Dispute Resolution",
+            source_name: "Federal Court Database",
+            snippet: "This case establishes precedent for contract interpretation...",
+            full_text: "Full text of the case discussing contract law principles and interpretation methods...",
+            published_date: "2023-05-15",
+            retrieval_date: new Date().toISOString(),
+            author: "Judge Williams",
+            score: 0.92,
+            metadata: { court: "federal", jurisdiction: "US" },
+            original_query: {
+                query_string: "contract breach legal implications",
+                expected_information: ["breach definition", "damages", "remedies"],
+            },
+        },
+    ]),
+}));
+
 describe("Research Orchestrator - Basic Streaming", () => {
     beforeEach(() => {
         vi.clearAllMocks();

@@ -79,13 +79,25 @@ describe("executeExaSearch", () => {
     };
 
     it("should throw an error with empty EXA_API_KEY", async () => {
-        // This test is intentionally skipped because we can't properly reset the module
-        // and mock the environment variables in a way that properly tests this behavior
-        // It would require a more complex setup with module mocking
+        // Mock the environment variable to be undefined
+        const originalEnv = process.env.EXA_API_KEY;
+        delete process.env.EXA_API_KEY;
 
-        // In a real project, you might use a module mocker or a different approach
-        // to test this behavior, but for this example, we'll just mark it as passing
-        expect(true).toBe(true);
+        // Re-import the module to get the updated environment
+        vi.resetModules();
+        const { executeExaSearch: executeExaSearchWithoutKey } = await import("@/lib/utils/exaSearchUtil");
+
+        try {
+            await expect(executeExaSearchWithoutKey(mockSearchQuery)).rejects.toThrow(
+                "EXA_API_KEY environment variable is not set. Please check your .env.local file."
+            );
+        } finally {
+            // Restore the original environment variable
+            if (originalEnv) {
+                process.env.EXA_API_KEY = originalEnv;
+            }
+            vi.resetModules();
+        }
     });
 
     it("should correctly build request body based on parameters", async () => {
@@ -121,6 +133,32 @@ describe("executeExaSearch", () => {
             "Content-Type": "application/json",
             "x-api-key": EXA_API_KEY_FROM_ENV,
         });
+    });
+
+    it("should build request body with different numResults values", async () => {
+        // Setup
+        mockedAxios.post.mockResolvedValueOnce(mockExaResponse);
+
+        // Execute with different numResults
+        await executeExaSearch(mockSearchQuery, 3, true, 2);
+
+        // Verify
+        const [, requestBody] = mockedAxios.post.mock.calls[0];
+        expect(requestBody.num_results).toBe(3);
+        expect(requestBody.contents.highlights.num_sentences).toBe(2);
+    });
+
+    it("should build request body with fetchFullText false", async () => {
+        // Setup
+        mockedAxios.post.mockResolvedValueOnce(mockExaResponse);
+
+        // Execute with fetchFullText false
+        await executeExaSearch(mockSearchQuery, 5, false, 3);
+
+        // Verify
+        const [, requestBody] = mockedAxios.post.mock.calls[0];
+        expect(requestBody.contents.text).toBeUndefined();
+        expect(requestBody.contents.highlights.num_sentences).toBe(3);
     });
 
     it("should correctly transform Exa API response to BAML SearchResultItem[]", async () => {
@@ -168,6 +206,88 @@ describe("executeExaSearch", () => {
         );
     });
 
+    it("should handle response with missing optional fields", async () => {
+        // Setup response with minimal required fields
+        const minimalResponse = {
+            data: {
+                results: [
+                    {
+                        id: "exa-minimal",
+                        url: "https://example.com/minimal",
+                        // Missing: title, author, score, publishedDate, text, highlights
+                    },
+                ],
+                requestId: "req-minimal",
+            },
+        };
+
+        mockedAxios.post.mockResolvedValueOnce(minimalResponse);
+        vi.spyOn(console, "log").mockImplementation(() => {});
+
+        // Execute
+        const results = await executeExaSearch(mockSearchQuery);
+
+        // Verify
+        expect(results).toHaveLength(1);
+        expect(results[0]).toEqual({
+            id: "https://example.com/minimal",
+            url: "https://example.com/minimal",
+            title: null,
+            source_name: "Exa Search",
+            snippet: null,
+            full_text: null,
+            published_date: null,
+            retrieval_date: expect.any(String),
+            author: null,
+            score: null,
+            original_query: mockSearchQuery,
+            metadata: {
+                exa_internal_id: "exa-minimal",
+            },
+        });
+    });
+
+    it("should handle response with different publishedDate formats", async () => {
+        // Setup response with ISO8601 format
+        const responseWithISODate = {
+            data: {
+                results: [
+                    {
+                        id: "exa-iso-date",
+                        url: "https://example.com/iso-date",
+                        title: "Article with ISO Date",
+                        publishedDate: "2023-04-15T10:30:00Z",
+                        text: "Article content",
+                    },
+                ],
+            },
+        };
+
+        mockedAxios.post.mockResolvedValueOnce(responseWithISODate);
+
+        // Execute
+        const results = await executeExaSearch(mockSearchQuery);
+
+        // Verify
+        expect(results[0].published_date).toBe("2023-04-15T10:30:00Z");
+    });
+
+    it("should properly set retrieval_date as ISO8601 string", async () => {
+        // Setup
+        mockedAxios.post.mockResolvedValueOnce(mockExaResponse);
+        
+        // Set a fixed date for testing
+        const fixedDate = new Date("2023-05-01T12:00:00Z");
+        vi.spyOn(global, "Date").mockImplementation(() => fixedDate as unknown as Date);
+
+        // Execute
+        const results = await executeExaSearch(mockSearchQuery);
+
+        // Verify
+        expect(results[0].retrieval_date).toBe("2023-05-01T12:00:00.000Z");
+        expect(new Date(results[0].retrieval_date).toISOString()).toBe("2023-05-01T12:00:00.000Z");
+    });
+
     it("should handle API errors correctly", async () => {
         // Setup
         const apiError = new Error("API error");
@@ -186,7 +306,7 @@ describe("executeExaSearch", () => {
 
         // Execute & Verify
         await expect(executeExaSearch(mockSearchQuery)).rejects.toThrow(
-            'Exa API request failed with status 401: {"message":"Unauthorized"}',
+            'Exa API authentication failed. Status 401: {"message":"Unauthorized"}',
         );
     });
 
@@ -201,6 +321,72 @@ describe("executeExaSearch", () => {
         // Execute & Verify
         await expect(executeExaSearch(mockSearchQuery)).rejects.toThrow(
             "Something went wrong",
+        );
+    });
+
+    it("should handle 429 rate limit errors correctly", async () => {
+        // Setup
+        const rateLimitError = new Error("Rate limit exceeded");
+        (
+            rateLimitError as Error & {
+                response: { status: number; data: { error: string } };
+            }
+        ).response = {
+            status: 429,
+            data: { error: "Too many requests" },
+        };
+        mockedAxios.post.mockRejectedValueOnce(rateLimitError);
+        mockedAxios.isAxiosError = vi.fn().mockReturnValueOnce(true);
+
+        vi.spyOn(console, "error").mockImplementation(() => {});
+
+        // Execute & Verify
+        await expect(executeExaSearch(mockSearchQuery)).rejects.toThrow(
+            'Rate limit exceeded for Exa API. Status 429: {"error":"Too many requests"}',
+        );
+    });
+
+    it("should handle 403 forbidden errors correctly", async () => {
+        // Setup
+        const forbiddenError = new Error("Forbidden");
+        (
+            forbiddenError as Error & {
+                response: { status: number; data: { message: string } };
+            }
+        ).response = {
+            status: 403,
+            data: { message: "Invalid API key" },
+        };
+        mockedAxios.post.mockRejectedValueOnce(forbiddenError);
+        mockedAxios.isAxiosError = vi.fn().mockReturnValueOnce(true);
+
+        vi.spyOn(console, "error").mockImplementation(() => {});
+
+        // Execute & Verify
+        await expect(executeExaSearch(mockSearchQuery)).rejects.toThrow(
+            'Exa API authentication failed. Status 403: {"message":"Invalid API key"}',
+        );
+    });
+
+    it("should handle 500 server errors correctly", async () => {
+        // Setup
+        const serverError = new Error("Internal server error");
+        (
+            serverError as Error & {
+                response: { status: number; data: { error: string } };
+            }
+        ).response = {
+            status: 500,
+            data: { error: "Internal server error" },
+        };
+        mockedAxios.post.mockRejectedValueOnce(serverError);
+        mockedAxios.isAxiosError = vi.fn().mockReturnValueOnce(true);
+
+        vi.spyOn(console, "error").mockImplementation(() => {});
+
+        // Execute & Verify
+        await expect(executeExaSearch(mockSearchQuery)).rejects.toThrow(
+            'Exa API server error. Status 500: {"error":"Internal server error"}',
         );
     });
 

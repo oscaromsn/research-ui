@@ -10,6 +10,7 @@ import type {
   SearchQueryItem,
   SearchResultItem,
 } from "@/baml_client/types";
+import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
 
 // Research pipeline stage enum
 export type ResearchStage =
@@ -82,59 +83,63 @@ async function sendUpdate(
   }
 }
 
-// Mock document fetching function (for simulation)
+// Live document fetching function using Exa API
 async function fetchDocumentsFromQueries(
   queries: SearchQueryItem[]
 ): Promise<SearchResultItem[]> {
+  const MAX_QUERIES_TO_EXECUTE = 3; // Start conservative for initial implementation
+  const RESULTS_PER_QUERY = 2; // Limit results per query to manage API usage
+  const allFetchedResults: SearchResultItem[] = [];
+
   console.log(
-    "Simulating document fetch for queries:",
-    queries.map((q) => q.query_string).join(", ")
+    `Orchestrator: Starting live document fetch for ${queries.length} queries`
   );
 
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const executedQueries = queries.slice(0, MAX_QUERIES_TO_EXECUTE);
 
-  // Return empty array for testing empty states
-  if (
-    queries.length > 0 &&
-    queries[0].query_string.includes("no results please")
-  ) {
-    return [];
+  for (const query of executedQueries) {
+    try {
+      console.log(
+        `Orchestrator: Executing live search for query: "${query.query_string}"`
+      );
+      const results = await executeExaSearch(query, RESULTS_PER_QUERY, true, 2);
+      allFetchedResults.push(...results);
+      console.log(
+        `Orchestrator: Query "${query.query_string}" yielded ${results.length} results.`
+      );
+    } catch (searchError: any) {
+      console.error(
+        `Orchestrator: Error during live search for query "${query.query_string}":`,
+        searchError.message
+      );
+
+      // Handle rate limiting specifically - consider stopping further searches
+      if (searchError.message.includes("Rate limit exceeded")) {
+        console.warn(
+          "Orchestrator: Rate limit reached for Exa API. Stopping further search queries for this session."
+        );
+        break; // Stop executing more queries if we hit rate limits
+      }
+
+      // For other errors, continue with remaining queries
+      // Individual query failures shouldn't halt the entire process
+    }
   }
 
-  // Mock search results
-  const mockResults: SearchResultItem[] = [
-    {
-      id: "doc_001",
-      url: "https://example.com/case1",
-      title: "Smith v. Jones - Contract Dispute Resolution",
-      source_name: "Federal Court Database",
-      snippet: "This case establishes precedent for contract interpretation...",
-      full_text:
-        "Full text of the case discussing contract law principles and interpretation methods...",
-      published_date: "2023-05-15",
-      retrieval_date: new Date().toISOString(),
-      author: "Judge Williams",
-      score: 0.92,
-      metadata: { court: "federal", jurisdiction: "US" },
-    },
-    {
-      id: "doc_002",
-      url: "https://example.com/statute1",
-      title: "Commercial Code Section 2-315 - Implied Warranty",
-      source_name: "US Legal Code",
-      snippet: "Statutory requirements for implied warranty of fitness...",
-      full_text:
-        "Complete statutory text regarding commercial warranty requirements...",
-      published_date: "2022-01-01",
-      retrieval_date: new Date().toISOString(),
-      score: 0.88,
-      metadata: { type: "statute", jurisdiction: "US" },
-    },
-  ];
+  // De-duplicate results based on URL (which is used as the ID)
+  const uniqueDocIds = new Set<string>();
+  const searchResultItems = allFetchedResults.filter((item) => {
+    if (!uniqueDocIds.has(item.id)) {
+      uniqueDocIds.add(item.id);
+      return true;
+    }
+    return false;
+  });
 
-  // Return 1-2 random results
-  return mockResults.slice(0, Math.floor(Math.random() * 2) + 1);
+  console.log(
+    `Orchestrator: Total unique documents fetched: ${searchResultItems.length}`
+  );
+  return searchResultItems;
 }
 
 // Main orchestrator function
@@ -186,40 +191,54 @@ export async function conductResearch(
         isFinalForStage: true,
       });
 
-      // --- Stage 2: Simulated Document Retrieval ---
+      // --- Stage 2: Live Document Retrieval ---
       currentStage = "FETCHING_DOCUMENTS";
       await sendUpdate(writer, encoder, {
         type: "STATUS_CHANGE",
         stage: currentStage,
-        message: "Retrieving documents based on queries...",
+        message: "Retrieving documents from live search APIs...",
       });
 
-      searchResultItems = await fetchDocumentsFromQueries(
-        queryAnalysis.search_queries
-      );
+      try {
+        searchResultItems = await fetchDocumentsFromQueries(
+          queryAnalysis.search_queries
+        );
 
-      if (searchResultItems.length === 0) {
+        if (searchResultItems.length === 0) {
+          await sendUpdate(writer, encoder, {
+            type: "LOG",
+            stage: currentStage,
+            message:
+              "No documents found for any of the executed search queries. This may indicate overly specific queries or limited available content. Proceeding to assessment.",
+            isFinalForStage: true,
+          });
+        } else {
+          await sendUpdate(writer, encoder, {
+            type: "DATA",
+            stage: currentStage,
+            data: {
+              count: searchResultItems.length,
+              titles: searchResultItems.map((r) =>
+                r.title ? `${r.title.substring(0, 70)}...` : "Untitled"
+              ),
+              sources: searchResultItems.map((r) => r.source_name),
+            },
+            message: `${searchResultItems.length} unique documents retrieved from live search.`,
+            isFinalForStage: true,
+          });
+        }
+      } catch (searchError: any) {
+        console.error(
+          "Orchestrator: Complete search failure:",
+          searchError.message
+        );
         await sendUpdate(writer, encoder, {
-          type: "LOG",
+          type: "ERROR",
           stage: currentStage,
-          message:
-            "No documents found for the generated queries. Further refinement might be needed.",
-          isFinalForStage: true,
+          message: `Failed to retrieve documents from search API: ${searchError.message}`,
         });
-      } else {
-        await sendUpdate(writer, encoder, {
-          type: "DATA",
-          stage: currentStage,
-          data: {
-            count: searchResultItems.length,
-            titles: searchResultItems.map((r) =>
-              r.title ? `${r.title.substring(0, 70)}...` : "Untitled"
-            ),
-            sources: searchResultItems.map((r) => r.source_name),
-          },
-          message: `${searchResultItems.length} documents retrieved (simulated).`,
-          isFinalForStage: true,
-        });
+        // Set empty results and continue - the assessment stage will handle this gracefully
+        searchResultItems = [];
       }
 
       // --- Stage 3: Analyze Documents Iteratively ---

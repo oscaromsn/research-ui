@@ -143,6 +143,7 @@ export async function executeExaSearch(
           "x-api-key": EXA_API_KEY, // Exa uses x-api-key header for authentication
           // 'Authorization': `Bearer ${EXA_API_KEY}`, // Some APIs use Bearer
         },
+        timeout: 30000, // 30-second timeout for individual search requests
       }
     );
 
@@ -191,14 +192,43 @@ export async function executeExaSearch(
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const axiosError = error as AxiosError;
+      const status = axiosError.response?.status;
+      const responseData = axiosError.response?.data;
+
       console.error(
         `Error executing Exa search for query "${bamlSearchQuery.query_string}":`,
-        axiosError.response?.status,
-        axiosError.response?.data
+        status,
+        responseData
       );
-      // Consider re-throwing a custom error or returning an empty array based on agent's needs
+
+      // Handle specific error cases
+      if (status === 429) {
+        // Rate limit error - provide specific message for orchestrator to handle
+        throw new Error(
+          `Rate limit exceeded for Exa API. Status ${status}: ${JSON.stringify(responseData)}`
+        );
+      } else if (status === 401 || status === 403) {
+        // Authentication/authorization errors
+        throw new Error(
+          `Exa API authentication failed. Status ${status}: ${JSON.stringify(responseData)}`
+        );
+      } else if (status && status >= 500) {
+        // Server errors
+        throw new Error(
+          `Exa API server error. Status ${status}: ${JSON.stringify(responseData)}`
+        );
+      } else {
+        // Other client errors (400, etc.)
+        throw new Error(
+          `Exa API request failed with status ${status}: ${JSON.stringify(responseData)}`
+        );
+      }
+    }
+
+    // Handle timeout errors specifically
+    if (error instanceof Error && error.message.includes("timeout")) {
       throw new Error(
-        `Exa API request failed with status ${axiosError.response?.status}: ${JSON.stringify(axiosError.response?.data)}`
+        `Exa API request timed out for query "${bamlSearchQuery.query_string}". The search API may be experiencing high load.`
       );
     }
 
