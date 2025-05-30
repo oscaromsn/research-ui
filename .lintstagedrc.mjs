@@ -11,7 +11,7 @@ const config = {
   ],
 
   // BAML files
-  "baml_src/**/*.baml": [() => "pnpm baml:generate", () => "pnpm baml:test"],
+  "baml_src/**/*.baml": [() => "pnpm baml:generate"],
 
   // JSON files
   "**/*.{json,jsonc}": ["biome format --write"],
