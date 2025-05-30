@@ -13,16 +13,35 @@ export default defineConfig({
       tsconfig: "./tsconfig.test.json",
     },
     include: ["**/*.{test,spec}.{ts,tsx}"],
-    exclude: ["node_modules", ".next", "dist", ".git", "e2e/**"],
+    exclude: [
+      "node_modules",
+      ".next",
+      "dist",
+      ".git",
+      "e2e/**",
+      // Exclude tests that are known to require API keys
+      "**/*api-dependent*",
+      "**/*integration*",
+      "**/*e2e*",
+      // Exclude example files
+      "**/*example*",
+    ],
     setupFiles: ["./setupTests.ts"],
     env: {
       // Load environment variables from .env.test file for testing
       ...config({ path: path.resolve(__dirname, ".env.test") }).parsed,
       NODE_ENV: "test",
-      // Allow debugging API test behavior
-      DEBUG_API_TESTS: process.env.DEBUG_API_TESTS || "false",
-      // Preserve CI flag for conditional test execution
-      CI: process.env.CI || "false",
+      // Force all API keys to be unavailable for these tests
+      GOOGLE_API_KEY: "",
+      OPENAI_API_KEY: "",
+      ANTHROPIC_API_KEY: "",
+      XAI_API_KEY: "",
+      GROQ_API_KEY: "",
+      EXA_API_KEY: "",
+      TAVILY_API_KEY: "",
+      LINKUP_API_KEY: "",
+      // Mark this as no-API test mode
+      VITEST_NO_API_MODE: "true",
     },
     coverage: {
       provider: "v8",
@@ -36,6 +55,10 @@ export default defineConfig({
         "**/*.config.{ts,js}",
         "coverage/**",
         "__mocks__/**",
+        // Exclude API integration code from no-API coverage
+        "**/api-test-helpers.ts",
+        "**/*api-dependent*",
+        "**/*integration*",
       ],
       thresholds: {
         // Adjust these thresholds as your project matures
