@@ -12,6 +12,7 @@ import {
   analyzedDocsSummaryAtom,
   finalReportContentAtom,
   generatedQueriesAtom,
+  researchAssessmentAtom,
   researchLogAtom,
   researchStatusAtom,
   resetResearchStateAtom,
@@ -19,6 +20,7 @@ import {
 } from "@/lib/state/researchAtoms";
 import type {
   ClientAnalyzedDoc,
+  ClientResearchAssessment,
   ClientSynthesis,
   ResearchStatus,
 } from "@/lib/state/researchAtoms";
@@ -89,6 +91,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
   const setAnalyzedDocs = useSetAtom(analyzedDocsSummaryAtom);
   const setSynthesisDetails = useSetAtom(synthesisDetailsAtom);
   const setFinalReportContent = useSetAtom(finalReportContentAtom);
+  const setResearchAssessment = useSetAtom(researchAssessmentAtom);
   const resetAllResearchState = useSetAtom(resetResearchStateAtom);
 
   // Local state for the AbortController
@@ -280,6 +283,15 @@ export function useResearchAgent(): UseResearchAgentReturn {
                         "topics" in update.data
                       ) {
                         setSynthesisDetails(update.data as ClientSynthesis);
+                      } else if (
+                        update.stage === "ASSESSING_RESEARCH" &&
+                        update.data &&
+                        typeof update.data === "object"
+                      ) {
+                        // Handle research assessment data
+                        setResearchAssessment(
+                          update.data as ClientResearchAssessment
+                        );
                       } else if (
                         update.stage === "GENERATING_REPORT" &&
                         update.data
@@ -476,6 +488,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
       setAnalyzedDocs,
       setSynthesisDetails,
       setFinalReportContent,
+      setResearchAssessment,
     ]
   );
 

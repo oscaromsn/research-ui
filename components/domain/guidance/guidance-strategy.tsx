@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
   generatedQueriesAtom,
+  researchAssessmentAtom,
   researchLogAtom,
 } from "@/lib/state/researchAtoms";
 export function GuidanceStrategy() {
@@ -15,6 +16,7 @@ export function GuidanceStrategy() {
   const agent = useResearchAgent();
   const generatedQueries = useAtomValue(generatedQueriesAtom);
   const researchLogs = useAtomValue(researchLogAtom);
+  const assessment = useAtomValue(researchAssessmentAtom);
 
   const handleStartResearch = () => {
     if (legalQuestion.trim()) {
@@ -116,85 +118,110 @@ export function GuidanceStrategy() {
           </div>
         </div>
       )}
-      <div className="mb-4">
-        <div className="bg-white dark:bg-[#1e2436] p-4 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg">
-          <button
-            type="button"
-            className="w-full"
-            onClick={() => setIsAssessmentExpanded(!isAssessmentExpanded)}
-          >
-            <div className="flex items-start mb-2">
-              <AlertTriangle
-                size={16}
-                className="flex-shrink-0 mt-0.5 mr-2 text-[#eab308]"
-              />
-              <div className="flex-1">
-                <h3 className="font-medium text-sm text-left">
-                  Agent Assessment{" "}
-                  <span className="text-[#eab308]">
-                    Further Action Needed ⚠️
-                  </span>
-                </h3>
-              </div>
-              <ChevronDown
-                size={16}
-                className={`text-[#64748b] dark:text-[#94a3b8] transform transition-transform ${isAssessmentExpanded ? "rotate-180" : ""}`}
-              />
-            </div>
-          </button>
-          <p className="mb-3 text-[#4a5568] dark:text-[#a0aec0] text-xs">
-            Current synthesis lacks sufficient case law from the 9th Circuit
-            regarding &apos;unforeseen circumstances&apos;. Recommend refining
-            queries to target this jurisdiction.
-          </p>
-          {isAssessmentExpanded && (
-            <div className="mt-4 pt-4 border-[#e1e5eb] dark:border-[#2a3148] border-t">
-              <div className="space-y-4">
-                <div>
-                  <h4 className="mb-2 font-medium text-[#4a5568] dark:text-[#a0aec0] text-xs">
-                    Suggested Actions:
-                  </h4>
-                  <ul className="space-y-2 text-[#4a5568] dark:text-[#a0aec0] text-xs">
-                    <li className="flex items-start">
-                      <div className="bg-[#3a7bb7] mt-1.5 mr-2 rounded-full w-1.5 h-1.5" />
-                      Add &quot;JURISDICTION: &apos;9th Circuit&apos;&quot; to
-                      search parameters
-                    </li>
-                    <li className="flex items-start">
-                      <div className="bg-[#3a7bb7] mt-1.5 mr-2 rounded-full w-1.5 h-1.5" />
-                      Review cases from 2019-2023 specifically addressing force
-                      majeure
-                    </li>
-                    <li className="flex items-start">
-                      <div className="bg-[#3a7bb7] mt-1.5 mr-2 rounded-full w-1.5 h-1.5" />
-                      Analyze district court interpretations of &quot;unforeseen
-                      circumstances&quot;
-                    </li>
-                  </ul>
+      {assessment && (
+        <div className="mb-4">
+          <div className="bg-white dark:bg-[#1e2436] p-4 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg">
+            <button
+              type="button"
+              className="w-full"
+              onClick={() => setIsAssessmentExpanded(!isAssessmentExpanded)}
+            >
+              <div className="flex items-start mb-2">
+                <AlertTriangle
+                  size={16}
+                  className={`flex-shrink-0 mt-0.5 mr-2 ${
+                    assessment.isSufficient
+                      ? "text-green-500"
+                      : "text-[#eab308]"
+                  }`}
+                />
+                <div className="flex-1">
+                  <h3 className="font-medium text-sm text-left">
+                    Agent Assessment{" "}
+                    <span
+                      className={
+                        assessment.isSufficient
+                          ? "text-green-500"
+                          : "text-[#eab308]"
+                      }
+                    >
+                      {assessment.isSufficient
+                        ? "Research Sufficient ✓"
+                        : "Further Action Needed ⚠️"}
+                    </span>
+                  </h3>
                 </div>
-                <div>
-                  <h4 className="mb-2 font-medium text-[#4a5568] dark:text-[#a0aec0] text-xs">
-                    Impact on Analysis:
-                  </h4>
-                  <div className="flex items-center space-x-2">
-                    <div className="flex-1 bg-[#e2e8f0] dark:bg-[#2a3148] rounded-full h-1.5">
-                      <div className="bg-[#eab308] rounded-full w-[65%] h-full" />
-                    </div>
-                    <span className="text-[#eab308] text-xs">65%</span>
+                <ChevronDown
+                  size={16}
+                  className={`text-[#64748b] dark:text-[#94a3b8] transform transition-transform ${
+                    isAssessmentExpanded ? "rotate-180" : ""
+                  }`}
+                />
+              </div>
+            </button>
+            <p className="mb-3 text-[#4a5568] dark:text-[#a0aec0] text-xs">
+              {assessment.assessmentSummary}
+            </p>
+            {isAssessmentExpanded && (
+              <div className="mt-4 pt-4 border-[#e1e5eb] dark:border-[#2a3148] border-t">
+                <div className="space-y-4">
+                  {assessment.identifiedGaps &&
+                    assessment.identifiedGaps.length > 0 && (
+                      <div>
+                        <h4 className="mb-2 font-medium text-[#4a5568] dark:text-[#a0aec0] text-xs">
+                          Identified Gaps:
+                        </h4>
+                        <ul className="space-y-2 text-[#4a5568] dark:text-[#a0aec0] text-xs">
+                          {assessment.identifiedGaps.map((gap, index) => (
+                            <li key={index} className="flex items-start">
+                              <div className="bg-red-500 mt-1.5 mr-2 rounded-full w-1.5 h-1.5" />
+                              {gap}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                  {assessment.suggestedRefinementQueries &&
+                    assessment.suggestedRefinementQueries.length > 0 && (
+                      <div>
+                        <h4 className="mb-2 font-medium text-[#4a5568] dark:text-[#a0aec0] text-xs">
+                          Suggested Query Refinements:
+                        </h4>
+                        <ul className="space-y-2 text-[#4a5568] dark:text-[#a0aec0] text-xs">
+                          {assessment.suggestedRefinementQueries.map(
+                            (query, index) => (
+                              <li key={index} className="flex items-start">
+                                <div className="bg-[#3a7bb7] mt-1.5 mr-2 rounded-full w-1.5 h-1.5" />
+                                {query.query_string}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+
+                  <div>
+                    <h4 className="mb-2 font-medium text-[#4a5568] dark:text-[#a0aec0] text-xs">
+                      Next Action: {assessment.nextAction.replace(/_/g, " ")}
+                    </h4>
                   </div>
+
+                  {assessment.reasoningSummary && (
+                    <button
+                      type="button"
+                      className="flex items-center text-[#3a7bb7] hover:text-[#2c5d8a] text-xs"
+                    >
+                      <Brain size={12} className="mr-1" />
+                      View Assessment Reasoning
+                    </button>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  className="flex items-center text-[#3a7bb7] hover:text-[#2c5d8a] text-xs"
-                >
-                  <Brain size={12} className="mr-1" />
-                  View Assessment Reasoning
-                </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

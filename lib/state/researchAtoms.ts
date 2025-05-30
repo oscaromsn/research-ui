@@ -100,6 +100,25 @@ export interface ClientFinalReport {
 }
 
 /**
+ * Client-friendly representation of research assessment from ASSESSING_RESEARCH stage.
+ * Contains agent's analysis of research sufficiency and recommended next steps.
+ */
+export interface ClientResearchAssessment {
+  isSufficient: boolean;
+  assessmentSummary: string; // Potentially streaming
+  identifiedGaps?: string[];
+  nextAction:
+    | "REFINE_QUERIES"
+    | "NEW_QUERIES"
+    | "DEEPER_ANALYSIS_OF_EXISTING_DOCS"
+    | "GENERATE_REPORT"
+    | "REQUEST_HUMAN_REVIEW";
+  suggestedRefinementQueries?: ClientSearchQuery[];
+  documentIdsForDeeperAnalysis?: string[];
+  reasoningSummary?: string; // Summarized version for UI display
+}
+
+/**
  * Represents the current status of the research process.
  * Contains all information needed for UI status display and progress tracking.
  */
@@ -153,6 +172,11 @@ export const finalReportContentAtom = atom<ClientFinalReport>({
   limitations: [],
   appendixDocIds: [],
 });
+
+// FR3.1.7: researchAssessmentAtom (Phase 4 requirement)
+export const researchAssessmentAtom = atom<ClientResearchAssessment | null>(
+  null
+);
 
 // --- Derived Atoms (Optional but Recommended for UI Convenience) ---
 
@@ -228,6 +252,7 @@ export const resetResearchStateAtom = atom(null, (get, set, _value) => {
     appendixDocIds: [],
   });
   set(selectedAnalyzedDocIdAtom, null);
+  set(researchAssessmentAtom, null);
 });
 
 /*

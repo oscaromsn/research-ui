@@ -8,8 +8,10 @@ import { GuidanceStrategy } from "@/components/domain/guidance/guidance-strategy
 import * as useResearchAgentModule from "@/lib/hooks/useResearchAgent";
 import {
     generatedQueriesAtom,
+    researchAssessmentAtom,
     researchLogAtom,
 } from "@/lib/state/researchAtoms";
+import type { ClientResearchAssessment } from "@/lib/state/researchAtoms";
 
 // Mock the useResearchAgent hook
 vi.mock("@/lib/hooks/useResearchAgent", () => ({
@@ -227,11 +229,25 @@ describe("GuidanceStrategy Component Integration", () => {
     });
 
     it("toggles assessment section visibility", async () => {
+        // Set up mock assessment data
+        const mockAssessment: ClientResearchAssessment = {
+            isSufficient: false,
+            assessmentSummary: "Current analysis needs additional case law from jurisdiction.",
+            identifiedGaps: ["Missing 9th Circuit precedents", "Lack of recent rulings"],
+            nextAction: "REFINE_QUERIES",
+            suggestedRefinementQueries: [
+                { query_string: "9th Circuit force majeure", expected_information_summary: "Jurisdiction-specific cases" }
+            ],
+            reasoningSummary: "Assessment reasoning summary"
+        };
+        store.set(researchAssessmentAtom, mockAssessment);
+
         renderWithProvider(createElement(GuidanceStrategy));
 
-        // Assessment details should not be visible initially
+        // Assessment section should be visible but details not expanded initially
+        expect(screen.getByText(/Agent Assessment/)).toBeInTheDocument();
         expect(
-            screen.queryByText("Suggested Actions:"),
+            screen.queryByText("Identified Gaps:"),
         ).not.toBeInTheDocument();
 
         // Click to expand
@@ -241,15 +257,29 @@ describe("GuidanceStrategy Component Integration", () => {
         await userEvent.click(assessmentButton);
 
         // Now the expanded content should be visible
-        expect(screen.getByText("Suggested Actions:")).toBeInTheDocument();
-        expect(screen.getByText("Impact on Analysis:")).toBeInTheDocument();
+        expect(screen.getByText("Identified Gaps:")).toBeInTheDocument();
+        expect(screen.getByText("Suggested Query Refinements:")).toBeInTheDocument();
+        expect(screen.getByText("Next Action: REFINE QUERIES")).toBeInTheDocument();
 
         // Click again to collapse
         await userEvent.click(assessmentButton);
 
         // Expanded content should be hidden again
         expect(
-            screen.queryByText("Suggested Actions:"),
+            screen.queryByText("Identified Gaps:"),
+        ).not.toBeInTheDocument();
+    });
+
+    it("does not render assessment section when no assessment data", async () => {
+        // Ensure assessment atom is null (default state)
+        store.set(researchAssessmentAtom, null);
+        
+        renderWithProvider(createElement(GuidanceStrategy));
+
+        // Assessment section should not be visible
+        expect(screen.queryByText(/Agent Assessment/)).not.toBeInTheDocument();
+        expect(
+            screen.queryByText("Identified Gaps:"),
         ).not.toBeInTheDocument();
     });
 });
