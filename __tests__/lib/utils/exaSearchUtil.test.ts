@@ -2,7 +2,6 @@ import axios, { isAxiosError } from "axios";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { SearchQueryItem } from "@/baml_client/types";
-import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
 import {
     ExaConfigError,
     ExaRateLimitError,
@@ -19,6 +18,7 @@ import {
     isExaConfigError,
     isExaParsingError,
 } from "@/lib/utils/exaSearchErrors";
+import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
 
 // Mock axios
 vi.mock("axios", () => ({

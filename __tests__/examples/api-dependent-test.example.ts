@@ -5,6 +5,8 @@
  */
 
 import { describe, it, expect, beforeAll, vi } from "vitest";
+
+import { skipIfMissingApiKeys, hasRequiredApiKeys } from "../test-utils";
 import { 
   itWithApiKeys, 
   describeWithApiKeys, 
@@ -14,7 +16,6 @@ import {
   logApiKeyStatus,
   createApiTestSuite 
 } from "../utils/api-test-helpers";
-import { skipIfMissingApiKeys, hasRequiredApiKeys } from "../test-utils";
 
 // Example: Basic BAML function test that requires Google AI API
 describeWithApiKeys("BAML Function Tests", API_KEYS.GOOGLE_AI, () => {
