@@ -8,7 +8,7 @@ import { vi } from "vitest";
  */
 export function renderWithProviders(
   ui: ReactElement,
-  options?: Omit<RenderOptions, "wrapper">,
+  options?: Omit<RenderOptions, "wrapper">
 ) {
   const AllProviders = ({ children }: { children: React.ReactNode }) => {
     const testStore = createStore();
@@ -39,7 +39,7 @@ export class MockIntersectionObserver implements IntersectionObserver {
 
   constructor(
     callback: IntersectionObserverCallback,
-    _options?: IntersectionObserverInit,
+    _options?: IntersectionObserverInit
   ) {
     this._callback = callback;
   }
@@ -123,7 +123,12 @@ export function createMockLegalEntity(overrides = {}) {
 export const hasRequiredApiKeys = (requiredKeys: string[]): boolean => {
   return requiredKeys.every((key) => {
     const value = process.env[key];
-    return value && value.trim() !== "" && !value.includes("[YOUR_") && !value.includes("****");
+    return (
+      value &&
+      value.trim() !== "" &&
+      !value.includes("[YOUR_") &&
+      !value.includes("****")
+    );
   });
 };
 
@@ -132,22 +137,30 @@ export const hasRequiredApiKeys = (requiredKeys: string[]): boolean => {
  * @param requiredKeys - Array of environment variable names that must be present
  * @param testName - Name of the test for logging purposes
  */
-export const skipIfMissingApiKeys = (requiredKeys: string[], testName?: string) => {
+export const skipIfMissingApiKeys = (
+  requiredKeys: string[],
+  testName?: string
+) => {
   const hasKeys = hasRequiredApiKeys(requiredKeys);
-  
+
   if (!hasKeys) {
     const missingKeys = requiredKeys.filter((key) => {
       const value = process.env[key];
-      return !value || value.trim() === "" || value.includes("[YOUR_") || value.includes("****");
+      return (
+        !value ||
+        value.trim() === "" ||
+        value.includes("[YOUR_") ||
+        value.includes("****")
+      );
     });
-    
-    const message = testName 
+
+    const message = testName
       ? `Skipping "${testName}" - Missing API keys: ${missingKeys.join(", ")}`
       : `Skipping test - Missing API keys: ${missingKeys.join(", ")}`;
-    
+
     console.warn(message);
   }
-  
+
   return hasKeys;
 };
 
@@ -157,12 +170,12 @@ export const skipIfMissingApiKeys = (requiredKeys: string[], testName?: string) 
 export const isCI = (): boolean => {
   return Boolean(
     process.env.CI ||
-    process.env.GITHUB_ACTIONS ||
-    process.env.GITLAB_CI ||
-    process.env.CIRCLECI ||
-    process.env.TRAVIS ||
-    process.env.BUILDKITE ||
-    process.env.VERCEL
+      process.env.GITHUB_ACTIONS ||
+      process.env.GITLAB_CI ||
+      process.env.CIRCLECI ||
+      process.env.TRAVIS ||
+      process.env.BUILDKITE ||
+      process.env.VERCEL
   );
 };
 
@@ -170,7 +183,10 @@ export const isCI = (): boolean => {
  * Skip test in CI environment if API keys are not available
  * This is useful for tests that require real API calls
  */
-export const skipInCiIfMissingApiKeys = (requiredKeys: string[], testName?: string) => {
+export const skipInCiIfMissingApiKeys = (
+  requiredKeys: string[],
+  testName?: string
+) => {
   if (isCI()) {
     return skipIfMissingApiKeys(requiredKeys, testName);
   }
@@ -185,8 +201,8 @@ export const markAsApiDependent = (apiKeys: string[]) => {
   return {
     meta: {
       requiresApiKeys: apiKeys,
-      description: `This test requires the following API keys: ${apiKeys.join(", ")}`
-    }
+      description: `This test requires the following API keys: ${apiKeys.join(", ")}`,
+    },
   };
 };
 
@@ -195,7 +211,7 @@ export const markAsApiDependent = (apiKeys: string[]) => {
  */
 export const createMockBamlClient = () => ({
   GenerateLegalSearchQueries: vi.fn(),
-  AnalyzeSingleDocument: vi.fn(), 
+  AnalyzeSingleDocument: vi.fn(),
   SynthesizeResearchFindings: vi.fn(),
   GenerateFinalLegalReport: vi.fn(),
   AssessResearchAndPlanNextSteps: vi.fn(),

@@ -148,7 +148,9 @@ describe("ExaServerError", () => {
   });
 
   it("should default to temporary for most 5xx errors", () => {
-    const error500 = new ExaServerError("Internal server error", { status: 500 });
+    const error500 = new ExaServerError("Internal server error", {
+      status: 500,
+    });
     const error502 = new ExaServerError("Bad gateway", { status: 502 });
     const error501 = new ExaServerError("Not implemented", { status: 501 });
 
@@ -315,7 +317,9 @@ describe("Retry Logic Helpers", () => {
   });
 
   it("should provide appropriate retry delays", () => {
-    const rateLimitError = new ExaRateLimitError("Rate limit", { retryAfter: 10 });
+    const rateLimitError = new ExaRateLimitError("Rate limit", {
+      retryAfter: 10,
+    });
     const serverError = new ExaServerError("Server error");
     const networkError = new ExaNetworkError("Network error");
     const unknownError = new Error("Unknown error");

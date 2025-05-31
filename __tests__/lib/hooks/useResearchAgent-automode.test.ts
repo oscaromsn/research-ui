@@ -7,493 +7,508 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
-    autoModeStateAtom,
-    researchSessionAtom,
+  autoModeStateAtom,
+  researchSessionAtom,
 } from "@/lib/state/researchAtoms";
 
 // Mock the server action
 vi.mock("@/app/actions/researchAgentOrchestrator", () => ({
-    conductResearch: vi.fn(),
+  conductResearch: vi.fn(),
 }));
 
 const mockedConductResearch = vi.mocked(conductResearch);
 
 describe("useResearchAgent Hook - Auto Mode", () => {
-    let store: ReturnType<typeof createStore>;
+  let store: ReturnType<typeof createStore>;
 
-    const JotaiProvider = ({ children }: { children: ReactNode }) =>
-        createElement(Provider, { store }, children);
+  const JotaiProvider = ({ children }: { children: ReactNode }) =>
+    createElement(Provider, { store }, children);
 
-    beforeEach(() => {
-        store = createStore();
-        vi.clearAllMocks();
+  beforeEach(() => {
+    store = createStore();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe("Auto Mode Toggle", () => {
+    it("should toggle auto mode on and off", async () => {
+      const { result } = renderHook(() => useResearchAgent(), {
+        wrapper: JotaiProvider,
+      });
+
+      // Initially auto mode should be disabled
+      expect(result.current.autoModeEnabled).toBe(false);
+
+      // Toggle auto mode on
+      act(() => {
+        result.current.toggleAutoMode();
+      });
+
+      await waitFor(() => {
+        expect(result.current.autoModeEnabled).toBe(true);
+      });
+
+      // Toggle auto mode off
+      act(() => {
+        result.current.toggleAutoMode();
+      });
+
+      await waitFor(() => {
+        expect(result.current.autoModeEnabled).toBe(false);
+      });
     });
 
-    afterEach(() => {
-        vi.clearAllMocks();
+    it("should preserve auto mode state across hook re-renders", async () => {
+      const { result, rerender } = renderHook(() => useResearchAgent(), {
+        wrapper: JotaiProvider,
+      });
+
+      // Enable auto mode
+      act(() => {
+        result.current.toggleAutoMode();
+      });
+
+      await waitFor(() => {
+        expect(result.current.autoModeEnabled).toBe(true);
+      });
+
+      // Re-render the hook
+      rerender();
+
+      // Auto mode should still be enabled
+      expect(result.current.autoModeEnabled).toBe(true);
+    });
+  });
+
+  describe("Auto Mode Configuration", () => {
+    it("should pass auto mode config to conductResearch when starting research", async () => {
+      // Mock a successful stream
+      const mockStream = new ReadableStream({
+        start(controller) {
+          const update = {
+            type: "STATUS_CHANGE",
+            stage: "INITIALIZING",
+            message: "Starting research...",
+          };
+          controller.enqueue(
+            new TextEncoder().encode(`${JSON.stringify(update)}\n`)
+          );
+          controller.close();
+        },
+      });
+
+      mockedConductResearch.mockResolvedValue(mockStream);
+
+      const { result } = renderHook(() => useResearchAgent(), {
+        wrapper: JotaiProvider,
+      });
+
+      // Enable auto mode
+      act(() => {
+        result.current.toggleAutoMode();
+      });
+
+      await waitFor(() => {
+        expect(result.current.autoModeEnabled).toBe(true);
+      });
+
+      // Start research
+      await act(async () => {
+        await result.current.startResearch("Test legal question");
+      });
+
+      // Verify conductResearch was called with auto mode config
+      expect(mockedConductResearch).toHaveBeenCalledWith(
+        "Test legal question",
+        expect.objectContaining({
+          isEnabled: true,
+          maxIterations: 3,
+          currentIteration: 0,
+        })
+      );
     });
 
-    describe("Auto Mode Toggle", () => {
-        it("should toggle auto mode on and off", async () => {
-            const { result } = renderHook(() => useResearchAgent(), {
-                wrapper: JotaiProvider,
-            });
+    it("should pass disabled auto mode config when auto mode is off", async () => {
+      // Mock a successful stream
+      const mockStream = new ReadableStream({
+        start(controller) {
+          const update = {
+            type: "STATUS_CHANGE",
+            stage: "INITIALIZING",
+            message: "Starting research...",
+          };
+          controller.enqueue(
+            new TextEncoder().encode(`${JSON.stringify(update)}\n`)
+          );
+          controller.close();
+        },
+      });
 
-            // Initially auto mode should be disabled
-            expect(result.current.autoModeEnabled).toBe(false);
+      mockedConductResearch.mockResolvedValue(mockStream);
 
-            // Toggle auto mode on
-            act(() => {
-                result.current.toggleAutoMode();
-            });
+      const { result } = renderHook(() => useResearchAgent(), {
+        wrapper: JotaiProvider,
+      });
 
-            await waitFor(() => {
-                expect(result.current.autoModeEnabled).toBe(true);
-            });
+      // Auto mode should be disabled by default
+      expect(result.current.autoModeEnabled).toBe(false);
 
-            // Toggle auto mode off
-            act(() => {
-                result.current.toggleAutoMode();
-            });
+      // Start research
+      await act(async () => {
+        await result.current.startResearch("Test legal question");
+      });
 
-            await waitFor(() => {
-                expect(result.current.autoModeEnabled).toBe(false);
-            });
-        });
+      // Verify conductResearch was called with auto mode disabled
+      expect(mockedConductResearch).toHaveBeenCalledWith(
+        "Test legal question",
+        expect.objectContaining({
+          isEnabled: false,
+          maxIterations: 3,
+          currentIteration: 0,
+        })
+      );
+    });
+  });
 
-        it("should preserve auto mode state across hook re-renders", async () => {
-            const { result, rerender } = renderHook(() => useResearchAgent(), {
-                wrapper: JotaiProvider,
-            });
+  describe("Research Session Management", () => {
+    it("should generate a unique session ID when starting research", async () => {
+      // Mock a successful stream
+      const mockStream = new ReadableStream({
+        start(controller) {
+          controller.close();
+        },
+      });
 
-            // Enable auto mode
-            act(() => {
-                result.current.toggleAutoMode();
-            });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
-            await waitFor(() => {
-                expect(result.current.autoModeEnabled).toBe(true);
-            });
+      const { result } = renderHook(() => useResearchAgent(), {
+        wrapper: JotaiProvider,
+      });
 
-            // Re-render the hook
-            rerender();
+      // Start research
+      await act(async () => {
+        await result.current.startResearch("Test legal question");
+      });
 
-            // Auto mode should still be enabled
-            expect(result.current.autoModeEnabled).toBe(true);
-        });
+      // Check that a session ID was generated
+      const sessionState = store.get(researchSessionAtom);
+      expect(sessionState.sessionId).toBeTruthy();
+      expect(sessionState.sessionId).toMatch(/^research_\d+_[a-z0-9]+$/);
     });
 
-    describe("Auto Mode Configuration", () => {
-        it("should pass auto mode config to conductResearch when starting research", async () => {
-            // Mock a successful stream
-            const mockStream = new ReadableStream({
-                start(controller) {
-                    const update = {
-                        type: "STATUS_CHANGE",
-                        stage: "INITIALIZING",
-                        message: "Starting research...",
-                    };
-                    controller.enqueue(new TextEncoder().encode(`${JSON.stringify(update)}\n`));
-                    controller.close();
+    it("should initialize auto mode state with legal question", async () => {
+      // Mock a successful stream
+      const mockStream = new ReadableStream({
+        start(controller) {
+          controller.close();
+        },
+      });
+
+      mockedConductResearch.mockResolvedValue(mockStream);
+
+      const { result } = renderHook(() => useResearchAgent(), {
+        wrapper: JotaiProvider,
+      });
+
+      const testQuestion =
+        "What are the patent requirements for AI inventions?";
+
+      // Start research
+      await act(async () => {
+        await result.current.startResearch(testQuestion);
+      });
+
+      // Check that auto mode state was updated
+      const autoModeState = store.get(autoModeStateAtom);
+      expect(autoModeState.originalQuestion).toBe(testQuestion);
+      expect(autoModeState.currentIteration).toBe(0);
+    });
+  });
+
+  describe("Accumulative Data Handling", () => {
+    it("should accumulate search queries with timestamps", async () => {
+      const mockStream = new ReadableStream({
+        start(controller) {
+          const update = {
+            type: "DATA",
+            stage: "GENERATING_QUERIES",
+            data: {
+              queries: [
+                {
+                  query_string: "patent requirements AI",
+                  expected_information_summary: "Patent eligibility for AI",
                 },
-            });
+              ],
+            },
+          };
+          controller.enqueue(
+            new TextEncoder().encode(`${JSON.stringify(update)}\n`)
+          );
+          controller.close();
+        },
+      });
 
-            mockedConductResearch.mockResolvedValue(mockStream);
+      mockedConductResearch.mockResolvedValue(mockStream);
 
-            const { result } = renderHook(() => useResearchAgent(), {
-                wrapper: JotaiProvider,
-            });
+      const { result } = renderHook(() => useResearchAgent(), {
+        wrapper: JotaiProvider,
+      });
 
-            // Enable auto mode
-            act(() => {
-                result.current.toggleAutoMode();
-            });
+      // Start research
+      await act(async () => {
+        await result.current.startResearch("Test legal question");
+      });
 
-            await waitFor(() => {
-                expect(result.current.autoModeEnabled).toBe(true);
-            });
-
-            // Start research
-            await act(async () => {
-                await result.current.startResearch("Test legal question");
-            });
-
-            // Verify conductResearch was called with auto mode config
-            expect(mockedConductResearch).toHaveBeenCalledWith(
-                "Test legal question",
-                expect.objectContaining({
-                    isEnabled: true,
-                    maxIterations: 3,
-                    currentIteration: 0,
-                })
-            );
+      // Wait for the stream to be processed
+      await waitFor(() => {
+        const sessionState = store.get(researchSessionAtom);
+        expect(sessionState.accumulatedQueries).toHaveLength(1);
+        expect(sessionState.accumulatedQueries[0]).toMatchObject({
+          query_string: "patent requirements AI",
+          expected_information_summary: "Patent eligibility for AI",
+          timestamp: expect.any(String),
         });
-
-        it("should pass disabled auto mode config when auto mode is off", async () => {
-            // Mock a successful stream
-            const mockStream = new ReadableStream({
-                start(controller) {
-                    const update = {
-                        type: "STATUS_CHANGE",
-                        stage: "INITIALIZING",
-                        message: "Starting research...",
-                    };
-                    controller.enqueue(new TextEncoder().encode(`${JSON.stringify(update)}\n`));
-                    controller.close();
-                },
-            });
-
-            mockedConductResearch.mockResolvedValue(mockStream);
-
-            const { result } = renderHook(() => useResearchAgent(), {
-                wrapper: JotaiProvider,
-            });
-
-            // Auto mode should be disabled by default
-            expect(result.current.autoModeEnabled).toBe(false);
-
-            // Start research
-            await act(async () => {
-                await result.current.startResearch("Test legal question");
-            });
-
-            // Verify conductResearch was called with auto mode disabled
-            expect(mockedConductResearch).toHaveBeenCalledWith(
-                "Test legal question",
-                expect.objectContaining({
-                    isEnabled: false,
-                    maxIterations: 3,
-                    currentIteration: 0,
-                })
-            );
-        });
+      });
     });
 
-    describe("Research Session Management", () => {
-        it("should generate a unique session ID when starting research", async () => {
-            // Mock a successful stream
-            const mockStream = new ReadableStream({
-                start(controller) {
-                    controller.close();
-                },
-            });
+    it("should accumulate analyzed documents with timestamps", async () => {
+      const mockStream = new ReadableStream({
+        start(controller) {
+          const update = {
+            type: "DATA",
+            stage: "ANALYZING_DOCUMENTS",
+            data: {
+              docId: "doc-123",
+              title: "Test Document",
+              relevanceScore: 8,
+              summarySnippet: "Test summary",
+            },
+          };
+          controller.enqueue(
+            new TextEncoder().encode(`${JSON.stringify(update)}\n`)
+          );
+          controller.close();
+        },
+      });
 
-            mockedConductResearch.mockResolvedValue(mockStream);
+      mockedConductResearch.mockResolvedValue(mockStream);
 
-            const { result } = renderHook(() => useResearchAgent(), {
-                wrapper: JotaiProvider,
-            });
+      const { result } = renderHook(() => useResearchAgent(), {
+        wrapper: JotaiProvider,
+      });
 
-            // Start research
-            await act(async () => {
-                await result.current.startResearch("Test legal question");
-            });
+      // Start research
+      await act(async () => {
+        await result.current.startResearch("Test legal question");
+      });
 
-            // Check that a session ID was generated
-            const sessionState = store.get(researchSessionAtom);
-            expect(sessionState.sessionId).toBeTruthy();
-            expect(sessionState.sessionId).toMatch(/^research_\d+_[a-z0-9]+$/);
+      // Wait for the stream to be processed
+      await waitFor(() => {
+        const sessionState = store.get(researchSessionAtom);
+        expect(sessionState.accumulatedDocuments).toHaveLength(1);
+        expect(sessionState.accumulatedDocuments[0]).toMatchObject({
+          docId: "doc-123",
+          title: "Test Document",
+          relevanceScore: 8,
+          summarySnippet: "Test summary",
+          timestamp: expect.any(String),
         });
-
-        it("should initialize auto mode state with legal question", async () => {
-            // Mock a successful stream
-            const mockStream = new ReadableStream({
-                start(controller) {
-                    controller.close();
-                },
-            });
-
-            mockedConductResearch.mockResolvedValue(mockStream);
-
-            const { result } = renderHook(() => useResearchAgent(), {
-                wrapper: JotaiProvider,
-            });
-
-            const testQuestion = "What are the patent requirements for AI inventions?";
-
-            // Start research
-            await act(async () => {
-                await result.current.startResearch(testQuestion);
-            });
-
-            // Check that auto mode state was updated
-            const autoModeState = store.get(autoModeStateAtom);
-            expect(autoModeState.originalQuestion).toBe(testQuestion);
-            expect(autoModeState.currentIteration).toBe(0);
-        });
+      });
     });
 
-    describe("Accumulative Data Handling", () => {
-        it("should accumulate search queries with timestamps", async () => {
-            const mockStream = new ReadableStream({
-                start(controller) {
-                    const update = {
-                        type: "DATA",
-                        stage: "GENERATING_QUERIES",
-                        data: {
-                            queries: [
-                                {
-                                    query_string: "patent requirements AI",
-                                    expected_information_summary: "Patent eligibility for AI",
-                                },
-                            ],
-                        },
-                    };
-                    controller.enqueue(new TextEncoder().encode(`${JSON.stringify(update)}\n`));
-                    controller.close();
+    it("should accumulate synthesis topics with timestamps", async () => {
+      const mockStream = new ReadableStream({
+        start(controller) {
+          const update = {
+            type: "DATA",
+            stage: "SYNTHESIZING_FINDINGS",
+            data: {
+              topics: [
+                {
+                  title: "Patent Eligibility",
+                  synthesisSnippet: "AI inventions must meet...",
+                  confidence: 85,
+                  docIds: ["doc-123"],
                 },
-            });
+              ],
+            },
+          };
+          controller.enqueue(
+            new TextEncoder().encode(`${JSON.stringify(update)}\n`)
+          );
+          controller.close();
+        },
+      });
 
-            mockedConductResearch.mockResolvedValue(mockStream);
+      mockedConductResearch.mockResolvedValue(mockStream);
 
-            const { result } = renderHook(() => useResearchAgent(), {
-                wrapper: JotaiProvider,
-            });
+      const { result } = renderHook(() => useResearchAgent(), {
+        wrapper: JotaiProvider,
+      });
 
-            // Start research
-            await act(async () => {
-                await result.current.startResearch("Test legal question");
-            });
+      // Start research
+      await act(async () => {
+        await result.current.startResearch("Test legal question");
+      });
 
-            // Wait for the stream to be processed
-            await waitFor(() => {
-                const sessionState = store.get(researchSessionAtom);
-                expect(sessionState.accumulatedQueries).toHaveLength(1);
-                expect(sessionState.accumulatedQueries[0]).toMatchObject({
-                    query_string: "patent requirements AI",
-                    expected_information_summary: "Patent eligibility for AI",
-                    timestamp: expect.any(String),
-                });
-            });
+      // Wait for the stream to be processed
+      await waitFor(() => {
+        const sessionState = store.get(researchSessionAtom);
+        expect(sessionState.accumulatedTopics).toHaveLength(1);
+        expect(sessionState.accumulatedTopics[0]).toMatchObject({
+          title: "Patent Eligibility",
+          synthesisSnippet: "AI inventions must meet...",
+          confidence: 85,
+          docIds: ["doc-123"],
+          timestamp: expect.any(String),
         });
+      });
+    });
+  });
 
-        it("should accumulate analyzed documents with timestamps", async () => {
-            const mockStream = new ReadableStream({
-                start(controller) {
-                    const update = {
-                        type: "DATA",
-                        stage: "ANALYZING_DOCUMENTS",
-                        data: {
-                            docId: "doc-123",
-                            title: "Test Document",
-                            relevanceScore: 8,
-                            summarySnippet: "Test summary",
-                        },
-                    };
-                    controller.enqueue(new TextEncoder().encode(`${JSON.stringify(update)}\n`));
-                    controller.close();
-                },
-            });
+  describe("Pause and Resume Functionality", () => {
+    it("should allow pausing research", async () => {
+      const { result } = renderHook(() => useResearchAgent(), {
+        wrapper: JotaiProvider,
+      });
 
-            mockedConductResearch.mockResolvedValue(mockStream);
+      // Mock a stream that processes quickly
+      const mockStream = new ReadableStream({
+        start(controller) {
+          const update = {
+            type: "STATUS_CHANGE",
+            stage: "ANALYZING_DOCUMENTS",
+            message: "Analyzing documents...",
+          };
+          controller.enqueue(
+            new TextEncoder().encode(`${JSON.stringify(update)}\n`)
+          );
+          controller.close();
+        },
+      });
 
-            const { result } = renderHook(() => useResearchAgent(), {
-                wrapper: JotaiProvider,
-            });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
-            // Start research
-            await act(async () => {
-                await result.current.startResearch("Test legal question");
-            });
+      // Start research
+      await act(async () => {
+        await result.current.startResearch("Test legal question");
+      });
 
-            // Wait for the stream to be processed
-            await waitFor(() => {
-                const sessionState = store.get(researchSessionAtom);
-                expect(sessionState.accumulatedDocuments).toHaveLength(1);
-                expect(sessionState.accumulatedDocuments[0]).toMatchObject({
-                    docId: "doc-123",
-                    title: "Test Document",
-                    relevanceScore: 8,
-                    summarySnippet: "Test summary",
-                    timestamp: expect.any(String),
-                });
-            });
-        });
+      // Immediately pause research (before stream closes)
+      act(() => {
+        result.current.pauseResearch();
+      });
 
-        it("should accumulate synthesis topics with timestamps", async () => {
-            const mockStream = new ReadableStream({
-                start(controller) {
-                    const update = {
-                        type: "DATA",
-                        stage: "SYNTHESIZING_FINDINGS",
-                        data: {
-                            topics: [
-                                {
-                                    title: "Patent Eligibility",
-                                    synthesisSnippet: "AI inventions must meet...",
-                                    confidence: 85,
-                                    docIds: ["doc-123"],
-                                },
-                            ],
-                        },
-                    };
-                    controller.enqueue(new TextEncoder().encode(`${JSON.stringify(update)}\n`));
-                    controller.close();
-                },
-            });
-
-            mockedConductResearch.mockResolvedValue(mockStream);
-
-            const { result } = renderHook(() => useResearchAgent(), {
-                wrapper: JotaiProvider,
-            });
-
-            // Start research
-            await act(async () => {
-                await result.current.startResearch("Test legal question");
-            });
-
-            // Wait for the stream to be processed
-            await waitFor(() => {
-                const sessionState = store.get(researchSessionAtom);
-                expect(sessionState.accumulatedTopics).toHaveLength(1);
-                expect(sessionState.accumulatedTopics[0]).toMatchObject({
-                    title: "Patent Eligibility",
-                    synthesisSnippet: "AI inventions must meet...",
-                    confidence: 85,
-                    docIds: ["doc-123"],
-                    timestamp: expect.any(String),
-                });
-            });
-        });
+      // Check that pause method was called successfully
+      expect(typeof result.current.pauseResearch).toBe("function");
     });
 
-    describe("Pause and Resume Functionality", () => {
-        it("should allow pausing research", async () => {
-            const { result } = renderHook(() => useResearchAgent(), {
-                wrapper: JotaiProvider,
-            });
+    it("should clear pause state when aborting research", async () => {
+      const { result } = renderHook(() => useResearchAgent(), {
+        wrapper: JotaiProvider,
+      });
 
-            // Mock a stream that processes quickly
-            const mockStream = new ReadableStream({
-                start(controller) {
-                    const update = {
-                        type: "STATUS_CHANGE",
-                        stage: "ANALYZING_DOCUMENTS",
-                        message: "Analyzing documents...",
-                    };
-                    controller.enqueue(new TextEncoder().encode(`${JSON.stringify(update)}\n`));
-                    controller.close();
-                },
-            });
+      const mockStream = new ReadableStream({
+        start(controller) {
+          const update = {
+            type: "STATUS_CHANGE",
+            stage: "ANALYZING_DOCUMENTS",
+            message: "Analyzing documents...",
+          };
+          controller.enqueue(
+            new TextEncoder().encode(`${JSON.stringify(update)}\n`)
+          );
+          controller.close();
+        },
+      });
 
-            mockedConductResearch.mockResolvedValue(mockStream);
+      mockedConductResearch.mockResolvedValue(mockStream);
 
-            // Start research
-            await act(async () => {
-                await result.current.startResearch("Test legal question");
-            });
+      // Start research
+      await act(async () => {
+        await result.current.startResearch("Test legal question");
+      });
 
-            // Immediately pause research (before stream closes)
-            act(() => {
-                result.current.pauseResearch();
-            });
+      // Pause research
+      act(() => {
+        result.current.pauseResearch();
+      });
 
-            // Check that pause method was called successfully
-            expect(typeof result.current.pauseResearch).toBe('function');
-        });
+      // Abort research
+      act(() => {
+        result.current.abortResearch();
+      });
 
-        it("should clear pause state when aborting research", async () => {
-            const { result } = renderHook(() => useResearchAgent(), {
-                wrapper: JotaiProvider,
-            });
+      // Check that abort method was called successfully
+      expect(typeof result.current.abortResearch).toBe("function");
+    });
+  });
 
-            const mockStream = new ReadableStream({
-                start(controller) {
-                    const update = {
-                        type: "STATUS_CHANGE",
-                        stage: "ANALYZING_DOCUMENTS",
-                        message: "Analyzing documents...",
-                    };
-                    controller.enqueue(new TextEncoder().encode(`${JSON.stringify(update)}\n`));
-                    controller.close();
-                },
-            });
+  describe("Error Handling", () => {
+    it("should handle auto mode configuration errors gracefully", async () => {
+      const { result } = renderHook(() => useResearchAgent(), {
+        wrapper: JotaiProvider,
+      });
 
-            mockedConductResearch.mockResolvedValue(mockStream);
+      mockedConductResearch.mockRejectedValue(new Error("Auto mode error"));
 
-            // Start research
-            await act(async () => {
-                await result.current.startResearch("Test legal question");
-            });
+      // Enable auto mode
+      act(() => {
+        result.current.toggleAutoMode();
+      });
 
-            // Pause research
-            act(() => {
-                result.current.pauseResearch();
-            });
+      // Start research
+      await act(async () => {
+        await result.current.startResearch("Test legal question");
+      });
 
-            // Abort research
-            act(() => {
-                result.current.abortResearch();
-            });
-
-            // Check that abort method was called successfully  
-            expect(typeof result.current.abortResearch).toBe('function');
-        });
+      // Check error state
+      await waitFor(() => {
+        expect(result.current.error).toBeTruthy();
+        expect(result.current.isLoading).toBe(false);
+      });
     });
 
-    describe("Error Handling", () => {
-        it("should handle auto mode configuration errors gracefully", async () => {
-            const { result } = renderHook(() => useResearchAgent(), {
-                wrapper: JotaiProvider,
-            });
+    it("should reset auto mode state when resetting research", async () => {
+      const { result } = renderHook(() => useResearchAgent(), {
+        wrapper: JotaiProvider,
+      });
 
-            mockedConductResearch.mockRejectedValue(new Error("Auto mode error"));
+      // Enable auto mode and set some state
+      act(() => {
+        result.current.toggleAutoMode();
+      });
 
-            // Enable auto mode
-            act(() => {
-                result.current.toggleAutoMode();
-            });
+      // Simulate setting up research state
+      const autoModeState = store.get(autoModeStateAtom);
+      store.set(autoModeStateAtom, {
+        ...autoModeState,
+        currentIteration: 2,
+        originalQuestion: "Test question",
+      });
 
-            // Start research
-            await act(async () => {
-                await result.current.startResearch("Test legal question");
-            });
+      // Mock a successful stream to trigger state reset
+      const mockStream = new ReadableStream({
+        start(controller) {
+          controller.close();
+        },
+      });
 
-            // Check error state
-            await waitFor(() => {
-                expect(result.current.error).toBeTruthy();
-                expect(result.current.isLoading).toBe(false);
-            });
-        });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
-        it("should reset auto mode state when resetting research", async () => {
-            const { result } = renderHook(() => useResearchAgent(), {
-                wrapper: JotaiProvider,
-            });
+      // Start new research (which should reset state)
+      await act(async () => {
+        await result.current.startResearch("New test question");
+      });
 
-            // Enable auto mode and set some state
-            act(() => {
-                result.current.toggleAutoMode();
-            });
-
-            // Simulate setting up research state
-            const autoModeState = store.get(autoModeStateAtom);
-            store.set(autoModeStateAtom, {
-                ...autoModeState,
-                currentIteration: 2,
-                originalQuestion: "Test question",
-            });
-
-            // Mock a successful stream to trigger state reset
-            const mockStream = new ReadableStream({
-                start(controller) {
-                    controller.close();
-                },
-            });
-
-            mockedConductResearch.mockResolvedValue(mockStream);
-
-            // Start new research (which should reset state)
-            await act(async () => {
-                await result.current.startResearch("New test question");
-            });
-
-            // Check that auto mode state was reset but enabled flag preserved
-            const newAutoModeState = store.get(autoModeStateAtom);
-            expect(newAutoModeState.isEnabled).toBe(true); // Preserved
-            expect(newAutoModeState.currentIteration).toBe(0); // Reset
-            expect(newAutoModeState.originalQuestion).toBe("New test question"); // Updated
-        });
+      // Check that auto mode state was reset but enabled flag preserved
+      const newAutoModeState = store.get(autoModeStateAtom);
+      expect(newAutoModeState.isEnabled).toBe(true); // Preserved
+      expect(newAutoModeState.currentIteration).toBe(0); // Reset
+      expect(newAutoModeState.originalQuestion).toBe("New test question"); // Updated
     });
+  });
 });

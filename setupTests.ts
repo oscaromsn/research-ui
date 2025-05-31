@@ -1,8 +1,9 @@
-import { cleanup, configure } from "@testing-library/react";
-import { afterEach, beforeAll, afterAll, vi } from "vitest";
-import "@testing-library/jest-dom";
 import path from "node:path";
+
+import { configure } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import { config } from "dotenv";
+import { afterEach, beforeAll, afterAll, vi } from "vitest";
 
 // @testing-library/jest-dom adds custom matchers to Vitest automatically
 // so we don't need to explicitly extend expect
@@ -23,9 +24,11 @@ beforeAll(() => {
   console.error = (...args: unknown[]) => {
     const message = args[0];
     if (
-      typeof message === 'string' &&
-      ((message.includes('An update to') && message.includes('was not wrapped in act')) ||
-      (message.includes('Warning: An update to') && message.includes('was not wrapped in act')))
+      typeof message === "string" &&
+      ((message.includes("An update to") &&
+        message.includes("was not wrapped in act")) ||
+        (message.includes("Warning: An update to") &&
+          message.includes("was not wrapped in act")))
     ) {
       return; // Suppress act() warnings
     }
@@ -40,14 +43,37 @@ afterAll(() => {
 // Also suppress stderr warnings if they're not caught by console.error override
 const originalStderrWrite = process.stderr.write;
 beforeAll(() => {
-  process.stderr.write = function(chunk: any, ...args: any[]): boolean {
-    const message = chunk.toString();
+  process.stderr.write = function (
+    chunk: string | Uint8Array,
+    encodingOrCallback?: BufferEncoding | ((error?: Error | null) => void),
+    callback?: (error?: Error | null) => void
+  ): boolean {
+    const message = chunk?.toString();
     if (
-      message.includes('An update to') && message.includes('was not wrapped in act')
+      message?.includes("An update to") &&
+      message.includes("was not wrapped in act")
     ) {
       return true; // Suppress act() warnings from stderr
     }
-    return (originalStderrWrite as any).call(this, chunk, ...args);
+
+    // Handle the overloaded function signature
+    if (typeof encodingOrCallback === "function") {
+      // When encodingOrCallback is a function, it's the callback parameter
+      return originalStderrWrite.call(
+        this,
+        chunk,
+        undefined,
+        encodingOrCallback
+      );
+    } else {
+      // When encodingOrCallback is a BufferEncoding, pass it along with optional callback
+      return originalStderrWrite.call(
+        this,
+        chunk,
+        encodingOrCallback,
+        callback
+      );
+    }
   };
 });
 
@@ -60,10 +86,10 @@ config({ path: path.resolve(__dirname, ".env.test") });
 
 // Mock the console methods to reduce noise during tests
 if (process.env.VITEST_SILENT_CONSOLE === "true") {
-    console.log = vi.fn();
-    console.info = vi.fn();
-    console.warn = vi.fn();
-    console.error = vi.fn();
+  console.log = vi.fn();
+  console.info = vi.fn();
+  console.warn = vi.fn();
+  console.error = vi.fn();
 }
 
 // Conditionally mock axios - only for unit tests, not integration tests
@@ -77,39 +103,38 @@ global.fetch = vi.fn();
 
 // Define a global ResizeObserver mock
 class ResizeObserverMock {
-    observe = vi.fn();
-    unobserve = vi.fn();
-    disconnect = vi.fn();
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
 }
 
 // Mock IntersectionObserver
 class IntersectionObserverMock implements IntersectionObserver {
-    readonly root: Element | Document | null = null;
-    readonly rootMargin: string = "0px";
-    readonly thresholds: ReadonlyArray<number> = [0];
+  readonly root: Element | Document | null = null;
+  readonly rootMargin: string = "0px";
+  readonly thresholds: ReadonlyArray<number> = [0];
 
-    private readonly _callback: IntersectionObserverCallback;
+  private readonly _callback: IntersectionObserverCallback;
 
-    constructor(
-        callback: IntersectionObserverCallback,
-        _options?: IntersectionObserverInit,
-    ) {
-        this._callback = callback;
-    }
+  constructor(
+    callback: IntersectionObserverCallback,
+    _options?: IntersectionObserverInit
+  ) {
+    this._callback = callback;
+  }
 
-    observe = vi.fn();
-    unobserve = vi.fn();
-    disconnect = vi.fn();
-    takeRecords = vi.fn().mockReturnValue([]);
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+  takeRecords = vi.fn().mockReturnValue([]);
 }
 
 // Add to global
 global.ResizeObserver = ResizeObserverMock;
 global.IntersectionObserver =
-    IntersectionObserverMock as unknown as typeof IntersectionObserver;
+  IntersectionObserverMock as unknown as typeof IntersectionObserver;
 
 // Clean up after each test
 afterEach(() => {
-    cleanup(); // Cleanup React Testing Library components
-    vi.clearAllMocks();
+  vi.clearAllMocks();
 });

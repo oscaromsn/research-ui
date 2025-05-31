@@ -1,7 +1,11 @@
 /* eslint-disable vitest/valid-title */
 import { describe, it, vi } from "vitest";
 
-import { skipIfMissingApiKeys, skipInCiIfMissingApiKeys, isCI } from "../test-utils";
+import {
+  skipIfMissingApiKeys,
+  skipInCiIfMissingApiKeys,
+  isCI,
+} from "../test-utils";
 
 /**
  * Available API providers and their required environment variables
@@ -15,7 +19,11 @@ export const API_KEYS = {
   EXA_SEARCH: ["EXA_API_KEY"] as string[],
   TAVILY_SEARCH: ["TAVILY_API_KEY"] as string[],
   LINKUP_SEARCH: ["LINKUP_API_KEY"] as string[],
-  ALL_LLM: ["GOOGLE_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY"] as string[],
+  ALL_LLM: [
+    "GOOGLE_API_KEY",
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+  ] as string[],
   ALL_SEARCH: ["EXA_API_KEY", "TAVILY_API_KEY", "LINKUP_API_KEY"] as string[],
 };
 
@@ -39,18 +47,17 @@ export const itWithApiKeys = (
 ) => {
   const { skipInCI = false, timeout, only = false, skip = false } = options;
 
-  const shouldSkip = skip || 
-    (skipInCI ? !skipInCiIfMissingApiKeys(requiredApiKeys, testName) : !skipIfMissingApiKeys(requiredApiKeys, testName));
+  const shouldSkip =
+    skip ||
+    (skipInCI
+      ? !skipInCiIfMissingApiKeys(requiredApiKeys, testName)
+      : !skipIfMissingApiKeys(requiredApiKeys, testName));
 
   const testRunner = only ? it.only : shouldSkip ? it.skip : it;
 
   const titleWithRequirements = `${testName} [requires: ${requiredApiKeys.join(", ")}]`;
-  
-  return testRunner(
-    titleWithRequirements,
-    testFn,
-    timeout
-  );
+
+  return testRunner(titleWithRequirements, testFn, timeout);
 };
 
 /**
@@ -72,17 +79,21 @@ export const describeWithApiKeys = (
 ) => {
   const { skipInCI = false, only = false, skip = false } = options;
 
-  const shouldSkip = skip || 
-    (skipInCI ? !skipInCiIfMissingApiKeys(requiredApiKeys, suiteName) : !skipIfMissingApiKeys(requiredApiKeys, suiteName));
+  const shouldSkip =
+    skip ||
+    (skipInCI
+      ? !skipInCiIfMissingApiKeys(requiredApiKeys, suiteName)
+      : !skipIfMissingApiKeys(requiredApiKeys, suiteName));
 
-  const describeRunner = only ? describe.only : shouldSkip ? describe.skip : describe;
-  
+  const describeRunner = only
+    ? describe.only
+    : shouldSkip
+      ? describe.skip
+      : describe;
+
   const titleWithRequirements = `${suiteName} [requires: ${requiredApiKeys.join(", ")}]`;
 
-  return describeRunner(
-    titleWithRequirements,
-    suiteFn
-  );
+  return describeRunner(titleWithRequirements, suiteFn);
 };
 
 /**
@@ -102,17 +113,12 @@ export const itBamlFunction = (
   } = {}
 ) => {
   const testTitle = `BAML function ${functionName}`;
-  
-  return itWithApiKeys(
-    testTitle,
-    requiredApiKeys,
-    testFn,
-    {
-      skipInCI: true, // Default to skipping BAML tests in CI
-      timeout: 30000, // Default 30s timeout for BAML tests
-      ...options,
-    }
-  );
+
+  return itWithApiKeys(testTitle, requiredApiKeys, testFn, {
+    skipInCI: true, // Default to skipping BAML tests in CI
+    timeout: 30000, // Default 30s timeout for BAML tests
+    ...options,
+  });
 };
 
 /**
@@ -132,31 +138,32 @@ export const itE2eWithApi = (
   } = {}
 ) => {
   const e2eTestTitle = `E2E: ${testName}`;
-  
-  return itWithApiKeys(
-    e2eTestTitle,
-    requiredApiKeys,
-    testFn,
-    {
-      skipInCI: false, // E2E tests should run in CI if keys are available
-      timeout: 60000, // Default 60s timeout for E2E tests
-      ...options,
-    }
-  );
+
+  return itWithApiKeys(e2eTestTitle, requiredApiKeys, testFn, {
+    skipInCI: false, // E2E tests should run in CI if keys are available
+    timeout: 60000, // Default 60s timeout for E2E tests
+    ...options,
+  });
 };
 
 /**
  * Utility to log API key availability status
  * Useful for debugging test skipping behavior
  */
-export const logApiKeyStatus = (keys: string[] = Object.values(API_KEYS).flat()) => {
+export const logApiKeyStatus = (
+  keys: string[] = Object.values(API_KEYS).flat()
+) => {
   console.log("=== API Key Status ===");
   console.log(`CI Environment: ${isCI()}`);
-  
+
   const uniqueKeys = [...new Set(keys)];
   uniqueKeys.forEach((key) => {
     const value = process.env[key];
-    const hasKey = value && value.trim() !== "" && !value.includes("[YOUR_") && !value.includes("****");
+    const hasKey =
+      value &&
+      value.trim() !== "" &&
+      !value.includes("[YOUR_") &&
+      !value.includes("****");
     const status = hasKey ? "✅ Available" : "❌ Missing/Invalid";
     console.log(`${key}: ${status}`);
   });
@@ -173,13 +180,18 @@ export const apiTestMatchers = {
   toBeSkippedDueToMissingApiKeys: (received: any, expectedKeys: string[]) => {
     const hasKeys = expectedKeys.every((key) => {
       const value = process.env[key];
-      return value && value.trim() !== "" && !value.includes("[YOUR_") && !value.includes("****");
+      return (
+        value &&
+        value.trim() !== "" &&
+        !value.includes("[YOUR_") &&
+        !value.includes("****")
+      );
     });
 
     return {
       pass: !hasKeys,
-      message: () => 
-        hasKeys 
+      message: () =>
+        hasKeys
           ? `Expected test to be skipped due to missing API keys, but all keys are available: ${expectedKeys.join(", ")}`
           : `Test correctly skipped due to missing API keys: ${expectedKeys.join(", ")}`,
     };
@@ -189,9 +201,12 @@ export const apiTestMatchers = {
 /**
  * Mock environment for testing API key validation logic
  */
-export const withMockApiKeys = (mockKeys: Record<string, string>, testFn: () => void) => {
+export const withMockApiKeys = (
+  mockKeys: Record<string, string>,
+  testFn: () => void
+) => {
   const originalEnv = { ...process.env };
-  
+
   // Set mock keys
   Object.entries(mockKeys).forEach(([key, value]) => {
     process.env[key] = value;
@@ -225,7 +240,7 @@ export const createApiTestSuite = (config: {
 
   const mockedSuiteTitle = `${suiteName} (Mocked)`;
   const realApiSuiteTitle = `${suiteName} (Real API)`;
-  
+
   describe(mockedSuiteTitle, () => {
     mockTests.forEach((test) => {
       it(test.name, test.fn);
@@ -234,15 +249,10 @@ export const createApiTestSuite = (config: {
 
   describeWithApiKeys(realApiSuiteTitle, requiredKeys, () => {
     realApiTests.forEach((test) => {
-      itWithApiKeys(
-        test.name,
-        requiredKeys,
-        test.fn,
-        {
-          skipInCI: true,
-          timeout: test.timeout || 30000,
-        }
-      );
+      itWithApiKeys(test.name, requiredKeys, test.fn, {
+        skipInCI: true,
+        timeout: test.timeout || 30000,
+      });
     });
   });
 };
