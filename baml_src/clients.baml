@@ -109,11 +109,11 @@ retry_policy Constant {
 }
 
 retry_policy TestSafely {
-  max_retries 2
+  max_retries 1
   strategy {
     type exponential_backoff
-    delay_ms 2000
-    multiplier 2
-    max_delay_ms 60000
+    delay_ms 200
+    multiplier 1.5
+    max_delay_ms 10000
   }
 }

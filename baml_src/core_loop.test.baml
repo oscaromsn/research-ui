@@ -19,15 +19,15 @@ test AssessmentWithNoSynthesis {
         }
       ]
     }
-    current_synthesis null
+    current_synthesis none
   }
   // First pass assessment should identify need for research
   @@assert( {{ this.is_sufficient == false }} )
-  @@assert( {{ this.assessment_summary | length > 10 }} )
+  @@assert( {{ (this.assessment_summary or "") | length > 10 }} )
   @@assert( {{ this.next_action in ["NEW_QUERIES", "REFINE_QUERIES"] }} )
   // Should provide suggested queries for first research
-  @@assert( {{ this.suggested_queries_for_refinement != null and (this.suggested_queries_for_refinement | length > 0) }} )
-  // document_ids_for_deeper_analysis should be null for NEW_QUERIES action
+  @@assert( {{ this.suggested_queries_for_refinement != none and ((this.suggested_queries_for_refinement or []) | length > 0) }} )
+  // document_ids_for_deeper_analysis should be none for NEW_QUERIES action
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 0 }} )
   @@assert( {{ this.reasoning.consider_relevant_legal_principles.summary | length > 0 }} )
   @@assert( {{ this.reasoning.formulate_search_queries_strategy.summary | length > 0 }} )
@@ -84,12 +84,12 @@ test AssessmentSufficientForReport {
   }
   @@assert( {{ this.is_sufficient == true }} )
   @@assert( {{ this.next_action == "GENERATE_REPORT" }} )
-  @@assert( {{ this.assessment_summary | length > 10 }} )
+  @@assert( {{ (this.assessment_summary or "") | length > 10 }} )
   // Should not provide refinement suggestions when sufficient
   @@assert( {{ not this.suggested_queries_for_refinement }} )
-  // document_ids_for_deeper_analysis should be null for GENERATE_REPORT action
+  // document_ids_for_deeper_analysis should be none for GENERATE_REPORT action
   // Assessment should reference the synthesis quality
-  @@assert( {{ ("sufficient" in (this.assessment_summary | lower)) or ("comprehensive" in (this.assessment_summary | lower)) or ("adequate" in (this.assessment_summary | lower)) }} )
+  @@assert( {{ ("sufficient" in ((this.assessment_summary or "") | lower)) or ("comprehensive" in ((this.assessment_summary or "") | lower)) or ("adequate" in ((this.assessment_summary or "") | lower)) }} )
 }
 
 test AssessmentNeedsRefinement {
@@ -137,13 +137,13 @@ test AssessmentNeedsRefinement {
   }
   @@assert( {{ this.is_sufficient == false }} )
   @@assert( {{ this.next_action == "REFINE_QUERIES" }} )
-  @@assert( {{ this.assessment_summary | length > 10 }} )
+  @@assert( {{ (this.assessment_summary or "") | length > 10 }} )
   // Should provide Texas-specific refinement suggestions
-  @@assert( {{ this.suggested_queries_for_refinement != null and (this.suggested_queries_for_refinement | length > 0) }} )
-  @@assert( {{ ("texas" in (this.suggested_queries_for_refinement | join(" ") | lower)) }} )
-  // document_ids_for_deeper_analysis should be null for REFINE_QUERIES action
+  @@assert( {{ this.suggested_queries_for_refinement != none and ((this.suggested_queries_for_refinement or []) | length > 0) }} )
+  @@assert( {{ ("texas" in (((this.suggested_queries_for_refinement or []) | join(" ")) | lower)) }} )
+  // document_ids_for_deeper_analysis should be none for REFINE_QUERIES action
   // Assessment should identify the gaps
-  @@assert( {{ ("texas" in (this.assessment_summary | lower)) or ("specific" in (this.assessment_summary | lower)) or ("jurisdiction" in (this.assessment_summary | lower)) }} )
+  @@assert( {{ ("texas" in ((this.assessment_summary or "") | lower)) or ("specific" in ((this.assessment_summary or "") | lower)) or ("jurisdiction" in ((this.assessment_summary or "") | lower)) }} )
 }
 
 test AssessmentNeedsNewQueries {
@@ -191,13 +191,13 @@ test AssessmentNeedsNewQueries {
   }
   @@assert( {{ this.is_sufficient == false }} )
   @@assert( {{ this.next_action == "NEW_QUERIES" }} )
-  @@assert( {{ this.assessment_summary | length > 10 }} )
+  @@assert( {{ (this.assessment_summary or "") | length > 10 }} )
   // Should suggest completely new query approach
-  @@assert( {{ this.suggested_queries_for_refinement != null and (this.suggested_queries_for_refinement | length > 0) }} )
-  @@assert( {{ ("new york" in (this.suggested_queries_for_refinement | join(" ") | lower)) }} )
-  // document_ids_for_deeper_analysis should be null for NEW_QUERIES action
+  @@assert( {{ this.suggested_queries_for_refinement != none and ((this.suggested_queries_for_refinement or []) | length > 0) }} )
+  @@assert( {{ ("new york" in (((this.suggested_queries_for_refinement or []) | join(" ")) | lower)) }} )
+  // document_ids_for_deeper_analysis should be none for NEW_QUERIES action
   // Assessment should identify ineffective current approach
-  @@assert( {{ ("new" in (this.assessment_summary | lower)) or ("different" in (this.assessment_summary | lower)) or ("specific" in (this.assessment_summary | lower)) }} )
+  @@assert( {{ ("new" in ((this.assessment_summary or "") | lower)) or ("different" in ((this.assessment_summary or "") | lower)) or ("specific" in ((this.assessment_summary or "") | lower)) }} )
 }
 
 test AssessmentNeedsDeeperAnalysis {
@@ -245,13 +245,13 @@ test AssessmentNeedsDeeperAnalysis {
   }
   @@assert( {{ this.is_sufficient == false }} )
   @@assert( {{ this.next_action == "DEEPER_ANALYSIS_OF_EXISTING_DOCS" }} )
-  @@assert( {{ this.assessment_summary | length > 10 }} )
+  @@assert( {{ (this.assessment_summary or "") | length > 10 }} )
   // Should identify specific documents for deeper analysis
-  @@assert( {{ this.document_ids_for_deeper_analysis != null and (this.document_ids_for_deeper_analysis | length > 0) }} )
-  @@assert( {{ ("case_summary_123" in this.document_ids_for_deeper_analysis) }} )
+  @@assert( {{ this.document_ids_for_deeper_analysis != none and ((this.document_ids_for_deeper_analysis or []) | length > 0) }} )
+  @@assert( {{ ("case_summary_123" in (this.document_ids_for_deeper_analysis or [])) }} )
   @@assert( {{ not this.suggested_queries_for_refinement }} ) // Focus on analysis, not new queries
   // Assessment should identify need for more detailed examination
-  @@assert( {{ ("deeper" in (this.assessment_summary | lower)) or ("detail" in (this.assessment_summary | lower)) or ("analysis" in (this.assessment_summary | lower)) or ("examine" in (this.assessment_summary | lower)) }} )
+  @@assert( {{ ("deeper" in ((this.assessment_summary or "") | lower)) or ("detail" in ((this.assessment_summary or "") | lower)) or ("analysis" in ((this.assessment_summary or "") | lower)) or ("examine" in ((this.assessment_summary or "") | lower)) }} )
 }
 
 test AssessmentRequiresHumanReview {
@@ -305,12 +305,12 @@ test AssessmentRequiresHumanReview {
   }
   @@assert( {{ this.is_sufficient == false }} )
   @@assert( {{ this.next_action == "REQUEST_HUMAN_REVIEW" }} )
-  @@assert( {{ this.assessment_summary | length > 10 }} )
+  @@assert( {{ (this.assessment_summary or "") | length > 10 }} )
   // Should not provide additional queries or analysis suggestions
   @@assert( {{ not this.suggested_queries_for_refinement }} )
-  // document_ids_for_deeper_analysis should be null for REQUEST_HUMAN_REVIEW action
+  // document_ids_for_deeper_analysis should be none for REQUEST_HUMAN_REVIEW action
   // Assessment should identify complexity requiring human expertise
-  @@assert( {{ ("complex" in (this.assessment_summary | lower)) or ("expert" in (this.assessment_summary | lower)) or ("human" in (this.assessment_summary | lower)) or ("specialized" in (this.assessment_summary | lower)) or ("review" in (this.assessment_summary | lower)) }} )
+  @@assert( {{ ("complex" in ((this.assessment_summary or "") | lower)) or ("expert" in ((this.assessment_summary or "") | lower)) or ("human" in ((this.assessment_summary or "") | lower)) or ("specialized" in ((this.assessment_summary or "") | lower)) or ("review" in ((this.assessment_summary or "") | lower)) }} )
 }
 
 test AssessmentWithExtensiveQueryHistory {
@@ -358,11 +358,11 @@ test AssessmentWithExtensiveQueryHistory {
   }
   // With extensive query history, should either be sufficient or need human review
   @@assert( {{ this.next_action in ["GENERATE_REPORT", "REQUEST_HUMAN_REVIEW", "DEEPER_ANALYSIS_OF_EXISTING_DOCS"] }} )
-  @@assert( {{ this.assessment_summary | length > 10 }} )
+  @@assert( {{ (this.assessment_summary or "") | length > 10 }} )
   // Should recognize extensive prior research effort
-  @@assert( {{ ("extensive" in (this.assessment_summary | lower)) or ("multiple" in (this.assessment_summary | lower)) or ("previous" in (this.assessment_summary | lower)) or ("prior" in (this.assessment_summary | lower)) }} )
+  @@assert( {{ ("extensive" in ((this.assessment_summary or "") | lower)) or ("multiple" in ((this.assessment_summary or "") | lower)) or ("previous" in ((this.assessment_summary or "") | lower)) or ("prior" in ((this.assessment_summary or "") | lower)) }} )
   // If not sufficient, should explain why despite extensive research
-  @@assert( {{ this.is_sufficient == true or (("despite" in (this.assessment_summary | lower)) or ("although" in (this.assessment_summary | lower)) or ("extensive" in (this.assessment_summary | lower))) }} )
+  @@assert( {{ this.is_sufficient == true or (("despite" in ((this.assessment_summary or "") | lower)) or ("although" in ((this.assessment_summary or "") | lower)) or ("extensive" in ((this.assessment_summary or "") | lower))) }} )
 }
 
 // NEW TEST: Live data scenario - Employment discrimination with comprehensive synthesis
@@ -423,14 +423,14 @@ test AssessLiveEmploymentDiscriminationResearch {
   }
   @@assert( {{ this.is_sufficient == true }} )
   @@assert( {{ this.next_action == "GENERATE_REPORT" }} )
-  @@assert( {{ this.assessment_summary | length > 20 }} )
+  @@assert( {{ (this.assessment_summary or "") | length > 20 }} )
   // Should recognize comprehensive coverage of the topic
-  @@assert( {{ ("comprehensive" in (this.assessment_summary | lower)) or ("sufficient" in (this.assessment_summary | lower)) or ("adequate" in (this.assessment_summary | lower)) }} )
+  @@assert( {{ ("comprehensive" in ((this.assessment_summary or "") | lower)) or ("sufficient" in ((this.assessment_summary or "") | lower)) or ("adequate" in ((this.assessment_summary or "") | lower)) }} )
   // Should not suggest additional queries when sufficient
   @@assert( {{ not this.suggested_queries_for_refinement }} )
   @@assert( {{ not this.document_ids_for_deeper_analysis }} )
   // Should recognize high confidence in synthesis topics
-  @@assert( {{ ("high confidence" in (this.assessment_summary | lower)) or ("strong" in (this.assessment_summary | lower)) or ("reliable" in (this.assessment_summary | lower)) }} )
+  @@assert( {{ ("high confidence" in ((this.assessment_summary or "") | lower)) or ("strong" in ((this.assessment_summary or "") | lower)) or ("reliable" in ((this.assessment_summary or "") | lower)) }} )
 }
 
 // NEW TEST: Live data scenario - Patent law with some gaps requiring refinement
@@ -475,13 +475,13 @@ test AssessLivePatentResearchNeedsRefinement {
   }
   @@assert( {{ this.is_sufficient == false }} )
   @@assert( {{ this.next_action == "REFINE_QUERIES" }} )
-  @@assert( {{ this.assessment_summary | length > 20 }} )
+  @@assert( {{ (this.assessment_summary or "") | length > 20 }} )
   // Should identify need for case law and practical examples
-  @@assert( {{ ("case law" in (this.assessment_summary | lower)) or ("practical" in (this.assessment_summary | lower)) or ("examples" in (this.assessment_summary | lower)) }} )
+  @@assert( {{ ("case law" in ((this.assessment_summary or "") | lower)) or ("practical" in ((this.assessment_summary or "") | lower)) or ("examples" in ((this.assessment_summary or "") | lower)) }} )
   // Should provide refined queries targeting case law and applications
-  @@assert( {{ this.suggested_queries_for_refinement != null and (this.suggested_queries_for_refinement | length > 0) }} )
-  @@assert( {{ ("case" in (this.suggested_queries_for_refinement | join(" ") | lower)) or ("precedent" in (this.suggested_queries_for_refinement | join(" ") | lower)) }} )
+  @@assert( {{ this.suggested_queries_for_refinement != none and ((this.suggested_queries_for_refinement or []) | length > 0) }} )
+  @@assert( {{ ("case" in (((this.suggested_queries_for_refinement or []) | join(" ")) | lower)) or ("precedent" in (((this.suggested_queries_for_refinement or []) | join(" ")) | lower)) }} )
   @@assert( {{ not this.document_ids_for_deeper_analysis }} )
   // Should recognize statutory coverage but need for judicial interpretation
-  @@assert( {{ ("statutory" in (this.assessment_summary | lower)) or ("judicial" in (this.assessment_summary | lower)) or ("interpretation" in (this.assessment_summary | lower)) }} )
+  @@assert( {{ ("statutory" in ((this.assessment_summary or "") | lower)) or ("judicial" in ((this.assessment_summary or "") | lower)) or ("interpretation" in ((this.assessment_summary or "") | lower)) }} )
 }

@@ -1,4 +1,3 @@
-
 test AnalyzeHighlyRelevantCase {
   functions [AnalyzeSingleDocument]
   args {
@@ -31,7 +30,7 @@ test AnalyzeHighlyRelevantCase {
   @@assert( {{ this.search_result_id == "case_123" }} )
   @@assert( {{ this.relevance_score >= 7 }} ) // Expecting high relevance
   @@assert( {{ this.confidence_score >= 6 }} )
-  @@assert( {{ this.summary | length > 20 }} ) // Summary should be populated
+  @@assert( {{ (this.summary | default("")) | length > 20 }} ) // Summary should be populated
   @@assert( {{ this.key_arguments_and_reasoning | length > 0 }} ) // Should find arguments
   @@assert( {{ this.extracted_entities | length > 0 }} ) // Should find entities like "Title VII", "9th Circuit"
   // Example: Check if a specific entity type was found
@@ -89,8 +88,8 @@ test AnalyzeLiveEmploymentDiscriminationArticle {
   @@assert( {{ this.search_result_id == "https://natlawreview.com/article/what-counts-adverse-employment-action-discrimination-and-retaliation-cases" }} )
   @@assert( {{ this.relevance_score >= 8 }} ) // Very high relevance - directly addresses the question
   @@assert( {{ this.confidence_score >= 7 }} ) // High confidence due to comprehensive content
-  @@assert( {{ this.summary | length > 50 }} ) // Should generate substantial summary
-  @@assert( {{ "adverse employment action" in (this.summary | lower) }} ) // Key term should appear in summary
+  @@assert( {{ (this.summary | default("")) | length > 50 }} ) // Should generate substantial summary
+  @@assert( {{ "adverse employment action" in (this.summary | default("") | lower) }} ) // Key term should appear in summary
   @@assert( {{ this.key_arguments_and_reasoning | length >= 3 }} ) // Multiple key arguments expected
   @@assert( {{ this.extracted_entities | length >= 5 }} ) // Should extract multiple entities including Title VII
   @@assert( {{ (this.extracted_entities | selectattr("type", "equalto", "Statute") | list | length) > 0 }} ) // Should find Title VII
@@ -133,8 +132,8 @@ test AnalyzeLiveTangibleEmploymentAction {
   @@assert( {{ this.search_result_id == "https://www.law.cornell.edu/wex/tangible_employment_action" }} )
   @@assert( {{ this.relevance_score >= 6 and this.relevance_score <= 8 }} ) // Moderately high - related but specifically about "tangible" action
   @@assert( {{ this.confidence_score >= 6 }} )
-  @@assert( {{ this.summary | length > 30 }} )
-  @@assert( {{ "tangible employment action" in (this.summary | lower) or "adverse employment action" in (this.summary | lower) }} )
+  @@assert( {{ (this.summary | default("")) | length > 30 }} )
+  @@assert( {{ ("tangible employment action" in (this.summary | default("") | lower)) or ("adverse employment action" in (this.summary | default("") | lower)) }} )
   @@assert( {{ this.key_arguments_and_reasoning | length >= 2 }} )
   @@assert( {{ this.extracted_entities | length >= 3 }} )
   @@assert( {{ (this.extracted_entities | selectattr("type", "equalto", "Case") | list | length) > 0 }} ) // Should find Burlington Industries case
@@ -177,8 +176,8 @@ test AnalyzeLivePatentSpecificationArticle {
   @@assert( {{ this.search_result_id == "https://vernalaw.com/why-is-section-112-of-the-patent-act-important/" }} )
   @@assert( {{ this.relevance_score >= 8 }} ) // Very high relevance - directly addresses 35 U.S.C. § 112 requirements
   @@assert( {{ this.confidence_score >= 7 }} ) // High confidence due to authoritative legal source
-  @@assert( {{ this.summary | length > 40 }} ) // Should generate comprehensive summary
-  @@assert( {{ "specification" in (this.summary | lower) and "patent" in (this.summary | lower) }} ) // Key terms expected
+  @@assert( {{ (this.summary | default("")) | length > 40 }} ) // Should generate comprehensive summary
+  @@assert( {{ ("specification" in (this.summary | default("") | lower)) and ("patent" in (this.summary | default("") | lower)) }} ) // Key terms expected
   @@assert( {{ this.key_arguments_and_reasoning | length >= 4 }} ) // Multiple requirements (written description, enablement, best mode, claims)
   @@assert( {{ this.extracted_entities | length >= 4 }} ) // Should extract statute, requirements, etc.
   @@assert( {{ (this.extracted_entities | selectattr("type", "equalto", "Statute") | list | length) > 0 }} ) // Should find 35 U.S.C. § 112
@@ -211,7 +210,7 @@ test AnalyzePartiallyRelevantStatute {
   }
   @@assert( {{ this.search_result_id == "statute_xyz" }} )
   @@assert( {{ this.relevance_score >= 7 and this.relevance_score <= 10 }} ) // Highly relevant as it directly covers patent application requirements
-  @@assert( {{ this.summary | length > 10 }} )
+  @@assert( {{ (this.summary | default("")) | length > 10 }} )
   @@assert( {{ this.key_arguments_and_reasoning | length > 0 }} ) // Should extract requirements
   @@assert( {{ (this.extracted_entities | selectattr("type", "equalto", "Statute") | list | length) > 0 }} )
   @@assert( {{ (this.extracted_entities | selectattr("name", "equalto", "35 U.S.C. § 112") | list | length) > 0 }} )
@@ -243,7 +242,7 @@ test AnalyzeIrrelevantDocument {
   @@assert( {{ this.search_result_id == "random_doc_789" }} )
   @@assert( {{ this.relevance_score <= 3 }} ) // Expecting low relevance
   // Summary might still be generated but should reflect irrelevance
-  @@assert( {{ this.summary | length > 5 }} )
+  @@assert( {{ (this.summary | default("")) | length > 5 }} )
   // Depending on LLM, it might find "legal concept" as an entity due to the text, or find none.
   // This assertion is loose:
   @@assert( {{ this.extracted_entities | length >= 0 }} )
@@ -274,7 +273,7 @@ test AnalyzeDocumentWithMissingFullText {
   @@assert( {{ this.search_result_id == "incomplete_doc_001" }} )
   // Relevance might be moderate based on title/snippet, but confidence might be lower due to missing text
   @@assert( {{ this.relevance_score >= 3 and this.relevance_score <= 8 }} )
-  @@assert( {{ this.summary | length > 5 }} ) // LLM should attempt a summary based on snippet/title
+  @@assert( {{ (this.summary | default("")) | length > 5 }} ) // LLM should attempt a summary based on snippet/title
   // Key arguments might be sparse or non-existent
   @@assert( {{ this.key_arguments_and_reasoning | length >= 0 }} )
   // Check reasoning structure

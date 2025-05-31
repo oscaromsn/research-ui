@@ -161,9 +161,22 @@ export async function conductResearch(
   const { stream, writer, encoder, closeStream } = createStream();
   let currentStage: ResearchStage = "IDLE";
 
+  // Set up timeout mechanism to prevent hanging
+  const ORCHESTRATOR_TIMEOUT_MS = 300000; // 5 minutes total timeout
+  const timeoutController = new AbortController();
+  const timeoutId = setTimeout(() => {
+    timeoutController.abort();
+  }, ORCHESTRATOR_TIMEOUT_MS);
+
   // IIFE to run async pipeline logic
   (async () => {
     try {
+      // Check for timeout before each major stage
+      if (timeoutController.signal.aborted) {
+        throw new Error(
+          "Orchestrator timeout: Process exceeded maximum time limit"
+        );
+      }
       currentStage = "INITIALIZING";
       await sendUpdate(writer, encoder, {
         type: "STATUS_CHANGE",
@@ -182,6 +195,10 @@ export async function conductResearch(
         stage: currentStage,
         message: "Generating initial search queries...",
       });
+
+      if (timeoutController.signal.aborted) {
+        throw new Error("Orchestrator timeout during query generation");
+      }
 
       const queryAnalysis = await b.GenerateLegalSearchQueries(legalQuestion);
 
@@ -211,6 +228,10 @@ export async function conductResearch(
         message: "Retrieving documents from live search APIs...",
       });
 
+      if (timeoutController.signal.aborted) {
+        throw new Error("Orchestrator timeout during document fetching");
+      }
+
       try {
         searchResultItems = await fetchDocumentsFromQueries(
           queryAnalysis.search_queries
@@ -218,12 +239,14 @@ export async function conductResearch(
 
         if (searchResultItems.length === 0) {
           await sendUpdate(writer, encoder, {
-            type: "LOG",
+            type: "ERROR",
             stage: currentStage,
             message:
-              "No documents found for any of the executed search queries. This may indicate overly specific queries or limited available content. Proceeding to assessment.",
+              "No documents found for any of the executed search queries. This indicates a fundamental issue with document retrieval. Unable to proceed without source documents.",
             isFinalForStage: true,
           });
+          // Fail fast - can't proceed without any documents
+          return;
         } else {
           await sendUpdate(writer, encoder, {
             type: "DATA",
@@ -248,10 +271,10 @@ export async function conductResearch(
         await sendUpdate(writer, encoder, {
           type: "ERROR",
           stage: currentStage,
-          message: `Failed to retrieve documents from search API: ${errorMessage}`,
+          message: `Failed to retrieve documents from search API: ${errorMessage}. Unable to proceed without document retrieval capability.`,
         });
-        // Set empty results and continue - the assessment stage will handle this gracefully
-        searchResultItems = [];
+        // Fail fast - critical error in document retrieval
+        return;
       }
 
       // --- Stage 3: Analyze Documents Iteratively ---
@@ -265,8 +288,17 @@ export async function conductResearch(
           currentProcessedDoc: 0,
         });
 
+        if (timeoutController.signal.aborted) {
+          throw new Error("Orchestrator timeout during document analysis");
+        }
+
         analyzedDocs = [];
         for (let i = 0; i < searchResultItems.length; i++) {
+          if (timeoutController.signal.aborted) {
+            throw new Error(
+              "Orchestrator timeout during document analysis iteration"
+            );
+          }
           const doc = searchResultItems[i];
           await sendUpdate(writer, encoder, {
             type: "PROGRESS",
@@ -346,6 +378,10 @@ export async function conductResearch(
           message: "Synthesizing findings from analyzed documents...",
         });
 
+        if (timeoutController.signal.aborted) {
+          throw new Error("Orchestrator timeout during findings synthesis");
+        }
+
         synthesis = await b.SynthesizeAllFindings(analyzedDocs, legalQuestion);
 
         await sendUpdate(writer, encoder, {
@@ -367,11 +403,14 @@ export async function conductResearch(
         });
       } else {
         await sendUpdate(writer, encoder, {
-          type: "LOG",
+          type: "ERROR",
           stage: "SYNTHESIZING_FINDINGS",
-          message: "Skipping synthesis as no documents were analyzed.",
+          message:
+            "Cannot synthesize findings - no documents were successfully analyzed. Research pipeline failed.",
           isFinalForStage: true,
         });
+        // Fail fast - can't proceed without analyzed documents
+        return;
       }
 
       // --- Stage 5: Assess Research ---
@@ -383,6 +422,10 @@ export async function conductResearch(
           stage: currentStage,
           message: "Assessing research sufficiency and planning next steps...",
         });
+
+        if (timeoutController.signal.aborted) {
+          throw new Error("Orchestrator timeout during research assessment");
+        }
 
         assessment = await b.AssessResearchAndPlanNextSteps(
           legalQuestion,
@@ -410,34 +453,15 @@ export async function conductResearch(
           isFinalForStage: true,
         });
       } else {
-        // Default assessment if no documents analyzed
+        // This should not happen if we fail fast above, but keep as safety net
         await sendUpdate(writer, encoder, {
-          type: "LOG",
+          type: "ERROR",
           stage: "ASSESSING_RESEARCH",
           message:
-            "Skipping assessment due to lack of analyzed documents or synthesis.",
+            "Cannot assess research - prerequisite stages failed. Research pipeline terminated.",
           isFinalForStage: true,
         });
-
-        assessment = {
-          is_sufficient: false,
-          assessment_summary:
-            "Insufficient data to perform assessment. Initial document retrieval might have failed or found no relevant items.",
-          next_action: "REQUEST_HUMAN_REVIEW" as NextActionType,
-          reasoning: {} as ResearchAssessment["reasoning"], // Simplified default
-        } as ResearchAssessment;
-
-        await sendUpdate(writer, encoder, {
-          type: "DATA",
-          stage: "ASSESSING_RESEARCH",
-          data: {
-            isSufficient: assessment.is_sufficient,
-            assessmentSummary: assessment.assessment_summary,
-            nextAction: assessment.next_action,
-          },
-          message: "Assessment defaulted due to insufficient prior data.",
-          isFinalForStage: true,
-        });
+        return;
       }
 
       // Enhanced Iteration Logic with Auto Mode Support
@@ -639,6 +663,10 @@ export async function conductResearch(
           message: "Generating final legal report...",
         });
 
+        if (timeoutController.signal.aborted) {
+          throw new Error("Orchestrator timeout during report generation");
+        }
+
         // Check if streaming is available for this function
         try {
           const reportStream = b.stream.GenerateFinalLegalReport(
@@ -770,15 +798,25 @@ export async function conductResearch(
       });
     } catch (error: unknown) {
       console.error(`Error during orchestrator stage ${currentStage}:`, error);
+
+      // Check if this was a timeout error
+      const isTimeoutError =
+        error instanceof Error && error.message.includes("timeout");
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An unknown orchestrator error occurred.";
+
       await sendUpdate(writer, encoder, {
         type: "ERROR",
         stage: currentStage,
-        message:
-          error instanceof Error
-            ? error.message
-            : "An unknown orchestrator error occurred.",
+        message: isTimeoutError
+          ? `${errorMessage} The operation took longer than expected. Please try again or use a simpler query.`
+          : errorMessage,
       });
     } finally {
+      // Clear the timeout
+      clearTimeout(timeoutId);
       await closeStream();
     }
   })();
