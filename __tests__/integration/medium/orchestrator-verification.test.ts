@@ -13,6 +13,9 @@ import type {
     ResearchUpdate,
 } from "@/app/actions/researchAgentOrchestrator";
 
+// Unmock axios for integration tests that need real HTTP requests
+vi.unmock("axios");
+
 // Mock the BAML client to avoid real API calls
 vi.mock("@/baml_client", () => import("@/__mocks__/baml_client"));
 

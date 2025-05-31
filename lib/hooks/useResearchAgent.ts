@@ -500,12 +500,15 @@ export function useResearchAgent(): UseResearchAgentReturn {
                       break;
                   }
                 } catch (parseError: unknown) {
-                  console.error(
-                    "Error parsing streamed JSON update:",
-                    parseError,
-                    "Raw chunk:",
-                    stringUpdate
-                  );
+                  // Only log to console in non-test environments
+                  if (process.env.NODE_ENV !== "test") {
+                    console.error(
+                      "Error parsing streamed JSON update:",
+                      parseError,
+                      "Raw chunk:",
+                      stringUpdate
+                    );
+                  }
                   setResearchLog((prev) => [
                     ...prev,
                     `${new Date().toISOString()} [SYSTEM_ERROR] Failed to parse stream update: ${stringUpdate}`,
@@ -552,7 +555,10 @@ export function useResearchAgent(): UseResearchAgentReturn {
           error instanceof Error ? error.message : "Unknown error";
         const errorName = error instanceof Error ? error.name : undefined;
 
-        console.error("Error calling conductResearch server action:", error);
+        // Only log to console in non-test environments
+        if (process.env.NODE_ENV !== "test") {
+          console.error("Error calling conductResearch server action:", error);
+        }
         if (errorName === "AbortError") {
           setResearchStatus({
             stage: "IDLE",

@@ -13,7 +13,7 @@ import {
   itWithApiKeys, 
   API_KEYS, 
   logApiKeyStatus 
-} from "../utils/api-test-helpers";
+} from "../../utils/api-test-helpers";
 
 // Unmock axios for integration tests that need real HTTP requests
 vi.unmock("axios");
