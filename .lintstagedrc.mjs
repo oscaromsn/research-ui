@@ -11,7 +11,7 @@ const config = {
   ],
 
   // BAML files
-  "baml_src/**/*.baml": [() => "pnpm baml:generate"],
+  "baml_src/**/*.baml": [() => "bun baml:generate"],
 
   // JSON files
   "**/*.{json,jsonc}": ["biome format --write"],
@@ -20,11 +20,11 @@ const config = {
   "*.{js,mjs,ts}": ["eslint --fix --quiet"],
 
   // Package.json changes - run install
-  "package.json": [() => "pnpm install --frozen-lockfile"],
+  "package.json": [() => "bun install --frozen-lockfile"],
 
   // TypeScript configuration changes - run typecheck
   "{tsconfig.json,eslint.config.mjs,biome.json,next.config.ts}": [
-    () => "pnpm typecheck",
+    () => "bun typecheck",
   ],
 
   // Test files - format with Biome and lint with ESLint

@@ -1,7 +1,7 @@
 # Check if SKIP_HOOKS environment variable is set
 if [ "$SKIP_HOOKS" = "true" ]; then
   echo "⚠️  Skipping pre-commit hooks (SKIP_HOOKS=true)"
-  echo "💡 Remember to run 'pnpm validate' before pushing!"
+  echo "💡 Remember to run 'bun validate' before pushing!"
   exit 0
 fi
 
@@ -14,10 +14,10 @@ echo "💡 To skip: SKIP_HOOKS=true git commit"
 # - Auto-fix linting issues (ESLint)  
 # - Run related unit tests only
 # - Generate BAML client if schema changes
-pnpm exec lint-staged
+bun x lint-staged
 
 # === SYSTEM-WIDE VALIDATION ===
 # Integration tests validate the entire system, not individual files
 # These run on every commit to catch integration issues early
 echo "⚡ Running fast integration tests for early feedback..."
-pnpm test:integration:fast --run --bail=1
+bun test:integration:fast --run --bail=1

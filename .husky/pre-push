@@ -3,27 +3,27 @@ echo "💡 To skip: git push --no-verify"
 
 # Auto-format code (fixes formatting issues automatically)
 echo "🎨 Auto-formatting code..."
-pnpm format
+bun format
 
 # Run strict type checking with exact optional properties
 echo "🔧 Running strict TypeScript validation..."
-pnpm typecheck:strict
+bun typecheck:strict
 
 # Auto-fix linting issues and ensure code quality
 echo "🔍 Auto-fixing linting issues..."
-pnpm lint:fix
+bun lint:fix
 
 # Run fast unit tests to ensure core functionality works
 echo "🧪 Running unit tests..."
-pnpm test:unit --run --bail=1 --testTimeout=10000
+bun test:unit --run --bail=1 --testTimeout=10000
 
 # Run fast integration tests with mocked APIs (quick validation)
 echo "⚡ Running fast integration tests (mocked APIs)..."
-pnpm test:integration:fast --run --bail=1
+bun test:integration:fast --run --bail=1
 
 # Run medium integration tests with real APIs (balanced validation)
 echo "🔗 Running medium integration tests (real APIs)..."
-pnpm test:integration:medium --run --bail=1
+bun test:integration:medium --run --bail=1
 
 echo ""
 echo "✅ All pre-push validations completed successfully!"
