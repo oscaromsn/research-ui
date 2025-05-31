@@ -8,4 +8,16 @@ fi
 echo "🔍 Running pre-commit checks..."
 echo "💡 To skip: SKIP_HOOKS=true git commit"
 
+# === FILE-SPECIFIC VALIDATION (via lint-staged) ===
+# Processes only staged/changed files:
+# - Auto-format changed files (Biome)
+# - Auto-fix linting issues (ESLint)  
+# - Run related unit tests only
+# - Generate BAML client if schema changes
 pnpm exec lint-staged
+
+# === SYSTEM-WIDE VALIDATION ===
+# Integration tests validate the entire system, not individual files
+# These run on every commit to catch integration issues early
+echo "⚡ Running fast integration tests for early feedback..."
+pnpm test:integration:fast --run --bail=1

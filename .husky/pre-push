@@ -14,10 +14,18 @@ echo "🔍 Auto-fixing linting issues..."
 pnpm lint:fix
 
 # Run fast unit tests to ensure core functionality works
-echo "🧪 Running unit tests (excluding slow integration tests)..."
-pnpm test:unit --run --reporter=default --reporter.summary=false --bail=1 --testTimeout=10000
+echo "🧪 Running unit tests..."
+pnpm test:unit --run --bail=1 --testTimeout=10000
+
+# Run fast integration tests with mocked APIs (quick validation)
+echo "⚡ Running fast integration tests (mocked APIs)..."
+pnpm test:integration:fast --run --bail=1
+
+# Run medium integration tests with real APIs (balanced validation)
+echo "🔗 Running medium integration tests (real APIs)..."
+pnpm test:integration:medium --run --bail=1
 
 echo ""
 echo "✅ All pre-push validations completed successfully!"
-echo "🚀 Your code is properly formatted, type-safe, and tested!"
-echo "💡 Full integration tests and coverage will run in CI/CD"
+echo "🚀 Your code is properly formatted, type-safe, and integration-tested!"
+echo "💡 Slow integration tests and E2E coverage will run in CI/CD"
