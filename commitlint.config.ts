@@ -7,7 +7,7 @@ const config: UserConfig = {
       // Custom parser to handle optional gitmoji at the start
       headerPattern:
         // eslint-disable-next-line security/detect-unsafe-regex
-        /^(?:[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}]\s*)?(\w*)(?:\(([^)]*)\))?!?:\s*(.*)$/u,
+        /^(?:[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}][\u{FE00}-\u{FE0F}]?\s*)?(\w*)(?:\(([^)]*)\))?!?:\s*(.*)$/u,
       headerCorrespondence: ["type", "scope", "subject"],
     },
   },

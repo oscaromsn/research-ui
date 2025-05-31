@@ -364,29 +364,81 @@ export async function executeExaSearch(
 
   try {
     console.log(`Executing Exa search for: "${bamlSearchQuery.query_string}"`);
-    const response = await axios.post<ExaSearchApiResponse>(
-      `${EXA_API_BASE_URL}/search`,
-      requestBody,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": EXA_API_KEY, // Exa uses x-api-key header for authentication
-          // 'Authorization': `Bearer ${EXA_API_KEY}`, // Some APIs use Bearer
-        },
-        timeout: 30000, // 30-second timeout for individual search requests
-      }
-    );
+    console.log(`Request body:`, JSON.stringify(requestBody, null, 2));
+
+    if (!EXA_API_KEY) {
+      throw new ExaConfigError("EXA_API_KEY is not configured");
+    }
+
+    let response;
+    try {
+      console.log("Making axios request to:", `${EXA_API_BASE_URL}/search`);
+      console.log("Headers:", {
+        "Content-Type": "application/json",
+        "x-api-key": EXA_API_KEY
+          ? `${EXA_API_KEY.substring(0, 8)}...`
+          : "MISSING",
+      });
+
+      response = await axios.post<ExaSearchApiResponse>(
+        `${EXA_API_BASE_URL}/search`,
+        requestBody,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": EXA_API_KEY, // Exa uses x-api-key header for authentication
+            // 'Authorization': `Bearer ${EXA_API_KEY}`, // Some APIs use Bearer
+          },
+          timeout: 30000, // 30-second timeout for individual search requests
+          validateStatus: function (status) {
+            // Accept all status codes to debug response
+            return true;
+          },
+        }
+      );
+
+      console.log("Axios response received:", {
+        status: response?.status,
+        statusText: response?.statusText,
+        hasData: !!response?.data,
+        dataType: typeof response?.data,
+      });
+    } catch (requestError) {
+      console.error("Axios request failed:", {
+        message:
+          requestError instanceof Error
+            ? requestError.message
+            : String(requestError),
+        code: (requestError as any)?.code,
+        errno: (requestError as any)?.errno,
+        syscall: (requestError as any)?.syscall,
+        stack: requestError instanceof Error ? requestError.stack : undefined,
+      });
+      throw requestError;
+    }
+
+    if (!response) {
+      throw new ExaNetworkError(
+        `No response received from Exa API for query "${bamlSearchQuery.query_string}"`,
+        {
+          query: bamlSearchQuery.query_string,
+          isTimeout: false,
+          isConnectionError: true,
+          cause: new Error("Response is undefined"),
+        }
+      );
+    }
 
     const retrievalDate = new Date().toISOString();
 
     // Validate response structure
-    if (!response.data || typeof response.data !== "object") {
+    if (!response || !response.data || typeof response.data !== "object") {
       throw new ExaParsingError(
         "Invalid response format: Response data is missing or not an object",
         {
-          response: response.data,
+          response: response?.data,
           expectedFormat: "object with results array",
-          actualFormat: typeof response.data,
+          actualFormat: response ? typeof response.data : "undefined response",
         }
       );
     }
@@ -466,17 +518,20 @@ export async function executeExaSearch(
     console.log(`Exa search yielded ${bamlResults.length} results.`);
     return bamlResults;
   } catch (error) {
+    console.error(
+      `Error executing Exa search for query "${bamlSearchQuery.query_string}":`,
+      {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        errorType: error?.constructor?.name || typeof error,
+      }
+    );
+
     if (isAxiosError(error)) {
       const axiosError = error as AxiosError;
       const status = axiosError.response?.status;
       const responseData = axiosError.response?.data;
       const requestId = extractRequestId(responseData);
-
-      console.error(
-        `Error executing Exa search for query "${bamlSearchQuery.query_string}":`,
-        status,
-        responseData
-      );
 
       const baseErrorOptions = {
         ...(status !== undefined && { status }),
@@ -591,6 +646,22 @@ export async function executeExaSearch(
       error instanceof ExaParsingError
     ) {
       throw error;
+    }
+
+    // For undefined response errors, provide specific handling
+    if (
+      error instanceof TypeError &&
+      error.message.includes("Cannot read properties of undefined")
+    ) {
+      throw new ExaNetworkError(
+        `Network error: Received invalid response from Exa API for query "${bamlSearchQuery.query_string}". The API may be temporarily unavailable.`,
+        {
+          query: bamlSearchQuery.query_string,
+          isTimeout: false,
+          isConnectionError: true,
+          cause: error,
+        }
+      );
     }
 
     // Wrap unknown errors

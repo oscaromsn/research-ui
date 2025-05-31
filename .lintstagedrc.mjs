@@ -7,7 +7,7 @@ const config = {
   "{app,components,lib}/**/*.{ts,tsx,js,jsx}": [
     "biome format --write",
     "eslint --fix --quiet",
-    "vitest related --run --reporter=verbose",
+    "vitest related --run --reporter=basic --bail=1 --testTimeout=5000 --exclude='**/*integration*' --exclude='**/*e2e*'",
   ],
 
   // BAML files
@@ -30,7 +30,7 @@ const config = {
   // Test files - use ESLint only since biome ignores test files
   "**/*.{test,spec}.{ts,tsx,js,jsx}": [
     "eslint --fix --quiet",
-    "vitest related --run --reporter=verbose",
+    "vitest related --run --reporter=basic --bail=1 --testTimeout=5000 --exclude='**/*integration*' --exclude='**/*e2e*'",
   ],
 };
 

@@ -12,12 +12,12 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { Switch } from "@/components/ui/switch";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Switch } from "@/components/ui/switch";
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
   generatedQueriesAtom,

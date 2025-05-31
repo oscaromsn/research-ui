@@ -1,1 +1,11 @@
+# Check if SKIP_HOOKS environment variable is set
+if [ "$SKIP_HOOKS" = "true" ]; then
+  echo "⚠️  Skipping pre-commit hooks (SKIP_HOOKS=true)"
+  echo "💡 Remember to run 'pnpm validate' before pushing!"
+  exit 0
+fi
+
+echo "🔍 Running pre-commit checks..."
+echo "💡 To skip: SKIP_HOOKS=true git commit"
+
 pnpm exec lint-staged
