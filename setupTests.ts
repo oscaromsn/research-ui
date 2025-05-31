@@ -66,8 +66,11 @@ if (process.env.VITEST_SILENT_CONSOLE === "true") {
     console.error = vi.fn();
 }
 
-// Automatically restore mocks between tests
-vi.mock("axios");
+// Conditionally mock axios - only for unit tests, not integration tests
+// Integration tests need real HTTP requests
+if (!process.env.VITEST_INTEGRATION_TESTS) {
+  vi.mock("axios");
+}
 
 // Add a global fetch mock if needed
 global.fetch = vi.fn();

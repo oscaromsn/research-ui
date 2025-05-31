@@ -165,62 +165,56 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to see the a
 
 ## Running Tests
 
-LexiSynth uses a multi-layered testing approach.
+LexiSynth uses a comprehensive, multi-layered testing approach designed for both speed and reliability. 
 
-### BAML Tests
+📖 **For detailed testing guidance, see [docs/TESTING.md](./docs/tooling/TESTING.md)**
 
-These tests validate the logic within your BAML functions (prompts and schema definitions).
+### Quick Start
 
-*   Run all BAML tests:
-    ```bash
-    pnpm baml:test
-    ```
-*   Run tests for a specific BAML function:
-    ```bash
-    pnpm baml:test -i {$FunctionName}::
-    ```
-    (Replace `{$FunctionName}` with the actual BAML function name)
+**For Development (Fast):**
+```bash
+# Run unit tests only (recommended for daily development)
+pnpm test
 
-BAML tests use `.test.baml` files located alongside their corresponding `.baml` function files.
+# Watch mode for active development
+pnpm test:watch
+```
 
-### Unit/Component Tests (Vitest)
+**For Full Validation:**
+```bash
+# Run all test types (unit + integration + e2e)
+pnpm test:all
 
-These tests cover individual functions, React components, and client-side hooks.
+# Complete CI validation suite
+pnpm ci
+```
 
-*   Run all Vitest tests:
-    ```bash
-    pnpm test
-    ```
-*   Run Vitest tests in watch mode:
-    ```bash
-    pnpm test:watch
-    ```
-*   Run Vitest tests with UI:
-    ```bash
-    pnpm test:ui
-    ```
-*   Generate coverage report:
-    ```bash
-    pnpm test:coverage
-    ```
-    Coverage reports are typically found in the `/coverage` directory.
+### Test Categories
 
-Test files are located in the `__tests__` directory, mirroring the source structure.
+| Test Type | Command | Speed | Requirements |
+|-----------|---------|-------|--------------|
+| **Unit Tests** | `pnpm test:unit` | ~30-60s | None |
+| **Integration Tests** | `pnpm test:integration` | ~5-10min | API Keys* |
+| **BAML/AI Tests** | `pnpm test:baml` | ~2-5min | AI API Keys* |
+| **E2E Tests** | `pnpm test:e2e` | ~3-10min | Browser setup |
 
-### End-to-End Tests (Playwright)
+*\*API Keys: `GOOGLE_API_KEY`, `EXA_API_KEY` required for integration and BAML tests*
 
-These tests validate complete user flows through the application.
+### Testing Architecture
 
-*   Run all Playwright tests:
-    ```bash
-    pnpm test:e2e
-    ```
-*   Run Playwright tests with UI mode for debugging:
-    ```bash
-    pnpm test:e2e:ui
-    ```
-E2E test files are located in the `/e2e` directory. Ensure the development server (`pnpm dev`) is running or use Playwright's `webServer` option (configured in `playwright.config.ts`).
+```
+📁 __tests__/
+├── 📁 actions/          # Server Action tests
+├── 📁 components/       # React Component tests  
+├── 📁 integration/      # Real API tests (SLOW)
+├── 📁 lib/             # Hook & utility tests
+└── 📁 utils/           # Test helpers
 
+📁 e2e/                 # Playwright E2E tests
+📁 baml_src/            # AI function tests
+```
+
+For complete testing documentation, troubleshooting, and best practices, see [docs/TESTING.md](./docs/tooling/TESTING.md).
 ## Development Workflow
 
 ### BAML Development

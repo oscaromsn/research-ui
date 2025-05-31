@@ -18,6 +18,8 @@ export default defineConfig({
     env: {
       // Load environment variables from .env.test file for testing
       ...config({ path: path.resolve(__dirname, ".env.test") }).parsed,
+      // Also load .env.local for integration tests with real API keys
+      ...config({ path: path.resolve(__dirname, ".env.local") }).parsed,
       NODE_ENV: "test",
       // Allow debugging API test behavior
       DEBUG_API_TESTS: process.env.DEBUG_API_TESTS || "false",
