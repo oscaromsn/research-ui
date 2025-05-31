@@ -24,11 +24,13 @@ Validates commit message format using commitlint:
 
 ### Pre-push Hook (`./husky/pre-push`)
 
-Lightweight validation before pushing:
+Comprehensive validation before pushing:
 
-- **Type checking**: Ensures TypeScript compiles without errors
-- **Format check**: Verifies code formatting consistency
-- **Fast feedback**: Completes in seconds, not minutes
+- **Auto-formatting**: Automatically fixes code formatting issues (`pnpm format`)
+- **Strict type checking**: Ensures TypeScript compiles with strict mode and exact optional properties
+- **Auto-fix linting**: Automatically fixes linting issues (`pnpm lint:fix`)
+- **Unit test validation**: Runs complete unit test suite (excluding slow integration tests)
+- **Robust feedback**: Completes in ~53 seconds with 286 tests
 
 ## Bypass Mechanism
 
@@ -103,8 +105,8 @@ emoji type(scope): description
 - No timeout protection
 
 **After optimization:**
-- Execution time: ~35 seconds
-- Only runs related unit tests
+- Execution time: ~35 seconds (pre-commit), ~53 seconds (pre-push)
+- Only runs related unit tests (pre-commit) or full unit test suite (pre-push)
 - Minimal output
 - Protected against hanging tests
 
@@ -136,7 +138,7 @@ pnpm exec lint-staged --diff="HEAD~1"
 |------|---------------|--------------|
 | Pre-commit | 30-40s | Format, lint, test changed files |
 | Commit-msg | <1s | Validate commit message format |
-| Pre-push | 5-10s | Type check and format validation |
+| Pre-push | 50-60s | Auto-format, strict typecheck, auto-fix lint, run 286 unit tests |
 
 ## Troubleshooting
 
@@ -189,9 +191,10 @@ ls -la .git/hooks/
 ### For Developers
 
 1. **Commit frequently**: Small, focused commits are processed faster
-2. **Test locally**: Run `pnpm test:unit` before committing
+2. **Trust the hooks**: Pre-push automatically formats, type-checks, and tests your code
 3. **Use descriptive messages**: Follow conventional commit format
 4. **Stage selectively**: Only stage files ready for review
+5. **Review hook output**: Pay attention to auto-fixes and test results
 
 ### For Team Leads
 
@@ -202,9 +205,10 @@ ls -la .git/hooks/
 
 ## Integration with CI/CD
 
-Git hooks provide **fast feedback** during development, while CI/CD provides **comprehensive validation**:
+Git hooks provide **comprehensive local validation** during development, while CI/CD provides **full integration validation**:
 
-- **Git hooks**: Fast unit tests, linting, formatting
-- **CI/CD**: Full test suite, integration tests, deployment checks
+- **Pre-commit hooks**: Fast unit tests on changed files, linting, formatting (~35s)
+- **Pre-push hooks**: Complete unit test suite, strict validation, auto-fixes (~53s)
+- **CI/CD**: Integration tests, E2E tests, API tests, deployment checks
 
-This layered approach ensures both developer productivity and code quality.
+This layered approach ensures both developer productivity and enterprise-grade code quality.

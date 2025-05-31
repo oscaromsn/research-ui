@@ -1,10 +1,23 @@
-echo "🔍 Running pre-push validations..."
+echo "🔍 Running comprehensive pre-push validations..."
+echo "💡 To skip: git push --no-verify"
 
-# Run typecheck and format check (skip lint to avoid blocking on pre-existing issues)
-echo "⚡ Running typecheck..."
-pnpm typecheck
+# Auto-format code (fixes formatting issues automatically)
+echo "🎨 Auto-formatting code..."
+pnpm format
 
-echo "⚡ Running format check..."
-pnpm format:check
+# Run strict type checking with exact optional properties
+echo "🔧 Running strict TypeScript validation..."
+pnpm typecheck:strict
 
-echo "✅ Pre-push validations completed successfully!"
+# Auto-fix linting issues and ensure code quality
+echo "🔍 Auto-fixing linting issues..."
+pnpm lint:fix
+
+# Run fast unit tests to ensure core functionality works
+echo "🧪 Running unit tests (excluding slow integration tests)..."
+pnpm test:unit --run --reporter=default --reporter.summary=false --bail=1 --testTimeout=10000
+
+echo ""
+echo "✅ All pre-push validations completed successfully!"
+echo "🚀 Your code is properly formatted, type-safe, and tested!"
+echo "💡 Full integration tests and coverage will run in CI/CD"
