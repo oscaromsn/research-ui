@@ -15,7 +15,7 @@ Every code change, no matter how small, must be validated through static analysi
 ### Quality Gates Hierarchy
 
 ```
-Level 1: Format & Syntax     → pnpm run format:check
+Level 1: Format & Syntax     → pnpm run format
 Level 2: Type Safety         → pnpm run typecheck
 Level 3: Code Quality        → pnpm run lint
 Level 4: Test Coverage       → pnpm run test
@@ -28,7 +28,7 @@ Level 7: Dependency Health   → pnpm run deps:check
 
 #### Quick Validation (Every Change)
 ```bash
-pnpm run validate:quick  # typecheck + lint + format:check
+pnpm run validate:quick  # typecheck + lint + format
 ```
 
 #### Full Validation (Before Completion)
@@ -75,7 +75,7 @@ pnpm run lint           # Check test code quality
 
 # Atomic validation cycle
 pnpm run typecheck      # Type safety first
-pnpm run format:check   # Code formatting
+pnpm run format         # Code formatting
 pnpm run test           # Verify test passes
 pnpm run lint           # Code quality
 ```
@@ -186,8 +186,7 @@ pnpm run lint:strict        # Zero-warning validation
 #### Format-First Approach
 ```bash
 # Before reviewing code
-pnpm run format
-pnpm run format:check       # Verify formatting
+pnpm run format             # Format code directly
 ```
 
 **Integration Pattern**:

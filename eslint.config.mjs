@@ -32,7 +32,6 @@ export default tseslint.config(
       "dist/**",
       "baml_client/**", // Keep BAML client ignored
       "public/**",
-      "setupTests.ts",
     ],
   },
 
@@ -168,9 +167,13 @@ export default tseslint.config(
     files: [
       "**/*.test.{ts,tsx}",
       "**/__tests__/**/*.{ts,tsx}",
-      "**/__mocks__/**/*.{ts,tsx}",
-      "__mocks__/**/*.{ts,tsx}",
+      "**/__mocks__/**/*.{ts,tsx,js,jsx}",
+      "__mocks__/**/*.{ts,tsx,js,jsx}",
       "setupTests.ts",
+    ],
+    ignores: [
+      "e2e/**/*.{ts,tsx}",
+      "**/*.spec.{ts,tsx}",
     ],
     plugins: {
       "jest-dom": jestDomPlugin,
@@ -303,11 +306,12 @@ export default tseslint.config(
       "**/*.test.{ts,tsx}",
       "**/*.spec.{ts,tsx}",
       "**/__tests__/**/*.{ts,tsx}",
-      "**/__mocks__/**/*.{ts,tsx}",
-      "__mocks__/**/*.{ts,tsx}",
+      "**/__mocks__/**/*.{ts,tsx,js,jsx}",
+      "__mocks__/**/*.{ts,tsx,js,jsx}",
       "setupTests.ts",
       "*.config.{js,mjs,ts}",
       "**/*.config.{js,mjs,ts}",
+      "e2e/**/*.{ts,tsx}",
     ],
     languageOptions: {
       parserOptions: {

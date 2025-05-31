@@ -171,7 +171,7 @@ async function smartValidate(context: ValidationContext) {
 }
 
 function selectValidations(context: ValidationContext) {
-  const base = ['typecheck', 'format:check'];
+  const base = ['typecheck', 'format'];
   
   if (context.changedFiles.some(f => f.includes('.test.'))) {
     return [...base, 'test'];

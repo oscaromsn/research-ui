@@ -27,10 +27,23 @@ const config = {
     () => "pnpm typecheck",
   ],
 
-  // Test files - use ESLint only since biome ignores test files
+  // Test files - format with Biome and lint with ESLint
   "**/*.{test,spec}.{ts,tsx,js,jsx}": [
+    "biome format --write",
     "eslint --fix --quiet",
     "vitest related --run --bail=1 --testTimeout=5000 --exclude='**/*integration*' --exclude='**/*e2e*'",
+  ],
+
+  // Mock files - format with Biome and lint with ESLint
+  "__mocks__/**/*.{ts,tsx,js,jsx}": [
+    "biome format --write",
+    "eslint --fix --quiet",
+  ],
+
+  // Setup test files - format with Biome and lint with ESLint
+  "setupTests.ts": [
+    "biome format --write",
+    "eslint --fix --quiet",
   ],
 };
 
