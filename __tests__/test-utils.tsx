@@ -1,6 +1,7 @@
 import { type RenderOptions, render } from "@testing-library/react";
 import { Provider, createStore } from "jotai";
-import React, { type ReactElement } from "react";
+import type React from "react";
+import type { ReactElement } from "react";
 import { vi } from "vitest";
 
 /**
@@ -33,7 +34,7 @@ export class MockResizeObserver {
 export class MockIntersectionObserver implements IntersectionObserver {
   readonly root: Element | Document | null = null;
   readonly rootMargin: string = "0px";
-  readonly thresholds: ReadonlyArray<number> = [0];
+  readonly thresholds: readonly number[] = [0];
 
   private readonly _callback: IntersectionObserverCallback;
 

@@ -190,7 +190,7 @@ describe("useResearchAgent Hook", () => {
       expect(status.message).toBe("Initializing research...");
 
       // Clean up by closing the stream
-      streamController!.close();
+      streamController?.close();
     });
 
     it("should call conductResearch server action with legal question", async () => {
@@ -727,7 +727,7 @@ describe("useResearchAgent Hook", () => {
       consoleSpy.mockRestore();
 
       // Clean up
-      streamController!.close();
+      streamController?.close();
     });
   });
 });

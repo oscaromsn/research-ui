@@ -124,8 +124,8 @@ function extractRetryAfter(headers: unknown): number | undefined {
   const retryAfter = headersObj["retry-after"] || headersObj["Retry-After"];
 
   if (typeof retryAfter === "string") {
-    const seconds = parseInt(retryAfter, 10);
-    return isNaN(seconds) ? undefined : seconds;
+    const seconds = Number.parseInt(retryAfter, 10);
+    return Number.isNaN(seconds) ? undefined : seconds;
   }
 
   return undefined;
@@ -170,7 +170,6 @@ function getRateLimitMessage(
       return "Monthly usage quota exceeded.";
     case "concurrent":
       return "Too many concurrent requests.";
-    case "requests":
     default:
       return "Request rate limit exceeded.";
   }
@@ -364,7 +363,7 @@ export async function executeExaSearch(
 
   try {
     console.log(`Executing Exa search for: "${bamlSearchQuery.query_string}"`);
-    console.log(`Request body:`, JSON.stringify(requestBody, null, 2));
+    console.log("Request body:", JSON.stringify(requestBody, null, 2));
 
     if (!EXA_API_KEY) {
       throw new ExaConfigError("EXA_API_KEY is not configured");
@@ -390,7 +389,7 @@ export async function executeExaSearch(
             // 'Authorization': `Bearer ${EXA_API_KEY}`, // Some APIs use Bearer
           },
           timeout: 30000, // 30-second timeout for individual search requests
-          validateStatus: function (status) {
+          validateStatus: (_status) => {
             // Accept all status codes to debug response
             return true;
           },
@@ -554,30 +553,30 @@ export async function executeExaSearch(
             rateLimitType,
           }
         );
-      } else if (status === 401) {
+      }if (status === 401) {
         const authType = extractAuthErrorType(responseData, "invalid_key");
 
         throw new ExaAuthError(
-          `Exa API authentication failed: Invalid or expired API key.`,
+          "Exa API authentication failed: Invalid or expired API key.",
           {
             ...baseErrorOptions,
             authType,
           }
         );
-      } else if (status === 403) {
+      }if (status === 403) {
         const authType = extractAuthErrorType(
           responseData,
           "insufficient_permissions"
         );
 
         throw new ExaAuthError(
-          `Exa API authorization failed: Insufficient permissions for this operation.`,
+          "Exa API authorization failed: Insufficient permissions for this operation.",
           {
             ...baseErrorOptions,
             authType,
           }
         );
-      } else if (status && status >= 500) {
+      }if (status && status >= 500) {
         const isTemporary = status !== 501; // 501 Not Implemented is permanent
 
         throw new ExaServerError(
@@ -587,7 +586,7 @@ export async function executeExaSearch(
             isTemporary,
           }
         );
-      } else if (status && status >= 400) {
+      }if (status && status >= 400) {
         const errorCode = extractErrorCode(responseData);
         const validationErrors = extractValidationErrors(responseData);
 
@@ -599,7 +598,7 @@ export async function executeExaSearch(
             ...(validationErrors !== undefined && { validationErrors }),
           }
         );
-      } else {
+      }
         // Network error without response
         const isTimeout =
           axiosError.code === "ECONNABORTED" ||
@@ -616,7 +615,6 @@ export async function executeExaSearch(
             cause: error,
           }
         );
-      }
     }
 
     // Handle timeout errors specifically (from axios timeout config)

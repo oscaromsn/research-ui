@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import { Provider, createStore } from "jotai";
-import React, { type ReactNode } from "react";
+import type React from "react";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { ReportDrafter } from "@/components/domain/report-generation/report-drafter";

@@ -39,7 +39,7 @@
     "attributePosition": "auto"
   },
   "linter": {
-    "enabled": false,
+    "enabled": true,
     "rules": {
       "recommended": true,
       "complexity": {

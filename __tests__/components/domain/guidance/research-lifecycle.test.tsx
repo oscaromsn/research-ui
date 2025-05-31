@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { Provider, createStore } from "jotai";
-import React, { type ReactNode } from "react";
+import type React from "react";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { ResearchLifecycle } from "@/components/domain/guidance/research-lifecycle";

@@ -558,10 +558,10 @@ describe("Phase 3 Completion - Client-Side Orchestrator Hook", () => {
 
   describe("6. abortResearch Functionality", () => {
     it("should call abort() on the active AbortController", async () => {
-      let _streamController: ReadableStreamDefaultController<Uint8Array>;
+      let StreamController: ReadableStreamDefaultController<Uint8Array>;
       const mockStream = new ReadableStream({
         start(controller) {
-          _streamController = controller;
+          StreamController = controller;
         },
       });
       mockedConductResearch.mockResolvedValue(mockStream);
@@ -601,10 +601,10 @@ describe("Phase 3 Completion - Client-Side Orchestrator Hook", () => {
     });
 
     it("should lead to stream processing termination when called", async () => {
-      let _streamController: ReadableStreamDefaultController<Uint8Array>;
+      let StreamController: ReadableStreamDefaultController<Uint8Array>;
       const mockStream = new ReadableStream({
         start(controller) {
-          _streamController = controller;
+          StreamController = controller;
         },
       });
       mockedConductResearch.mockResolvedValue(mockStream);

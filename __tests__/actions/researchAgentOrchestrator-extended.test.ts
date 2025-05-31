@@ -1,6 +1,6 @@
 /// <reference types="../../types/test-globals" />
 
-import type { ReadableStream as _ReadableStream } from "stream/web";
+import type { ReadableStream as _ReadableStream } from "node:stream/web";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -212,16 +212,16 @@ describe("Research Agent Orchestrator - Extended Data Mapping", () => {
 
       // Test key arguments
       expect(result.keyArguments).toHaveLength(4);
-      expect(result.keyArguments![0]).toContain(
+      expect(result.keyArguments?.[0]).toContain(
         "Government-mandated closures during COVID-19"
       );
-      expect(result.keyArguments![1]).toContain(
+      expect(result.keyArguments?.[1]).toContain(
         "Force majeure clauses must be interpreted strictly"
       );
 
       // Test extracted entities
       expect(result.extractedEntities).toHaveLength(4);
-      expect(result.extractedEntities![0]).toEqual({
+      expect(result.extractedEntities?.[0]).toEqual({
         name: "Smith v. Jones",
         type: "Case",
         details: "345 F.Supp. 2d 123 (N.D. Cal. 2023)",
@@ -229,17 +229,17 @@ describe("Research Agent Orchestrator - Extended Data Mapping", () => {
 
       // Test extracted quotes
       expect(result.extractedQuotes).toHaveLength(3);
-      expect(result.extractedQuotes![0]).toContain(
+      expect(result.extractedQuotes?.[0]).toContain(
         "unprecedented disruption to commercial activities"
       );
 
       // Test full text is truncated appropriately
-      expect(result.fullText!.length).toBeLessThanOrEqual(5000);
+      expect(result.fullText?.length).toBeLessThanOrEqual(5000);
       expect(result.fullText).toContain("SMITH v. JONES");
 
       // Test counter arguments
       expect(result.counterArguments).toHaveLength(3);
-      expect(result.counterArguments![0]).toContain(
+      expect(result.counterArguments?.[0]).toContain(
         "pandemic was arguably foreseeable"
       );
 
@@ -357,7 +357,7 @@ describe("Research Agent Orchestrator - Extended Data Mapping", () => {
       const result = mapToClientFormat(longAnalysis, longSearchResult);
 
       expect(result.summarySnippet.length).toBe(300);
-      expect(result.fullText!.length).toBe(5000);
+      expect(result.fullText?.length).toBe(5000);
       expect(
         result.analysisReasoning?.analyzeLegalQuestionSummary.length
       ).toBeLessThanOrEqual(500);

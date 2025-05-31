@@ -247,7 +247,7 @@ export async function conductResearch(
           });
           // Fail fast - can't proceed without any documents
           return;
-        } else {
+        }
           await sendUpdate(writer, encoder, {
             type: "DATA",
             stage: currentStage,
@@ -261,7 +261,6 @@ export async function conductResearch(
             message: `${searchResultItems.length} unique documents retrieved from live search.`,
             isFinalForStage: true,
           });
-        }
       } catch (searchError: unknown) {
         const errorMessage =
           searchError instanceof Error

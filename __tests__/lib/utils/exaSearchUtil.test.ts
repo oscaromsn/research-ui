@@ -103,7 +103,7 @@ describe("executeExaSearch", () => {
   it("should throw ExaConfigError with empty EXA_API_KEY", async () => {
     // Mock the environment variable to be undefined
     const originalEnv = process.env.EXA_API_KEY;
-    delete process.env.EXA_API_KEY;
+    process.env.EXA_API_KEY = undefined;
 
     // Re-import the module to get the updated environment
     vi.resetModules();
@@ -628,7 +628,7 @@ describe("executeExaSearch", () => {
           expect(error.status).toBe(400);
           expect(error.errorCode).toBe("VALIDATION_ERROR");
           expect(error.validationErrors).toHaveLength(1);
-          expect(error.validationErrors![0].field).toBe("query");
+          expect(error.validationErrors?.[0].field).toBe("query");
           expect(error.isRetryable()).toBe(false);
         }
       }

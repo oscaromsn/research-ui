@@ -44,7 +44,7 @@ describe("useResearchAgent Hook - Extended Data Handling", () => {
     const stream = new ReadableStream({
       start(controller) {
         updates.forEach((update) => {
-          const data = encoder.encode(JSON.stringify(update) + "\n");
+          const data = encoder.encode(`${JSON.stringify(update)}\n`);
           controller.enqueue(data);
         });
         controller.close();
@@ -198,7 +198,7 @@ describe("useResearchAgent Hook - Extended Data Handling", () => {
         expect(doc.summarySnippet).toBe("Updated summary with more content...");
         expect(doc.keyArguments).toEqual(["New argument 1", "New argument 2"]);
         expect(doc.extractedEntities).toHaveLength(1);
-        expect(doc.extractedEntities![0].name).toBe("Test Entity");
+        expect(doc.extractedEntities?.[0].name).toBe("Test Entity");
       });
     });
 
@@ -243,16 +243,16 @@ describe("useResearchAgent Hook - Extended Data Handling", () => {
           (doc) => doc.docId === "doc-minimal"
         );
         expect(minimalDoc).toBeDefined();
-        expect(minimalDoc!.keyArguments).toBeUndefined();
-        expect(minimalDoc!.extractedEntities).toBeUndefined();
+        expect(minimalDoc?.keyArguments).toBeUndefined();
+        expect(minimalDoc?.extractedEntities).toBeUndefined();
 
         // Check extended document
         const extendedDoc = analyzedDocs.find(
           (doc) => doc.docId === "doc-extended-1"
         );
         expect(extendedDoc).toBeDefined();
-        expect(extendedDoc!.keyArguments).toHaveLength(3);
-        expect(extendedDoc!.extractedEntities).toHaveLength(2);
+        expect(extendedDoc?.keyArguments).toHaveLength(3);
+        expect(extendedDoc?.extractedEntities).toHaveLength(2);
       });
     });
 
@@ -305,7 +305,7 @@ describe("useResearchAgent Hook - Extended Data Handling", () => {
           "The court found that COVID-19 restrictions..."
         );
         expect(doc.keyArguments).toHaveLength(2);
-        expect(doc.keyArguments![1]).toBe(
+        expect(doc.keyArguments?.[1]).toBe(
           "Additional argument from further analysis"
         );
       });
@@ -360,7 +360,7 @@ describe("useResearchAgent Hook - Extended Data Handling", () => {
 
         expect(doc.extractedEntities).toHaveLength(6);
 
-        const entityTypes = doc.extractedEntities!.map((e) => e.type);
+        const entityTypes = doc.extractedEntities?.map((e) => e.type);
         expect(entityTypes).toContain("Case");
         expect(entityTypes).toContain("Statute");
         expect(entityTypes).toContain("Person");
@@ -369,7 +369,7 @@ describe("useResearchAgent Hook - Extended Data Handling", () => {
         expect(entityTypes).toContain("Jurisdiction");
 
         // Verify entity details are preserved
-        const caseEntity = doc.extractedEntities!.find(
+        const caseEntity = doc.extractedEntities?.find(
           (e) => e.type === "Case"
         );
         expect(caseEntity?.details).toBe("Citation");
@@ -420,13 +420,13 @@ describe("useResearchAgent Hook - Extended Data Handling", () => {
         const doc = analyzedDocs[0];
 
         expect(doc.analysisReasoning).toBeDefined();
-        expect(doc.analysisReasoning!.analyzeLegalQuestionSummary).toContain(
+        expect(doc.analysisReasoning?.analyzeLegalQuestionSummary).toContain(
           "Comprehensive analysis"
         );
         expect(
-          doc.analysisReasoning!.considerRelevantPrinciplesSummary
+          doc.analysisReasoning?.considerRelevantPrinciplesSummary
         ).toContain("impossibility doctrine");
-        expect(doc.analysisReasoning!.formulateSearchQueriesSummary).toContain(
+        expect(doc.analysisReasoning?.formulateSearchQueriesSummary).toContain(
           "Search strategy"
         );
       });

@@ -89,7 +89,7 @@ export class ExaRateLimitError extends ExaError {
     }
 
     // Exponential backoff: 1s, 2s, 4s, 8s, max 30s
-    return Math.min(1000 * Math.pow(2, attempt - 1), 30000);
+    return Math.min(1000 * 2 ** (attempt - 1), 30000);
   }
 }
 
@@ -160,7 +160,7 @@ export class ExaServerError extends ExaError {
    */
   getSuggestedRetryDelay(attempt = 1): number {
     // Faster retry for server errors: 500ms, 1s, 2s, 4s, max 10s
-    return Math.min(500 * Math.pow(2, attempt - 1), 10000);
+    return Math.min(500 * 2 ** (attempt - 1), 10000);
   }
 }
 
@@ -235,11 +235,11 @@ export class ExaNetworkError extends ExaError {
   getSuggestedRetryDelay(attempt = 1): number {
     if (this.isTimeout) {
       // Longer delay for timeouts: 2s, 4s, 8s, 16s, max 60s
-      return Math.min(2000 * Math.pow(2, attempt - 1), 60000);
+      return Math.min(2000 * 2 ** (attempt - 1), 60000);
     }
 
     // Shorter delay for connection errors: 1s, 2s, 4s, 8s, max 30s
-    return Math.min(1000 * Math.pow(2, attempt - 1), 30000);
+    return Math.min(1000 * 2 ** (attempt - 1), 30000);
   }
 }
 
@@ -375,5 +375,5 @@ export function getRetryDelay(error: unknown, attempt = 1): number {
   }
 
   // Default fallback delay
-  return Math.min(1000 * Math.pow(2, attempt - 1), 30000);
+  return Math.min(1000 * 2 ** (attempt - 1), 30000);
 }

@@ -29,7 +29,7 @@ describe("API Testing Utilities", () => {
       if (originalKey !== undefined) {
         process.env.TEST_EMPTY_KEY = originalKey;
       } else {
-        delete process.env.TEST_EMPTY_KEY;
+        process.env.TEST_EMPTY_KEY = undefined;
       }
     });
 
@@ -43,7 +43,7 @@ describe("API Testing Utilities", () => {
       if (originalKey !== undefined) {
         process.env.TEST_PLACEHOLDER_KEY = originalKey;
       } else {
-        delete process.env.TEST_PLACEHOLDER_KEY;
+        process.env.TEST_PLACEHOLDER_KEY = undefined;
       }
     });
 
@@ -57,7 +57,7 @@ describe("API Testing Utilities", () => {
       if (originalKey !== undefined) {
         process.env.TEST_MASKED_KEY = originalKey;
       } else {
-        delete process.env.TEST_MASKED_KEY;
+        process.env.TEST_MASKED_KEY = undefined;
       }
     });
 
@@ -71,7 +71,7 @@ describe("API Testing Utilities", () => {
       if (originalKey !== undefined) {
         process.env.TEST_VALID_KEY = originalKey;
       } else {
-        delete process.env.TEST_VALID_KEY;
+        process.env.TEST_VALID_KEY = undefined;
       }
     });
 
@@ -95,12 +95,12 @@ describe("API Testing Utilities", () => {
       if (originalKey1 !== undefined) {
         process.env.TEST_KEY_1 = originalKey1;
       } else {
-        delete process.env.TEST_KEY_1;
+        process.env.TEST_KEY_1 = undefined;
       }
       if (originalKey2 !== undefined) {
         process.env.TEST_KEY_2 = originalKey2;
       } else {
-        delete process.env.TEST_KEY_2;
+        process.env.TEST_KEY_2 = undefined;
       }
     });
   });
@@ -134,7 +134,7 @@ describe("API Testing Utilities", () => {
       if (originalKey !== undefined) {
         process.env.TEST_AVAILABLE_KEY = originalKey;
       } else {
-        delete process.env.TEST_AVAILABLE_KEY;
+        process.env.TEST_AVAILABLE_KEY = undefined;
       }
       consoleSpy.mockRestore();
     });
@@ -162,19 +162,19 @@ describe("API Testing Utilities", () => {
       expect(isCI()).toBe(true);
 
       // Test GitHub Actions
-      delete process.env.CI;
+      process.env.CI = undefined;
       process.env.GITHUB_ACTIONS = "true";
       expect(isCI()).toBe(true);
 
       // Test no CI
-      delete process.env.GITHUB_ACTIONS;
+      process.env.GITHUB_ACTIONS = undefined;
       expect(isCI()).toBe(false);
 
       // Restore
       if (originalCI !== undefined) {
         process.env.CI = originalCI;
       } else {
-        delete process.env.CI;
+        process.env.CI = undefined;
       }
     });
   });
@@ -195,7 +195,7 @@ describe("API Testing Utilities", () => {
       if (originalCI !== undefined) {
         process.env.CI = originalCI;
       } else {
-        delete process.env.CI;
+        process.env.CI = undefined;
       }
       consoleSpy.mockRestore();
     });
@@ -204,7 +204,7 @@ describe("API Testing Utilities", () => {
       const originalCI = process.env.CI;
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-      delete process.env.CI;
+      process.env.CI = undefined;
 
       const result = skipInCiIfMissingApiKeys(["MISSING_KEY"], "Local Test");
 

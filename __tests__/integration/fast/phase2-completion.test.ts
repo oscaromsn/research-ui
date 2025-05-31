@@ -221,7 +221,7 @@ describe("Phase 2 Completion Criteria Validation", () => {
       store.set(researchAtoms.finalReportContentAtom, {
         ...currentReport,
         executiveSummary:
-          currentReport.executiveSummary + " the legal implications...",
+          `${currentReport.executiveSummary} the legal implications...`,
       });
 
       expect(store.get(researchAtoms.executiveSummaryDisplayAtom)).toBe(

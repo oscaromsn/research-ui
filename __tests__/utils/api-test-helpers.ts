@@ -177,7 +177,7 @@ export const apiTestMatchers = {
   /**
    * Assert that a test was skipped due to missing API keys
    */
-  toBeSkippedDueToMissingApiKeys: (received: any, expectedKeys: string[]) => {
+  toBeSkippedDueToMissingApiKeys: (_received: any, expectedKeys: string[]) => {
     const hasKeys = expectedKeys.every((key) => {
       const value = process.env[key];
       return (

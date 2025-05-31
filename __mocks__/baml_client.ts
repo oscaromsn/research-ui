@@ -133,7 +133,7 @@ export const b = {
     .mockResolvedValue(createMockOverallSynthesis()),
   GenerateFinalLegalReport: vi.fn().mockResolvedValue(createMockFinalReport()),
   stream: {
-    GenerateLegalSearchQueries: vi.fn().mockImplementation(function () {
+    GenerateLegalSearchQueries: vi.fn().mockImplementation(() => {
       const generator = (async function* () {
         yield createMockLegalQueryAnalysis();
       })();
@@ -144,7 +144,7 @@ export const b = {
         .mockResolvedValue(createMockLegalQueryAnalysis());
       return generator;
     }),
-    AnalyzeSingleDocument: vi.fn().mockImplementation(function () {
+    AnalyzeSingleDocument: vi.fn().mockImplementation(() => {
       const generator = (async function* () {
         yield createMockAnalyzedDocument();
       })();
@@ -155,7 +155,7 @@ export const b = {
         .mockResolvedValue(createMockAnalyzedDocument());
       return generator;
     }),
-    AssessResearchAndPlanNextSteps: vi.fn().mockImplementation(function () {
+    AssessResearchAndPlanNextSteps: vi.fn().mockImplementation(() => {
       const generator = (async function* () {
         yield createMockResearchAssessment();
       })();
@@ -166,7 +166,7 @@ export const b = {
         .mockResolvedValue(createMockResearchAssessment());
       return generator;
     }),
-    SynthesizeAllFindings: vi.fn().mockImplementation(function () {
+    SynthesizeAllFindings: vi.fn().mockImplementation(() => {
       const generator = (async function* () {
         yield createMockOverallSynthesis();
       })();
@@ -177,7 +177,7 @@ export const b = {
         .mockResolvedValue(createMockOverallSynthesis());
       return generator;
     }),
-    GenerateFinalLegalReport: vi.fn().mockImplementation(function () {
+    GenerateFinalLegalReport: vi.fn().mockImplementation(() => {
       const generator = (async function* () {
         yield createMockFinalReport();
       })();

@@ -65,7 +65,7 @@ beforeAll(() => {
         undefined,
         encodingOrCallback
       );
-    } else {
+    }
       // When encodingOrCallback is a BufferEncoding, pass it along with optional callback
       return originalStderrWrite.call(
         this,
@@ -73,7 +73,6 @@ beforeAll(() => {
         encodingOrCallback,
         callback
       );
-    }
   };
 });
 
@@ -112,7 +111,7 @@ class ResizeObserverMock {
 class IntersectionObserverMock implements IntersectionObserver {
   readonly root: Element | Document | null = null;
   readonly rootMargin: string = "0px";
-  readonly thresholds: ReadonlyArray<number> = [0];
+  readonly thresholds: readonly number[] = [0];
 
   private readonly _callback: IntersectionObserverCallback;
 
