@@ -173,7 +173,7 @@ bun run lint
 bun run typecheck
 
 # Run tests
-bun test
+bun run test
 
 # Build verification
 bun build

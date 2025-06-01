@@ -222,7 +222,7 @@ bun typecheck
 bun build
 
 # Run tests
-bun test
+bun run test
 bun test:coverage
 ```
 
@@ -238,7 +238,7 @@ bun test:coverage
 Before considering a feature complete ensure that:
 
 1. ✅ BAML code generated & working.
-2. ✅ All tests pass (`bun test`)
+2. ✅ All tests pass (`bun run test`)
 3. ✅ Test coverage meets guidelines (`bun test:coverage`)
 4. ✅ Type checking passes (`bun typecheck`)
 5. ✅ Linting passes (`bun lint`)

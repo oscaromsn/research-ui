@@ -174,7 +174,7 @@ LexiSynth uses a comprehensive, multi-layered testing approach designed for both
 **For Development (Fast):**
 ```bash
 # Run unit tests only (recommended for daily development)
-bun test
+bun run test
 
 # Watch mode for active development
 bun test:watch
@@ -250,7 +250,7 @@ For complete testing documentation, troubleshooting, and best practices, see [do
 *   `bun format`: Formats code using Biome.
 *   `bun lint`: Lints code using ESLint.
 *   `bun typecheck`: Runs TypeScript compiler checks.
-*   `bun test`: Runs all Vitest unit/component tests.
+*   `bun run test`: Runs all Vitest unit/component tests.
 *   `bun test:e2e`: Runs all Playwright E2E tests.
 *   `bun baml:generate`: Regenerates the `baml_client/` directory.
 *   `bun baml:test`: Runs all BAML native tests.

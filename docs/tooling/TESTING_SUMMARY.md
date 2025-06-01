@@ -31,7 +31,7 @@ We have successfully set up a comprehensive testing infrastructure for the Next.
 
 ```bash
 # Run tests once
-bun test
+bun run test
 
 # Run tests in watch mode
 bun test:watch

@@ -35,9 +35,9 @@
 
   - change typecheck to typecheck:strict?
 
-  - too long `bun test`, change to:
-    - bun test --reporter=basic
-    - bun test --run 2>&1 | tail -20
+  - too long `bun run test`, change to:
+    - bun run test --reporter=basic
+    - bun run test --run 2>&1 | tail -20
 
 ## BAML feature requests
   - set custom retry policy on tests

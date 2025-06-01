@@ -7,7 +7,7 @@ This document provides a comprehensive guide to the testing ecosystem in LexiSyn
 ### For New Developers
 ```bash
 # Run fast unit tests (recommended for development)
-bun test
+bun run test
 
 # Watch mode for active development
 bun test:watch
@@ -233,7 +233,7 @@ describe('conductResearch', () => {
 **Tests timing out**:
 ```bash
 # Increase timeout for specific tests
-bun test --timeout=60000
+bun run test --timeout=60000
 ```
 
 **Mock issues**:

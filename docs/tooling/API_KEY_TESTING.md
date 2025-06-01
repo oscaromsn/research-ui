@@ -101,7 +101,7 @@ const API_KEYS = {
 ### Standard Test Execution
 ```bash
 # Run all tests (skips API-dependent tests if keys missing)
-bun test
+bun run test
 
 # Run tests with API key debugging
 bun run test:api
@@ -125,13 +125,13 @@ bun run baml:test:safe
 ### Environment-Specific Testing
 ```bash
 # Local development (may include API tests)
-NODE_ENV=development bun test
+NODE_ENV=development bun run test
 
 # CI simulation (skips most API tests)
-CI=true bun test
+CI=true bun run test
 
 # Debug API test behavior
-DEBUG_API_TESTS=true bun test
+DEBUG_API_TESTS=true bun run test
 ```
 
 ## Best Practices
@@ -244,7 +244,7 @@ jobs:
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
-        run: bun test
+        run: bun run test
 ```
 
 ### Environment Variables in CI
@@ -281,13 +281,13 @@ beforeAll(() => {
 
 ```bash
 # Check which tests would be skipped
-DEBUG_API_TESTS=true bun test --dry-run
+DEBUG_API_TESTS=true bun run test --dry-run
 
 # See API key status
-DEBUG_API_TESTS=true bun test | grep "API Key Status"
+DEBUG_API_TESTS=true bun run test | grep "API Key Status"
 
 # Run specific test with debugging
-DEBUG_API_TESTS=true bun test -- --run orchestrator-with-api
+DEBUG_API_TESTS=true bun run test -- --run orchestrator-with-api
 ```
 
 ## File Organization

@@ -240,7 +240,7 @@ Route (app)                                 Size  First Load JS
 
 **Test Suite Execution:**
 ```bash
-> bun test
+> bun run test
 ✅ 193/195 tests passing (99% pass rate)
 ❌ 2 BAML integration tests failing (due to missing API keys - expected)
 ```

@@ -93,7 +93,7 @@ Ensure you have the following installed:
 2.  Create your feature/bugfix branch.
 3.  Implement your changes. Adhere to the coding standards outlined below and in `CLAUDE.md`.
 4.  Write appropriate tests (BAML tests, Vitest unit/component tests, Playwright E2E tests).
-5.  Ensure all tests pass (`bun test`, `bun baml:test`, `bun test:e2e`).
+5.  Ensure all tests pass (`bun run test`, `bun baml:test`, `bun test:e2e`).
 6.  Run code quality checks:
     *   `bun format`
     *   `bun lint`
@@ -179,7 +179,7 @@ A robust testing strategy is crucial.
 *   Use Vitest for the test runner and React Testing Library for component interactions.
 *   Mock dependencies as needed (e.g., BAML client, server actions, Jotai atoms for specific component tests). `__mocks__/` contains shared mocks.
 *   `__tests__/test-utils.tsx` provides `renderWithProviders` and mock data factories.
-*   Run with: `bun test`
+*   Run with: `bun run test`
 *   Run with coverage: `bun test:coverage`
 
 ### End-to-End Tests (Playwright)
@@ -193,7 +193,7 @@ A robust testing strategy is crucial.
 While there isn't a single command for *all* test types (BAML, Vitest, Playwright) combined, ensure each suite passes:
 ```bash
 bun baml:test
-bun test
+bun run test
 bun test:e2e
 ```
 The `bun validate` script is a good comprehensive check.
@@ -238,7 +238,7 @@ This project follows the **Conventional Commits** specification. This is enforce
 ## Submitting Pull Requests
 
 1.  Ensure your branch is up-to-date with the upstream `main` branch.
-2.  Verify all tests pass (`bun baml:test`, `bun test`, `bun test:e2e`).
+2.  Verify all tests pass (`bun baml:test`, `bun run test`, `bun test:e2e`).
 3.  Verify all code quality checks pass (`bun validate`).
 4.  Push your branch to your fork.
 5.  Open a Pull Request (PR) against the `main` branch of the LexiSynth repository.

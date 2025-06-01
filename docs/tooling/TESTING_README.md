@@ -30,7 +30,7 @@ The following npm scripts are available for testing:
 
 ```bash
 # Run tests once
-bun test
+bun run test
 
 # Run tests in watch mode
 bun test:watch

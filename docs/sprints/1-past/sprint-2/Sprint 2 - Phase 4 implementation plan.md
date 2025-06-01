@@ -229,7 +229,7 @@
 
 ### Phase 4 Completion & Review:
 
-1.  **Run All Tests:** `bun test` (Vitest unit/component tests) and `bun baml:test`.
+1.  **Run All Tests:** `bun run test` (Vitest unit/component tests) and `bun baml:test`.
 2.  **Code Review:** Review all UI component changes, Jotai atom consumption, and `useResearchAgent` usage.
     *   Focus on correct state subscription, efficient rendering, prop drilling (minimize if possible by using atoms), and handling of streaming updates.
     *   Ensure UI is responsive and doesn't block on JavaScript execution during streaming.
