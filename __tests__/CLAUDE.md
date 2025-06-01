@@ -15,30 +15,30 @@ Every code change, no matter how small, must be validated through static analysi
 ### Quality Gates Hierarchy
 
 ```
-Level 1: Format & Syntax     → pnpm run format
-Level 2: Type Safety         → pnpm run typecheck
-Level 3: Code Quality        → pnpm run lint
-Level 4: Test Coverage       → pnpm run test
-Level 5: Strict Validation   → pnpm run typecheck:strict
-Level 6: Bundle Analysis     → pnpm run size
-Level 7: Dependency Health   → pnpm run deps:check
+Level 1: Format & Syntax     → bun run format
+Level 2: Type Safety         → bun run typecheck
+Level 3: Code Quality        → bun run lint
+Level 4: Test Coverage       → bun run test
+Level 5: Strict Validation   → bun run typecheck:strict
+Level 6: Bundle Analysis     → bun run size
+Level 7: Dependency Health   → bun run deps:check
 ```
 
 ### Validation Workflows
 
 #### Quick Validation (Every Change)
 ```bash
-pnpm run validate:quick  # typecheck + lint + format
+bun run validate:quick  # typecheck + lint + format
 ```
 
 #### Full Validation (Before Completion)
 ```bash
-pnpm run validate:full   # All quality gates + tests + E2E + bundle analysis
+bun run validate:full   # All quality gates + tests + E2E + bundle analysis
 ```
 
 #### CI Pipeline Simulation
 ```bash
-pnpm run ci             # Complete validation suite for production readiness
+bun run ci             # Complete validation suite for production readiness
 ```
 
 ## TDD Development Workflow
@@ -48,9 +48,9 @@ pnpm run ci             # Complete validation suite for production readiness
 #### 1.1 Pre-Development Setup
 ```bash
 # Verify clean starting state
-pnpm run validate:quick
-pnpm run test
-pnpm run typecov
+bun run validate:quick
+bun run test
+bun run typecov
 ```
 
 **Validation Rule**: All tools must pass before beginning new work.
@@ -61,9 +61,9 @@ pnpm run typecov
 # Example: __tests__/components/new-feature.test.tsx
 
 # Immediate validation
-pnpm run typecheck      # Ensure test compiles
-pnpm run test           # Verify test fails as expected
-pnpm run lint           # Check test code quality
+bun run typecheck      # Ensure test compiles
+bun run test           # Verify test fails as expected
+bun run lint           # Check test code quality
 ```
 
 **Validation Checkpoint**: Test must fail for the right reason, with clean TypeScript compilation.
@@ -74,10 +74,10 @@ pnpm run lint           # Check test code quality
 # Focus on single responsibility
 
 # Atomic validation cycle
-pnpm run typecheck      # Type safety first
-pnpm run format         # Code formatting
-pnpm run test           # Verify test passes
-pnpm run lint           # Code quality
+bun run typecheck      # Type safety first
+bun run format         # Code formatting
+bun run test           # Verify test passes
+bun run lint           # Code quality
 ```
 
 **Validation Rule**: Each atomic change must pass all Level 1-4 quality gates.
@@ -98,13 +98,13 @@ pnpm run lint           # Code quality
 #### 2.2 Validation Pattern
 ```bash
 # After every meaningful change (5-10 lines of code)
-pnpm run typecheck && pnpm run test && pnpm run lint
+bun run typecheck && bun run test && bun run lint
 
 # After every component/function completion
-pnpm run validate:quick
+bun run validate:quick
 
 # After every feature completion
-pnpm run validate:full
+bun run validate:full
 ```
 
 ### Phase 3: Quality Assurance
@@ -112,19 +112,19 @@ pnpm run validate:full
 #### 3.1 Strict Validation
 ```bash
 # Before marking work complete
-pnpm run typecheck:strict    # Strictest TypeScript validation
-pnpm run lint:strict         # Zero-warning linting
-pnpm run test:coverage       # Verify test coverage
-pnpm run typecov            # Type coverage analysis
+bun run typecheck:strict    # Strictest TypeScript validation
+bun run lint:strict         # Zero-warning linting
+bun run test:coverage       # Verify test coverage
+bun run typecov            # Type coverage analysis
 ```
 
 #### 3.2 Production Readiness
 ```bash
 # Final validation before completion
-pnpm run size               # Bundle size analysis
-pnpm run deps:check         # Dependency architecture
-pnpm run audit              # Security vulnerabilities
-pnpm run ci                 # Full CI simulation
+bun run size               # Bundle size analysis
+bun run deps:check         # Dependency architecture
+bun run audit              # Security vulnerabilities
+bun run ci                 # Full CI simulation
 ```
 
 ## Tool-Specific Usage Guidelines
@@ -134,7 +134,7 @@ pnpm run ci                 # Full CI simulation
 #### Immediate Type Checking
 ```bash
 # After every file save/change
-pnpm run typecheck
+bun run typecheck
 ```
 
 **When to Use**:
@@ -146,7 +146,7 @@ pnpm run typecheck
 #### Strict Mode Validation
 ```bash
 # Before feature completion
-pnpm run typecheck:strict
+bun run typecheck:strict
 ```
 
 **When to Use**:
@@ -164,15 +164,15 @@ pnpm run typecheck:strict
 #### Continuous Linting
 ```bash
 # After implementing logic
-pnpm run lint
+bun run lint
 ```
 
 **Auto-Fix Pattern**:
 ```bash
-pnpm run lint:fix           # Auto-fix simple issues
-pnpm run lint               # Verify remaining issues
+bun run lint:fix           # Auto-fix simple issues
+bun run lint               # Verify remaining issues
 # Fix remaining issues manually
-pnpm run lint:strict        # Zero-warning validation
+bun run lint:strict        # Zero-warning validation
 ```
 
 **Common Issues & Solutions**:
@@ -186,7 +186,7 @@ pnpm run lint:strict        # Zero-warning validation
 #### Format-First Approach
 ```bash
 # Before reviewing code
-pnpm run format             # Format code directly
+bun run format             # Format code directly
 ```
 
 **Integration Pattern**:
@@ -199,21 +199,21 @@ pnpm run format             # Format code directly
 #### Test-Driven Cycle
 ```bash
 # Red: Write failing test
-pnpm run test
+bun run test
 
 # Green: Make test pass
-pnpm run test
+bun run test
 
 # Refactor: Improve code
-pnpm run test
-pnpm run test:coverage      # Verify coverage
+bun run test
+bun run test:coverage      # Verify coverage
 ```
 
 #### Test Categories
 ```bash
-pnpm run test               # Unit & integration tests
-pnpm run test:e2e          # End-to-end tests
-pnpm run test:coverage     # Coverage analysis
+bun run test               # Unit & integration tests
+bun run test:e2e          # End-to-end tests
+bun run test:coverage     # Coverage analysis
 ```
 
 ### Bundle Analysis
@@ -221,11 +221,11 @@ pnpm run test:coverage     # Coverage analysis
 #### Performance Monitoring
 ```bash
 # After adding dependencies
-pnpm run size
+bun run size
 
 # For detailed analysis
-pnpm run size:debug
-pnpm run bundle:analyze
+bun run size:debug
+bun run bundle:analyze
 ```
 
 **Size Thresholds**:
@@ -238,11 +238,11 @@ pnpm run bundle:analyze
 #### Continuous Monitoring
 ```bash
 # After dependency changes
-pnpm run deps:check
-pnpm run audit
+bun run deps:check
+bun run audit
 
 # Automated cleanup
-pnpm run knip              # Remove unused dependencies
+bun run knip              # Remove unused dependencies
 ```
 
 ## Atomic Change Methodology
@@ -252,44 +252,44 @@ pnpm run knip              # Remove unused dependencies
 #### Micro-Changes (1-3 lines)
 ```bash
 # Validation: Type check only
-pnpm run typecheck
+bun run typecheck
 ```
 
 #### Small Changes (4-20 lines)
 ```bash
 # Validation: Quick cycle
-pnpm run typecheck && pnpm run test
+bun run typecheck && bun run test
 ```
 
 #### Medium Changes (21-100 lines)
 ```bash
 # Validation: Standard cycle
-pnpm run validate:quick
+bun run validate:quick
 ```
 
 #### Large Changes (100+ lines)
 ```bash
 # Validation: Full cycle
-pnpm run validate:full
+bun run validate:full
 ```
 
 ### Validation Frequency
 
 #### Every Code Change
 1. Save file
-2. Run `pnpm run typecheck`
+2. Run `bun run typecheck`
 3. Fix any type errors immediately
 4. Continue development
 
 #### Every Function/Component
 1. Complete implementation
-2. Run `pnpm run validate:quick`
+2. Run `bun run validate:quick`
 3. Fix all issues before proceeding
 4. Add/update tests
 
 #### Every Feature
 1. Complete feature implementation
-2. Run `pnpm run validate:full`
+2. Run `bun run validate:full`
 3. Address all quality issues
 4. Verify E2E functionality
 
@@ -321,10 +321,10 @@ const result = externalApiResult ?? null; // not undefined
 ### ESLint Errors
 
 #### Systematic Resolution
-1. **Auto-fix first**: `pnpm run lint:fix`
+1. **Auto-fix first**: `bun run lint:fix`
 2. **Understand remaining**: Read rule documentation
 3. **Fix properly**: Follow best practices, don't disable rules
-4. **Verify**: `pnpm run lint:strict`
+4. **Verify**: `bun run lint:strict`
 
 #### Priority Order
 1. Security issues (high priority)
@@ -348,10 +348,10 @@ const result = externalApiResult ?? null; // not undefined
 #### Monitoring
 ```bash
 # After every dependency addition
-pnpm run size
+bun run size
 
 # Weekly review
-pnpm run size:analyze       # Generate detailed report
+bun run size:analyze       # Generate detailed report
 ```
 
 #### Optimization Strategies
@@ -365,10 +365,10 @@ pnpm run size:analyze       # Generate detailed report
 #### Target: 100% for Source Files
 ```bash
 # Monitor coverage
-pnpm run typecov
+bun run typecov
 
 # Identify gaps
-pnpm run typecov --detail
+bun run typecov --detail
 ```
 
 #### Improvement Strategies
@@ -384,30 +384,30 @@ pnpm run typecov --detail
 #### Recommended Setup
 ```bash
 # Auto-run before commit
-pnpm run validate:quick
-pnpm run test
+bun run validate:quick
+bun run test
 ```
 
 #### Commit Message Validation
 ```bash
 # Ensure conventional commits
-pnpm run commitlint
+bun run commitlint
 ```
 
 ### CI/CD Integration
 
 #### Pull Request Pipeline
 ```bash
-pnpm run validate:full      # Complete validation
-pnpm run test:e2e          # E2E testing
-pnpm run audit             # Security check
+bun run validate:full      # Complete validation
+bun run test:e2e          # E2E testing
+bun run audit             # Security check
 ```
 
 #### Deployment Pipeline
 ```bash
-pnpm run ci                # Full CI validation
-pnpm run build             # Production build
-pnpm run size              # Bundle analysis
+bun run ci                # Full CI validation
+bun run build             # Production build
+bun run size              # Bundle analysis
 ```
 
 ## Advanced Patterns
@@ -442,37 +442,37 @@ pnpm run size              # Bundle analysis
 ### Common Issues
 
 #### "Tests Pass But App Breaks"
-1. Check E2E tests: `pnpm run test:e2e`
-2. Verify type safety: `pnpm run typecheck:strict`
-3. Check bundle issues: `pnpm run size`
-4. Review dependencies: `pnpm run deps:check`
+1. Check E2E tests: `bun run test:e2e`
+2. Verify type safety: `bun run typecheck:strict`
+3. Check bundle issues: `bun run size`
+4. Review dependencies: `bun run deps:check`
 
 #### "TypeScript Errors in CI But Not Locally"
 1. Clear cache: `rm -rf .next node_modules/.cache`
-2. Reinstall: `pnpm install`
-3. Check versions: `pnpm run typecheck:strict`
-4. Verify environment: Check Node.js and pnpm versions
+2. Reinstall: `bun install`
+3. Check versions: `bun run typecheck:strict`
+4. Verify environment: Check Node.js and bun versions
 
 #### "Performance Regression"
-1. Bundle analysis: `pnpm run size:analyze`
-2. Dependency audit: `pnpm run deps:check`
+1. Bundle analysis: `bun run size:analyze`
+2. Dependency audit: `bun run deps:check`
 3. Test performance: Check test execution time
 4. Profile build: Use Next.js analyzer
 
 ### Recovery Procedures
 
 #### From Broken State
-1. **Assess**: `pnpm run validate:quick`
+1. **Assess**: `bun run validate:quick`
 2. **Prioritize**: Fix TypeScript errors first
 3. **Incremental**: Fix one issue type at a time
 4. **Validate**: Run tools after each fix
 5. **Test**: Ensure functionality intact
 
 #### From Dependency Issues
-1. **Audit**: `pnpm run audit`
-2. **Clean**: `pnpm run knip`
-3. **Update**: `pnpm run audit:fix`
-4. **Validate**: `pnpm run validate:full`
+1. **Audit**: `bun run audit`
+2. **Clean**: `bun run knip`
+3. **Update**: `bun run audit:fix`
+4. **Validate**: `bun run validate:full`
 
 ## Best Practices Summary
 
