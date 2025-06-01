@@ -1,4 +1,8 @@
-import axios, { type AxiosError, isAxiosError } from "axios";
+import axios, {
+  type AxiosError,
+  type AxiosResponse,
+  isAxiosError,
+} from "axios";
 import * as dotenv from "dotenv";
 
 // Load environment variables
@@ -88,14 +92,6 @@ interface ExaSearchApiResponse {
 // --- Configuration ---
 
 const EXA_API_BASE_URL = "https://api.exa.ai";
-const EXA_API_KEY = process.env.EXA_API_KEY;
-
-// Check if API key is available
-if (!EXA_API_KEY) {
-  console.warn(
-    "EXA_API_KEY environment variable is not set. Exa searches will fail."
-  );
-}
 
 // --- Helper Functions for Error Parsing ---
 
@@ -330,13 +326,12 @@ export async function executeExaSearch(
   fetchFullText = true,
   numHighlightSentences = 3 // Default to 3 sentences for highlights
 ): Promise<BamlSearchResultItem[]> {
-  if (!EXA_API_KEY) {
-    throw new ExaConfigError(
-      "EXA_API_KEY environment variable is not set. Please check your .env file.",
-      {
-        configType: "missing_api_key",
-      }
-    );
+  const EXA_API_KEY = process.env.EXA_API_KEY;
+
+  if (!EXA_API_KEY || EXA_API_KEY.trim() === "") {
+    throw new ExaConfigError("EXA_API_KEY environment variable is not set", {
+      configType: "missing_api_key",
+    });
   }
 
   const requestBody: ExaSearchRequestBody = {
@@ -365,18 +360,12 @@ export async function executeExaSearch(
     console.log(`Executing Exa search for: "${bamlSearchQuery.query_string}"`);
     console.log("Request body:", JSON.stringify(requestBody, null, 2));
 
-    if (!EXA_API_KEY) {
-      throw new ExaConfigError("EXA_API_KEY is not configured");
-    }
-
-    let response;
+    let response: AxiosResponse<ExaSearchApiResponse>;
     try {
       console.log("Making axios request to:", `${EXA_API_BASE_URL}/search`);
       console.log("Headers:", {
         "Content-Type": "application/json",
-        "x-api-key": EXA_API_KEY
-          ? `${EXA_API_KEY.substring(0, 8)}...`
-          : "MISSING",
+        "x-api-key": `${EXA_API_KEY.substring(0, 8)}...`,
       });
 
       response = await axios.post<ExaSearchApiResponse>(
@@ -553,7 +542,8 @@ export async function executeExaSearch(
             rateLimitType,
           }
         );
-      }if (status === 401) {
+      }
+      if (status === 401) {
         const authType = extractAuthErrorType(responseData, "invalid_key");
 
         throw new ExaAuthError(
@@ -563,7 +553,8 @@ export async function executeExaSearch(
             authType,
           }
         );
-      }if (status === 403) {
+      }
+      if (status === 403) {
         const authType = extractAuthErrorType(
           responseData,
           "insufficient_permissions"
@@ -576,7 +567,8 @@ export async function executeExaSearch(
             authType,
           }
         );
-      }if (status && status >= 500) {
+      }
+      if (status && status >= 500) {
         const isTemporary = status !== 501; // 501 Not Implemented is permanent
 
         throw new ExaServerError(
@@ -586,7 +578,8 @@ export async function executeExaSearch(
             isTemporary,
           }
         );
-      }if (status && status >= 400) {
+      }
+      if (status && status >= 400) {
         const errorCode = extractErrorCode(responseData);
         const validationErrors = extractValidationErrors(responseData);
 
@@ -599,22 +592,22 @@ export async function executeExaSearch(
           }
         );
       }
-        // Network error without response
-        const isTimeout =
-          axiosError.code === "ECONNABORTED" ||
-          axiosError.message.includes("timeout");
-        const isConnectionError =
-          axiosError.code === "ECONNREFUSED" || axiosError.code === "ENOTFOUND";
+      // Network error without response
+      const isTimeout =
+        axiosError.code === "ECONNABORTED" ||
+        axiosError.message.includes("timeout");
+      const isConnectionError =
+        axiosError.code === "ECONNREFUSED" || axiosError.code === "ENOTFOUND";
 
-        throw new ExaNetworkError(
-          `Network error during Exa API request: ${axiosError.message}`,
-          {
-            query: bamlSearchQuery.query_string,
-            isTimeout,
-            isConnectionError,
-            cause: error,
-          }
-        );
+      throw new ExaNetworkError(
+        `Network error during Exa API request: ${axiosError.message}`,
+        {
+          query: bamlSearchQuery.query_string,
+          isTimeout,
+          isConnectionError,
+          cause: error,
+        }
+      );
     }
 
     // Handle timeout errors specifically (from axios timeout config)

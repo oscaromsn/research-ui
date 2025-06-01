@@ -20,29 +20,17 @@ import {
 } from "@/lib/utils/exaSearchErrors";
 import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
 
-// Mock axios
-vi.mock("axios", () => ({
-  default: {
-    post: vi.fn(),
-  },
-  isAxiosError: vi.fn(),
-}));
-
+// axios is already mocked in setupTests.ts
 const mockedAxios = axios as unknown as {
   post: ReturnType<typeof vi.fn>;
 };
 const mockedIsAxiosError = isAxiosError as unknown as ReturnType<typeof vi.fn>;
 
-// Mock dotenv to prevent loading real environment variables
-vi.mock("dotenv", () => ({
-  config: vi.fn(() => ({})),
-}));
-
 // Get the actual API key from .env.test (loaded by Vitest config)
 const EXA_API_KEY_FROM_ENV = process.env.EXA_API_KEY;
 
 beforeEach(() => {
-  vi.resetModules();
+  vi.clearAllMocks();
 });
 
 afterEach(() => {
@@ -103,16 +91,13 @@ describe("executeExaSearch", () => {
   it("should throw ExaConfigError with empty EXA_API_KEY", async () => {
     // Mock the environment variable to be undefined
     const originalEnv = process.env.EXA_API_KEY;
-    process.env.EXA_API_KEY = undefined;
-
-    // Re-import the module to get the updated environment
-    vi.resetModules();
-    const { executeExaSearch: executeExaSearchWithoutKey } = await import(
-      "@/lib/utils/exaSearchUtil"
-    );
+    delete process.env.EXA_API_KEY;
 
     try {
-      await expect(executeExaSearchWithoutKey(mockSearchQuery)).rejects.toThrow(
+      await expect(executeExaSearch(mockSearchQuery)).rejects.toThrow(
+        ExaConfigError
+      );
+      await expect(executeExaSearch(mockSearchQuery)).rejects.toThrow(
         "EXA_API_KEY environment variable is not set"
       );
     } finally {
@@ -120,7 +105,6 @@ describe("executeExaSearch", () => {
       if (originalEnv) {
         process.env.EXA_API_KEY = originalEnv;
       }
-      vi.resetModules();
     }
   });
 
