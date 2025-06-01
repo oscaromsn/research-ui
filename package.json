@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "// === QUICK REFERENCE ===": "For detailed testing docs see docs/TESTING.md",
-  "// Development": "bun test (fast unit tests) | bun test:watch (watch mode)",
-  "// Integration": "bun test:integration (slow, needs API keys) | bun test:all (everything)",
+  "// Development": "bun run test (fast unit tests) | bun run test:watch (watch mode)",
+  "// Integration": "bun run test:integration (slow, needs API keys) | bun run test:all (everything)",
   "// CI/CD": "bun ci (full validation suite)",
   "scripts": {
     "// === DEVELOPMENT ===": "",
