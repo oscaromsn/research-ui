@@ -167,16 +167,16 @@ The new `eslint.config.mjs` follows this pattern:
 
 ```bash
 # Lint the entire project
-pnpm run lint
+bun run lint
 
 # Type checking
-pnpm run typecheck
+bun run typecheck
 
 # Run tests
-pnpm test
+bun test
 
 # Build verification
-pnpm build
+bun build
 ```
 
 ## Common Issues and Solutions
@@ -214,10 +214,10 @@ The new configuration includes many more rules and plugins. If linting becomes s
 
 Ensure your CI pipeline runs:
 ```bash
-pnpm run lint      # ESLint checks
-pnpm run typecheck # TypeScript checks
-pnpm run test      # Test suite
-pnpm run build     # Build verification
+bun run lint      # ESLint checks
+bun run typecheck # TypeScript checks
+bun run test      # Test suite
+bun run build     # Build verification
 ```
 
 This comprehensive setup provides a solid foundation for maintaining code quality while being flexible enough to evolve with project needs.

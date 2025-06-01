@@ -43,14 +43,14 @@ Transform from **"Code → Validate → Fix → Repeat"** to **"Code → Auto-Va
 . "$(dirname "$0")/_/husky.sh"
 
 # Smart validation based on changed files
-pnpm run validate:smart
+bun run validate:smart
 
 # Auto-fix common issues
-pnpm run lint:fix --quiet
-pnpm run format --quiet
+bun run lint:fix --quiet
+bun run format --quiet
 
 # Final validation
-pnpm run validate:quick
+bun run validate:quick
 ```
 
 **Benefits**:
@@ -66,9 +66,9 @@ pnpm run validate:quick
 
 # Comprehensive validation only for significant changes
 if [ "$(git diff --name-only @{upstream}...HEAD | wc -l)" -gt 5 ]; then
-  pnpm run validate:full
+  bun run validate:full
 else
-  pnpm run validate:quick
+  bun run validate:quick
 fi
 ```
 
@@ -135,7 +135,7 @@ watcher.on('change', async (path) => {
     {
       "label": "Smart Validation",
       "type": "shell",
-      "command": "pnpm",
+      "command": "bun",
       "args": ["run", "validate:smart"],
       "group": "build",
       "presentation": { "echo": true, "reveal": "silent" },

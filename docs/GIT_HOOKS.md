@@ -78,12 +78,12 @@ Our git hooks use **multiple specialized tools** with clear separation of respon
 ### Layer 3: Pre-push Hook (~67 seconds)  
 **Runs before every push** - Comprehensive validation with full integration testing
 
-- ✅ **Auto-format entire codebase** (`pnpm format`)
-- ✅ **Strict TypeScript validation** (`pnpm typecheck:strict`)
+- ✅ **Auto-format entire codebase** (`bun format`)
+- ✅ **Strict TypeScript validation** (`bun typecheck:strict`)
   - Strict mode enabled
   - Exact optional properties checking
   - No `any` types allowed
-- ✅ **Auto-fix all linting issues** (`pnpm lint:fix`)
+- ✅ **Auto-fix all linting issues** (`bun lint:fix`)
 - ✅ **Complete unit test suite** (286 tests)
 - ✅ **Fast integration tests** (37 tests, ~5s)
   - Mocked APIs, structural validation (also in pre-commit)

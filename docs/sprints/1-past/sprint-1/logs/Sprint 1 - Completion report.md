@@ -218,19 +218,19 @@ function createMockStream(updates: ResearchUpdate[]) {
 
 **TypeScript Compilation:**
 ```bash
-> pnpm typecheck
+> bun typecheck
 ✅ PASSED - Zero compilation errors with strict mode enabled
 ```
 
 **ESLint Validation:**
 ```bash
-> pnpm lint
+> bun lint
 ✅ PASSED - No ESLint warnings or errors
 ```
 
 **Production Build:**
 ```bash
-> pnpm build
+> bun build
 ✅ PASSED - Successful optimized production build
 Route (app)                                 Size  First Load JS
 ┌ ○ /                                    15.8 kB         117 kB
@@ -240,7 +240,7 @@ Route (app)                                 Size  First Load JS
 
 **Test Suite Execution:**
 ```bash
-> pnpm test
+> bun test
 ✅ 193/195 tests passing (99% pass rate)
 ❌ 2 BAML integration tests failing (due to missing API keys - expected)
 ```

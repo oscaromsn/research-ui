@@ -22,7 +22,7 @@
       "public/**",
       ".claude/**",
       ".zed/**",
-      "pnpm-lock.yaml",
+      "bun.lockb",
       "package-lock.json",
       "yarn.lock",
       "*.min.js",

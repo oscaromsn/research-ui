@@ -45,38 +45,38 @@ This document outlines the comprehensive linting and formatting policy for the L
 - Dependencies: `node_modules/**`
 - Public assets: `public/**`
 - IDE files: `.vscode/**`, `.zed/**`, `.claude/**`
-- Lock files: `pnpm-lock.yaml`, `package-lock.json`
+- Lock files: `bun.lock`, `bun.lockb`, `package-lock.json`
 
 ## Scripts and Commands
 
 ### Formatting Commands
 ```bash
 # Format all files (source, tests, mocks - everything)
-pnpm format
+bun format
 ```
 
 ### Linting Commands
 ```bash
 # Lint all files (quiet mode)
-pnpm lint
+bun lint
 
 # Lint and auto-fix issues
-pnpm lint:fix
+bun lint:fix
 
 # Strict linting with zero warnings allowed
-pnpm lint:strict
+bun lint:strict
 ```
 
 ### Validation Commands
 ```bash
 # Quick validation (format + lint + typecheck)
-pnpm validate:quick
+bun validate:quick
 
 # Full validation (includes tests and coverage)
-pnpm validate
+bun validate
 
 # Complete CI validation
-pnpm ci
+bun ci
 ```
 
 ## Pre-commit Hooks (lint-staged)
@@ -207,7 +207,7 @@ npx biome format --help
 git add . && npx lint-staged
 
 # Format and see what changes (if any)
-pnpm format
+bun format
 ```
 
 ## Migration Notes

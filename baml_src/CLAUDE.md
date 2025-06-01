@@ -56,12 +56,12 @@ This guide provides essential instructions and context for working within the `/
     *   Use `@@assert( {{ ... }} )` to validate output structure and key content.
     *   **Refer to `@functions/CLAUDE.md` for detailed guidance on Jinja filters and assertion syntax (e.g., `{{ this|length > 0 }}`, `{{ this.field == "value" }}`, `{{ "keyword" in (this.summary | lower) }}`).**
 
-5.  **Run BAML Tests (`pnpm baml:test`)**:
+5.  **Run BAML Tests (`bun baml:test`)**:
     *   Iterate on prompts and type definitions until all relevant tests pass.
     *   Use the BAML VSCode extension's "Playground" feature to test individual function calls with specific inputs interactively. This is excellent for debugging prompts.
-    *   To run tests for a single function: `pnpm baml:test -i {$FunctionName}::` (e.g., `pnpm baml:test -i GenerateLegalSearchQueries::`).
+    *   To run tests for a single function: `bun baml:test -i {$FunctionName}::` (e.g., `bun baml:test -i GenerateLegalSearchQueries::`).
 
-6.  **Regenerate BAML Client (`pnpm baml:generate`)**:
+6.  **Regenerate BAML Client (`bun baml:generate`)**:
     *   **CRUCIAL**: After **any** change to `.baml` files (types, functions, clients, generators), you **MUST** run this command.
     *   This updates the `/baml_client` directory with new TypeScript types, client methods, and React hooks.
 
@@ -106,14 +106,14 @@ This guide provides essential instructions and context for working within the `/
 
 ## 5. Important Commands (Run from Project Root)
 
-*   **`pnpm baml:generate`**: **Run this after ANY change to ANY `.baml` file.** It updates the `/baml_client` directory.
-*   **`pnpm baml:test`**: Runs all BAML tests defined in `.test.baml` files.
-*   **`pnpm baml:test -i {$FunctionName}::`**: Runs all tests for a specific BAML function. Useful for focused development.
-    *   Example: `pnpm baml:test -i GenerateLegalSearchQueries::`
+*   **`bun baml:generate`**: **Run this after ANY change to ANY `.baml` file.** It updates the `/baml_client` directory.
+*   **`bun baml:test`**: Runs all BAML tests defined in `.test.baml` files.
+*   **`bun baml:test -i {$FunctionName}::`**: Runs all tests for a specific BAML function. Useful for focused development.
+    *   Example: `bun baml:test -i GenerateLegalSearchQueries::`
 
 ## 6. Relationship with `/baml_client`
 
-*   The `/baml_client` directory is **ENTIRELY AUTO-GENERATED** by the `pnpm baml:generate` command based on the contents of `/baml_src`.
+*   The `/baml_client` directory is **ENTIRELY AUTO-GENERATED** by the `bun baml:generate` command based on the contents of `/baml_src`.
 *   **NEVER MANUALLY EDIT FILES IN `/baml_client`.** Your changes will be overwritten.
 *   All changes to BAML logic, types, or client configurations must be made in `/baml_src`, followed by client regeneration.
 

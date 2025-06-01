@@ -1,6 +1,0 @@
-onlyBuiltDependencies:
-  - '@scarf/scarf'
-  - '@tailwindcss/oxide'
-  - esbuild
-  - sharp
-  - unrs-resolver

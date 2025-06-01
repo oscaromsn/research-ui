@@ -42,7 +42,7 @@ To ensure a smooth and effective collaboration, please review these guidelines.
 Ensure you have the following installed:
 
 *   Node.js (v18.17 or later)
-*   pnpm (v10.11.0 or later)
+*   bun (v1.1.0 or later)
 *   Git
 *   Access to LLM APIs (OpenAI, Google AI/Vertex AI, Anthropic) and an Exa Search API key for full functionality.
 
@@ -56,11 +56,11 @@ Ensure you have the following installed:
     ```
 3.  **Install dependencies:**
     ```bash
-    pnpm install
+    bun install
     ```
 4.  **Set up Git hooks** using Husky:
     ```bash
-    pnpm prepare
+    bun prepare
     ```
     This will ensure code quality checks run automatically before commits and pushes.
 5.  **Set up environment variables:**
@@ -69,11 +69,11 @@ Ensure you have the following installed:
     *   Similarly, create `.env.test` for test-specific environment variables (especially `EXA_API_KEY` for `exaSearchUtil.test.ts`).
 6.  **Generate initial BAML client:**
     ```bash
-    pnpm baml:generate
+    bun baml:generate
     ```
 7.  **Run the development server:**
     ```bash
-    pnpm dev
+    bun dev
     ```
     The application should now be accessible at `http://localhost:3000`.
 
@@ -93,12 +93,12 @@ Ensure you have the following installed:
 2.  Create your feature/bugfix branch.
 3.  Implement your changes. Adhere to the coding standards outlined below and in `CLAUDE.md`.
 4.  Write appropriate tests (BAML tests, Vitest unit/component tests, Playwright E2E tests).
-5.  Ensure all tests pass (`pnpm test`, `pnpm baml:test`, `pnpm test:e2e`).
+5.  Ensure all tests pass (`bun test`, `bun baml:test`, `bun test:e2e`).
 6.  Run code quality checks:
-    *   `pnpm format`
-    *   `pnpm lint`
-    *   `pnpm typecheck`
-7.  Commit your changes using the Conventional Commits format (see [Commit Messages](#commit-messages)). `pnpm commit` can help guide you.
+    *   `bun format`
+    *   `bun lint`
+    *   `bun typecheck`
+7.  Commit your changes using the Conventional Commits format (see [Commit Messages](#commit-messages)). `bun commit` can help guide you.
 8.  Push your branch to your fork and open a Pull Request against the main LexiSynth repository.
 
 ### BAML Development
@@ -107,10 +107,10 @@ If your changes involve modifying LLM interactions, prompts, or data schemas:
 
 1.  Edit files within the `baml_src/` directory (functions, types, clients).
 2.  Write or update corresponding tests in `.test.baml` files. These are crucial for validating prompt effectiveness and schema correctness.
-3.  Run BAML-specific tests: `pnpm baml:test`.
+3.  Run BAML-specific tests: `bun baml:test`.
 4.  Once BAML changes are satisfactory and tests pass, regenerate the BAML client:
     ```bash
-    pnpm baml:generate
+    bun baml:generate
     ```
     This updates the `baml_client/` directory. **Do not manually edit files in `baml_client/`.**
 
@@ -171,7 +171,7 @@ A robust testing strategy is crucial.
 
 *   Located in `.test.baml` files alongside their corresponding function files in `baml_src/`.
 *   Use BAML's native testing syntax with `test {}` blocks and `@@assert` for validations.
-*   Run with: `pnpm baml:test`
+*   Run with: `bun baml:test`
 
 ### Unit & Component Tests (Vitest)
 
@@ -179,24 +179,24 @@ A robust testing strategy is crucial.
 *   Use Vitest for the test runner and React Testing Library for component interactions.
 *   Mock dependencies as needed (e.g., BAML client, server actions, Jotai atoms for specific component tests). `__mocks__/` contains shared mocks.
 *   `__tests__/test-utils.tsx` provides `renderWithProviders` and mock data factories.
-*   Run with: `pnpm test`
-*   Run with coverage: `pnpm test:coverage`
+*   Run with: `bun test`
+*   Run with coverage: `bun test:coverage`
 
 ### End-to-End Tests (Playwright)
 
 *   Located in `e2e/`.
 *   Test critical user flows, especially the streaming aspects of the research pipeline.
-*   Run with: `pnpm test:e2e` (ensure dev server is running or configured in `playwright.config.ts`).
+*   Run with: `bun test:e2e` (ensure dev server is running or configured in `playwright.config.ts`).
 
 ### Running All Tests
 
 While there isn't a single command for *all* test types (BAML, Vitest, Playwright) combined, ensure each suite passes:
 ```bash
-pnpm baml:test
-pnpm test
-pnpm test:e2e
+bun baml:test
+bun test
+bun test:e2e
 ```
-The `pnpm validate` script is a good comprehensive check.
+The `bun validate` script is a good comprehensive check.
 
 ## Code Quality & Linting
 
@@ -205,25 +205,25 @@ Automated checks are enforced via Husky hooks.
 ### Formatting
 
 *   Biome is used for code formatting.
-*   Run `pnpm format` to format all applicable files.
+*   Run `bun format` to format all applicable files.
 *   Pre-commit hooks will attempt to format staged files.
 
 ### Linting
 
 *   ESLint is configured with various plugins (Next.js, React, TypeScript, Import, JSX-A11Y, Promise, Security, Testing Library, Vitest).
-*   Run `pnpm lint` to check for linting errors.
-*   Run `pnpm lint:fix` to attempt automatic fixes.
+*   Run `bun lint` to check for linting errors.
+*   Run `bun lint:fix` to attempt automatic fixes.
 
 ### Type Checking
 
 *   Ensure your code passes TypeScript's strict checks.
-*   Run `pnpm typecheck` or `pnpm typecheck:strict`.
-*   Maintain a high type coverage score (see `type-coverage.json` and `pnpm typecov`).
+*   Run `bun typecheck` or `bun typecheck:strict`.
+*   Maintain a high type coverage score (see `type-coverage.json` and `bun typecov`).
 
 ### Dead Code & Dependency Checks
 
-*   Use Knip to find unused files, dependencies, and exports: `pnpm knip`.
-*   Use Dependency-Cruiser to analyze module relationships: `pnpm deps:check`.
+*   Use Knip to find unused files, dependencies, and exports: `bun knip`.
+*   Use Dependency-Cruiser to analyze module relationships: `bun deps:check`.
 
 ## Commit Messages
 
@@ -233,13 +233,13 @@ This project follows the **Conventional Commits** specification. This is enforce
     *   Example: `feat(report-generation): add streaming for executive summary`
     *   Example: `fix(evidence-analysis): correct entity highlighting`
 *   **Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`, `init`, `release`.
-*   Use `pnpm commit` for a guided commit message experience via `git-cz`.
+*   Use `bun commit` for a guided commit message experience via `git-cz`.
 
 ## Submitting Pull Requests
 
 1.  Ensure your branch is up-to-date with the upstream `main` branch.
-2.  Verify all tests pass (`pnpm baml:test`, `pnpm test`, `pnpm test:e2e`).
-3.  Verify all code quality checks pass (`pnpm validate`).
+2.  Verify all tests pass (`bun baml:test`, `bun test`, `bun test:e2e`).
+3.  Verify all code quality checks pass (`bun validate`).
 4.  Push your branch to your fork.
 5.  Open a Pull Request (PR) against the `main` branch of the LexiSynth repository.
 6.  Provide a clear and concise description of your changes in the PR.
@@ -258,7 +258,7 @@ This project follows the **Conventional Commits** specification. This is enforce
     *   Expected behavior.
     *   Actual behavior.
     *   Screenshots or error messages, if applicable.
-    *   Your environment (OS, browser, Node version, pnpm version).
+    *   Your environment (OS, browser, Node version, bun version).
 
 ## Suggesting Enhancements
 

@@ -30,16 +30,16 @@ The following npm scripts are available for testing:
 
 ```bash
 # Run tests once
-pnpm test
+bun test
 
 # Run tests in watch mode
-pnpm test:watch
+bun test:watch
 
 # Run tests with UI visualization
-pnpm test:ui
+bun test:ui
 
 # Run tests and generate coverage report
-pnpm test:coverage
+bun test:coverage
 ```
 
 ## Test Examples
@@ -118,7 +118,7 @@ When testing React components:
 
 ## Test Coverage
 
-Run `pnpm test:coverage` to generate a coverage report, which will help identify areas of code that need more testing.
+Run `bun test:coverage` to generate a coverage report, which will help identify areas of code that need more testing.
 
 ---
 

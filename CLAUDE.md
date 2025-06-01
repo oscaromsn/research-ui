@@ -13,7 +13,7 @@ LexiSynth is a Next.js 15 application designed to assist legal professionals by 
 ## Tech Stack
 
 - **TypeScript**: Strict mode enabled
-- **pnpm**: Package manager (v10.11.0+). Use `pnpm` for all package operations.
+- **bun**: Package manager (v1.1.0+). Use `bun` for all package operations.
 - **Next.js 15**: App Router + Server Actions. RSC by default, Client Components only when necessary
 - **BAML (v0.88.0+)**: For all LLM interactions, schema definitions, and client generation.
 - **Jotai (v2.12.4+)**: Global client-side state management, particularly for data streamed from the research pipeline.
@@ -151,7 +151,7 @@ You always read the full planning files relevant for your taks at hand, while Uu
 1. **Single Responsibility**: Each component does one thing well
 2. **Props Interface**: Always define TypeScript interfaces
 3. **Composition**: Build complex UIs from simple components
-4. **Primitives-first**: Leverage on availabie primitives when possible, install shadcn as necessary using `pnpm dlx shadcn@latest add [component-name]`
+5. **Primitives-first**: Leverage on available primitives when possible, install shadcn as necessary using `bunx shadcn@latest add [component-name]`
 5. **Accessibility**: Include ARIA labels and keyboard support
 6. **Testing**: Write tests alongside components
 
@@ -166,7 +166,7 @@ You always read the full planning files relevant for your taks at hand, while Uu
 ## UI/UX Implementation
 - **Tailwind CSS v4**: Utility-first styling with CVA
 - **CSS Variables**: Define in `globals.css` for theming
-- **Shadcn/ui & Radix UI Primitives**: Use as base, customize as needed (install via pnpm)
+- **Shadcn/ui & Radix UI Primitives**: Use as base, customize as needed (install via bun)
 - **Responsive Design**: Ensure usability across screen sizes using Tailwind's modifiers.
 - **Accessibility (a11y)**: Semantic HTML, keyboard navigation, ARIA attributes, color contrast.
 - **Streaming Feedback**: UI must clearly indicate loading and streaming progress. Text should appear progressively. Lifecycle visualization should update.
@@ -196,7 +196,7 @@ You always read the full planning files relevant for your taks at hand, while Uu
 
 1. **BAML Tests (`.test.baml` files):**
 	- Write for every BAML function covering various inputs and asserting output structure/key values.
-	- Run with `pnpm baml-cli test`.
+	- Run with `bun baml-cli test`.
 2. **Server-Side Orchestrator Tests (Vitest):**
 	- Unit test `conductResearch`. Mock the BAML client (`b`) to simulate BAML function responses (including streams). Assert that the correct sequence of `ResearchUpdate` objects is produced on its output stream.
 3. **Client-Side Hook Tests (Vitest + RTL - PRD 6.2):**
@@ -209,26 +209,26 @@ You always read the full planning files relevant for your taks at hand, while Uu
 
 ```bash
 # Regenerate BAML client after baml_src changes
-pnpm baml:generate
+bun baml:generate
 
 # Type checking
-pnpm typecheck
+bun typecheck
 
 # Linting & Formatting (Biome based on CLAUDE.md intent, though package.json shows eslint)
-# Assuming biome script: pnpm lint && pnpm format
+# Assuming biome script: bun lint && bun format
 # Or if ESLint is used: next lint
 
 # Build (ensures app compiles)
-pnpm build
+bun build
 
 # Run tests
-pnpm test
-pnpm test:coverage
+bun test
+bun test:coverage
 ```
 
 ## Development Workflow (TDD Preferred)
 
-1. **BAML Changes**: Define/modify BAML function/type -> Write `.test.baml` -> Run BAML tests -> `pnpm baml:test` for all tests or `pnpm baml:test -i {$FunctionName}::` to run all tests tests for the function `$FunctionName`.
+1. **BAML Changes**: Define/modify BAML function/type -> Write `.test.baml` -> Run BAML tests -> `bun baml:test` for all tests or `bun baml:test -i {$FunctionName}::` to run all tests tests for the function `$FunctionName`.
 2. **Orchestrator Changes**: Define expected `ResearchUpdate` sequence for a new feature/stage -> Write Vitest unit test for `conductResearch` mocking BAML calls -> Implement orchestrator logic to pass test.
 3. **Hook Changes**: Define how Jotai atoms should change for new `ResearchUpdate` types/data -> Write Vitest unit test for `useResearchAgent` mocking `conductResearch` stream -> Implement hook logic.
 4. **UI Component Changes**: Define how UI should look/behave for new Jotai state -> Write RTL component test -> Implement component.
@@ -238,11 +238,11 @@ pnpm test:coverage
 Before considering a feature complete ensure that:
 
 1. ✅ BAML code generated & working.
-2. ✅ All tests pass (`pnpm test`)
-3. ✅ Test coverage meets guidelines (`pnpm test:coverage`)
-4. ✅ Type checking passes (`pnpm typecheck`)
-5. ✅ Linting passes (`pnpm lint`)
-6. ✅ Build succeeds (`pnpm build`).
+2. ✅ All tests pass (`bun test`)
+3. ✅ Test coverage meets guidelines (`bun test:coverage`)
+4. ✅ Type checking passes (`bun typecheck`)
+5. ✅ Linting passes (`bun lint`)
+6. ✅ Build succeeds (`bun build`).
 7. ✅ No runtime errors in the console
 8. ✅ Bundle size impact is reasonable
 9. ✅ Code adheres to these guidelines.

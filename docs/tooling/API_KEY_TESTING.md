@@ -101,37 +101,37 @@ const API_KEYS = {
 ### Standard Test Execution
 ```bash
 # Run all tests (skips API-dependent tests if keys missing)
-pnpm test
+bun test
 
 # Run tests with API key debugging
-pnpm run test:api
+bun run test:api
 
 # Run only non-API tests (forces API keys to be unavailable)
-pnpm run test:no-api
+bun run test:no-api
 
 # Run tests with coverage
-pnpm run test:coverage
+bun run test:coverage
 ```
 
 ### BAML Tests
 ```bash
 # Run BAML tests (requires API keys)
-pnpm run baml:test
+bun run baml:test
 
 # Run BAML tests safely (doesn't fail on missing keys)
-pnpm run baml:test:safe
+bun run baml:test:safe
 ```
 
 ### Environment-Specific Testing
 ```bash
 # Local development (may include API tests)
-NODE_ENV=development pnpm test
+NODE_ENV=development bun test
 
 # CI simulation (skips most API tests)
-CI=true pnpm test
+CI=true bun test
 
 # Debug API test behavior
-DEBUG_API_TESTS=true pnpm test
+DEBUG_API_TESTS=true bun test
 ```
 
 ## Best Practices
@@ -225,9 +225,9 @@ jobs:
         with:
           node-version: '18'
       - name: Install dependencies
-        run: pnpm install
+        run: bun install
       - name: Run unit tests (no API)
-        run: pnpm run test:no-api
+        run: bun run test:no-api
 
   test-with-api:
     runs-on: ubuntu-latest
@@ -239,12 +239,12 @@ jobs:
         with:
           node-version: '18'
       - name: Install dependencies
-        run: pnpm install
+        run: bun install
       - name: Run tests with API keys
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
-        run: pnpm test
+        run: bun test
 ```
 
 ### Environment Variables in CI
@@ -281,13 +281,13 @@ beforeAll(() => {
 
 ```bash
 # Check which tests would be skipped
-DEBUG_API_TESTS=true pnpm test --dry-run
+DEBUG_API_TESTS=true bun test --dry-run
 
 # See API key status
-DEBUG_API_TESTS=true pnpm test | grep "API Key Status"
+DEBUG_API_TESTS=true bun test | grep "API Key Status"
 
 # Run specific test with debugging
-DEBUG_API_TESTS=true pnpm test -- --run orchestrator-with-api
+DEBUG_API_TESTS=true bun test -- --run orchestrator-with-api
 ```
 
 ## File Organization

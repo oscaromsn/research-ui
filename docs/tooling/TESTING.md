@@ -7,19 +7,19 @@ This document provides a comprehensive guide to the testing ecosystem in LexiSyn
 ### For New Developers
 ```bash
 # Run fast unit tests (recommended for development)
-pnpm test
+bun test
 
 # Watch mode for active development
-pnpm test:watch
+bun test:watch
 
 # Run all tests (includes slow integration tests)
-pnpm test:all
+bun test:all
 ```
 
 ### For CI/CD
 ```bash
 # Complete validation suite
-pnpm ci
+bun ci
 ```
 
 ## Test Architecture Overview
@@ -47,13 +47,13 @@ Our testing ecosystem is organized into multiple layers, each serving a specific
 
 ```bash
 # Run all unit tests
-pnpm test:unit
+bun test:unit
 
 # Watch mode for development
-pnpm test:unit:watch
+bun test:unit:watch
 
 # With coverage report
-pnpm test:coverage
+bun test:coverage
 ```
 
 **When to use**: 
@@ -68,13 +68,13 @@ pnpm test:coverage
 
 ```bash
 # Run integration tests (requires API keys)
-pnpm test:integration
+bun test:integration
 
 # With debug output
-pnpm test:integration:debug
+bun test:integration:debug
 
 # Watch mode (not recommended - very slow)
-pnpm test:integration:watch
+bun test:integration:watch
 ```
 
 **When to use**:
@@ -96,10 +96,10 @@ export EXA_API_KEY="your-exa-search-key"
 
 ```bash
 # Run BAML tests
-pnpm test:baml
+bun test:baml
 
 # Safe mode (won't fail if API keys missing)
-pnpm test:baml:safe
+bun test:baml:safe
 ```
 
 ### 🌐 End-to-End Tests (Browser Automation)
@@ -109,13 +109,13 @@ pnpm test:baml:safe
 
 ```bash
 # Run E2E tests
-pnpm test:e2e
+bun test:e2e
 
 # Interactive mode
-pnpm test:e2e:ui
+bun test:e2e:ui
 
 # Debug mode
-pnpm test:e2e:debug
+bun test:e2e:debug
 ```
 
 ## Environment Setup
@@ -233,7 +233,7 @@ describe('conductResearch', () => {
 **Tests timing out**:
 ```bash
 # Increase timeout for specific tests
-pnpm test --timeout=60000
+bun test --timeout=60000
 ```
 
 **Mock issues**:
@@ -251,16 +251,16 @@ echo $GOOGLE_API_KEY
 echo $EXA_API_KEY
 
 # Run with debug output
-pnpm test:integration:debug
+bun test:integration:debug
 ```
 
 ### Debug Mode
 ```bash
 # Run tests with debug output
-DEBUG_API_TESTS=true pnpm test:integration
+DEBUG_API_TESTS=true bun test:integration
 
 # Use Vitest UI for interactive debugging
-pnpm test:ui
+bun test:ui
 ```
 
 ## Performance Considerations

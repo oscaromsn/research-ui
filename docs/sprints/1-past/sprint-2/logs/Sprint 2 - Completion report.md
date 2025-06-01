@@ -423,7 +423,7 @@ it("does not render assessment section when no assessment data", async () => {
 - ✅ **Commit Message**: Follows conventional commit standards
 
 **Production Readiness Checklist**:
-- ✅ **Build Success**: `pnpm build` completes without errors
+- ✅ **Build Success**: `bun build` completes without errors
 - ✅ **Type Coverage**: >98.9% type coverage maintained
 - ✅ **Bundle Analysis**: No significant size increases
 - ✅ **Dependency Audit**: No security vulnerabilities

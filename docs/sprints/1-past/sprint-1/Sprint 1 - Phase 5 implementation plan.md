@@ -155,13 +155,13 @@ Okay, Phase 5 focuses on Testing and Refinement. This is crucial for ensuring Le
 - ✅ Unit tests exist for `resetResearchStateAtom` logic.
 - ✅ `useResearchAgent.ts` has comprehensive unit tests covering initialization, `startResearch` (including stream processing for all `ResearchUpdate` types and stages), `abortResearch`, and error handling. Mocking of `conductResearch` is effective.
 - ✅ Key UI components (`GuidanceStrategy`, `EvidenceAnalysis`, `SynthesisReporting`, `ResearchLifecycle`) have component tests verifying they render correctly based on various Jotai states and that user interactions trigger expected calls to the `useResearchAgent` hook.
-- ✅ All frontend unit and component tests pass (`pnpm test`).
+- ✅ All frontend unit and component tests pass (`bun test`).
 - ✅ Test coverage meets targets specified in `CLAUDE.md` (e.g., 70%+ for critical paths).
 
 **Checkpoint 1:**
 - All BAML tests are written and passing.
 - Core frontend logic (especially `useResearchAgent` and Jotai atom interactions) is unit-tested.
-- Run `pnpm test:coverage` and review coverage report.
+- Run `bun test:coverage` and review coverage report.
 
 ---
 
@@ -219,10 +219,10 @@ Okay, Phase 5 focuses on Testing and Refinement. This is crucial for ensuring Le
 **Details:**
 
 1. **Run Linters and Formatters:**
-	- `pnpm lint` (as defined in `package.json`, which might run Biome or ESLint based on project setup – `CLAUDE.md` implies Biome is primary).
-	- `pnpm format` (if a separate format script exists, or rely on Biome's format-on-save if configured).
+	- `bun lint` (as defined in `package.json`, which might run Biome or ESLint based on project setup – `CLAUDE.md` implies Biome is primary).
+	- `bun format` (if a separate format script exists, or rely on Biome's format-on-save if configured).
 2. **Type Checking:**
-	- `pnpm typecheck` (runs `tsc --noEmit`). Resolve all TypeScript errors.
+	- `bun typecheck` (runs `tsc --noEmit`). Resolve all TypeScript errors.
 	- Pay special attention to `any` types; replace them with specific types as per `CLAUDE.md`.
 3. **Code Review (Self or Peer):**
 	- **Decoupling:** Is there a clean separation between UI, `useResearchAgent` hook, Jotai state, and the server action?
@@ -237,8 +237,8 @@ Okay, Phase 5 focuses on Testing and Refinement. This is crucial for ensuring Le
 	- Ensure consistent error propagation.
 
 **Acceptance Criteria 5.4:**
-- ✅ `pnpm lint` passes with no errors/warnings (or justifiable exceptions).
-- ✅ `pnpm typecheck` passes with no errors.
+- ✅ `bun lint` passes with no errors/warnings (or justifiable exceptions).
+- ✅ `bun typecheck` passes with no errors.
 - ✅ Code adheres to naming conventions and style guidelines in `CLAUDE.md`.
 - ✅ Key logic paths are reviewed for clarity, correctness, and performance.
 
@@ -267,7 +267,7 @@ Okay, Phase 5 focuses on Testing and Refinement. This is crucial for ensuring Le
 
 1. **All Tests Pass:**
 	- ✅ All BAML tests pass.
-	- ✅ All Vitest unit/component tests pass (`pnpm test`).
+	- ✅ All Vitest unit/component tests pass (`bun test`).
 	- ✅ Test coverage meets project targets.
 2. **Manual E2E Validation:**
 	- ✅ Key user flows are manually tested and work as expected, including streaming and error handling.

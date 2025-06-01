@@ -8,20 +8,20 @@ This project has been successfully configured with comprehensive development too
 - **Status**: ✅ Configured and working
 - **Config**: `commitlint.config.js`
 - **Purpose**: Enforces conventional commit message format
-- **Test**: `echo "feat: test message" | pnpm exec commitlint`
+- **Test**: `echo "feat: test message" | bun exec commitlint`
 
 ### 2. **Size Limit** - Bundle Size Monitoring
 - **Status**: ✅ Configured and working
 - **Config**: `.size-limit.json`
 - **Purpose**: Monitors JavaScript bundle sizes and prevents performance regressions
 - **Current limits**: Main chunk (50KB), App pages (150KB), Page components (100KB)
-- **Test**: `pnpm size`
+- **Test**: `bun size`
 
 ### 3. **Dependency Cruiser** - Dependency Analysis
 - **Status**: ✅ Configured and working
 - **Config**: `.dependency-cruiser.js`
 - **Purpose**: Analyzes dependencies, detects circular dependencies, enforces architectural rules
-- **Test**: `pnpm deps:check`
+- **Test**: `bun deps:check`
 
 ### 4. **Husky** - Git Hooks Management
 - **Status**: ✅ Configured and working
@@ -35,7 +35,7 @@ This project has been successfully configured with comprehensive development too
 - **Status**: ✅ Configured and working
 - **Config**: `.lintstagedrc.js`
 - **Purpose**: Runs linters and formatters only on staged files
-- **Test**: `pnpm exec lint-staged`
+- **Test**: `bun exec lint-staged`
 
 ## 🔧 Updated Package.json Scripts
 
@@ -72,30 +72,30 @@ The hooks will automatically:
 
 ```bash
 # Check bundle sizes
-pnpm size
+bun size
 
 # Analyze dependencies
-pnpm deps:check
+bun deps:check
 
 # Generate dependency graph
-pnpm deps:graph
+bun deps:graph
 
 # Test commit message
-echo "feat: test message" | pnpm exec commitlint
+echo "feat: test message" | bun exec commitlint
 
 # Run lint-staged manually
-pnpm exec lint-staged
+bun exec lint-staged
 ```
 
 ## 📋 Integration Status
 
 | Tool | Status | Hook Integration | Manual Commands |
 |------|--------|------------------|-----------------|
-| Commitlint | ✅ Working | commit-msg hook | `pnpm commitlint` |
-| Size Limit | ✅ Working | validate:full | `pnpm size` |
-| Dependency Cruiser | ✅ Working | validate script | `pnpm deps:check` |
+| Commitlint | ✅ Working | commit-msg hook | `bun commitlint` |
+| Size Limit | ✅ Working | validate:full | `bun size` |
+| Dependency Cruiser | ✅ Working | validate script | `bun deps:check` |
 | Husky | ✅ Working | All git operations | `.husky/*` |
-| Lint Staged | ✅ Working | pre-commit hook | `pnpm exec lint-staged` |
+| Lint Staged | ✅ Working | pre-commit hook | `bun exec lint-staged` |
 
 ## 🎯 Benefits
 

@@ -226,7 +226,7 @@
         *   Confirm which tool is primary for formatting (likely Biome per `CLAUDE.md`). Ensure its configuration is optimal.
         *   If ESLint is used for linting, ensure its rules complement Biome and don't conflict.
         *   Adjust `ignore` patterns in both `biome.json` and `.eslintignore` for consistency.
-        *   Ensure `pnpm lint` and `pnpm format` (if it exists) scripts run the intended tools correctly.
+        *   Ensure `bun lint` and `bun format` (if it exists) scripts run the intended tools correctly.
     *   **Acceptance Criteria:** ✅ Linting and formatting setup is consistent and documented (e.g., in the main `README.md` or `CLAUDE.md`).
 
 **Checkpoint 4 (End of Cleanup):** Project structure and tooling are more organized.

@@ -81,7 +81,7 @@ This section details the specific technical requirements for each feature, follo
 		- **FR1.3.2:** Fallback and retry policies (`Constant`, `Exponential`) shall be defined and available for client configurations.
 	- **3.1.4. BAML Code Generation:**
 		- **FR1.4.1:** `baml_src/generators.baml` shall be configured for `output_type "typescript/react"` targeting BAML version `0.88.0`.
-		- **FR1.4.2:** The system must support regeneration of the `baml_client` via `pnpm generate:baml`.
+		- **FR1.4.2:** The system must support regeneration of the `baml_client` via `bun generate:baml`.
 
 - **3.2. Server-Side Orchestrator (`researchAgentOrchestrator.ts`)**
 	- **FR2.1. Server Action Definition:**
@@ -213,8 +213,8 @@ This section details the specific technical requirements for each feature, follo
 - **6.1. BAML Tests:** Each BAML function in `baml_src/functions/` shall have corresponding `.test.baml` files with representative test cases.
 - **6.2. Unit Tests (Vitest):** Utility functions, Jotai atom logic (if complex), and custom hooks (`useResearchAgent`) shall have unit tests.
 - **6.3. Component Tests (React Testing Library):** UI components shall be tested for rendering, interactions, and state-driven display changes.
-- **6.4. Type Checking:** `pnpm typecheck` must pass.
-- **6.5. Linting:** `pnpm lint` (using Biome) must pass.
+- **6.4. Type Checking:** `bun typecheck` must pass.
+- **6.5. Linting:** `bun lint` (using Biome) must pass.
 
 **7. Documentation Requirements**
 

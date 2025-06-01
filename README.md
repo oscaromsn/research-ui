@@ -55,7 +55,7 @@ The application emphasizes a server-first approach using Next.js App Router with
 
 *   **Framework:** Next.js 15 (App Router, RSC, Server Actions)
 *   **Language:** TypeScript (strict mode)
-*   **Package Manager:** pnpm (v10.11.0+)
+*   **Package Manager:** bun (v1.1.0+)
 *   **AI/LLM Layer:** BAML (Boundary AI Markup Language) v0.89.0+
 *   **State Management (Client):** Jotai v2.12.4+
 *   **Styling:** Tailwind CSS v4, Class Variance Authority (CVA)
@@ -105,7 +105,7 @@ This pattern ensures that complex AI logic remains server-side, while the client
 ### Prerequisites
 
 *   Node.js (v18.17 or later recommended for Next.js 15)
-*   pnpm (v10.11.0 or later)
+*   bun (v1.1.0 or later)
 *   Access to LLM APIs (e.g., OpenAI, Google AI/Vertex AI, Anthropic) and an Exa Search API key.
 
 ### Installation
@@ -118,12 +118,12 @@ This pattern ensures that complex AI logic remains server-side, while the client
 
 2.  **Install dependencies:**
     ```bash
-    pnpm install
+    bun install
     ```
 
 3.  **Initialize Husky Git hooks:**
     ```bash
-    pnpm prepare
+    bun prepare
     ```
 
 ### Environment Variables
@@ -153,12 +153,12 @@ A `.env.test` file is also used for loading test-specific environment variables 
 
 1.  **Generate BAML client (if `baml_src` has changed or first time setup):**
     ```bash
-    pnpm baml:generate
+    bun baml:generate
     ```
 
 2.  **Start the Next.js development server:**
     ```bash
-    pnpm dev
+    bun dev
     ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
@@ -174,29 +174,29 @@ LexiSynth uses a comprehensive, multi-layered testing approach designed for both
 **For Development (Fast):**
 ```bash
 # Run unit tests only (recommended for daily development)
-pnpm test
+bun test
 
 # Watch mode for active development
-pnpm test:watch
+bun test:watch
 ```
 
 **For Full Validation:**
 ```bash
 # Run all test types (unit + integration + e2e)
-pnpm test:all
+bun test:all
 
 # Complete CI validation suite
-pnpm ci
+bun ci
 ```
 
 ### Test Categories
 
 | Test Type | Command | Speed | Requirements |
 |-----------|---------|-------|--------------|
-| **Unit Tests** | `pnpm test:unit` | ~30-60s | None |
-| **Integration Tests** | `pnpm test:integration` | ~5-10min | API Keys* |
-| **BAML/AI Tests** | `pnpm test:baml` | ~2-5min | AI API Keys* |
-| **E2E Tests** | `pnpm test:e2e` | ~3-10min | Browser setup |
+| **Unit Tests** | `bun test:unit` | ~30-60s | None |
+| **Integration Tests** | `bun test:integration` | ~5-10min | API Keys* |
+| **BAML/AI Tests** | `bun test:baml` | ~2-5min | AI API Keys* |
+| **E2E Tests** | `bun test:e2e` | ~3-10min | Browser setup |
 
 *\*API Keys: `GOOGLE_API_KEY`, `EXA_API_KEY` required for integration and BAML tests*
 
@@ -221,8 +221,8 @@ For complete testing documentation, troubleshooting, and best practices, see [do
 
 1.  Define or modify BAML functions and types in the `baml_src/` directory.
 2.  Write corresponding tests in `.test.baml` files.
-3.  Run BAML tests: `pnpm baml:test`.
-4.  If tests pass and changes are made, regenerate the BAML client: `pnpm baml:generate`. This updates the `baml_client/` directory.
+3.  Run BAML tests: `bun baml:test`.
+4.  If tests pass and changes are made, regenerate the BAML client: `bun baml:generate`. This updates the `baml_client/` directory.
 
 ### Frontend Development
 
@@ -234,26 +234,26 @@ For complete testing documentation, troubleshooting, and best practices, see [do
 
 ### Code Quality & Conventions
 
-*   **Formatting:** Code is automatically formatted by Biome (and ESLint for certain aspects). Run `pnpm format` to format manually.
-*   **Linting:** ESLint is configured for comprehensive linting. Run `pnpm lint` or `pnpm lint:fix`.
-*   **Commit Messages:** Follow Conventional Commits. `pnpm commit` can be used for guided commits (via `git-cz`), and `commitlint` (triggered by Husky) enforces this.
-*   **Type Checking:** Run `pnpm typecheck` regularly.
+*   **Formatting:** Code is automatically formatted by Biome (and ESLint for certain aspects). Run `bun format` to format manually.
+*   **Linting:** ESLint is configured for comprehensive linting. Run `bun lint` or `bun lint:fix`.
+*   **Commit Messages:** Follow Conventional Commits. `bun commit` can be used for guided commits (via `git-cz`), and `commitlint` (triggered by Husky) enforces this.
+*   **Type Checking:** Run `bun typecheck` regularly.
 *   **Husky Hooks:** Pre-commit and pre-push hooks are configured in `.husky/` to run lint-staged, type checks, etc.
 
 ## Key Scripts
 
 (Refer to `package.json` for a full list)
 
-*   `pnpm dev`: Starts the Next.js development server.
-*   `pnpm build`: Builds the application for production.
-*   `pnpm start`: Starts the production server.
-*   `pnpm format`: Formats code using Biome.
-*   `pnpm lint`: Lints code using ESLint.
-*   `pnpm typecheck`: Runs TypeScript compiler checks.
-*   `pnpm test`: Runs all Vitest unit/component tests.
-*   `pnpm test:e2e`: Runs all Playwright E2E tests.
-*   `pnpm baml:generate`: Regenerates the `baml_client/` directory.
-*   `pnpm baml:test`: Runs all BAML native tests.
-*   `pnpm validate`: Runs a comprehensive suite of checks (typecheck, lint, tests, format, knip, typecov, deps).
-*   `pnpm knip`: Finds unused files, dependencies, and exports.
-*   `pnpm deps:check`: Checks for dependency issues using dependency-cruiser.
+*   `bun dev`: Starts the Next.js development server.
+*   `bun build`: Builds the application for production.
+*   `bun start`: Starts the production server.
+*   `bun format`: Formats code using Biome.
+*   `bun lint`: Lints code using ESLint.
+*   `bun typecheck`: Runs TypeScript compiler checks.
+*   `bun test`: Runs all Vitest unit/component tests.
+*   `bun test:e2e`: Runs all Playwright E2E tests.
+*   `bun baml:generate`: Regenerates the `baml_client/` directory.
+*   `bun baml:test`: Runs all BAML native tests.
+*   `bun validate`: Runs a comprehensive suite of checks (typecheck, lint, tests, format, knip, typecov, deps).
+*   `bun knip`: Finds unused files, dependencies, and exports.
+*   `bun deps:check`: Checks for dependency issues using dependency-cruiser.

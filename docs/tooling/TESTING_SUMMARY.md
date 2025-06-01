@@ -31,19 +31,19 @@ We have successfully set up a comprehensive testing infrastructure for the Next.
 
 ```bash
 # Run tests once
-pnpm test
+bun test
 
 # Run tests in watch mode
-pnpm test:watch
+bun test:watch
 
 # Run tests with UI visualization
-pnpm test:ui
+bun test:ui
 
 # Run tests with coverage
-pnpm test:coverage
+bun test:coverage
 
 # Type checking
-pnpm typecheck
+bun typecheck
 ```
 
 ## Next Steps

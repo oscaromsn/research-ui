@@ -201,7 +201,7 @@
 
 ### Phase 2 Completion & Review:
 
-1.  **Run All BAML Tests:** Execute `pnpm baml:test` (or equivalent using the VSCode extension) and ensure all tests pass.
+1.  **Run All BAML Tests:** Execute `bun baml:test` (or equivalent using the VSCode extension) and ensure all tests pass.
 2.  **Full Pipeline Manual Test:**
     *   Execute the application from the UI with 2-3 different legal questions designed to test various paths (e.g., one straightforward, one leading to refinement needs, one complex).
     *   Carefully observe the data being populated in each UI section (`GuidanceStrategy`, `EvidenceAnalysis`, `SynthesisReporting`, `ReportDrafter`).

@@ -45,10 +45,10 @@ refactor: extract utility functions to separate module
 **Usage**:
 ```bash
 # Test a commit message
-echo "feat: your commit message" | pnpm exec commitlint
+echo "feat: your commit message" | bun exec commitlint
 
 # Manual validation
-pnpm commitlint --edit
+bun commitlint --edit
 ```
 
 ### 2. Size Limit
@@ -65,13 +65,13 @@ pnpm commitlint --edit
 **Usage**:
 ```bash
 # Check current bundle sizes
-pnpm size
+bun size
 
 # Analyze why bundles are large
-pnpm size:why
+bun size:why
 
 # Generate JSON analysis report
-pnpm size:analyze
+bun size:analyze
 ```
 
 **Integration**: Automatically runs during `validate:full` and pre-push hooks.
@@ -92,13 +92,13 @@ pnpm size:analyze
 **Usage**:
 ```bash
 # Check for dependency violations
-pnpm deps:check
+bun deps:check
 
 # Generate visual dependency graph (requires Graphviz)
-pnpm deps:graph
+bun deps:graph
 
 # Generate HTML dependency report
-pnpm deps:report
+bun deps:report
 ```
 
 **Output files**:
@@ -131,10 +131,10 @@ Runs quick validation:
 **Manual execution**:
 ```bash
 # Test pre-commit hook
-pnpm precommit
+bun precommit
 
 # Test commit message validation
-pnpm commitlint --edit
+bun commitlint --edit
 ```
 
 ### 5. Lint Staged
@@ -156,10 +156,10 @@ pnpm commitlint --edit
 **Usage**:
 ```bash
 # Run lint-staged manually
-pnpm exec lint-staged
+bun exec lint-staged
 
 # Run with verbose output
-pnpm exec lint-staged --verbose
+bun exec lint-staged --verbose
 ```
 
 ## Development Workflow
@@ -185,15 +185,15 @@ Run comprehensive validation:
 
 ```bash
 # Full validation including tests and bundle analysis
-pnpm validate:full
+bun validate:full
 
 # Individual checks
-pnpm validate        # Core validation
-pnpm test:coverage   # Test coverage
-pnpm test:e2e        # End-to-end tests
-pnpm size           # Bundle size check
-pnpm deps:check     # Dependency analysis
-pnpm audit          # Security audit
+bun validate        # Core validation
+bun test:coverage   # Test coverage
+bun test:e2e        # End-to-end tests
+bun size           # Bundle size check
+bun deps:check     # Dependency analysis
+bun audit          # Security audit
 ```
 
 ### CI/CD Integration
@@ -201,7 +201,7 @@ pnpm audit          # Security audit
 The `ci` script runs the complete validation suite:
 
 ```bash
-pnpm ci
+bun ci
 ```
 
 This includes:
@@ -230,7 +230,7 @@ This includes:
 ✖ Size limit exceeded
 ```
 **Solution**: 
-- Run `pnpm size:why` to analyze large dependencies
+- Run `bun size:why` to analyze large dependencies
 - Optimize imports (use tree shaking)
 - Consider code splitting
 - Update limits in `.size-limit.json` if necessary
@@ -271,13 +271,13 @@ To verify the git hooks are working correctly:
 
 ```bash
 # Test commitlint
-echo "feat: test commit message" | pnpm exec commitlint
+echo "feat: test commit message" | bun exec commitlint
 
 # Test invalid commit message
-echo "invalid message" | pnpm exec commitlint
+echo "invalid message" | bun exec commitlint
 
 # Test pre-commit hook (manually)
-pnpm exec lint-staged --verbose
+bun exec lint-staged --verbose
 
 # Test pre-push hook (manually)
 .husky/pre-push
