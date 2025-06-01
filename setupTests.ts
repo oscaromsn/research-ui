@@ -66,13 +66,8 @@ beforeAll(() => {
         encodingOrCallback
       );
     }
-      // When encodingOrCallback is a BufferEncoding, pass it along with optional callback
-      return originalStderrWrite.call(
-        this,
-        chunk,
-        encodingOrCallback,
-        callback
-      );
+    // When encodingOrCallback is a BufferEncoding, pass it along with optional callback
+    return originalStderrWrite.call(this, chunk, encodingOrCallback, callback);
   };
 });
 

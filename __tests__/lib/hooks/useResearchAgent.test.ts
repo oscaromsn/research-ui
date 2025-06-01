@@ -160,7 +160,9 @@ describe("useResearchAgent Hook", () => {
     });
 
     it("should set initializing state when starting research", async () => {
-      let streamController: ReadableStreamDefaultController<Uint8Array>;
+      let streamController:
+        | ReadableStreamDefaultController<Uint8Array>
+        | undefined;
       const mockStream = new ReadableStream({
         start(controller) {
           streamController = controller;
@@ -275,7 +277,9 @@ describe("useResearchAgent Hook", () => {
     });
 
     it("should log when no active research to abort", () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {
+        // Mock implementation - intentionally empty
+      });
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
@@ -688,7 +692,9 @@ describe("useResearchAgent Hook", () => {
 
   describe("AbortController Management", () => {
     it("should create AbortController when starting research", async () => {
-      let streamController: ReadableStreamDefaultController<Uint8Array>;
+      let streamController:
+        | ReadableStreamDefaultController<Uint8Array>
+        | undefined;
       const mockStream = new ReadableStream({
         start(controller) {
           streamController = controller;
@@ -713,7 +719,9 @@ describe("useResearchAgent Hook", () => {
       });
 
       // Now test abort while controller is still active
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {
+        // Mock implementation - intentionally empty
+      });
 
       act(() => {
         result.current.abortResearch();

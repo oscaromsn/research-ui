@@ -248,19 +248,19 @@ export async function conductResearch(
           // Fail fast - can't proceed without any documents
           return;
         }
-          await sendUpdate(writer, encoder, {
-            type: "DATA",
-            stage: currentStage,
-            data: {
-              count: searchResultItems.length,
-              titles: searchResultItems.map((r) =>
-                r.title ? `${r.title.substring(0, 70)}...` : "Untitled"
-              ),
-              sources: searchResultItems.map((r) => r.source_name),
-            },
-            message: `${searchResultItems.length} unique documents retrieved from live search.`,
-            isFinalForStage: true,
-          });
+        await sendUpdate(writer, encoder, {
+          type: "DATA",
+          stage: currentStage,
+          data: {
+            count: searchResultItems.length,
+            titles: searchResultItems.map((r) =>
+              r.title ? `${r.title.substring(0, 70)}...` : "Untitled"
+            ),
+            sources: searchResultItems.map((r) => r.source_name),
+          },
+          message: `${searchResultItems.length} unique documents retrieved from live search.`,
+          isFinalForStage: true,
+        });
       } catch (searchError: unknown) {
         const errorMessage =
           searchError instanceof Error
