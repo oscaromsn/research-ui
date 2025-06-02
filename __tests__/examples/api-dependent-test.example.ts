@@ -134,7 +134,9 @@ describeWithApiKeys(
         try {
           while (true) {
             const { done, value } = await reader.read()
-            if (done) break
+            if (done) {
+              break
+            }
 
             const chunk = new TextDecoder().decode(value)
             const lines = chunk.split('\n').filter(line => line.trim())
@@ -169,7 +171,7 @@ createApiTestSuite({
   mockTests: [
     {
       name: 'should handle mock document analysis',
-      fn: async () => {
+      fn: () => {
         // Mock test that always runs
         const mockAnalysis = {
           relevance_score: 8,
@@ -199,12 +201,21 @@ createApiTestSuite({
 
         const mockDoc = {
           id: 'real-test',
+          url: 'https://example.com/test-doc',
+          title: 'Test Legal Document',
+          snippet: 'Test snippet content',
+          published_date: null,
+          author: null,
+          score: null,
           full_text: 'Real legal document content for testing...',
-          // ... other required fields
+          highlights: null,
+          retrieval_date: new Date().toISOString(),
+          metadata: null,
+          source_name: 'Test Source',
         }
 
         const result = await b.AnalyzeSingleDocument(
-          mockDoc as any,
+          mockDoc,
           'Test legal question'
         )
 

@@ -114,12 +114,10 @@ watcher.on('change', async (path) => {
 {
   "typescript.preferences.includePackageJsonAutoImports": "off",
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true,
+    "source.fixAll.biome": true,
     "source.organizeImports": true,
     "source.formatDocument": true
   },
-  "eslint.validate": ["typescript", "typescriptreact"],
-  "eslint.run": "onType",
   "typescript.updateImportsOnFileMove.enabled": "always",
   "editor.rulers": [80, 120],
   "files.autoSave": "onFocusChange"
@@ -529,7 +527,7 @@ class ZeroTouchSystem {
 #### Tooling Dependencies
 - **Husky**: Enhanced git hook management
 - **Chokidar**: File system watching
-- **Biome/ESlint**: Automated fixing capabilities
+- **Biome**: Automated fixing capabilities
 - **TypeScript**: Advanced type analysis
 - **Jest/Vitest**: Intelligent test execution
 

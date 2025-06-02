@@ -14,30 +14,32 @@ export function Modal({
   children,
   size = 'md',
 }: ModalProps) {
-  if (!isOpen) return null
+  if (!isOpen) {
+    return null
+  }
   const sizeClasses = {
     md: 'max-w-md',
     lg: 'max-w-lg',
     xl: 'max-w-xl',
   }
   return (
-    <div className="z-50 fixed inset-0 flex justify-center items-center bg-black/50 animate-in fade-in-0">
+    <div className="fade-in-0 fixed inset-0 z-50 flex animate-in items-center justify-center bg-black/50">
       <div
-        className={`bg-white dark:bg-[#1a1f2e] rounded-lg shadow-lg w-full ${sizeClasses[size]} mx-4`}
+        className={`w-full rounded-lg bg-white shadow-lg dark:bg-[#1a1f2e] ${sizeClasses[size]} mx-4`}
       >
-        <div className="flex justify-between items-center p-4 border-[#e1e5eb] dark:border-[#2a3148] border-b">
-          <h3 className="font-semibold text-[#1a1f2e] dark:text-white text-lg">
+        <div className="flex items-center justify-between border-[#e1e5eb] border-b p-4 dark:border-[#2a3148]">
+          <h3 className="font-semibold text-[#1a1f2e] text-lg dark:text-white">
             {title}
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="hover:bg-[#f1f5f9] dark:hover:bg-[#242a3d] p-1 rounded-full transition-colors"
+            className="rounded-full p-1 transition-colors hover:bg-[#f1f5f9] dark:hover:bg-[#242a3d]"
           >
             <X size={18} className="text-[#64748b] dark:text-[#94a3b8]" />
           </button>
         </div>
-        <div className="p-4 max-h-[80vh] overflow-y-auto">{children}</div>
+        <div className="max-h-[80vh] overflow-y-auto p-4">{children}</div>
       </div>
     </div>
   )

@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} flex flex-col min-h-screen bg-[#f8f9fa] dark:bg-[#121620]`}
+        className={`${inter.className} flex min-h-screen flex-col bg-[#f8f9fa] dark:bg-[#121620]`}
       >
         <JotaiProvider>{children}</JotaiProvider>
       </body>

@@ -20,6 +20,7 @@
       "dist/**",
       "docs/**",
       "node_modules/**",
+      "baml_client/**",
       "public/**"
     ],
     "include": [
@@ -38,7 +39,11 @@
       "lib/**/*.ts",
       "lib/**/*.tsx",
       "src/**/*.ts",
-      "src/**/*.tsx"
+      "src/**/*.tsx",
+      "pages/**/*.ts",
+      "pages/**/*.tsx",
+      "utils/**/*.ts",
+      "utils/**/*.tsx"
     ]
   },
   "organizeImports": {
@@ -89,7 +94,7 @@
           }
         },
         "noExtraBooleanCast": "error",
-        "noForEach": "warn",
+        "noForEach": "error",
         "noMultipleSpacesInRegularExpressionLiterals": "error",
         "noStaticOnlyClass": "error",
         "noThisInStatic": "error",
@@ -135,9 +140,11 @@
         "noUnsafeOptionalChaining": "error",
         "noUnusedLabels": "error",
         "noUnusedPrivateClassMembers": "error",
-        "noUnusedVariables": "error",
+        "noUnusedVariables": {
+          "level": "error"
+        },
         "useArrayLiterals": "error",
-        "useExhaustiveDependencies": "warn",
+        "useExhaustiveDependencies": "error",
         "useHookAtTopLevel": "error",
         "useIsNan": "error",
         "useJsxKeyInIterable": "error",
@@ -146,20 +153,23 @@
       },
       "nursery": {
         "noDuplicateElseIf": "error",
+        "noMissingVarFunction": "error",
+        "noSubstr": "error",
         "useSortedClasses": {
           "level": "error",
           "options": {
             "attributes": ["className", "class"],
             "functions": ["clsx", "cva", "tw", "cn"]
           }
-        }
+        },
+        "useStrictMode": "error"
       },
       "performance": {
         "recommended": true,
-        "noAccumulatingSpread": "warn",
-        "noBarrelFile": "warn",
+        "noAccumulatingSpread": "error",
+        "noBarrelFile": "error",
         "noDelete": "error",
-        "noReExportAll": "warn"
+        "noReExportAll": "error"
       },
       "security": {
         "recommended": true,
@@ -171,16 +181,21 @@
         "recommended": true,
         "noArguments": "error",
         "noCommaOperator": "error",
-        "noDefaultExport": "off",
+        "noDefaultExport": "warn",
         "noImplicitBoolean": "error",
         "noInferrableTypes": "error",
         "noNamespace": "error",
-        "noNamespaceImport": "warn",
+        "noNamespaceImport": "error",
         "noNegationElse": "error",
-        "noNonNullAssertion": "warn",
+        "noNonNullAssertion": "error",
         "noParameterAssign": "error",
         "noParameterProperties": "error",
-        "noRestrictedGlobals": "error",
+        "noRestrictedGlobals": {
+          "level": "error",
+          "options": {
+            "deniedGlobals": ["event", "fdescribe", "fit", "name", "status"]
+          }
+        },
         "noShoutyConstants": "error",
         "noUnusedTemplateLiteral": "error",
         "noUselessElse": "error",
@@ -228,7 +243,7 @@
         "noDuplicateParameters": "error",
         "noEmptyBlockStatements": "error",
         "noEmptyInterface": "error",
-        "noExplicitAny": "warn",
+        "noExplicitAny": "error",
         "noExtraNonNullAssertion": "error",
         "noFallthroughSwitchClause": "error",
         "noFunctionAssign": "error",
@@ -243,11 +258,15 @@
         "noRedundantUseStrict": "error",
         "noSelfCompare": "error",
         "noShadowRestrictedNames": "error",
+        "noSkippedTests": "error",
         "noSparseArray": "error",
+        "noThenProperty": "error",
         "noUnsafeDeclarationMerging": "error",
         "noUnsafeNegation": "error",
+        "useAwait": "error",
         "useDefaultSwitchClauseLast": "error",
         "useGetterReturn": "error",
+        "useIsArray": "error",
         "useNamespaceKeyword": "error",
         "useValidTypeof": "error"
       }
@@ -330,10 +349,19 @@
       "linter": {
         "rules": {
           "suspicious": {
-            "noExplicitAny": "off"
+            "noExplicitAny": "warn",
+            "noSkippedTests": "off"
           },
           "complexity": {
-            "noExcessiveCognitiveComplexity": "off"
+            "noExcessiveCognitiveComplexity": {
+              "level": "warn",
+              "options": {
+                "maxAllowedComplexity": 40
+              }
+            }
+          },
+          "style": {
+            "noNonNullAssertion": "warn"
           }
         }
       }
@@ -344,16 +372,32 @@
         "rules": {
           "style": {
             "noDefaultExport": "off"
+          },
+          "suspicious": {
+            "noEmptyInterface": "off"
           }
         }
       }
     },
     {
-      "include": ["src/app/**", "app/**"],
+      "include": ["src/app/**", "app/**", "pages/**"],
       "linter": {
         "rules": {
           "style": {
             "noDefaultExport": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["*.stories.ts", "*.stories.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off"
+          },
+          "suspicious": {
+            "noExplicitAny": "warn"
           }
         }
       }

@@ -156,7 +156,7 @@ export const logApiKeyStatus = (
   console.log(`CI Environment: ${isCI()}`)
 
   const uniqueKeys = [...new Set(keys)]
-  uniqueKeys.forEach(key => {
+  for (const key of uniqueKeys) {
     const value = process.env[key]
     const hasKey =
       value &&
@@ -165,7 +165,7 @@ export const logApiKeyStatus = (
       !value.includes('****')
     const status = hasKey ? '✅ Available' : '❌ Missing/Invalid'
     console.log(`${key}: ${status}`)
-  })
+  }
   console.log('====================')
 }
 
@@ -176,7 +176,10 @@ export const apiTestMatchers = {
   /**
    * Assert that a test was skipped due to missing API keys
    */
-  toBeSkippedDueToMissingApiKeys: (_received: any, expectedKeys: string[]) => {
+  toBeSkippedDueToMissingApiKeys: (
+    _received: unknown,
+    expectedKeys: string[]
+  ) => {
     const hasKeys = expectedKeys.every(key => {
       const value = process.env[key]
       return (
@@ -207,9 +210,9 @@ export const withMockApiKeys = (
   const originalEnv = { ...process.env }
 
   // Set mock keys
-  Object.entries(mockKeys).forEach(([key, value]) => {
+  for (const [key, value] of Object.entries(mockKeys)) {
     process.env[key] = value
-  })
+  }
 
   try {
     testFn()
@@ -241,17 +244,17 @@ export const createApiTestSuite = (config: {
   const realApiSuiteTitle = `${suiteName} (Real API)`
 
   describe(mockedSuiteTitle, () => {
-    mockTests.forEach(test => {
+    for (const test of mockTests) {
       it(test.name, test.fn)
-    })
+    }
   })
 
   describeWithApiKeys(realApiSuiteTitle, requiredKeys, () => {
-    realApiTests.forEach(test => {
+    for (const test of realApiTests) {
       itWithApiKeys(test.name, requiredKeys, test.fn, {
         skipInCI: true,
         timeout: test.timeout || 30000,
       })
-    })
+    }
   })
 }

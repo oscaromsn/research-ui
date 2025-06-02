@@ -7,7 +7,7 @@ import { Modal } from '@/components/ui/modal'
 describe('Modal Component', () => {
   it('renders when isOpen is true', () => {
     render(
-      <Modal isOpen={true} onClose={() => {}} title="Test Modal">
+      <Modal isOpen={true} onClose={vi.fn()} title="Test Modal">
         <div>Modal Content</div>
       </Modal>
     )
@@ -24,7 +24,7 @@ describe('Modal Component', () => {
 
   it('does not render when isOpen is false', () => {
     render(
-      <Modal isOpen={false} onClose={() => {}} title="Test Modal">
+      <Modal isOpen={false} onClose={vi.fn()} title="Test Modal">
         <div>Modal Content</div>
       </Modal>
     )
@@ -52,7 +52,7 @@ describe('Modal Component', () => {
 
   it('renders with correct size classes', () => {
     const { rerender } = render(
-      <Modal isOpen={true} onClose={() => {}} title="Test Modal" size="md">
+      <Modal isOpen={true} onClose={vi.fn()} title="Test Modal" size="md">
         <div>Modal Content</div>
       </Modal>
     )
@@ -64,7 +64,7 @@ describe('Modal Component', () => {
 
     // Rerender with large size
     rerender(
-      <Modal isOpen={true} onClose={() => {}} title="Test Modal" size="lg">
+      <Modal isOpen={true} onClose={vi.fn()} title="Test Modal" size="lg">
         <div>Modal Content</div>
       </Modal>
     )
@@ -74,7 +74,7 @@ describe('Modal Component', () => {
 
     // Rerender with extra large size
     rerender(
-      <Modal isOpen={true} onClose={() => {}} title="Test Modal" size="xl">
+      <Modal isOpen={true} onClose={vi.fn()} title="Test Modal" size="xl">
         <div>Modal Content</div>
       </Modal>
     )
@@ -85,7 +85,7 @@ describe('Modal Component', () => {
 
   it('renders with modal overlay', () => {
     render(
-      <Modal isOpen={true} onClose={() => {}} title="Test Modal">
+      <Modal isOpen={true} onClose={vi.fn()} title="Test Modal">
         <div>Modal Content</div>
       </Modal>
     )

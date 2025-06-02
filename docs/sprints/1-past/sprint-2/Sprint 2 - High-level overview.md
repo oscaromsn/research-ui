@@ -221,11 +221,10 @@
     *   **Acceptance Criteria:** ✅ Documentation files relocated to `docs/`.
 
 3.  **Task 4.3: Standardize Linter/Formatter Setup**
-    *   **Action:** Review `biome.json`, `eslint.config.mjs`, `.eslintignore`, and `package.json` lint/format scripts.
+    *   **Action:** Review `biome.json`, `tsconfig.json` and `package.json` lint/format scripts.
     *   **Details:**
         *   Confirm which tool is primary for formatting (likely Biome per `CLAUDE.md`). Ensure its configuration is optimal.
-        *   If ESLint is used for linting, ensure its rules complement Biome and don't conflict.
-        *   Adjust `ignore` patterns in both `biome.json` and `.eslintignore` for consistency.
+        *   Ensure `ignore` patterns in both `biome.json` and `tsconfig.json` for consistency.
         *   Ensure `bun lint` and `bun format` (if it exists) scripts run the intended tools correctly.
     *   **Acceptance Criteria:** ✅ Linting and formatting setup is consistent and documented (e.g., in the main `README.md` or `CLAUDE.md`).
 

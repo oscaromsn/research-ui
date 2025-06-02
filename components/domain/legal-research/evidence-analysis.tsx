@@ -79,16 +79,16 @@ export function EvidenceAnalysis() {
   }
 
   return (
-    <div className="flex flex-col bg-white dark:bg-[#1a1f2e] border-[#e1e5eb] dark:border-[#2a3148] border-r w-full md:w-1/3 overflow-y-auto">
-      <div className="p-4 border-[#e1e5eb] dark:border-[#2a3148] border-b">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="font-semibold text-[#1a1f2e] dark:text-white text-lg">
+    <div className="flex w-full flex-col overflow-y-auto border-[#e1e5eb] border-r bg-white md:w-1/3 dark:border-[#2a3148] dark:bg-[#1a1f2e]">
+      <div className="border-[#e1e5eb] border-b p-4 dark:border-[#2a3148]">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="font-semibold text-[#1a1f2e] text-lg dark:text-white">
             Evidence & Analysis
           </h2>
           <div className="flex space-x-2">
             <button
               type="button"
-              className="hover:bg-[#f1f5f9] dark:hover:bg-[#242a3d] p-1 rounded"
+              className="rounded p-1 hover:bg-[#f1f5f9] dark:hover:bg-[#242a3d]"
               aria-label="Menu options"
             >
               <svg
@@ -124,20 +124,20 @@ export function EvidenceAnalysis() {
               <button
                 key={doc.docId}
                 type="button"
-                className={`p-3 mb-2 rounded-lg cursor-pointer text-left w-full ${
+                className={`mb-2 w-full cursor-pointer rounded-lg p-3 text-left ${
                   isSelected
-                    ? 'bg-[#edf2f7] dark:bg-[#242a3d] border-l-4 border-[#3a7bb7]'
-                    : 'bg-white dark:bg-[#1e2436] hover:bg-[#f8fafc] dark:hover:bg-[#212941]'
+                    ? 'border-[#3a7bb7] border-l-4 bg-[#edf2f7] dark:bg-[#242a3d]'
+                    : 'bg-white hover:bg-[#f8fafc] dark:bg-[#1e2436] dark:hover:bg-[#212941]'
                 }`}
                 onClick={() => handleDocumentClick(doc)}
                 onKeyUp={e => handleDocumentKeyUp(doc, e)}
               >
-                <div className="flex justify-between items-start">
+                <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="mb-1 font-medium text-[#2d3748] dark:text-[#e2e8f0] text-sm">
+                    <h3 className="mb-1 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
                       {doc.title || 'Untitled Document'}
                     </h3>
-                    <div className="flex items-center mb-1 text-[#64748b] dark:text-[#94a3b8] text-xs">
+                    <div className="mb-1 flex items-center text-[#64748b] text-xs dark:text-[#94a3b8]">
                       <span>
                         {doc.url ? new URL(doc.url).hostname : 'Unknown Source'}
                       </span>
@@ -155,7 +155,7 @@ export function EvidenceAnalysis() {
                         </>
                       )}
                     </div>
-                    <p className="text-[#4a5568] dark:text-[#a0aec0] text-xs">
+                    <p className="text-[#4a5568] text-xs dark:text-[#a0aec0]">
                       {doc.summarySnippet || 'No summary available.'}
                     </p>
                   </div>
@@ -186,15 +186,15 @@ export function EvidenceAnalysis() {
           onViewAnalysis: () => setShowReasoningModal(true),
         })}
       />
-      <div className="border-[#e1e5eb] dark:border-[#2a3148] border-t">
+      <div className="border-[#e1e5eb] border-t dark:border-[#2a3148]">
         <div className="flex h-64">
-          <div className="p-4 border-[#e1e5eb] dark:border-[#2a3148] border-r w-1/2 overflow-auto text-xs">
+          <div className="w-1/2 overflow-auto border-[#e1e5eb] border-r p-4 text-xs dark:border-[#2a3148]">
             {selectedDocument?.fullText ? (
               <div className="space-y-3">
-                <h3 className="font-medium text-sm text-[#2d3748] dark:text-[#e2e8f0]">
+                <h3 className="font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
                   Document Content
                 </h3>
-                <div className="text-xs text-[#4a5568] dark:text-[#a0aec0] leading-relaxed">
+                <div className="text-[#4a5568] text-xs leading-relaxed dark:text-[#a0aec0]">
                   {selectedDocument.fullText
                     .split('\n')
                     .map((paragraph, idx) => (
@@ -208,24 +208,24 @@ export function EvidenceAnalysis() {
                 </div>
               </div>
             ) : (
-              <div className="text-[#64748b] dark:text-[#94a3b8] italic">
+              <div className="text-[#64748b] italic dark:text-[#94a3b8]">
                 No document content available.
               </div>
             )}
           </div>
-          <div className="p-4 w-1/2 text-xs">
+          <div className="w-1/2 p-4 text-xs">
             <div className="mb-3">
-              <div className="flex justify-between items-center mb-1">
-                <span className="font-medium text-[#4a5568] dark:text-[#a0aec0] text-xs">
+              <div className="mb-1 flex items-center justify-between">
+                <span className="font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
                   Relevance
                 </span>
                 <span className="text-[#3a7bb7] text-xs">
                   {selectedDocument?.relevanceScore || 0}/10
                 </span>
               </div>
-              <div className="bg-[#e2e8f0] dark:bg-[#2a3148] rounded-full w-full h-1.5">
+              <div className="h-1.5 w-full rounded-full bg-[#e2e8f0] dark:bg-[#2a3148]">
                 <div
-                  className="bg-[#3a7bb7] rounded-full h-full"
+                  className="h-full rounded-full bg-[#3a7bb7]"
                   style={{
                     width: `${selectedDocument?.relevanceScore ? selectedDocument.relevanceScore * 10 : 0}%`,
                   }}
@@ -233,23 +233,23 @@ export function EvidenceAnalysis() {
               </div>
             </div>
             <div className="mb-3">
-              <p className="mb-1 font-medium text-[#4a5568] dark:text-[#a0aec0] text-xs">
+              <p className="mb-1 font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
                 Summary:
               </p>
-              <p className="text-[#4a5568] dark:text-[#a0aec0] text-xs">
+              <p className="text-[#4a5568] text-xs dark:text-[#a0aec0]">
                 {selectedDocument?.summarySnippet ||
                   'No analysis available for this document.'}
                 <span
-                  className="inline-block bg-[#4a5568] dark:bg-[#a0aec0] w-0.5 h-3 ml-0.5 animate-caret-blink"
+                  className="ml-0.5 inline-block h-3 w-0.5 animate-caret-blink bg-[#4a5568] dark:bg-[#a0aec0]"
                   style={{ verticalAlign: 'text-top' }}
                 />
               </p>
             </div>
             <div className="mb-3">
-              <p className="mb-1 font-medium text-[#4a5568] dark:text-[#a0aec0] text-xs">
+              <p className="mb-1 font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
                 Key Arguments:
               </p>
-              <ul className="pl-4 text-xs list-disc space-y-1">
+              <ul className="list-disc space-y-1 pl-4 text-xs">
                 {selectedDocument?.keyArguments?.length ? (
                   selectedDocument.keyArguments.map((argument, idx) => (
                     <li
@@ -260,14 +260,14 @@ export function EvidenceAnalysis() {
                     </li>
                   ))
                 ) : (
-                  <li className="text-[#64748b] dark:text-[#94a3b8] italic">
+                  <li className="text-[#64748b] italic dark:text-[#94a3b8]">
                     No key arguments identified.
                   </li>
                 )}
               </ul>
             </div>
             <div className="mb-3">
-              <p className="mb-1 font-medium text-[#4a5568] dark:text-[#a0aec0] text-xs">
+              <p className="mb-1 font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
                 Extracted Entities:
               </p>
               <div className="flex flex-wrap gap-1">
@@ -275,14 +275,14 @@ export function EvidenceAnalysis() {
                   selectedDocument.extractedEntities.map((entity, idx) => (
                     <span
                       key={`entity-${selectedDocument.docId}-${entity.name}-${idx}`}
-                      className={`px-1.5 py-0.5 rounded text-[10px] ${getEntityStyle(entity.type)}`}
+                      className={`rounded px-1.5 py-0.5 text-[10px] ${getEntityStyle(entity.type)}`}
                       title={entity.details}
                     >
                       {entity.name}
                     </span>
                   ))
                 ) : (
-                  <span className="text-[#64748b] dark:text-[#94a3b8] italic text-xs">
+                  <span className="text-[#64748b] text-xs italic dark:text-[#94a3b8]">
                     No entities extracted.
                   </span>
                 )}
@@ -290,7 +290,7 @@ export function EvidenceAnalysis() {
             </div>
             <button
               type="button"
-              className="flex items-center text-[#3a7bb7] hover:text-[#2c5d8a] text-xs"
+              className="flex items-center text-[#3a7bb7] text-xs hover:text-[#2c5d8a]"
               onClick={() => setShowReasoningModal(true)}
             >
               <Brain size={12} className="mr-1" />

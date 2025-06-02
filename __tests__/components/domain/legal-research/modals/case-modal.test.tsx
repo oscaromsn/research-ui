@@ -18,11 +18,17 @@ vi.mock('@/components/ui/modal', () => ({
     title: string
     children: React.ReactNode
   }) => {
-    if (!isOpen) return null
+    if (!isOpen) {
+      return null
+    }
     return (
       <div data-testid="modal-container">
         <div data-testid="modal-title">{title}</div>
-        <button onClick={onClose} data-testid="modal-close-button">
+        <button
+          type="button"
+          onClick={onClose}
+          data-testid="modal-close-button"
+        >
           Close
         </button>
         <div data-testid="modal-content">{children}</div>
@@ -66,14 +72,14 @@ describe('CaseModal Component', () => {
     render(
       <CaseModal
         isOpen={true}
-        onClose={() => {}}
+        onClose={vi.fn()}
         documentData={mockDocumentData}
       />
     )
 
     // Check title is passed to Modal
     expect(screen.getByTestId('modal-title')).toHaveTextContent(
-      mockDocumentData.title!
+      mockDocumentData.title || ''
     )
 
     // Check content is rendered
@@ -90,7 +96,7 @@ describe('CaseModal Component', () => {
     render(
       <CaseModal
         isOpen={false}
-        onClose={() => {}}
+        onClose={vi.fn()}
         documentData={mockDocumentData}
       />
     )
@@ -121,7 +127,7 @@ describe('CaseModal Component', () => {
     render(
       <CaseModal
         isOpen={true}
-        onClose={() => {}}
+        onClose={vi.fn()}
         documentData={mockDocumentData}
       />
     )
@@ -177,7 +183,7 @@ describe('CaseModal Component', () => {
     }
 
     render(
-      <CaseModal isOpen={true} onClose={() => {}} documentData={minimalData} />
+      <CaseModal isOpen={true} onClose={vi.fn()} documentData={minimalData} />
     )
 
     // Title should be displayed

@@ -108,15 +108,16 @@ describe('ReportDrafter Component Integration', () => {
 
     // Check section titles in document structure (use more specific selectors)
     const docStructure = screen.getByText('Document Structure').closest('div')
+    if (!docStructure) {
+      throw new Error('Document Structure container not found')
+    }
     expect(
-      within(docStructure!).getByText('Executive Summary')
+      within(docStructure).getByText('Executive Summary')
     ).toBeInTheDocument()
-    expect(within(docStructure!).getByText('Background')).toBeInTheDocument()
+    expect(within(docStructure).getByText('Background')).toBeInTheDocument()
+    expect(within(docStructure).getByText('Legal Analysis')).toBeInTheDocument()
     expect(
-      within(docStructure!).getByText('Legal Analysis')
-    ).toBeInTheDocument()
-    expect(
-      within(docStructure!).getByText('Recommendations')
+      within(docStructure).getByText('Recommendations')
     ).toBeInTheDocument()
 
     // Check section content in main area
@@ -195,13 +196,16 @@ describe('ReportDrafter Component Integration', () => {
 
     // Check that completed sections have different styling than incomplete ones
     const docStructure = screen.getByText('Document Structure').closest('div')
-    const backgroundSection = within(docStructure!)
+    if (!docStructure) {
+      throw new Error('Document Structure container not found')
+    }
+    const backgroundSection = within(docStructure)
       .getByText('Background')
       .closest('div[class*="p-2"]')
-    const legalAnalysisSection = within(docStructure!)
+    const legalAnalysisSection = within(docStructure)
       .getByText('Legal Analysis')
       .closest('div[class*="p-2"]')
-    const executiveSummarySection = within(docStructure!)
+    const executiveSummarySection = within(docStructure)
       .getByText('Executive Summary')
       .closest('div[class*="p-2"]')
 
@@ -340,16 +344,19 @@ describe('ReportDrafter Component Integration', () => {
 
     // Use document structure area specifically to avoid conflicts with content area
     const docStructure = screen.getByText('Document Structure').closest('div')
-    const backgroundSection = within(docStructure!)
+    if (!docStructure) {
+      throw new Error('Document Structure container not found')
+    }
+    const backgroundSection = within(docStructure)
       .getByText('Background')
       .closest('div[class*="p-2"]')
-    const legalAnalysisSection = within(docStructure!)
+    const legalAnalysisSection = within(docStructure)
       .getByText('Legal Analysis')
       .closest('div[class*="p-2"]')
-    const recommendationsSection = within(docStructure!)
+    const recommendationsSection = within(docStructure)
       .getByText('Recommendations')
       .closest('div[class*="p-2"]')
-    const conclusionSection = within(docStructure!)
+    const conclusionSection = within(docStructure)
       .getByText('Conclusion')
       .closest('div[class*="p-2"]')
 

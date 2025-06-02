@@ -45,7 +45,7 @@ When I ask you to perform tasks related to LexiSynth:
 
 - **Understand Requirements**: Always start by consulting the `@features/Project Requirements Document (PRD).md` if the query relates to core features or project goals.
 - **Trace Implementation History**: If I ask *why* something was implemented a certain way, or how a specific feature evolved, look into the relevant `@sprints/.../Sprint X - Phase Y implementation plan.md` documents and the `@sprints/1-past/sprint-1/logs/PHASE_5_COMPLETION_REPORT.md`.
-- **Verify Tooling & CI Setup**: If I ask about commit hooks, linting rules, testing commands, or CI processes, refer to the files in `@tooling/` and the root project configuration files they describe (e.g., `eslint.config.mjs`, `vitest.config.ts`).
+- **Verify Tooling & CI Setup**: If I ask about commit hooks, linting rules, testing commands, or CI processes, refer to the files in `@tooling/` and the root project configuration files they describe (e.g., `biome.js`, `tsconfig.json`, `vitest.config.ts`).
 - **Learn by Example**: If I ask for help implementing a pattern similar to existing ones involving BAML or Jotai, consult the `@exemplars/` directory for guidance.
 - **Current Development Focus**: For tasks related to ongoing work, prioritize information from `@sprints/2-current/sprint-2/`.
 - **Future Features**: For discussions about planned enhancements, refer to `@sprints/3-future/`.
@@ -55,7 +55,7 @@ When I ask you to perform tasks related to LexiSynth:
 
 - **Sprint Plans (e.g., `Sprint 1 - Phase X implementation plan.md`)**: These are highly detailed and provide step-by-step instructions and acceptance criteria for features. They are excellent for understanding the intended implementation details and breaking down complex tasks.
 - **`PHASE_5_COMPLETION_REPORT.md`**: This is a key historical document. It details the state of LexiSynth v0.1, including extensive testing results, architectural validation, and NFR achievements. It's a good reference for the baseline quality and functionality.
-- **Tooling Docs (`@tooling/*`)**: These often refer to specific configuration files at the project root (e.g., `eslint.config.mjs`, `.dependency-cruiser.js`). Be prepared to cross-reference these.
+- **Tooling Docs (`@tooling/*`)**: These often refer to specific configuration files at the project root (e.g., `biome.json`, `.dependency-cruiser.js`). Be prepared to cross-reference these.
 
 ## 5. General Tips for Navigating `docs/`
 

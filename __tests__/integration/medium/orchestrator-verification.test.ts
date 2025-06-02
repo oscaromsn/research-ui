@@ -5,7 +5,7 @@
  * Tests that all required components are properly implemented
  */
 
-import { vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { conductResearch } from '@/app/actions/researchAgentOrchestrator'
 import type {
@@ -96,7 +96,9 @@ describe('Research Orchestrator - Phase 1 Verification', () => {
           while (chunks < 10) {
             // Read up to 10 chunks to avoid infinite loop
             const { done, value } = await reader.read()
-            if (done) break
+            if (done) {
+              break
+            }
 
             const chunk = decoder.decode(value)
             const lines = chunk.split('\n').filter(line => line.trim())
@@ -130,8 +132,8 @@ describe('Research Orchestrator - Phase 1 Verification', () => {
 
     // Should start with INITIALIZING
     if (updates.length > 0) {
-      expect(updates[0].stage).toBe('INITIALIZING')
-      expect(updates[0].type).toBe('STATUS_CHANGE')
+      expect(updates[0]?.stage).toBe('INITIALIZING')
+      expect(updates[0]?.type).toBe('STATUS_CHANGE')
     }
   }, 35000)
 })

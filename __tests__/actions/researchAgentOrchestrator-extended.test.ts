@@ -501,7 +501,7 @@ describe('Research Agent Orchestrator - Extended Data Mapping', () => {
       const progressUpdate = createProgressUpdate(
         2,
         5,
-        mockSearchResultItem.title!
+        mockSearchResultItem.title ?? undefined
       )
 
       expect(progressUpdate.type).toBe('PROGRESS')

@@ -245,7 +245,7 @@ For complete testing documentation, troubleshooting, and best practices, see [do
 (Refer to `package.json` for a full list)
 
 *   `bun dev`: Starts the Next.js development server.
-*   `bun build`: Builds the application for production.
+*   `bun run build`: Builds the application for production.
 *   `bun start`: Starts the production server.
 *   `bun format`: Formats code using Biome.
 *   `bun lint`: Lints code using Biome.

@@ -24,10 +24,18 @@ export abstract class ExaError extends Error {
   ) {
     super(message)
     this.name = this.constructor.name
-    if (options.status !== undefined) this.status = options.status
-    if (options.response !== undefined) this.response = options.response
-    if (options.requestId !== undefined) this.requestId = options.requestId
-    if (options.query !== undefined) this.query = options.query
+    if (options.status !== undefined) {
+      this.status = options.status
+    }
+    if (options.response !== undefined) {
+      this.response = options.response
+    }
+    if (options.requestId !== undefined) {
+      this.requestId = options.requestId
+    }
+    if (options.query !== undefined) {
+      this.query = options.query
+    }
 
     if (options.cause) {
       this.cause = options.cause
@@ -76,7 +84,9 @@ export class ExaRateLimitError extends ExaError {
     } = {}
   ) {
     super(message, options)
-    if (options.retryAfter !== undefined) this.retryAfter = options.retryAfter
+    if (options.retryAfter !== undefined) {
+      this.retryAfter = options.retryAfter
+    }
     this.rateLimitType = options.rateLimitType || 'requests'
   }
 
@@ -193,9 +203,12 @@ export class ExaClientError extends ExaError {
     } = {}
   ) {
     super(message, options)
-    if (options.errorCode !== undefined) this.errorCode = options.errorCode
-    if (options.validationErrors !== undefined)
+    if (options.errorCode !== undefined) {
+      this.errorCode = options.errorCode
+    }
+    if (options.validationErrors !== undefined) {
       this.validationErrors = options.validationErrors
+    }
   }
 
   /**
@@ -295,10 +308,12 @@ export class ExaParsingError extends ExaError {
     } = {}
   ) {
     super(message, options)
-    if (options.expectedFormat !== undefined)
+    if (options.expectedFormat !== undefined) {
       this.expectedFormat = options.expectedFormat
-    if (options.actualFormat !== undefined)
+    }
+    if (options.actualFormat !== undefined) {
       this.actualFormat = options.actualFormat
+    }
   }
 }
 

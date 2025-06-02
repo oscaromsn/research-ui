@@ -219,7 +219,7 @@ Okay, Phase 5 focuses on Testing and Refinement. This is crucial for ensuring Le
 **Details:**
 
 1. **Run Linters and Formatters:**
-	- `bun lint` (as defined in `package.json`, which might run Biome or ESLint based on project setup – `CLAUDE.md` implies Biome is primary).
+	- `bun lint` (as defined in `package.json`, which might run Biome based on project setup – `CLAUDE.md` implies Biome is primary).
 	- `bun format` (if a separate format script exists, or rely on Biome's format-on-save if configured).
 2. **Type Checking:**
 	- `bun typecheck` (runs `tsc --noEmit`). Resolve all TypeScript errors.

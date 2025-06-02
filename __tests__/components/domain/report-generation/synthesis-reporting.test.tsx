@@ -20,11 +20,13 @@ vi.mock(
       isOpen: boolean
       onClose: () => void
     }) => {
-      if (!isOpen) return null
+      if (!isOpen) {
+        return null
+      }
       return (
         <div data-testid="synthesis-reasoning-modal">
           <h3>Synthesis Reasoning Details</h3>
-          <button onClick={onClose} aria-label="close">
+          <button type="button" onClick={onClose} aria-label="close">
             Close
           </button>
         </div>

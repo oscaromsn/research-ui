@@ -113,8 +113,8 @@ describe('Phase 3 Completion - Client-Side Orchestrator Hook', () => {
         | ReadableStreamDefaultController<Uint8Array>
         | undefined
       const mockStream = new ReadableStream({
-        start(controller) {
-          streamController = controller
+        start(_controller) {
+          // Controller not used in this test
         },
       })
       mockedConductResearch.mockResolvedValue(mockStream)
@@ -143,8 +143,8 @@ describe('Phase 3 Completion - Client-Side Orchestrator Hook', () => {
         | ReadableStreamDefaultController<Uint8Array>
         | undefined
       const mockStream = new ReadableStream({
-        start(controller) {
-          streamController = controller
+        start(_controller) {
+          // Controller not used in this test
         },
       })
       mockedConductResearch.mockResolvedValue(mockStream)
@@ -163,7 +163,9 @@ describe('Phase 3 Completion - Client-Side Orchestrator Hook', () => {
       })
 
       // Verify AbortController exists by testing abort functionality
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {
+        // Mock implementation - no logging needed in test
+      })
 
       act(() => {
         result.current.abortResearch()
@@ -558,10 +560,9 @@ describe('Phase 3 Completion - Client-Side Orchestrator Hook', () => {
 
   describe('6. abortResearch Functionality', () => {
     it('should call abort() on the active AbortController', async () => {
-      let StreamController: ReadableStreamDefaultController<Uint8Array>
       const mockStream = new ReadableStream({
-        start(controller) {
-          StreamController = controller
+        start(_controller) {
+          // Controller not used in this test
         },
       })
       mockedConductResearch.mockResolvedValue(mockStream)
@@ -579,7 +580,9 @@ describe('Phase 3 Completion - Client-Side Orchestrator Hook', () => {
         expect(status.stage).toBe('INITIALIZING')
       })
 
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {
+        // Mock implementation - no logging needed in test
+      })
 
       act(() => {
         result.current.abortResearch()
@@ -601,10 +604,9 @@ describe('Phase 3 Completion - Client-Side Orchestrator Hook', () => {
     })
 
     it('should lead to stream processing termination when called', async () => {
-      let StreamController: ReadableStreamDefaultController<Uint8Array>
       const mockStream = new ReadableStream({
-        start(controller) {
-          StreamController = controller
+        start(_controller) {
+          // Controller not used in this test
         },
       })
       mockedConductResearch.mockResolvedValue(mockStream)
@@ -700,11 +702,11 @@ describe('Phase 3 Completion - Client-Side Orchestrator Hook', () => {
         // Verify all data was processed
         const queries = store.get(generatedQueriesAtom)
         expect(queries).toHaveLength(1)
-        expect(queries[0].query_string).toBe('test query')
+        expect(queries[0]?.query_string).toBe('test query')
 
         const docs = store.get(analyzedDocsSummaryAtom)
         expect(docs).toHaveLength(1)
-        expect(docs[0].docId).toBe('test-doc')
+        expect(docs[0]?.docId).toBe('test-doc')
 
         // Verify logging worked throughout
         const logs = store.get(researchLogAtom)

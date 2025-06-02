@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import {
   MockIntersectionObserver,
@@ -42,8 +42,7 @@ describe('test-utils', () => {
     })
 
     it('MockIntersectionObserver has the required methods', () => {
-      const callback = vi.fn()
-      const mockObserver = new MockIntersectionObserver(callback)
+      const mockObserver = new MockIntersectionObserver()
 
       expect(mockObserver.observe).toBeDefined()
       expect(mockObserver.unobserve).toBeDefined()

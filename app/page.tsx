@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <main className="flex md:flex-row flex-col flex-1 w-full overflow-hidden">
+      <main className="flex w-full flex-1 flex-col overflow-hidden md:flex-row">
         <GuidanceStrategy />
         <EvidenceAnalysis />
         <SynthesisReporting />

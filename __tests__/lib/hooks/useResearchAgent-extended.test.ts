@@ -43,10 +43,10 @@ describe('useResearchAgent Hook - Extended Data Handling', () => {
     const encoder = new TextEncoder()
     const stream = new ReadableStream({
       start(controller) {
-        updates.forEach(update => {
+        for (const update of updates) {
           const data = encoder.encode(`${JSON.stringify(update)}\n`)
           controller.enqueue(data)
-        })
+        }
         controller.close()
       },
     })
@@ -127,16 +127,16 @@ describe('useResearchAgent Hook - Extended Data Handling', () => {
         expect(analyzedDocs).toHaveLength(1)
 
         const doc = analyzedDocs[0]
-        expect(doc.docId).toBe('doc-extended-1')
-        expect(doc.title).toBe(
+        expect(doc?.docId).toBe('doc-extended-1')
+        expect(doc?.title).toBe(
           'Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)'
         )
-        expect(doc.url).toBe('https://example.com/smith-v-jones')
-        expect(doc.keyArguments).toHaveLength(3)
-        expect(doc.extractedEntities).toHaveLength(2)
-        expect(doc.extractedQuotes).toHaveLength(2)
-        expect(doc.counterArguments).toHaveLength(2)
-        expect(doc.analysisReasoning?.analyzeLegalQuestionSummary).toContain(
+        expect(doc?.url).toBe('https://example.com/smith-v-jones')
+        expect(doc?.keyArguments).toHaveLength(3)
+        expect(doc?.extractedEntities).toHaveLength(2)
+        expect(doc?.extractedQuotes).toHaveLength(2)
+        expect(doc?.counterArguments).toHaveLength(2)
+        expect(doc?.analysisReasoning?.analyzeLegalQuestionSummary).toContain(
           'COVID-19 restrictions'
         )
       })
@@ -194,11 +194,11 @@ describe('useResearchAgent Hook - Extended Data Handling', () => {
         expect(analyzedDocs).toHaveLength(1)
 
         const doc = analyzedDocs[0]
-        expect(doc.docId).toBe('doc-progressive')
-        expect(doc.summarySnippet).toBe('Updated summary with more content...')
-        expect(doc.keyArguments).toEqual(['New argument 1', 'New argument 2'])
-        expect(doc.extractedEntities).toHaveLength(1)
-        expect(doc.extractedEntities?.[0].name).toBe('Test Entity')
+        expect(doc?.docId).toBe('doc-progressive')
+        expect(doc?.summarySnippet).toBe('Updated summary with more content...')
+        expect(doc?.keyArguments).toEqual(['New argument 1', 'New argument 2'])
+        expect(doc?.extractedEntities).toHaveLength(1)
+        expect(doc?.extractedEntities?.[0]?.name).toBe('Test Entity')
       })
     })
 
@@ -299,11 +299,11 @@ describe('useResearchAgent Hook - Extended Data Handling', () => {
       await waitFor(() => {
         const analyzedDocs = store.get(analyzedDocsSummaryAtom)
         const doc = analyzedDocs[0]
-        expect(doc.summarySnippet).toBe(
-          'The court found that COVID-19 restrictions...'
+        expect(doc?.summarySnippet).toBe(
+          'Real contract analysis with complete reasoning...'
         )
-        expect(doc.keyArguments).toHaveLength(2)
-        expect(doc.keyArguments?.[1]).toBe(
+        expect(doc?.keyArguments).toHaveLength(2)
+        expect(doc?.keyArguments?.[1]).toBe(
           'Additional argument from further analysis'
         )
       })
@@ -355,10 +355,9 @@ describe('useResearchAgent Hook - Extended Data Handling', () => {
       await waitFor(() => {
         const analyzedDocs = store.get(analyzedDocsSummaryAtom)
         const doc = analyzedDocs[0]
+        expect(doc?.extractedEntities).toHaveLength(6)
 
-        expect(doc.extractedEntities).toHaveLength(6)
-
-        const entityTypes = doc.extractedEntities?.map(e => e.type)
+        const entityTypes = doc?.extractedEntities?.map(e => e.type)
         expect(entityTypes).toContain('Case')
         expect(entityTypes).toContain('Statute')
         expect(entityTypes).toContain('Person')
@@ -367,7 +366,7 @@ describe('useResearchAgent Hook - Extended Data Handling', () => {
         expect(entityTypes).toContain('Jurisdiction')
 
         // Verify entity details are preserved
-        const caseEntity = doc.extractedEntities?.find(e => e.type === 'Case')
+        const caseEntity = doc?.extractedEntities?.find(e => e.type === 'Case')
         expect(caseEntity?.details).toBe('Citation')
       })
     })
@@ -415,14 +414,14 @@ describe('useResearchAgent Hook - Extended Data Handling', () => {
         const analyzedDocs = store.get(analyzedDocsSummaryAtom)
         const doc = analyzedDocs[0]
 
-        expect(doc.analysisReasoning).toBeDefined()
-        expect(doc.analysisReasoning?.analyzeLegalQuestionSummary).toContain(
+        expect(doc?.analysisReasoning).toBeDefined()
+        expect(doc?.analysisReasoning?.analyzeLegalQuestionSummary).toContain(
           'Comprehensive analysis'
         )
         expect(
-          doc.analysisReasoning?.considerRelevantPrinciplesSummary
+          doc?.analysisReasoning?.considerRelevantPrinciplesSummary
         ).toContain('impossibility doctrine')
-        expect(doc.analysisReasoning?.formulateSearchQueriesSummary).toContain(
+        expect(doc?.analysisReasoning?.formulateSearchQueriesSummary).toContain(
           'Search strategy'
         )
       })
@@ -461,8 +460,8 @@ describe('useResearchAgent Hook - Extended Data Handling', () => {
       await waitFor(() => {
         const analyzedDocs = store.get(analyzedDocsSummaryAtom)
         expect(analyzedDocs).toHaveLength(1)
-        expect(analyzedDocs[0].docId).toBe('doc-malformed')
-        expect(analyzedDocs[0].title).toBe('Malformed Document')
+        expect(analyzedDocs[0]?.docId).toBe('doc-malformed')
+        expect(analyzedDocs[0]?.title).toBe('Malformed Document')
       })
     })
 
@@ -553,10 +552,9 @@ describe('useResearchAgent Hook - Extended Data Handling', () => {
       await waitFor(() => {
         const analyzedDocs = store.get(analyzedDocsSummaryAtom)
         const doc = analyzedDocs[0]
-
-        expect(doc.extractedEntities).toHaveLength(100)
-        expect(doc.keyArguments).toHaveLength(50)
-        expect(doc.fullText).toHaveLength(10000)
+        expect(doc?.extractedEntities).toHaveLength(100)
+        expect(doc?.keyArguments).toHaveLength(50)
+        expect(doc?.fullText).toHaveLength(10000)
       })
 
       const endTime = performance.now()

@@ -218,7 +218,7 @@ bun typecheck
 bun lint && bun format
 
 # Build (ensures app compiles)
-bun build
+bun run build
 
 # Run tests
 bun run test

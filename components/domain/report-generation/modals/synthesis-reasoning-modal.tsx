@@ -1,8 +1,8 @@
 import { AlertTriangle, CheckCircle, Clock } from 'lucide-react'
 
 import type { DetailedReasoning } from '@/baml_client/types'
+import { Modal } from '@/components/ui/modal'
 import type { ClientSynthesis } from '@/lib/state/researchAtoms'
-import { Modal } from '@ui/modal'
 
 interface SynthesisReasoningModalProps {
   isOpen: boolean
@@ -24,7 +24,9 @@ export function SynthesisReasoningModal({
   sourcesUsed = [],
 }: SynthesisReasoningModalProps) {
   const getReasoningSteps = () => {
-    if (!reasoning) return []
+    if (!reasoning) {
+      return []
+    }
 
     const steps = [
       {
@@ -82,22 +84,25 @@ export function SynthesisReasoningModal({
       size="lg"
     >
       <div className="space-y-6">
-        <div className="flex items-start space-x-2 bg-[#fff7ed] dark:bg-[#2e1907] p-3 rounded-lg text-[#9a3412] dark:text-[#fdba74] text-sm">
-          <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
+        <div className="flex items-start space-x-2 rounded-lg bg-[#fff7ed] p-3 text-[#9a3412] text-sm dark:bg-[#2e1907] dark:text-[#fdba74]">
+          <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
           <p>
             {synthesisData?.reasoningSummary ||
               'This synthesis is based on the analyzed documents and AI reasoning. Please review for accuracy.'}
           </p>
         </div>
         <div className="space-y-4">
-          <div className="bg-[#f8fafc] dark:bg-[#1e2436] p-4 rounded-lg">
-            <h4 className="mb-2 font-medium text-[#2d3748] dark:text-[#e2e8f0] text-sm">
+          <div className="rounded-lg bg-[#f8fafc] p-4 dark:bg-[#1e2436]">
+            <h4 className="mb-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
               Reasoning Chain
             </h4>
             <div className="space-y-3">
               {reasoningSteps.length > 0 ? (
                 reasoningSteps.map((step, index) => (
-                  <div key={index} className="flex items-start">
+                  <div
+                    key={`step-${step.text}-${index}`}
+                    className="flex items-start"
+                  >
                     <div className="mt-1 mr-2">
                       {step.status === 'complete' ? (
                         <CheckCircle
@@ -114,13 +119,17 @@ export function SynthesisReasoningModal({
                       )}
                     </div>
                     <div className="flex-1">
-                      <p className="text-[#4a5568] dark:text-[#a0aec0] text-sm">
+                      <p className="text-[#4a5568] text-sm dark:text-[#a0aec0]">
                         {step.text}
                       </p>
                       {step.details && step.details.length > 0 && (
-                        <ul className="mt-1 ml-4 text-xs text-[#64748b] dark:text-[#94a3b8] list-disc">
+                        <ul className="mt-1 ml-4 list-disc text-[#64748b] text-xs dark:text-[#94a3b8]">
                           {step.details.map((detail, detailIndex) => (
-                            <li key={detailIndex}>{detail}</li>
+                            <li
+                              key={`detail-${detailIndex}-${detail.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '')}`}
+                            >
+                              {detail}
+                            </li>
                           ))}
                         </ul>
                       )}
@@ -128,14 +137,14 @@ export function SynthesisReasoningModal({
                   </div>
                 ))
               ) : (
-                <p className="text-[#64748b] dark:text-[#94a3b8] text-sm text-center py-4">
+                <p className="py-4 text-center text-[#64748b] text-sm dark:text-[#94a3b8]">
                   No detailed reasoning steps available.
                 </p>
               )}
             </div>
           </div>
           <div>
-            <h4 className="mb-2 font-medium text-[#2d3748] dark:text-[#e2e8f0] text-sm">
+            <h4 className="mb-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
               Sources Used
             </h4>
             <div className="space-y-2">
@@ -143,35 +152,35 @@ export function SynthesisReasoningModal({
                 sourcesUsed.map((source, index) => (
                   <div
                     key={`${source.docId}-${index}`}
-                    className="flex justify-between items-center text-xs"
+                    className="flex items-center justify-between text-xs"
                   >
-                    <div className="flex-1 mr-2">
-                      <span className="text-[#4a5568] dark:text-[#a0aec0] font-medium">
+                    <div className="mr-2 flex-1">
+                      <span className="font-medium text-[#4a5568] dark:text-[#a0aec0]">
                         {source.docId}
                       </span>
                       {source.title && (
-                        <div className="text-[#64748b] dark:text-[#94a3b8] text-xs truncate mt-0.5">
+                        <div className="mt-0.5 truncate text-[#64748b] text-xs dark:text-[#94a3b8]">
                           {source.title}
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center flex-shrink-0">
-                      <div className="bg-[#e2e8f0] dark:bg-[#2a3148] mr-2 rounded-full w-24 h-1.5">
+                    <div className="flex flex-shrink-0 items-center">
+                      <div className="mr-2 h-1.5 w-24 rounded-full bg-[#e2e8f0] dark:bg-[#2a3148]">
                         <div
-                          className="bg-[#3a7bb7] rounded-full h-full"
+                          className="h-full rounded-full bg-[#3a7bb7]"
                           style={{
                             width: `${source.confidence * 100}%`,
                           }}
                         />
                       </div>
-                      <span className="text-[#3a7bb7] min-w-[2.5rem]">
+                      <span className="min-w-[2.5rem] text-[#3a7bb7]">
                         {(source.confidence * 100).toFixed(0)}%
                       </span>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-[#64748b] dark:text-[#94a3b8] text-sm text-center py-4">
+                <p className="py-4 text-center text-[#64748b] text-sm dark:text-[#94a3b8]">
                   No source information available.
                 </p>
               )}
@@ -179,14 +188,18 @@ export function SynthesisReasoningModal({
 
             {synthesisData?.unansweredAspects &&
               synthesisData.unansweredAspects.length > 0 && (
-                <div className="mt-4 p-3 bg-[#fef2f2] dark:bg-[#2d1b1b] rounded-lg">
-                  <h5 className="text-sm font-medium text-[#991b1b] dark:text-[#fca5a5] mb-2">
+                <div className="mt-4 rounded-lg bg-[#fef2f2] p-3 dark:bg-[#2d1b1b]">
+                  <h5 className="mb-2 font-medium text-[#991b1b] text-sm dark:text-[#fca5a5]">
                     Unanswered Aspects
                   </h5>
-                  <ul className="space-y-1 text-xs text-[#7f1d1d] dark:text-[#fecaca] list-disc ml-4">
+                  <ul className="ml-4 list-disc space-y-1 text-[#7f1d1d] text-xs dark:text-[#fecaca]">
                     {synthesisData.unansweredAspects.map(
                       (aspect: string, index: number) => (
-                        <li key={index}>{aspect}</li>
+                        <li
+                          key={`unanswered-${index}-${aspect.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '')}`}
+                        >
+                          {aspect}
+                        </li>
                       )
                     )}
                   </ul>
@@ -195,14 +208,18 @@ export function SynthesisReasoningModal({
 
             {synthesisData?.emergingQuestions &&
               synthesisData.emergingQuestions.length > 0 && (
-                <div className="mt-4 p-3 bg-[#eff6ff] dark:bg-[#1e2946] rounded-lg">
-                  <h5 className="text-sm font-medium text-[#1e40af] dark:text-[#93c5fd] mb-2">
+                <div className="mt-4 rounded-lg bg-[#eff6ff] p-3 dark:bg-[#1e2946]">
+                  <h5 className="mb-2 font-medium text-[#1e40af] text-sm dark:text-[#93c5fd]">
                     Emerging Questions
                   </h5>
-                  <ul className="space-y-1 text-xs text-[#1e3a8a] dark:text-[#bfdbfe] list-disc ml-4">
+                  <ul className="ml-4 list-disc space-y-1 text-[#1e3a8a] text-xs dark:text-[#bfdbfe]">
                     {synthesisData.emergingQuestions.map(
                       (question: string, index: number) => (
-                        <li key={index}>{question}</li>
+                        <li
+                          key={`question-${index}-${question.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '')}`}
+                        >
+                          {question}
+                        </li>
                       )
                     )}
                   </ul>

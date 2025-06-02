@@ -50,6 +50,187 @@ const DEFAULT_RETRY_CONFIG: RetryConfig = {
   backoffMultiplier: 2,
 }
 
+function handleConfigError(error: { message: string }): ExaErrorHandlingResult {
+  return {
+    shouldRetry: false,
+    errorCategory: 'config',
+    userMessage: 'Search service configuration error. Please contact support.',
+    technicalDetails: error.message,
+    isRecoverable: false,
+    suggestedAction: 'Check API key configuration and retry the research.',
+  }
+}
+
+function handleAuthError(
+  error: { message: string; isRecoverable: () => boolean },
+  attempt: number
+): ExaErrorHandlingResult {
+  const isRecoverable = error.isRecoverable()
+  return {
+    shouldRetry: !isRecoverable && attempt <= 1,
+    retryDelay: isRecoverable ? 1000 : undefined,
+    maxRetries: 1,
+    errorCategory: 'auth',
+    userMessage: isRecoverable
+      ? 'Search service permissions temporarily unavailable. Retrying...'
+      : 'Search service authentication failed. Please contact support.',
+    technicalDetails: error.message,
+    isRecoverable,
+    suggestedAction: isRecoverable
+      ? 'The system will retry automatically.'
+      : 'Check API key validity and permissions.',
+  }
+}
+
+function handleRateLimitError(
+  error: {
+    message: string
+    getSuggestedRetryDelay: (attempt: number) => number
+  },
+  attempt: number,
+  retryConfig: RetryConfig
+): ExaErrorHandlingResult {
+  const delay = Math.min(
+    error.getSuggestedRetryDelay(attempt),
+    retryConfig.maxDelay
+  )
+  const shouldRetry = attempt <= retryConfig.maxRetries
+
+  return {
+    shouldRetry,
+    retryDelay: delay,
+    maxRetries: retryConfig.maxRetries,
+    errorCategory: 'rate_limit',
+    userMessage: shouldRetry
+      ? `Search rate limit exceeded. Retrying in ${Math.ceil(delay / 1000)} seconds...`
+      : 'Search rate limit exceeded. Please try again later.',
+    technicalDetails: error.message,
+    isRecoverable: true,
+    suggestedAction: shouldRetry
+      ? `Automatic retry in ${Math.ceil(delay / 1000)} seconds.`
+      : 'Wait a few minutes before retrying the search.',
+  }
+}
+
+function handleServerError(
+  error: {
+    message: string
+    isTemporary: boolean
+    getSuggestedRetryDelay: (attempt: number) => number
+  },
+  attempt: number,
+  retryConfig: RetryConfig
+): ExaErrorHandlingResult {
+  const delay = Math.min(
+    error.getSuggestedRetryDelay(attempt),
+    retryConfig.maxDelay
+  )
+  const shouldRetry = error.isTemporary && attempt <= retryConfig.maxRetries
+
+  return {
+    shouldRetry,
+    retryDelay: delay,
+    maxRetries: retryConfig.maxRetries,
+    errorCategory: 'server',
+    userMessage: shouldRetry
+      ? 'Search service temporarily unavailable. Retrying...'
+      : 'Search service is currently unavailable. Please try again later.',
+    technicalDetails: error.message,
+    isRecoverable: error.isTemporary,
+    suggestedAction: shouldRetry
+      ? 'The system will retry automatically.'
+      : 'Please try your search again in a few minutes.',
+  }
+}
+
+function handleClientError(
+  error: { message: string; isRetryable: () => boolean },
+  attempt: number
+): ExaErrorHandlingResult {
+  const shouldRetry = error.isRetryable() && attempt <= 1
+
+  return {
+    shouldRetry,
+    retryDelay: shouldRetry ? 1000 : undefined,
+    maxRetries: 1,
+    errorCategory: 'client',
+    userMessage: shouldRetry
+      ? 'Search request timeout. Retrying...'
+      : 'Invalid search request. Please modify your query and try again.',
+    technicalDetails: error.message,
+    isRecoverable: error.isRetryable(),
+    suggestedAction: shouldRetry
+      ? 'The system will retry automatically.'
+      : 'Please check your search parameters and try again.',
+  }
+}
+
+function handleNetworkError(
+  error: {
+    message: string
+    getSuggestedRetryDelay: (attempt: number) => number
+  },
+  attempt: number,
+  retryConfig: RetryConfig
+): ExaErrorHandlingResult {
+  const delay = Math.min(
+    error.getSuggestedRetryDelay(attempt),
+    retryConfig.maxDelay
+  )
+  const shouldRetry = attempt <= retryConfig.maxRetries
+
+  return {
+    shouldRetry,
+    retryDelay: delay,
+    maxRetries: retryConfig.maxRetries,
+    errorCategory: 'network',
+    userMessage: shouldRetry
+      ? 'Network connection issue. Retrying...'
+      : 'Unable to connect to search service. Please check your connection.',
+    technicalDetails: error.message,
+    isRecoverable: true,
+    suggestedAction: shouldRetry
+      ? 'The system will retry automatically.'
+      : 'Please check your internet connection and try again.',
+  }
+}
+
+function handleParsingError(
+  error: { message: string },
+  attempt: number
+): ExaErrorHandlingResult {
+  const shouldRetry = attempt <= 1
+
+  return {
+    shouldRetry,
+    retryDelay: 1000,
+    maxRetries: 1,
+    errorCategory: 'parsing',
+    userMessage: shouldRetry
+      ? 'Search response parsing error. Retrying...'
+      : 'Search service returned invalid data. Please try again later.',
+    technicalDetails: error.message,
+    isRecoverable: true,
+    suggestedAction: shouldRetry
+      ? 'The system will retry automatically.'
+      : 'Please try your search again later.',
+  }
+}
+
+function handleUnknownError(error: unknown): ExaErrorHandlingResult {
+  return {
+    shouldRetry: true,
+    retryDelay: 2000,
+    maxRetries: 1,
+    errorCategory: 'unknown',
+    userMessage:
+      'An unexpected error occurred during search. Please try again.',
+    technicalDetails: error instanceof Error ? error.message : String(error),
+    isRecoverable: true,
+    suggestedAction: 'Please try your search again.',
+  }
+}
+
 /**
  * Analyzes an Exa API error and provides handling recommendations for the orchestrator
  */
@@ -60,161 +241,35 @@ export function analyzeExaError(
 ): ExaErrorHandlingResult {
   const retryConfig = { ...DEFAULT_RETRY_CONFIG, ...config }
 
-  // Handle Exa configuration errors
   if (isExaConfigError(error)) {
-    return {
-      shouldRetry: false,
-      errorCategory: 'config',
-      userMessage:
-        'Search service configuration error. Please contact support.',
-      technicalDetails: error.message,
-      isRecoverable: false,
-      suggestedAction: 'Check API key configuration and retry the research.',
-    }
+    return handleConfigError(error)
   }
 
-  // Handle authentication/authorization errors
   if (isExaAuthError(error)) {
-    return {
-      shouldRetry: !error.isRecoverable() && attempt <= 1, // Only retry once for recoverable auth errors
-      retryDelay: error.isRecoverable() ? 1000 : undefined,
-      maxRetries: 1,
-      errorCategory: 'auth',
-      userMessage: error.isRecoverable()
-        ? 'Search service permissions temporarily unavailable. Retrying...'
-        : 'Search service authentication failed. Please contact support.',
-      technicalDetails: error.message,
-      isRecoverable: error.isRecoverable(),
-      suggestedAction: error.isRecoverable()
-        ? 'The system will retry automatically.'
-        : 'Check API key validity and permissions.',
-    }
+    return handleAuthError(error, attempt)
   }
 
-  // Handle rate limiting errors
   if (isExaRateLimitError(error)) {
-    const delay = Math.min(
-      error.getSuggestedRetryDelay(attempt),
-      retryConfig.maxDelay
-    )
-    const shouldRetry = attempt <= retryConfig.maxRetries
-
-    return {
-      shouldRetry,
-      retryDelay: delay,
-      maxRetries: retryConfig.maxRetries,
-      errorCategory: 'rate_limit',
-      userMessage: shouldRetry
-        ? `Search rate limit exceeded. Retrying in ${Math.ceil(delay / 1000)} seconds...`
-        : 'Search rate limit exceeded. Please try again later.',
-      technicalDetails: error.message,
-      isRecoverable: true,
-      suggestedAction: shouldRetry
-        ? `Automatic retry in ${Math.ceil(delay / 1000)} seconds.`
-        : 'Wait a few minutes before retrying the search.',
-    }
+    return handleRateLimitError(error, attempt, retryConfig)
   }
 
-  // Handle server errors
   if (isExaServerError(error)) {
-    const delay = Math.min(
-      error.getSuggestedRetryDelay(attempt),
-      retryConfig.maxDelay
-    )
-    const shouldRetry = error.isTemporary && attempt <= retryConfig.maxRetries
-
-    return {
-      shouldRetry,
-      retryDelay: delay,
-      maxRetries: retryConfig.maxRetries,
-      errorCategory: 'server',
-      userMessage: shouldRetry
-        ? 'Search service temporarily unavailable. Retrying...'
-        : 'Search service is currently unavailable. Please try again later.',
-      technicalDetails: error.message,
-      isRecoverable: error.isTemporary,
-      suggestedAction: shouldRetry
-        ? 'The system will retry automatically.'
-        : 'Please try your search again in a few minutes.',
-    }
+    return handleServerError(error, attempt, retryConfig)
   }
 
-  // Handle client errors
   if (isExaClientError(error)) {
-    const shouldRetry = error.isRetryable() && attempt <= 1 // Only retry once for client errors
-
-    return {
-      shouldRetry,
-      retryDelay: shouldRetry ? 1000 : undefined,
-      maxRetries: 1,
-      errorCategory: 'client',
-      userMessage: shouldRetry
-        ? 'Search request timeout. Retrying...'
-        : 'Invalid search request. Please modify your query and try again.',
-      technicalDetails: error.message,
-      isRecoverable: error.isRetryable(),
-      suggestedAction: shouldRetry
-        ? 'The system will retry automatically.'
-        : 'Please check your search parameters and try again.',
-    }
+    return handleClientError(error, attempt)
   }
 
-  // Handle network errors
   if (isExaNetworkError(error)) {
-    const delay = Math.min(
-      error.getSuggestedRetryDelay(attempt),
-      retryConfig.maxDelay
-    )
-    const shouldRetry = attempt <= retryConfig.maxRetries
-
-    return {
-      shouldRetry,
-      retryDelay: delay,
-      maxRetries: retryConfig.maxRetries,
-      errorCategory: 'network',
-      userMessage: shouldRetry
-        ? 'Network connection issue. Retrying...'
-        : 'Unable to connect to search service. Please check your connection.',
-      technicalDetails: error.message,
-      isRecoverable: true,
-      suggestedAction: shouldRetry
-        ? 'The system will retry automatically.'
-        : 'Please check your internet connection and try again.',
-    }
+    return handleNetworkError(error, attempt, retryConfig)
   }
 
-  // Handle parsing errors
   if (isExaParsingError(error)) {
-    const shouldRetry = attempt <= 1 // Only retry once for parsing errors
-
-    return {
-      shouldRetry,
-      retryDelay: 1000,
-      maxRetries: 1,
-      errorCategory: 'parsing',
-      userMessage: shouldRetry
-        ? 'Search response parsing error. Retrying...'
-        : 'Search service returned invalid data. Please try again later.',
-      technicalDetails: error.message,
-      isRecoverable: true,
-      suggestedAction: shouldRetry
-        ? 'The system will retry automatically.'
-        : 'Please try your search again later.',
-    }
+    return handleParsingError(error, attempt)
   }
 
-  // Handle unknown errors
-  return {
-    shouldRetry: attempt <= 1, // Only retry once for unknown errors
-    retryDelay: 2000,
-    maxRetries: 1,
-    errorCategory: 'unknown',
-    userMessage:
-      'An unexpected error occurred during search. Please try again.',
-    technicalDetails: error instanceof Error ? error.message : String(error),
-    isRecoverable: true,
-    suggestedAction: 'Please try your search again.',
-  }
+  return handleUnknownError(error)
 }
 
 /**

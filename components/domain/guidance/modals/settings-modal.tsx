@@ -11,18 +11,18 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Settings" size="md">
       <div className="space-y-6">
-        <div className="flex items-center space-x-4 bg-[#f8fafc] dark:bg-[#1e2436] p-4 rounded-lg">
-          <div className="flex justify-center items-center bg-[#4a90e2] rounded-full w-16 h-16">
+        <div className="flex items-center space-x-4 rounded-lg bg-[#f8fafc] p-4 dark:bg-[#1e2436]">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#4a90e2]">
             <User size={32} className="text-white" />
           </div>
           <div>
-            <h4 className="font-medium text-[#2d3748] dark:text-[#e2e8f0] text-sm">
+            <h4 className="font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
               Sarah Chen
             </h4>
-            <p className="text-[#64748b] dark:text-[#94a3b8] text-xs">
+            <p className="text-[#64748b] text-xs dark:text-[#94a3b8]">
               sarah.chen@example.com
             </p>
-            <span className="inline-block bg-[#dbeafe] dark:bg-[#1e3a8a] mt-1 px-2 py-0.5 rounded text-[#2563eb] text-[10px] dark:text-[#93c5fd]">
+            <span className="mt-1 inline-block rounded bg-[#dbeafe] px-2 py-0.5 text-[#2563eb] text-[10px] dark:bg-[#1e3a8a] dark:text-[#93c5fd]">
               Premium Plan
             </span>
           </div>
@@ -53,36 +53,36 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             <button
               type="button"
               key={`preference-${item.label}`}
-              className="flex justify-between items-center hover:bg-[#f1f5f9] dark:hover:bg-[#242a3d] p-3 rounded-lg w-full text-[#4a5568] dark:text-[#a0aec0] text-sm transition-colors"
+              className="flex w-full items-center justify-between rounded-lg p-3 text-[#4a5568] text-sm transition-colors hover:bg-[#f1f5f9] dark:text-[#a0aec0] dark:hover:bg-[#242a3d]"
             >
               <div className="flex items-center">
                 <item.icon size={16} className="mr-3" />
                 {item.label}
               </div>
               {item.badge && (
-                <span className="bg-[#ef4444] px-2 py-0.5 rounded-full text-white text-xs">
+                <span className="rounded-full bg-[#ef4444] px-2 py-0.5 text-white text-xs">
                   {item.badge}
                 </span>
               )}
             </button>
           ))}
         </div>
-        <div className="flex justify-between items-center p-3 text-[#4a5568] dark:text-[#a0aec0] text-sm">
+        <div className="flex items-center justify-between p-3 text-[#4a5568] text-sm dark:text-[#a0aec0]">
           <div className="flex items-center">
             <Moon size={16} className="mr-3" />
             Dark Mode
           </div>
           <button
             type="button"
-            className="relative bg-[#e2e8f0] dark:bg-[#2a3148] rounded-full w-12 h-6"
+            className="relative h-6 w-12 rounded-full bg-[#e2e8f0] dark:bg-[#2a3148]"
           >
-            <div className="top-1 right-1 absolute bg-[#3a7bb7] rounded-full w-4 h-4 transition-transform" />
+            <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-[#3a7bb7] transition-transform" />
           </button>
         </div>
-        <div className="pt-4 border-[#e1e5eb] dark:border-[#2a3148] border-t">
+        <div className="border-[#e1e5eb] border-t pt-4 dark:border-[#2a3148]">
           <button
             type="button"
-            className="flex justify-center items-center hover:bg-[#fef2f2] dark:hover:bg-[#451a1a] p-2 rounded-lg w-full text-[#ef4444] text-sm transition-colors"
+            className="flex w-full items-center justify-center rounded-lg p-2 text-[#ef4444] text-sm transition-colors hover:bg-[#fef2f2] dark:hover:bg-[#451a1a]"
           >
             <LogOut size={16} className="mr-2" />
             Sign Out

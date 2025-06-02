@@ -1,92 +1,92 @@
 {
-	"compilerOptions": {
-		// === STRICT TYPE CHECKING ===
-		"strict": true,
-		"exactOptionalPropertyTypes": true,
-		"useUnknownInCatchVariables": true,
-		"noImplicitAny": true,
-		"noImplicitThis": true,
-		"noImplicitReturns": true,
-		"noFallthroughCasesInSwitch": true,
-		"noUncheckedIndexedAccess": true,
-		"noImplicitOverride": true,
-		"allowUnusedLabels": false,
-		"allowUnreachableCode": false,
-		// === ADVANCED STRICT CHECKS ===
-		"strictNullChecks": true,
-		"strictFunctionTypes": true,
-		"strictBindCallApply": true,
-		"strictPropertyInitialization": true,
-		"alwaysStrict": true,
-		// === MODULE RESOLUTION ===
-		"module": "esnext",
-		"moduleResolution": "bundler",
-		"target": "ES2022",
-		"lib": ["dom", "dom.iterable", "esnext"],
-		"allowJs": true,
-		"checkJs": false,
-		"declaration": true,
-		"declarationMap": true,
-		"sourceMap": true,
-		// === NEXT.JS SPECIFIC ===
-		"allowSyntheticDefaultImports": true,
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"incremental": true,
-		"isolatedModules": true,
-		"jsx": "preserve",
-		"resolveJsonModule": true,
-		"skipLibCheck": true,
-		// === EMIT CONTROLS ===
-		"noEmit": true,
-		"removeComments": true,
-		"verbatimModuleSyntax": true,
-		// === ADDITIONAL STRICTNESS ===
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		// === EXPERIMENTAL ===
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true,
-		// === PATH MAPPING ===
-		"baseUrl": ".",
-		"plugins": [
-			{
-				"name": "next"
-			}
-		],
-		"paths": {
-			"@/*": ["./*"],
-			"@components/*": ["components/*"],
-			"@ui/*": ["components/ui/*"],
-			"@domain/*": ["components/domain/*"],
-			"@layout/*": ["components/layout/*"],
-			"@lib/*": ["lib/*"],
-			"@state/*": ["lib/state/*"],
-			"@atoms/*": ["lib/state/atoms/*"],
-			"@utils/*": ["lib/utils/*"],
-			"@api/*": ["lib/api/*"],
-			"@types/*": ["types/*"]
-		},
-		"types": ["node"],
-		"typeRoots": ["./node_modules/@types", "./types"]
-	},
-	"include": [
-		"**/*.ts",
-		"**/*.tsx",
-		".next/types/**/*.ts",
-		"next-env.d.ts",
-		"vitest.config.ts",
-		"**/*.mjs",
-		"setupTests.ts",
-		"types/**/*.d.ts"
-	],
-	"exclude": [
-		"**/*.spec.ts",
-		"**/*.spec.tsx",
-		".next",
-		"build",
-		"coverage",
-		"dist",
-		"node_modules"
-	]
+  "compilerOptions": {
+    // === STRICT TYPE CHECKING ===
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "useUnknownInCatchVariables": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    // === ADVANCED STRICT CHECKS ===
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "alwaysStrict": true,
+    // === MODULE RESOLUTION ===
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "checkJs": false,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    // === NEXT.JS SPECIFIC ===
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    // === EMIT CONTROLS ===
+    "noEmit": true,
+    "removeComments": true,
+    "verbatimModuleSyntax": true,
+    // === ADDITIONAL STRICTNESS ===
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    // === EXPERIMENTAL ===
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    // === PATH MAPPING ===
+    "baseUrl": ".",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"],
+      "@components/*": ["components/*"],
+      "@ui/*": ["components/ui/*"],
+      "@domain/*": ["components/domain/*"],
+      "@layout/*": ["components/layout/*"],
+      "@lib/*": ["lib/*"],
+      "@state/*": ["lib/state/*"],
+      "@atoms/*": ["lib/state/atoms/*"],
+      "@utils/*": ["lib/utils/*"],
+      "@api/*": ["lib/api/*"],
+      "@types/*": ["types/*"]
+    },
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "./types"]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "next-env.d.ts",
+    "vitest.config.ts",
+    "**/*.mjs",
+    "setupTests.ts",
+    "types/**/*.d.ts"
+  ],
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    ".next",
+    "build",
+    "coverage",
+    "dist",
+    "node_modules"
+  ]
 }

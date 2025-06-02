@@ -3,10 +3,11 @@
  * This test requires actual API keys and will be skipped in CI unless keys are available
  */
 
-import { beforeAll, beforeEach, vi } from 'vitest'
+import { beforeAll, beforeEach, expect, vi } from 'vitest'
 
 import { conductResearch } from '@/app/actions/researchAgentOrchestrator'
 import type { ResearchUpdate } from '@/app/actions/researchAgentOrchestrator'
+import type { FinalLegalReport } from '@/baml_client/types'
 
 import {
   API_KEYS,
@@ -51,7 +52,6 @@ describeWithApiKeys(
 
         try {
           let completedFound = false
-          const timeoutCount = 0
           const maxTimeoutMs = 300000 // 5 minutes for full real API test
           const startTime = Date.now()
 
@@ -62,7 +62,9 @@ describeWithApiKeys(
             }
 
             const { done, value } = await reader.read()
-            if (done) break
+            if (done) {
+              break
+            }
 
             const chunk = decoder.decode(value)
             const lines = chunk.split('\n').filter(line => line.trim())
@@ -124,7 +126,7 @@ describeWithApiKeys(
           // If there were errors, verify they were handled gracefully
           const errorUpdates = updates.filter(u => u.type === 'ERROR')
           expect(errorUpdates.length).toBeGreaterThan(0)
-          expect(errorUpdates[0].message).toBeDefined()
+          expect(errorUpdates[0]?.message).toBeDefined()
         } else {
           // If no errors, verify we reached a valid end state
           const hasValidEndState =
@@ -150,6 +152,169 @@ describeWithApiKeys(
         timeout: 300000, // 5 minutes for full real API test
       }
     )
+
+    // Helper functions to reduce cognitive complexity
+
+    interface StreamProcessingResult {
+      hasCompleted: boolean
+      hasError: boolean
+    }
+
+    async function processResearchStream(
+      reader: ReadableStreamDefaultReader<Uint8Array>,
+      updates: ResearchUpdate[]
+    ): Promise<StreamProcessingResult> {
+      try {
+        const startTime = Date.now()
+        const maxTimeoutMs = 240000 // 4 minutes
+        let hasCompleted = false
+        let hasError = false
+
+        while (!hasCompleted && !hasError) {
+          if (Date.now() - startTime > maxTimeoutMs) {
+            console.warn(`Test timeout after ${maxTimeoutMs}ms`)
+            break
+          }
+
+          const streamResult = await readStreamChunk(reader)
+          if (streamResult.done) {
+            break
+          }
+
+          const parsedUpdates = parseStreamChunk(streamResult.value)
+          updates.push(...parsedUpdates)
+
+          const status = checkCompletionStatus(parsedUpdates)
+          hasCompleted = status.completed
+          hasError = status.error
+
+          if (!hasCompleted && !hasError) {
+            await new Promise(resolve => setTimeout(resolve, 100))
+          }
+        }
+
+        return { hasCompleted, hasError }
+      } finally {
+        reader.releaseLock()
+      }
+    }
+
+    async function readStreamChunk(
+      reader: ReadableStreamDefaultReader<Uint8Array>
+    ) {
+      const { done, value } = await reader.read()
+      return { done, value }
+    }
+
+    function parseStreamChunk(value: Uint8Array | undefined): ResearchUpdate[] {
+      if (!value) {
+        return []
+      }
+      const chunk = new TextDecoder().decode(value)
+      const lines = chunk.split('\n').filter(line => line.trim())
+      const updates: ResearchUpdate[] = []
+
+      for (const line of lines) {
+        try {
+          const update = JSON.parse(line) as ResearchUpdate
+          updates.push(update)
+        } catch {
+          // Ignore parsing errors
+        }
+      }
+
+      return updates
+    }
+
+    function checkCompletionStatus(updates: ResearchUpdate[]): {
+      completed: boolean
+      error: boolean
+    } {
+      const hasCompleted = updates.some(
+        update =>
+          update.stage === 'COMPLETED' ||
+          update.stage === 'HUMAN_REVIEW_REQUESTED' ||
+          update.stage === 'ITERATION_PAUSED'
+      )
+
+      const hasError = updates.some(update => update.type === 'ERROR')
+
+      return { completed: hasCompleted, error: hasError }
+    }
+
+    function extractFinalReport(
+      updates: ResearchUpdate[]
+    ): FinalLegalReport | null {
+      for (const update of updates) {
+        if (update.type === 'DATA' && update.data) {
+          if (
+            typeof update.data === 'object' &&
+            update.data !== null &&
+            ('executive_summary' in update.data ||
+              'executiveSummary' in update.data)
+          ) {
+            return update.data as FinalLegalReport
+          }
+        }
+      }
+      return null
+    }
+
+    function validateTestResults(
+      updates: ResearchUpdate[],
+      hasCompleted: boolean,
+      hasError: boolean,
+      finalReport: FinalLegalReport | null
+    ): void {
+      expect(updates.length).toBeGreaterThan(0)
+
+      if (hasError) {
+        validateErrorHandling(updates)
+      } else if (hasCompleted && finalReport) {
+        validateSuccessfulCompletion(finalReport)
+      } else {
+        validateProgressMade(updates)
+      }
+    }
+
+    function validateErrorHandling(updates: ResearchUpdate[]): void {
+      const errorUpdate = updates.find(u => u.type === 'ERROR')
+      expect(errorUpdate?.message).toBeDefined()
+      console.log('Test handled error gracefully:', errorUpdate?.message)
+    }
+
+    function validateSuccessfulCompletion(finalReport: FinalLegalReport): void {
+      expect(finalReport.report_title).toBeDefined()
+      expect(finalReport.executive_summary).toBeDefined()
+      expect(finalReport.sections).toBeDefined()
+      expect(Array.isArray(finalReport.sections)).toBe(true)
+      expect(finalReport.conclusion).toBeDefined()
+
+      const reportText = JSON.stringify(finalReport).toLowerCase()
+      const isRelevant =
+        reportText.includes('statute') ||
+        reportText.includes('limitation') ||
+        reportText.includes('new york') ||
+        reportText.includes('personal injury')
+
+      expect(isRelevant).toBe(true)
+
+      console.log('✅ Structured legal analysis completed successfully')
+      console.log(`Report title: ${finalReport.report_title}`)
+      console.log(`Number of sections: ${finalReport.sections.length}`)
+    }
+
+    function validateProgressMade(updates: ResearchUpdate[]): void {
+      const stages = updates.map(u => u.stage)
+      expect(stages).toContain('INITIALIZING')
+
+      const hasDataUpdates = updates.some(u => u.type === 'DATA')
+      if (hasDataUpdates) {
+        console.log("Test made progress with data updates but didn't complete")
+      } else {
+        console.log("Test started but didn't progress to data generation")
+      }
+    }
 
     itWithApiKeys(
       'should handle API errors gracefully',
@@ -180,7 +345,9 @@ describeWithApiKeys(
             }
 
             const { done, value } = await reader.read()
-            if (done) break
+            if (done) {
+              break
+            }
 
             const chunk = new TextDecoder().decode(value)
             const lines = chunk.split('\n').filter(line => line.trim())
@@ -262,124 +429,16 @@ describeWithApiKeys(
         const stream = await conductResearch(legalQuestion)
         const reader = stream.getReader()
 
-        let finalReport: any = null
         const updates: ResearchUpdate[] = []
+        let finalReport: FinalLegalReport | null = null
 
-        try {
-          const startTime = Date.now()
-          const maxTimeoutMs = 240000 // 4 minutes for structured analysis test
-          let hasCompleted = false
-          let hasError = false
+        const result = await processResearchStream(reader, updates)
+        const { hasCompleted, hasError } = result
 
-          while (!hasCompleted && !hasError) {
-            // Check for timeout
-            if (Date.now() - startTime > maxTimeoutMs) {
-              console.warn(
-                `Test timeout after ${maxTimeoutMs}ms - got ${updates.length} updates so far`
-              )
-              break
-            }
+        // Extract final report from updates if available
+        finalReport = extractFinalReport(updates)
 
-            const { done, value } = await reader.read()
-            if (done) break
-
-            const chunk = new TextDecoder().decode(value)
-            const lines = chunk.split('\n').filter(line => line.trim())
-
-            for (const line of lines) {
-              try {
-                const update = JSON.parse(line) as ResearchUpdate
-                updates.push(update)
-
-                if (update.type === 'DATA' && update.data) {
-                  // Look for final report data
-                  if (
-                    typeof update.data === 'object' &&
-                    ('executive_summary' in update.data ||
-                      'executiveSummary' in update.data)
-                  ) {
-                    finalReport = update.data
-                  }
-                }
-
-                if (
-                  update.stage === 'COMPLETED' ||
-                  update.stage === 'HUMAN_REVIEW_REQUESTED' ||
-                  update.stage === 'ITERATION_PAUSED'
-                ) {
-                  hasCompleted = true
-                  break
-                }
-
-                if (update.type === 'ERROR') {
-                  hasError = true
-                  break
-                }
-              } catch {
-                // Ignore parsing errors
-              }
-            }
-
-            // Add small delay to prevent tight loop
-            if (!hasCompleted && !hasError) {
-              await new Promise(resolve => setTimeout(resolve, 100))
-            }
-          }
-        } finally {
-          reader.releaseLock()
-        }
-
-        // Verify we got meaningful results
-        expect(updates.length).toBeGreaterThan(0)
-
-        // Check if we got errors or successful completion
-        const hasError = updates.some(u => u.type === 'ERROR')
-        const hasCompleted = updates.some(
-          u =>
-            u.stage === 'COMPLETED' ||
-            u.stage === 'HUMAN_REVIEW_REQUESTED' ||
-            u.stage === 'ITERATION_PAUSED'
-        )
-
-        if (hasError) {
-          // If there were errors, verify they were handled gracefully
-          const errorUpdate = updates.find(u => u.type === 'ERROR')
-          expect(errorUpdate?.message).toBeDefined()
-          console.log('Test handled error gracefully:', errorUpdate?.message)
-        } else if (hasCompleted && finalReport) {
-          // If completed successfully, verify the structured analysis
-          expect(finalReport).toBeDefined()
-
-          // Check for executive summary in either format
-          const hasExecutiveSummary =
-            finalReport.executive_summary || finalReport.executiveSummary
-          expect(hasExecutiveSummary).toBeDefined()
-
-          // Check that the analysis is relevant to the question
-          const reportText = JSON.stringify(finalReport).toLowerCase()
-          expect(
-            reportText.includes('statute') ||
-              reportText.includes('limitation') ||
-              reportText.includes('new york') ||
-              reportText.includes('personal injury')
-          ).toBe(true)
-        } else {
-          // If no final report but no errors, verify we made progress
-          const hasDataUpdates = updates.some(u => u.type === 'DATA')
-          const stages = updates.map(u => u.stage)
-
-          // Should have at least started the process
-          expect(stages).toContain('INITIALIZING')
-
-          // If we have data updates, that's progress
-          if (hasDataUpdates) {
-            console.log(
-              "Test made progress with data updates but didn't complete"
-            )
-          } else {
-            console.log("Test started but didn't progress to data generation")
-          }
-        }
+        validateTestResults(updates, hasCompleted, hasError, finalReport)
       },
       {
         skipInCI: true,

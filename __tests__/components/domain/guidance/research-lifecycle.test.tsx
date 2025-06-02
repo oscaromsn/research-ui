@@ -172,10 +172,10 @@ describe('ResearchLifecycle Component Integration', () => {
 
     // All stages should be completed (green)
     const stages = ['Ideate', 'Plan', 'Research', 'Analyze', 'Review', 'Draft']
-    stages.forEach(stageName => {
+    for (const stageName of stages) {
       const stage = screen.getByTestId(`stage-icon-${stageName.toLowerCase()}`)
       expect(stage).toHaveClass('bg-green-500') // Completed color
-    })
+    }
   })
 
   it('shows error state on current stage when ERROR', () => {
@@ -230,9 +230,9 @@ describe('ResearchLifecycle Component Integration', () => {
 
     // In IDLE state, all stages should be pending
     const stages = ['Ideate', 'Plan', 'Research', 'Analyze', 'Review', 'Draft']
-    stages.forEach(stageName => {
+    for (const stageName of stages) {
       const stage = screen.getByTestId(`stage-icon-${stageName.toLowerCase()}`)
       expect(stage).toHaveClass('bg-[#242a3d]') // Pending color
-    })
+    }
   })
 })

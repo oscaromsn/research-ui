@@ -1,27 +1,39 @@
 // __tests__/integration/phase2-completion.test.ts
 
 import { createStore } from 'jotai'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
-import * as researchAtoms from '@/lib/state/researchAtoms'
+import {
+  analyzedDocsSummaryAtom,
+  currentResearchStageAtom,
+  executiveSummaryDisplayAtom,
+  finalReportContentAtom,
+  generatedQueriesAtom,
+  isResearchLoadingAtom,
+  reportSectionsDisplayAtom,
+  researchErrorAtom,
+  researchLogAtom,
+  researchStatusAtom,
+  resetResearchStateAtom,
+  synthesisDetailsAtom,
+} from '@/lib/state/researchAtoms'
 
 describe('Phase 2 Completion Criteria Validation', () => {
   describe('1. All Files and Types Created', () => {
     it('should have researchAtoms module available', () => {
-      expect(researchAtoms).toBeDefined()
+      expect(researchStatusAtom).toBeDefined()
     })
 
     it('should export all required client-friendly interfaces', () => {
       // These interfaces should be available as types (we can't directly test them at runtime,
       // but TypeScript compilation ensures they exist)
-      expect(typeof researchAtoms).toBe('object')
 
       // We can validate the existence of the atoms which use these types
-      expect(researchAtoms.researchStatusAtom).toBeDefined()
-      expect(researchAtoms.generatedQueriesAtom).toBeDefined()
-      expect(researchAtoms.analyzedDocsSummaryAtom).toBeDefined()
-      expect(researchAtoms.synthesisDetailsAtom).toBeDefined()
-      expect(researchAtoms.finalReportContentAtom).toBeDefined()
+      expect(researchStatusAtom).toBeDefined()
+      expect(generatedQueriesAtom).toBeDefined()
+      expect(analyzedDocsSummaryAtom).toBeDefined()
+      expect(synthesisDetailsAtom).toBeDefined()
+      expect(finalReportContentAtom).toBeDefined()
     })
   })
 
@@ -33,7 +45,7 @@ describe('Phase 2 Completion Criteria Validation', () => {
     })
 
     it('should have researchStatusAtom with correct ResearchStatus type and initial state', () => {
-      const initialState = store.get(researchAtoms.researchStatusAtom)
+      const initialState = store.get(researchStatusAtom)
 
       expect(initialState).toMatchObject({
         stage: 'IDLE',
@@ -47,25 +59,25 @@ describe('Phase 2 Completion Criteria Validation', () => {
     })
 
     it('should have researchLogAtom as atom<string[]> with empty initial state', () => {
-      const initialState = store.get(researchAtoms.researchLogAtom)
+      const initialState = store.get(researchLogAtom)
       expect(Array.isArray(initialState)).toBe(true)
       expect(initialState).toHaveLength(0)
     })
 
     it('should have generatedQueriesAtom as atom<ClientSearchQuery[]> with empty initial state', () => {
-      const initialState = store.get(researchAtoms.generatedQueriesAtom)
+      const initialState = store.get(generatedQueriesAtom)
       expect(Array.isArray(initialState)).toBe(true)
       expect(initialState).toHaveLength(0)
     })
 
     it('should have analyzedDocsSummaryAtom as atom<ClientAnalyzedDoc[]> with empty initial state', () => {
-      const initialState = store.get(researchAtoms.analyzedDocsSummaryAtom)
+      const initialState = store.get(analyzedDocsSummaryAtom)
       expect(Array.isArray(initialState)).toBe(true)
       expect(initialState).toHaveLength(0)
     })
 
     it('should have synthesisDetailsAtom with correct ClientSynthesis initial state', () => {
-      const initialState = store.get(researchAtoms.synthesisDetailsAtom)
+      const initialState = store.get(synthesisDetailsAtom)
       expect(initialState).toMatchObject({
         topics: [],
         unansweredAspects: [],
@@ -75,7 +87,7 @@ describe('Phase 2 Completion Criteria Validation', () => {
     })
 
     it('should have finalReportContentAtom with correct ClientFinalReport initial state', () => {
-      const initialState = store.get(researchAtoms.finalReportContentAtom)
+      const initialState = store.get(finalReportContentAtom)
       expect(initialState).toMatchObject({
         title: '',
         executiveSummary: '',
@@ -89,23 +101,23 @@ describe('Phase 2 Completion Criteria Validation', () => {
 
   describe('3. Reset Functionality', () => {
     it('should have resetResearchStateAtom implemented', () => {
-      expect(researchAtoms.resetResearchStateAtom).toBeDefined()
+      expect(resetResearchStateAtom).toBeDefined()
     })
 
     it('should reset all data-holding atoms to initial states', () => {
       const store = createStore()
 
       // Set non-initial values
-      store.set(researchAtoms.researchLogAtom, ['test log'])
-      store.set(researchAtoms.generatedQueriesAtom, [{ query_string: 'test' }])
+      store.set(researchLogAtom, ['test log'])
+      store.set(generatedQueriesAtom, [{ query_string: 'test' }])
 
       // Trigger reset
-      store.set(researchAtoms.resetResearchStateAtom, null)
+      store.set(resetResearchStateAtom, null)
 
       // Verify reset
-      expect(store.get(researchAtoms.researchLogAtom)).toEqual([])
-      expect(store.get(researchAtoms.generatedQueriesAtom)).toEqual([])
-      expect(store.get(researchAtoms.researchStatusAtom).stage).toBe('IDLE')
+      expect(store.get(researchLogAtom)).toEqual([])
+      expect(store.get(generatedQueriesAtom)).toEqual([])
+      expect(store.get(researchStatusAtom).stage).toBe('IDLE')
     })
   })
 
@@ -115,7 +127,7 @@ describe('Phase 2 Completion Criteria Validation', () => {
 
       // This test validates that we can set ResearchStage values that are consistent
       // with the orchestrator types (compilation would fail if inconsistent)
-      store.set(researchAtoms.researchStatusAtom, {
+      store.set(researchStatusAtom, {
         stage: 'GENERATING_QUERIES',
         isLoading: true,
         error: null,
@@ -123,33 +135,27 @@ describe('Phase 2 Completion Criteria Validation', () => {
         totalDocsToProcess: 0,
       })
 
-      expect(store.get(researchAtoms.researchStatusAtom).stage).toBe(
-        'GENERATING_QUERIES'
-      )
+      expect(store.get(researchStatusAtom).stage).toBe('GENERATING_QUERIES')
     })
   })
 
   describe('5. No Business Logic', () => {
     it('should only contain type definitions and Jotai atom definitions', () => {
-      // Verify that the atoms module exports only atoms and types
-      const exportedKeys = Object.keys(researchAtoms)
-
-      // All exported items should be atoms (ending with 'Atom')
-      const atomExports = exportedKeys.filter(key => key.endsWith('Atom'))
+      // Verify that the atoms are properly defined and accessible
 
       // Should have at least the core atoms
-      expect(atomExports).toContain('researchStatusAtom')
-      expect(atomExports).toContain('researchLogAtom')
-      expect(atomExports).toContain('generatedQueriesAtom')
-      expect(atomExports).toContain('analyzedDocsSummaryAtom')
-      expect(atomExports).toContain('synthesisDetailsAtom')
-      expect(atomExports).toContain('finalReportContentAtom')
-      expect(atomExports).toContain('resetResearchStateAtom')
+      expect(researchStatusAtom).toBeDefined()
+      expect(researchLogAtom).toBeDefined()
+      expect(generatedQueriesAtom).toBeDefined()
+      expect(analyzedDocsSummaryAtom).toBeDefined()
+      expect(synthesisDetailsAtom).toBeDefined()
+      expect(finalReportContentAtom).toBeDefined()
+      expect(resetResearchStateAtom).toBeDefined()
 
       // Should have derived atoms
-      expect(atomExports).toContain('isResearchLoadingAtom')
-      expect(atomExports).toContain('currentResearchStageAtom')
-      expect(atomExports).toContain('researchErrorAtom')
+      expect(isResearchLoadingAtom).toBeDefined()
+      expect(currentResearchStageAtom).toBeDefined()
+      expect(researchErrorAtom).toBeDefined()
     })
   })
 
@@ -166,25 +172,25 @@ describe('Phase 2 Completion Criteria Validation', () => {
         summarySnippet: 'Initial snippet...',
       }
 
-      store.set(researchAtoms.analyzedDocsSummaryAtom, [mockDoc])
+      store.set(analyzedDocsSummaryAtom, [mockDoc])
 
       // Simulate appending a new doc (as useResearchAgent would do)
-      const currentDocs = store.get(researchAtoms.analyzedDocsSummaryAtom)
+      const currentDocs = store.get(analyzedDocsSummaryAtom)
       const newDoc = {
         ...mockDoc,
         docId: 'test-doc-2',
         title: 'Second Document',
       }
-      store.set(researchAtoms.analyzedDocsSummaryAtom, [...currentDocs, newDoc])
+      store.set(analyzedDocsSummaryAtom, [...currentDocs, newDoc])
 
-      expect(store.get(researchAtoms.analyzedDocsSummaryAtom)).toHaveLength(2)
+      expect(store.get(analyzedDocsSummaryAtom)).toHaveLength(2)
     })
 
     it('should have atoms structured for easy consumption by UI components', () => {
       const store = createStore()
 
       // Test derived atoms work as expected for UI consumption
-      store.set(researchAtoms.researchStatusAtom, {
+      store.set(researchStatusAtom, {
         stage: 'ANALYZING_DOCUMENTS',
         isLoading: true,
         error: null,
@@ -193,18 +199,16 @@ describe('Phase 2 Completion Criteria Validation', () => {
       })
 
       // UI components should be able to easily read these derived states
-      expect(store.get(researchAtoms.isResearchLoadingAtom)).toBe(true)
-      expect(store.get(researchAtoms.currentResearchStageAtom)).toBe(
-        'ANALYZING_DOCUMENTS'
-      )
-      expect(store.get(researchAtoms.researchErrorAtom)).toBe(null)
+      expect(store.get(isResearchLoadingAtom)).toBe(true)
+      expect(store.get(currentResearchStageAtom)).toBe('ANALYZING_DOCUMENTS')
+      expect(store.get(researchErrorAtom)).toBe(null)
     })
 
     it('should support streaming text updates', () => {
       const store = createStore()
 
       // Test that streaming text fields can be progressively built
-      store.set(researchAtoms.finalReportContentAtom, {
+      store.set(finalReportContentAtom, {
         title: 'Legal Analysis Report',
         executiveSummary: 'This report analyzes',
         sections: [],
@@ -214,13 +218,13 @@ describe('Phase 2 Completion Criteria Validation', () => {
       })
 
       // Simulate streaming text append (as useResearchAgent would do)
-      const currentReport = store.get(researchAtoms.finalReportContentAtom)
-      store.set(researchAtoms.finalReportContentAtom, {
+      const currentReport = store.get(finalReportContentAtom)
+      store.set(finalReportContentAtom, {
         ...currentReport,
         executiveSummary: `${currentReport.executiveSummary} the legal implications...`,
       })
 
-      expect(store.get(researchAtoms.executiveSummaryDisplayAtom)).toBe(
+      expect(store.get(executiveSummaryDisplayAtom)).toBe(
         'This report analyzes the legal implications...'
       )
     })
@@ -233,7 +237,7 @@ describe('Phase 2 Completion Criteria Validation', () => {
       // Simulate a complete research flow state to validate the schema
 
       // 1. Set initial research status
-      store.set(researchAtoms.researchStatusAtom, {
+      store.set(researchStatusAtom, {
         stage: 'GENERATING_QUERIES',
         isLoading: true,
         error: null,
@@ -243,7 +247,7 @@ describe('Phase 2 Completion Criteria Validation', () => {
       })
 
       // 2. Add generated queries
-      store.set(researchAtoms.generatedQueriesAtom, [
+      store.set(generatedQueriesAtom, [
         {
           query_string: 'contract law breach',
           expected_information_summary: 'Breach remedies',
@@ -255,7 +259,7 @@ describe('Phase 2 Completion Criteria Validation', () => {
       ])
 
       // 3. Add analyzed documents
-      store.set(researchAtoms.analyzedDocsSummaryAtom, [
+      store.set(analyzedDocsSummaryAtom, [
         {
           docId: 'doc1',
           title: 'Contract Law Fundamentals',
@@ -266,7 +270,7 @@ describe('Phase 2 Completion Criteria Validation', () => {
       ])
 
       // 4. Add synthesis
-      store.set(researchAtoms.synthesisDetailsAtom, {
+      store.set(synthesisDetailsAtom, {
         topics: [
           {
             title: 'Breach of Contract',
@@ -281,7 +285,7 @@ describe('Phase 2 Completion Criteria Validation', () => {
       })
 
       // 5. Add final report
-      store.set(researchAtoms.finalReportContentAtom, {
+      store.set(finalReportContentAtom, {
         title: 'Legal Analysis: Contract Breach Remedies',
         executiveSummary: 'This report examines available remedies...',
         sections: [
@@ -300,21 +304,15 @@ describe('Phase 2 Completion Criteria Validation', () => {
       })
 
       // Verify all state is properly structured and accessible
-      expect(store.get(researchAtoms.researchStatusAtom).stage).toBe(
-        'GENERATING_QUERIES'
-      )
-      expect(store.get(researchAtoms.generatedQueriesAtom)).toHaveLength(2)
-      expect(store.get(researchAtoms.analyzedDocsSummaryAtom)).toHaveLength(1)
-      expect(store.get(researchAtoms.synthesisDetailsAtom).topics).toHaveLength(
-        1
-      )
-      expect(
-        store.get(researchAtoms.finalReportContentAtom).sections
-      ).toHaveLength(2)
+      expect(store.get(researchStatusAtom).stage).toBe('GENERATING_QUERIES')
+      expect(store.get(generatedQueriesAtom)).toHaveLength(2)
+      expect(store.get(analyzedDocsSummaryAtom)).toHaveLength(1)
+      expect(store.get(synthesisDetailsAtom).topics).toHaveLength(1)
+      expect(store.get(finalReportContentAtom).sections).toHaveLength(2)
 
       // Verify derived atoms work correctly
-      expect(store.get(researchAtoms.isResearchLoadingAtom)).toBe(true)
-      expect(store.get(researchAtoms.reportSectionsDisplayAtom)).toHaveLength(2)
+      expect(store.get(isResearchLoadingAtom)).toBe(true)
+      expect(store.get(reportSectionsDisplayAtom)).toHaveLength(2)
     })
   })
 })

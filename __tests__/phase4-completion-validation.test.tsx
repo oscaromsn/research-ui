@@ -151,17 +151,23 @@ describe('Phase 4 Completion Validation', () => {
 
       // Verify document structure shows all sections with proper completion status
       const docStructure = screen.getByText('Document Structure').closest('div')
+      expect(docStructure).not.toBeNull()
+      if (!docStructure) {
+        throw new Error(
+          "Test setup failed: 'Document Structure' div not found."
+        )
+      }
       expect(
-        within(docStructure!).getByText('Executive Summary')
+        within(docStructure).getByText('Executive Summary')
       ).toBeInTheDocument()
-      expect(within(docStructure!).getByText('Background')).toBeInTheDocument()
+      expect(within(docStructure).getByText('Background')).toBeInTheDocument()
       expect(
-        within(docStructure!).getByText('Legal Analysis')
+        within(docStructure).getByText('Legal Analysis')
       ).toBeInTheDocument()
       expect(
-        within(docStructure!).getByText('Recommendations')
+        within(docStructure).getByText('Recommendations')
       ).toBeInTheDocument()
-      expect(within(docStructure!).getByText('Conclusion')).toBeInTheDocument()
+      expect(within(docStructure).getByText('Conclusion')).toBeInTheDocument()
 
       // Verify content display
       expect(
@@ -209,23 +215,29 @@ describe('Phase 4 Completion Validation', () => {
       renderWithProvider(<ReportDrafter />)
 
       const docStructure = screen.getByText('Document Structure').closest('div')
+      expect(docStructure).not.toBeNull()
+      if (!docStructure) {
+        throw new Error(
+          "Test setup failed: 'Document Structure' div not found."
+        )
+      }
 
       // Complete sections should have completion styling
-      const executiveSummarySection = within(docStructure!)
+      const executiveSummarySection = within(docStructure)
         .getByText('Executive Summary')
         .closest('div[class*="p-2"]')
-      const backgroundSection = within(docStructure!)
+      const backgroundSection = within(docStructure)
         .getByText('Background')
         .closest('div[class*="p-2"]')
-      const recommendationsSection = within(docStructure!)
+      const recommendationsSection = within(docStructure)
         .getByText('Recommendations')
         .closest('div[class*="p-2"]')
 
       // Incomplete sections should not have completion styling
-      const legalAnalysisSection = within(docStructure!)
+      const legalAnalysisSection = within(docStructure)
         .getByText('Legal Analysis')
         .closest('div[class*="p-2"]')
-      const conclusionSection = within(docStructure!)
+      const conclusionSection = within(docStructure)
         .getByText('Conclusion')
         .closest('div[class*="p-2"]')
 

@@ -8,9 +8,9 @@ import { ResearchLifecycle } from '@domain/guidance/research-lifecycle'
 export function Header() {
   const [showSettings, setShowSettings] = useState(false)
   return (
-    <header className="flex justify-between items-center bg-[#1a1f2e] px-4 py-3 border-[#2a3148] border-b text-white">
+    <header className="flex items-center justify-between border-[#2a3148] border-b bg-[#1a1f2e] px-4 py-3 text-white">
       <div className="flex items-center">
-        <div className="flex items-center mr-4">
+        <div className="mr-4 flex items-center">
           <span className="mr-1 font-bold text-2xl">LS</span>
           <span className="font-medium text-lg">LexiSynth</span>
         </div>
@@ -18,21 +18,21 @@ export function Header() {
           <input
             type="text"
             defaultValue="Research: Maritime Salvage Rights - The 'Oceanic' Case"
-            className="bg-[#242a3d] px-3 py-1 border border-[#3a4055] rounded focus:outline-none focus:ring-1 focus:ring-[#4a90e2] w-[340px] text-sm"
+            className="w-[340px] rounded border border-[#3a4055] bg-[#242a3d] px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#4a90e2]"
           />
         </div>
       </div>
       <ResearchLifecycle />
       <div className="flex items-center space-x-3">
-        <button type="button" className="hover:bg-[#242a3d] p-1.5 rounded-full">
+        <button type="button" className="rounded-full p-1.5 hover:bg-[#242a3d]">
           <Play size={18} />
         </button>
-        <button type="button" className="hover:bg-[#242a3d] p-1.5 rounded-full">
+        <button type="button" className="rounded-full p-1.5 hover:bg-[#242a3d]">
           <Save size={18} />
         </button>
         <button
           type="button"
-          className="flex justify-center items-center bg-[#4a90e2] hover:bg-[#3a7bb7] rounded-full w-8 h-8 transition-colors"
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-[#4a90e2] transition-colors hover:bg-[#3a7bb7]"
           onClick={() => setShowSettings(true)}
         >
           <User size={16} className="text-white" />

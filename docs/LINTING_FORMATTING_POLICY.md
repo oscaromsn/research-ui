@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the comprehensive linting and formatting policy for the LexiSynth project. We use a dual-tool approach with **Biome for formatting** and **ESLint for linting** to ensure code quality and consistency across the entire codebase. **All code is treated equally** - tests, mocks, and source files follow the same quality standards with no distinctions.
+This document outlines the comprehensive linting and formatting policy for the LexiSynth project. We use a dual-tool approach with **Biome for formatting** and **Biome for linting** to ensure code quality and consistency across the entire codebase. **All code is treated equally** - tests, mocks, and source files follow the same quality standards with no distinctions.
 
 ## Tools Configuration
 
@@ -18,9 +18,9 @@ This document outlines the comprehensive linting and formatting policy for the L
   - Semicolons required
   - Trailing commas (ES5 style)
 
-### ESLint (Linting)
+### bIOME (Linting)
 - **Primary Role**: Code quality, best practices, and error detection
-- **Configuration**: `eslint.config.mjs` (Flat Config)
+- **Configuration**: `biome.json`
 - **Coverage**: All TypeScript and JavaScript files with specialized rules for different file types
 - **Key Features**:
   - TypeScript-first with strict type checking
@@ -85,23 +85,23 @@ The project uses `lint-staged` to automatically format and lint files before com
 
 ### Source Files (`app/`, `components/`, `lib/`)
 1. **Biome format** - Apply consistent formatting
-2. **ESLint fix** - Fix linting issues automatically
+2. **Biome fix** - Fix linting issues automatically
 3. **Vitest run** - Run related unit tests
 
 ### Test Files (`**/*.{test,spec}.{ts,tsx}`)
 1. **Biome format** - Apply consistent formatting
-2. **ESLint fix** - Fix linting issues with test-specific rules
+2. **Biome fix** - Fix linting issues with test-specific rules
 3. **Vitest run** - Run the specific test files
 
 ### Mock Files (`__mocks__/**`)
 1. **Biome format** - Apply consistent formatting
-2. **ESLint fix** - Fix linting issues with relaxed rules
+2. **Biome fix** - Fix linting issues with relaxed rules
 
 ### Configuration Files
-1. **ESLint fix** - Lint configuration files
+1. **Biome fix** - Lint configuration files
 2. **TypeScript check** - Validate types after config changes
 
-## ESLint Configuration Details
+## Biome Configuration Details
 
 ### Rule Categories
 
@@ -149,14 +149,14 @@ The project uses `lint-staged` to automatically format and lint files before com
 ### IDE Setup
 Configure your IDE to:
 - Use Biome for formatting (not Prettier)
-- Use ESLint for inline linting
+- Use Biome for inline linting
 - Format on save with Biome
-- Show ESLint warnings/errors inline
+- Show Biome warnings/errors inline
 
 ### Error Resolution Priority
 1. **TypeScript errors** - Fix type issues first
-2. **ESLint errors** - Address code quality issues
-3. **ESLint warnings** - Improve code when possible
+2. **Biome errors** - Address code quality issues
+3. **Biome warnings** - Improve code when possible
 4. **Formatting** - Apply consistent style
 
 ## Integration Points
@@ -183,22 +183,12 @@ All scripts are designed to work together:
 ### Common Issues
 
 #### "File ignored" warnings
-- **Cause**: File matches ignore pattern in ESLint or Biome
-- **Solution**: Check `ignores` arrays in `eslint.config.mjs` and `files.ignore` in `biome.json`
-
-#### Formatting conflicts
-- **Cause**: ESLint and Biome have different formatting rules
-- **Solution**: Biome handles formatting, ESLint focuses on code quality
-- **Note**: With fast Biome, we format directly rather than checking first
+- **Cause**: File matches ignore pattern in Biome
+- **Solution**: Check `ignores` arrays in `files.ignore` in `biome.json`
 
 #### Test file linting
 - **Cause**: Test files need special rule configurations
-- **Solution**: Verify test file patterns in ESLint config sections
-
-### Debug Commands
-```bash
-# Check which files ESLint processes
-npx eslint --print-config file.ts
+- **Solution**: Verify test file patterns in biome.json config sections
 
 # See Biome configuration for a file
 npx biome format --help

@@ -6,7 +6,7 @@
  * For real API tests, see integration tests with API key requirements
  */
 
-import { beforeEach, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { conductResearch } from '@/app/actions/researchAgentOrchestrator'
 import type { ResearchUpdate } from '@/app/actions/researchAgentOrchestrator'
@@ -63,7 +63,9 @@ describe('Research Orchestrator - Basic Streaming', () => {
           let completedFound = false
           while (!completedFound) {
             const { done, value } = await reader.read()
-            if (done) break
+            if (done) {
+              break
+            }
 
             const chunk = decoder.decode(value)
             const lines = chunk.split('\n').filter(line => line.trim())
@@ -93,9 +95,9 @@ describe('Research Orchestrator - Basic Streaming', () => {
 
     // Verify basic flow
     expect(updates.length).toBeGreaterThanOrEqual(2)
-    expect(updates[0].type).toBe('STATUS_CHANGE')
-    expect(updates[0].stage).toBe('INITIALIZING')
-    expect(updates[updates.length - 1].stage).toBe('COMPLETED')
+    expect(updates[0]?.type).toBe('STATUS_CHANGE')
+    expect(updates[0]?.stage).toBe('INITIALIZING')
+    expect(updates[updates.length - 1]?.stage).toBe('COMPLETED')
   }, 10000) // 10 second timeout
 
   it('should handle empty legal question gracefully', async () => {
@@ -114,14 +116,18 @@ describe('Research Orchestrator - Basic Streaming', () => {
         (async () => {
           while (!hasCompleted) {
             const { done, value } = await reader.read()
-            if (done) break
+            if (done) {
+              break
+            }
 
             const chunk = new TextDecoder().decode(value)
             const lines = chunk.split('\n').filter(line => line.trim())
 
             for (const line of lines) {
               const update = JSON.parse(line) as ResearchUpdate
-              if (update.stage === 'COMPLETED') hasCompleted = true
+              if (update.stage === 'COMPLETED') {
+                hasCompleted = true
+              }
             }
           }
         })(),

@@ -19,11 +19,13 @@ vi.mock('@/components/domain/guidance/modals/settings-modal', () => ({
     isOpen: boolean
     onClose: () => void
   }) => {
-    if (!isOpen) return null
+    if (!isOpen) {
+      return null
+    }
     return (
       <div data-testid="settings-modal">
         Settings Modal
-        <button onClick={onClose} data-testid="close-settings">
+        <button type="button" onClick={onClose} data-testid="close-settings">
           Close
         </button>
       </div>

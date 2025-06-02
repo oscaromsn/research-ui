@@ -58,15 +58,45 @@ interface StageInfo {
   status: StageStatus
 }
 
+const researchStageToLifecycleName = (stage: ResearchStage | null): string => {
+  if (!stage) {
+    return 'Ideate'
+  }
+  return STAGE_MAPPING[stage] || 'Ideate'
+}
+
+const getStageStatus = (
+  stageIndex: number,
+  activeStageIndex: number,
+  researchStage: ResearchStage | null,
+  isLoading: boolean
+): StageStatus => {
+  if (researchStage === 'COMPLETED') {
+    return 'completed'
+  }
+
+  const isActiveStage = stageIndex === activeStageIndex
+  const isCompletedStage = stageIndex < activeStageIndex
+  const hasError =
+    researchStage === 'ERROR' ||
+    researchStage === 'HUMAN_REVIEW_REQUESTED' ||
+    researchStage === 'ITERATION_PAUSED'
+
+  if (hasError || isLoading) {
+    if (isCompletedStage) {
+      return 'completed'
+    }
+    if (isActiveStage) {
+      return 'active'
+    }
+    return 'pending'
+  }
+
+  return 'pending'
+}
+
 export function ResearchLifecycle() {
   const status = useAtomValue(researchStatusAtom)
-
-  const researchStageToLifecycleName = (
-    stage: ResearchStage | null
-  ): string => {
-    if (!stage) return 'Ideate'
-    return STAGE_MAPPING[stage] || 'Ideate'
-  }
 
   const lifecycleStageMap: Record<
     string,
@@ -96,29 +126,15 @@ export function ResearchLifecycle() {
         throw new Error(`Stage info not found for stage: ${stageName}`)
       }
 
-      let stageStatus: StageStatus = 'pending'
-
-      if (status.stage === 'COMPLETED') {
-        stageStatus = 'completed'
-      } else if (
-        status.stage === 'ERROR' ||
-        status.stage === 'HUMAN_REVIEW_REQUESTED' ||
-        status.stage === 'ITERATION_PAUSED' ||
-        status.isLoading
-      ) {
-        if (stageIndex < activeStageIndex) {
-          stageStatus = 'completed'
-        } else if (stageIndex === activeStageIndex) {
-          stageStatus = 'active'
-        } else {
-          stageStatus = 'pending'
-        }
-      }
-
       return {
         name: stageInfo.name,
         icon: stageInfo.icon,
-        status: stageStatus,
+        status: getStageStatus(
+          stageIndex,
+          activeStageIndex,
+          status.stage,
+          status.isLoading
+        ),
       }
     })
   }, [status.stage, status.isLoading, lifecycleStageMap])
@@ -138,20 +154,20 @@ export function ResearchLifecycle() {
           return (
             <div
               key={stage.name}
-              className="group flex flex-col items-center mx-1"
+              className="group mx-1 flex flex-col items-center"
             >
               <div
-                className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors duration-300 relative z-10 ${
+                className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-300 ${
                   STAGE_STYLES[stage.status]
                 }`}
                 data-testid={`stage-icon-${stage.name.toLowerCase()}`}
               >
                 {showLoader ? (
-                  <div className="relative w-full h-full flex items-center justify-center">
+                  <div className="relative flex h-full w-full items-center justify-center">
                     <div className="absolute z-10">{stage.icon}</div>
                     <Loader2
                       size={22}
-                      className="absolute opacity-40 animate-spin"
+                      className="absolute animate-spin opacity-40"
                       data-testid="loader"
                     />
                   </div>
@@ -160,12 +176,12 @@ export function ResearchLifecycle() {
                 )}
                 {!isLastStage && (
                   <div
-                    className={`absolute left-8 top-1/2 -translate-y-1/2 w-6 h-[1px] transition-colors duration-300 z-0 ${connectorStyle}`}
+                    className={`-translate-y-1/2 absolute top-1/2 left-8 z-0 h-[1px] w-6 transition-colors duration-300 ${connectorStyle}`}
                   />
                 )}
               </div>
               <span
-                className={`text-xs mt-2 transition-colors duration-300 ${
+                className={`mt-2 text-xs transition-colors duration-300 ${
                   TEXT_STYLES[stage.status]
                 }`}
               >

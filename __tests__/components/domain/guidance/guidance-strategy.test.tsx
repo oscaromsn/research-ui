@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { GuidanceStrategy } from '@/components/domain/guidance/guidance-strategy'
-import * as useResearchAgentModule from '@/lib/hooks/useResearchAgent'
+import { useResearchAgent } from '@/lib/hooks/useResearchAgent'
 import {
   generatedQueriesAtom,
   researchAssessmentAtom,
@@ -29,7 +29,7 @@ describe('GuidanceStrategy Component Integration', () => {
     store = createStore()
     mockStartResearch = vi.fn()
     mockAbortResearch = vi.fn()
-    mockUseResearchAgent = vi.mocked(useResearchAgentModule.useResearchAgent)
+    mockUseResearchAgent = vi.mocked(useResearchAgent)
 
     vi.clearAllMocks()
 
@@ -288,7 +288,7 @@ describe('GuidanceStrategy Component Integration', () => {
     expect(screen.queryByText('Identified Gaps:')).not.toBeInTheDocument()
   })
 
-  it('does not render assessment section when no assessment data', async () => {
+  it('does not render assessment section when no assessment data', () => {
     // Ensure assessment atom is null (default state)
     store.set(researchAssessmentAtom, null)
 

@@ -28,13 +28,15 @@ vi.mock('@/components/domain/legal-research/modals/case-modal', () => ({
       date?: string
     }
   }) => {
-    if (!isOpen) return null
+    if (!isOpen) {
+      return null
+    }
     return (
       <div data-testid="case-modal">
         <h3>Case Details</h3>
         <p>Title: {caseData?.title || 'No title'}</p>
         <p>Source: {caseData?.source || 'No source'}</p>
-        <button onClick={onClose} aria-label="close">
+        <button type="button" onClick={onClose} aria-label="close">
           Close
         </button>
       </div>

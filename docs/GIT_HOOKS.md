@@ -25,7 +25,7 @@ Our git hooks use **multiple specialized tools** with clear separation of respon
 - **Speed**: Very fast (~10-20s depending on changes)
 - **Responsibilities**:
   - Auto-format changed code files (Biome)
-  - Auto-fix linting issues (ESLint)
+  - Auto-fix linting issues (Biome)
   - Run unit tests related to changed files only
   - Generate BAML client when schema files change
   - Validate package.json and config file changes
@@ -61,7 +61,7 @@ Our git hooks use **multiple specialized tools** with clear separation of respon
 **Runs on every commit** - Fast, targeted validation with early integration feedback
 
 - ✅ **Auto-formatting** (Biome) - Fixes code style automatically
-- ✅ **ESLint auto-fix** - Fixes linting issues automatically  
+- ✅ **Biome auto-fix** - Fixes linting issues automatically  
 - ✅ **Related unit tests** - Only tests affected by changes
 - ✅ **BAML generation** - Updates AI client when BAML files change
 - ✅ **Fast integration tests** - Critical pipeline validation (37 tests, ~5s)
@@ -255,7 +255,7 @@ git commit --no-verify -m "bypass commit hooks"
 // File patterns and their respective validation tasks
 "{app,components,lib}/**/*.{ts,tsx,js,jsx}": [
   "biome format --write",           // Auto-format
-  "eslint --fix --quiet",           // Auto-fix linting
+  "biome check --write",           // Auto-fix linting
   "vitest related --run --bail=1",  // Related unit tests only
 ]
 ```
@@ -280,7 +280,7 @@ extends: ["@commitlint/config-conventional"]
 - `package.json` - Script definitions and test categorization
 - `.github/workflows/test-ci.yml` - CI/CD validation pipeline
 - `vitest.config.ts` - Test framework configuration
-- `eslint.config.mjs` - Linting rules and patterns
+- `biome.json` - Linting rules and patterns
 
 ## 📈 Success Metrics
 
@@ -328,7 +328,7 @@ Since implementing this robust validation system:
 
 #### **🎯 Clear Responsibilities**
 - **Formatting**: Handled by Biome in lint-staged
-- **Linting**: Handled by ESLint with auto-fix
+- **Linting**: Handled by Biome with auto-fix
 - **Testing**: Progressive from related → integration → comprehensive
 - **Messaging**: Consistent format enforced by commitlint
 

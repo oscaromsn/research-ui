@@ -60,7 +60,7 @@ describe('GuidanceStrategy - Auto Mode', () => {
       ).toBeInTheDocument()
     })
 
-    it('should call toggleAutoMode when switch is clicked', async () => {
+    it('should call toggleAutoMode when switch is clicked', () => {
       render(
         <JotaiProvider>
           <GuidanceStrategy />
@@ -170,7 +170,7 @@ describe('GuidanceStrategy - Auto Mode', () => {
       expect(screen.getByText(/Auto Mode: Processing/)).toBeInTheDocument()
     })
 
-    it('should call correct handlers when buttons are clicked', async () => {
+    it('should call correct handlers when buttons are clicked', () => {
       mockedUseResearchAgent.mockReturnValue({
         ...mockAgent,
         isLoading: true,
@@ -334,7 +334,7 @@ describe('GuidanceStrategy - Auto Mode', () => {
       expect(startButton).toBeDisabled()
     })
 
-    it('should enable start button when input has content', async () => {
+    it('should enable start button when input has content', () => {
       render(
         <JotaiProvider>
           <GuidanceStrategy />
@@ -350,7 +350,7 @@ describe('GuidanceStrategy - Auto Mode', () => {
       expect(startButton).toBeEnabled()
     })
 
-    it('should call startResearch with legal question when start button is clicked', async () => {
+    it('should call startResearch with legal question when start button is clicked', () => {
       render(
         <JotaiProvider>
           <GuidanceStrategy />

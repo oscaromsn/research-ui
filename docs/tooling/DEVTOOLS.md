@@ -116,7 +116,7 @@ bun deps:report
 #### Pre-commit Hook (`.husky/pre-commit`)
 Runs `lint-staged` to process staged files:
 - Format code with Biome
-- Fix ESLint issues
+- Fix Biome issues
 - Run related tests
 
 #### Commit Message Hook (`.husky/commit-msg`)
@@ -125,7 +125,7 @@ Validates commit messages using commitlint.
 #### Pre-push Hook (`.husky/pre-push`)
 Runs quick validation:
 - TypeScript compilation check
-- ESLint validation
+- Biome validation
 - Format validation
 
 **Manual execution**:
@@ -144,7 +144,7 @@ bun commitlint --edit
 **Configuration**: `.lintstagedrc.js`
 
 **File type handlers**:
-- **TypeScript/JavaScript files**: Biome format → ESLint fix → Run related tests
+- **TypeScript/JavaScript files**: Biome check --write → Typecheck → Run related tests
 - **BAML files**: Regenerate client → Run BAML tests
 - **JSON files**: Biome format
 - **CSS files**: Biome format
@@ -246,10 +246,10 @@ warn no-orphans: lib/utils/someFile.ts
 
 #### 4. Lint-staged Failures
 ```bash
-✖ eslint --fix --quiet
+✖ biome check --write
 ```
 **Solution**:
-- Fix ESLint errors manually
+- Fix Biome errors manually
 - Check if files are properly TypeScript/JavaScript
 - Ensure all imports are valid
 

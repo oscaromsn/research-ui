@@ -1,7 +1,7 @@
 import { BookOpen, Brain, Link, Scale } from 'lucide-react'
 
+import { Modal } from '@/components/ui/modal'
 import type { ClientAnalyzedDoc } from '@/lib/state/researchAtoms'
-import { Modal } from '@ui/modal'
 
 interface CaseModalProps {
   isOpen: boolean
@@ -16,7 +16,9 @@ export function CaseModal({
   onViewAnalysis,
 }: CaseModalProps) {
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Date not available'
+    if (!dateString) {
+      return 'Date not available'
+    }
     try {
       return new Date(dateString).toLocaleDateString()
     } catch {
@@ -25,11 +27,19 @@ export function CaseModal({
   }
 
   const getDocumentType = (title?: string) => {
-    if (!title) return 'Document'
+    if (!title) {
+      return 'Document'
+    }
     const titleLower = title.toLowerCase()
-    if (titleLower.includes('case') || titleLower.includes('v.')) return 'Case'
-    if (titleLower.includes('statute')) return 'Statute'
-    if (titleLower.includes('regulation')) return 'Regulation'
+    if (titleLower.includes('case') || titleLower.includes('v.')) {
+      return 'Case'
+    }
+    if (titleLower.includes('statute')) {
+      return 'Statute'
+    }
+    if (titleLower.includes('regulation')) {
+      return 'Regulation'
+    }
     return 'Document'
   }
 
@@ -48,7 +58,7 @@ export function CaseModal({
       size="xl"
     >
       <div className="space-y-6">
-        <div className="flex items-center space-x-4 text-[#64748b] dark:text-[#94a3b8] text-sm">
+        <div className="flex items-center space-x-4 text-[#64748b] text-sm dark:text-[#94a3b8]">
           <span className="flex items-center">
             <BookOpen size={14} className="mr-1" />
             {getDocumentType(documentData?.title)}
@@ -67,13 +77,13 @@ export function CaseModal({
         <div className="space-y-4">
           {documentData?.keyArguments &&
             documentData.keyArguments.length > 0 && (
-              <div className="bg-[#f8fafc] dark:bg-[#1e2436] p-4 rounded-lg">
-                <h4 className="mb-2 font-medium text-[#2d3748] dark:text-[#e2e8f0] text-sm">
+              <div className="rounded-lg bg-[#f8fafc] p-4 dark:bg-[#1e2436]">
+                <h4 className="mb-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
                   Key Arguments & Reasoning
                 </h4>
-                <ul className="space-y-2 pl-4 text-[#4a5568] dark:text-[#a0aec0] text-sm list-disc">
-                  {documentData.keyArguments.map((argument, index) => (
-                    <li key={index}>{argument}</li>
+                <ul className="list-disc space-y-2 pl-4 text-[#4a5568] text-sm dark:text-[#a0aec0]">
+                  {documentData.keyArguments.map(argument => (
+                    <li key={argument}>{argument}</li>
                   ))}
                 </ul>
               </div>
@@ -81,15 +91,15 @@ export function CaseModal({
 
           {documentData?.extractedQuotes &&
             documentData.extractedQuotes.length > 0 && (
-              <div className="bg-[#f8fafc] dark:bg-[#1e2436] p-4 rounded-lg">
-                <h4 className="mb-2 font-medium text-[#2d3748] dark:text-[#e2e8f0] text-sm">
+              <div className="rounded-lg bg-[#f8fafc] p-4 dark:bg-[#1e2436]">
+                <h4 className="mb-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
                   Key Quotes
                 </h4>
                 <div className="space-y-2">
-                  {documentData.extractedQuotes.map((quote, index) => (
+                  {documentData.extractedQuotes.map(quote => (
                     <blockquote
-                      key={index}
-                      className="text-[#4a5568] dark:text-[#a0aec0] text-sm italic border-l-2 border-[#3a7bb7] pl-3"
+                      key={quote}
+                      className="border-[#3a7bb7] border-l-2 pl-3 text-[#4a5568] text-sm italic dark:text-[#a0aec0]"
                     >
                       &ldquo;{quote}&rdquo;
                     </blockquote>
@@ -99,10 +109,10 @@ export function CaseModal({
             )}
           {(documentData?.summarySnippet || documentData?.fullText) && (
             <div>
-              <h4 className="mb-2 font-medium text-[#2d3748] dark:text-[#e2e8f0] text-sm">
+              <h4 className="mb-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
                 {documentData?.summarySnippet ? 'Summary' : 'Full Text'}
               </h4>
-              <div className="space-y-4 text-[#4a5568] dark:text-[#a0aec0] text-sm max-h-96 overflow-y-auto">
+              <div className="max-h-96 space-y-4 overflow-y-auto text-[#4a5568] text-sm dark:text-[#a0aec0]">
                 <p className="whitespace-pre-line">
                   {documentData?.summarySnippet || documentData?.fullText}
                 </p>
@@ -112,23 +122,23 @@ export function CaseModal({
 
           {documentData?.counterArguments &&
             documentData.counterArguments.length > 0 && (
-              <div className="bg-[#fef2f2] dark:bg-[#2d1b1b] p-4 rounded-lg">
-                <h4 className="mb-2 font-medium text-[#2d3748] dark:text-[#e2e8f0] text-sm">
+              <div className="rounded-lg bg-[#fef2f2] p-4 dark:bg-[#2d1b1b]">
+                <h4 className="mb-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
                   Counter Arguments & Nuances
                 </h4>
-                <ul className="space-y-2 pl-4 text-[#4a5568] dark:text-[#a0aec0] text-sm list-disc">
-                  {documentData.counterArguments.map((counterArg, index) => (
-                    <li key={index}>{counterArg}</li>
+                <ul className="list-disc space-y-2 pl-4 text-[#4a5568] text-sm dark:text-[#a0aec0]">
+                  {documentData.counterArguments.map(counterArg => (
+                    <li key={counterArg}>{counterArg}</li>
                   ))}
                 </ul>
               </div>
             )}
-          <div className="flex justify-between items-center pt-4 border-[#e1e5eb] dark:border-[#2a3148] border-t">
+          <div className="flex items-center justify-between border-[#e1e5eb] border-t pt-4 dark:border-[#2a3148]">
             {documentData?.analysisReasoning && onViewAnalysis && (
               <button
                 type="button"
                 onClick={onViewAnalysis}
-                className="flex items-center text-[#3a7bb7] hover:text-[#2c5d8a] text-xs transition-colors"
+                className="flex items-center text-[#3a7bb7] text-xs transition-colors hover:text-[#2c5d8a]"
               >
                 <Brain size={12} className="mr-1" />
                 View AI Analysis
@@ -139,7 +149,7 @@ export function CaseModal({
                 href={documentData.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center text-[#3a7bb7] hover:text-[#2c5d8a] text-xs transition-colors"
+                className="flex items-center text-[#3a7bb7] text-xs transition-colors hover:text-[#2c5d8a]"
               >
                 <Link size={12} className="mr-1" />
                 View Original Source
