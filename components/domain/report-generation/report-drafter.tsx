@@ -1,25 +1,25 @@
-'use client'
+"use client"
 
-import { useAtomValue, useSetAtom } from 'jotai'
-import { Download, FileText, Save, Share2 } from 'lucide-react'
-import { useState } from 'react'
+import { useAtomValue, useSetAtom } from "jotai"
+import { Download, FileText, Save, Share2 } from "lucide-react"
+import { useState } from "react"
 
-import { finalReportContentAtom } from '@/lib/state/researchAtoms'
+import { finalReportContentAtom } from "@/lib/state/researchAtoms"
 
 export function ReportDrafter() {
   const report = useAtomValue(finalReportContentAtom)
   const setReport = useSetAtom(finalReportContentAtom)
   const [editableTitle, setEditableTitle] = useState(
-    report.title || 'Untitled Report'
+    report.title || "Untitled Report"
   )
 
   // Define default sections that we expect in reports
   const defaultSections = [
-    'Executive Summary',
-    'Background',
-    'Legal Analysis',
-    'Recommendations',
-    'Conclusion',
+    "Executive Summary",
+    "Background",
+    "Legal Analysis",
+    "Recommendations",
+    "Conclusion",
   ]
 
   const handleTitleChange = (newTitle: string) => {
@@ -30,12 +30,12 @@ export function ReportDrafter() {
   const getSectionCompletion = (sectionTitle: string): boolean => {
     // Check if section exists in report and has content
     const section = report.sections.find(s => s.title === sectionTitle)
-    if (sectionTitle === 'Executive Summary') {
+    if (sectionTitle === "Executive Summary") {
       return Boolean(
         report.executiveSummary && report.executiveSummary.trim().length > 0
       )
     }
-    if (sectionTitle === 'Conclusion') {
+    if (sectionTitle === "Conclusion") {
       return Boolean(report.conclusion && report.conclusion.trim().length > 0)
     }
     return Boolean(section?.content && section.content.trim().length > 0)
@@ -86,8 +86,8 @@ export function ReportDrafter() {
                   key={`section-${sectionTitle}`}
                   className={`cursor-pointer rounded p-2 text-xs ${
                     isComplete
-                      ? 'bg-[#f1f5f9] text-[#3a7bb7] dark:bg-[#242a3d]'
-                      : 'text-[#64748b] hover:bg-[#f8fafc] dark:text-[#94a3b8] dark:hover:bg-[#1a2234]'
+                      ? "bg-[#f1f5f9] text-[#3a7bb7] dark:bg-[#242a3d]"
+                      : "text-[#64748b] hover:bg-[#f8fafc] dark:text-[#94a3b8] dark:hover:bg-[#1a2234]"
                   }`}
                 >
                   <div className="flex items-center">
@@ -108,7 +108,7 @@ export function ReportDrafter() {
                   {report.executiveSummary}
                   <span
                     className="ml-0.5 inline-block h-3 w-0.5 animate-caret-blink bg-[#4a5568] dark:bg-[#a0aec0]"
-                    style={{ verticalAlign: 'text-top' }}
+                    style={{ verticalAlign: "text-top" }}
                   />
                 </p>
               </>
@@ -117,8 +117,8 @@ export function ReportDrafter() {
             {report.sections
               .filter(
                 section =>
-                  section.title !== 'Executive Summary' &&
-                  section.title !== 'Conclusion'
+                  section.title !== "Executive Summary" &&
+                  section.title !== "Conclusion"
               )
               .map((section, index) => (
                 <div key={section.title || `section-content-${index}`}>
@@ -128,7 +128,7 @@ export function ReportDrafter() {
                     <span
                       className="ml-0.5 inline-block h-3 w-0.5 animate-caret-blink bg-[#4a5568] dark:bg-[#a0aec0]"
                       style={{
-                        verticalAlign: 'text-top',
+                        verticalAlign: "text-top",
                       }}
                     />
                   </p>
@@ -142,7 +142,7 @@ export function ReportDrafter() {
                   {report.conclusion}
                   <span
                     className="ml-0.5 inline-block h-3 w-0.5 animate-caret-blink bg-[#4a5568] dark:bg-[#a0aec0]"
-                    style={{ verticalAlign: 'text-top' }}
+                    style={{ verticalAlign: "text-top" }}
                   />
                 </p>
               </>

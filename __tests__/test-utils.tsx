@@ -1,15 +1,15 @@
-import { type RenderOptions, render } from '@testing-library/react'
-import { Provider, createStore } from 'jotai'
-import type React from 'react'
-import type { ReactElement } from 'react'
-import { vi } from 'vitest'
+import { type RenderOptions, render } from "@testing-library/react"
+import { Provider, createStore } from "jotai"
+import type React from "react"
+import type { ReactElement } from "react"
+import { vi } from "vitest"
 
 /**
  * Custom render function that includes global providers
  */
 export function renderWithProviders(
   ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
+  options?: Omit<RenderOptions, "wrapper">
 ) {
   const AllProviders = ({ children }: { children: React.ReactNode }) => {
     const testStore = createStore()
@@ -33,7 +33,7 @@ export class MockResizeObserver {
  */
 export class MockIntersectionObserver implements IntersectionObserver {
   readonly root: Element | Document | null = null
-  readonly rootMargin: string = '0px'
+  readonly rootMargin: string = "0px"
   readonly thresholds: readonly number[] = [0]
 
   observe = vi.fn()
@@ -47,37 +47,37 @@ export class MockIntersectionObserver implements IntersectionObserver {
  */
 export function createMockAnalyzedDocument(overrides = {}) {
   return {
-    searchResultId: 'mock-id-1',
+    searchResultId: "mock-id-1",
     relevanceScore: 8,
     confidenceScore: 7,
-    summary: 'This is a mock summary for testing purposes',
+    summary: "This is a mock summary for testing purposes",
     keyArgumentsAndReasoning: [
-      'First key argument for testing',
-      'Second key argument for testing',
+      "First key argument for testing",
+      "Second key argument for testing",
     ],
     extractedEntities: [
-      { name: 'Roe v. Wade', type: 'Case', details: 'Important case' },
+      { name: "Roe v. Wade", type: "Case", details: "Important case" },
       {
-        name: '15 U.S.C. § 78j(b)',
-        type: 'Statute',
-        details: 'Important statute',
+        name: "15 U.S.C. § 78j(b)",
+        type: "Statute",
+        details: "Important statute",
       },
     ],
-    extractedQuotes: ['Important quote 1', 'Important quote 2'],
-    counterArgumentsOrNuances: ['Counterargument 1', 'Nuance 1'],
+    extractedQuotes: ["Important quote 1", "Important quote 2"],
+    counterArgumentsOrNuances: ["Counterargument 1", "Nuance 1"],
     reasoning: {
-      analyzeLegalQuestion: { summary: 'Analysis of legal question' },
+      analyzeLegalQuestion: { summary: "Analysis of legal question" },
       considerRelevantLegalPrinciples: {
-        summary: 'Consideration of legal principles',
+        summary: "Consideration of legal principles",
       },
       formulateSearchQueriesStrategy: {
-        summary: 'Search query strategy',
+        summary: "Search query strategy",
       },
       specifyExpectedInformationStrategy: {
-        summary: 'Expected info strategy',
+        summary: "Expected info strategy",
       },
       ensureComprehensiveCoverageStrategy: {
-        summary: 'Coverage strategy',
+        summary: "Coverage strategy",
       },
     },
     ...overrides,
@@ -89,8 +89,8 @@ export function createMockAnalyzedDocument(overrides = {}) {
  */
 export function createMockSearchQuery(overrides = {}) {
   return {
-    queryString: 'mock search query',
-    expectedInformation: ['Expected information 1', 'Expected information 2'],
+    queryString: "mock search query",
+    expectedInformation: ["Expected information 1", "Expected information 2"],
     ...overrides,
   }
 }
@@ -100,9 +100,9 @@ export function createMockSearchQuery(overrides = {}) {
  */
 export function createMockLegalEntity(overrides = {}) {
   return {
-    name: 'Mock Legal Entity',
-    type: 'Case' as const,
-    details: 'Details about the mock legal entity',
+    name: "Mock Legal Entity",
+    type: "Case" as const,
+    details: "Details about the mock legal entity",
     ...overrides,
   }
 }
@@ -117,9 +117,9 @@ export const hasRequiredApiKeys = (requiredKeys: string[]): boolean => {
     const value = process.env[key]
     return (
       value &&
-      value.trim() !== '' &&
-      !value.includes('[YOUR_') &&
-      !value.includes('****')
+      value.trim() !== "" &&
+      !value.includes("[YOUR_") &&
+      !value.includes("****")
     )
   })
 }
@@ -140,15 +140,15 @@ export const skipIfMissingApiKeys = (
       const value = process.env[key]
       return (
         !value ||
-        value.trim() === '' ||
-        value.includes('[YOUR_') ||
-        value.includes('****')
+        value.trim() === "" ||
+        value.includes("[YOUR_") ||
+        value.includes("****")
       )
     })
 
     const message = testName
-      ? `Skipping "${testName}" - Missing API keys: ${missingKeys.join(', ')}`
-      : `Skipping test - Missing API keys: ${missingKeys.join(', ')}`
+      ? `Skipping "${testName}" - Missing API keys: ${missingKeys.join(", ")}`
+      : `Skipping test - Missing API keys: ${missingKeys.join(", ")}`
 
     console.warn(message)
   }
@@ -193,7 +193,7 @@ export const markAsApiDependent = (apiKeys: string[]) => {
   return {
     meta: {
       requiresApiKeys: apiKeys,
-      description: `This test requires the following API keys: ${apiKeys.join(', ')}`,
+      description: `This test requires the following API keys: ${apiKeys.join(", ")}`,
     },
   }
 }
@@ -215,20 +215,20 @@ export const createMockBamlClient = () => ({
 export const createMockSearchApi = () => ({
   executeExaSearch: vi.fn().mockResolvedValue([
     {
-      id: 'doc_001',
-      url: 'https://example.com/case1',
-      title: 'Mock Legal Case',
-      source_name: 'Mock Court Database',
-      snippet: 'Mock case summary...',
-      full_text: 'Mock full text content...',
-      published_date: '2023-05-15',
+      id: "doc_001",
+      url: "https://example.com/case1",
+      title: "Mock Legal Case",
+      source_name: "Mock Court Database",
+      snippet: "Mock case summary...",
+      full_text: "Mock full text content...",
+      published_date: "2023-05-15",
       retrieval_date: new Date().toISOString(),
-      author: 'Mock Judge',
+      author: "Mock Judge",
       score: 0.92,
-      metadata: { court: 'mock', jurisdiction: 'US' },
+      metadata: { court: "mock", jurisdiction: "US" },
       original_query: {
-        query_string: 'mock query',
-        expected_information: ['mock info'],
+        query_string: "mock query",
+        expected_information: ["mock info"],
       },
     },
   ]),

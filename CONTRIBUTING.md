@@ -95,9 +95,9 @@ Ensure you have the following installed:
 4.  Write appropriate tests (BAML tests, Vitest unit/component tests, Playwright E2E tests).
 5.  Ensure all tests pass (`bun run test`, `bun baml:test`, `bun test:e2e`).
 6.  Run code quality checks:
-    *   `bun format`
-    *   `bun lint`
+    *   `bun check`
     *   `bun typecheck`
+    *   `bun typecheck:strict`
 7.  Commit your changes using the Conventional Commits format (see [Commit Messages](#commit-messages)). `bun commit` can help guide you.
 8.  Push your branch to your fork and open a Pull Request against the main LexiSynth repository.
 
@@ -211,8 +211,7 @@ Automated checks are enforced via Husky hooks.
 ### Linting
 
 *   Biome is configured for comprehensive linting and formatting (TypeScript, React, JSX-A11Y, security, and more).
-*   Run `bun lint` to check for linting errors and apply fixes.
-*   Run `bun lint:fix` to attempt automatic fixes.
+*   Run `bun check` to check for linting errors and apply fixes.
 
 ### Type Checking
 

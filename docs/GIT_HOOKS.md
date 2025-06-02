@@ -83,7 +83,7 @@ Our git hooks use **multiple specialized tools** with clear separation of respon
   - Strict mode enabled
   - Exact optional properties checking
   - No `any` types allowed
-- ✅ **Auto-fix all linting issues** (`bun lint:fix`)
+- ✅ **Auto-fix all linting issues** (`bun check`)
 - ✅ **Complete unit test suite** (286 tests)
 - ✅ **Fast integration tests** (37 tests, ~5s)
   - Mocked APIs, structural validation (also in pre-commit)

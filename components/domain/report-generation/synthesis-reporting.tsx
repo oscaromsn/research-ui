@@ -1,18 +1,18 @@
-'use client'
+"use client"
 
-import { useAtomValue } from 'jotai'
-import { Brain, ChevronRight } from 'lucide-react'
-import { useState } from 'react'
+import { useAtomValue } from "jotai"
+import { Brain, ChevronRight } from "lucide-react"
+import { useState } from "react"
 
 import {
   researchSessionAtom,
   synthesisDetailsAtom,
-} from '@/lib/state/researchAtoms'
+} from "@/lib/state/researchAtoms"
 
-import { SynthesisReasoningModal } from './modals/synthesis-reasoning-modal'
-import { ReportDrafter } from './report-drafter'
+import { SynthesisReasoningModal } from "./modals/synthesis-reasoning-modal"
+import { ReportDrafter } from "./report-drafter"
 export function SynthesisReporting() {
-  const [activeTab, setActiveTab] = useState('synthesis')
+  const [activeTab, setActiveTab] = useState("synthesis")
   const [showSynthesisReasoning, setShowSynthesisReasoning] = useState(false)
   const synthesis = useAtomValue(synthesisDetailsAtom)
   const researchSession = useAtomValue(researchSessionAtom)
@@ -32,7 +32,7 @@ export function SynthesisReporting() {
 
   const getConfidenceLabel = (confidence?: number): string => {
     if (!confidence) {
-      return 'Unknown'
+      return "Unknown"
     }
     if (confidence >= 80) {
       return `High (${confidence}%)`
@@ -51,26 +51,26 @@ export function SynthesisReporting() {
         <div className="mb-4 flex border-[#e1e5eb] border-b dark:border-[#2a3148]">
           <button
             type="button"
-            className={`px-4 py-2 font-medium text-sm transition-colors ${activeTab === 'synthesis' ? 'border-[#3a7bb7] border-b-2 text-[#3a7bb7]' : 'text-[#64748b] hover:text-[#4a5568] dark:text-[#94a3b8] dark:hover:text-[#e2e8f0]'}`}
-            onClick={() => setActiveTab('synthesis')}
+            className={`px-4 py-2 font-medium text-sm transition-colors ${activeTab === "synthesis" ? "border-[#3a7bb7] border-b-2 text-[#3a7bb7]" : "text-[#64748b] hover:text-[#4a5568] dark:text-[#94a3b8] dark:hover:text-[#e2e8f0]"}`}
+            onClick={() => setActiveTab("synthesis")}
           >
             Synthesis Studio
           </button>
           <button
             type="button"
-            className={`px-4 py-2 font-medium text-sm transition-colors ${activeTab === 'report' ? 'border-[#3a7bb7] border-b-2 text-[#3a7bb7]' : 'text-[#64748b] hover:text-[#4a5568] dark:text-[#94a3b8] dark:hover:text-[#e2e8f0]'}`}
-            onClick={() => setActiveTab('report')}
+            className={`px-4 py-2 font-medium text-sm transition-colors ${activeTab === "report" ? "border-[#3a7bb7] border-b-2 text-[#3a7bb7]" : "text-[#64748b] hover:text-[#4a5568] dark:text-[#94a3b8] dark:hover:text-[#e2e8f0]"}`}
+            onClick={() => setActiveTab("report")}
           >
             Report Drafter
           </button>
         </div>
       </div>
-      {activeTab === 'synthesis' ? (
+      {activeTab === "synthesis" ? (
         <div className="mb-6">
           <div className="mb-3">
             <div className="mb-2 flex cursor-pointer items-center justify-between">
               <h3 className="font-medium text-[#4a5568] text-sm dark:text-[#a0aec0]">
-                Synthesized Topics{' '}
+                Synthesized Topics{" "}
                 {researchSession.accumulatedTopics.length > 0 &&
                   `(${sortedTopics.length} total)`}
               </h3>
@@ -89,8 +89,8 @@ export function SynthesisReporting() {
                     {topic.timestamp && (
                       <div className="ml-2 text-[#64748b] text-xs dark:text-[#94a3b8]">
                         {new Date(topic.timestamp).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
+                          hour: "2-digit",
+                          minute: "2-digit",
                         })}
                       </div>
                     )}
@@ -100,7 +100,7 @@ export function SynthesisReporting() {
                     <span
                       className="ml-0.5 inline-block h-3 w-0.5 animate-caret-blink bg-[#4a5568] dark:bg-[#a0aec0]"
                       style={{
-                        verticalAlign: 'text-top',
+                        verticalAlign: "text-top",
                       }}
                     />
                   </p>
@@ -148,8 +148,8 @@ export function SynthesisReporting() {
                       key={aspect || `aspect-${index}`}
                       className={
                         index < (synthesis.unansweredAspects?.length ?? 0) - 1
-                          ? 'mb-1'
-                          : ''
+                          ? "mb-1"
+                          : ""
                       }
                     >
                       {aspect}

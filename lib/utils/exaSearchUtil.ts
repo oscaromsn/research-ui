@@ -1,5 +1,5 @@
-import axios, { type AxiosError, type AxiosResponse, isAxiosError } from 'axios'
-import { config } from 'dotenv'
+import axios, { type AxiosError, type AxiosResponse, isAxiosError } from "axios"
+import { config } from "dotenv"
 
 // Load environment variables
 config()
@@ -9,7 +9,7 @@ config()
 import type {
   SearchResultItem as BamlSearchResultItem,
   SearchQueryItem,
-} from '@/baml_client/types'
+} from "@/baml_client/types"
 
 // Import custom error types
 import {
@@ -20,7 +20,7 @@ import {
   ExaParsingError,
   ExaRateLimitError,
   ExaServerError,
-} from './exaSearchErrors'
+} from "./exaSearchErrors"
 
 // --- Interfaces for Exa API Response (based on OpenAPI spec and examples) ---
 
@@ -50,17 +50,17 @@ interface ExaSearchRequestBody {
   end_crawl_date?: string // ISO 8601
   start_published_date?: string // ISO 8601
   end_published_date?: string // ISO 8601
-  type?: 'keyword' | 'neural' | 'auto'
+  type?: "keyword" | "neural" | "auto"
   category?:
-    | 'company'
-    | 'research paper'
-    | 'news'
-    | 'pdf'
-    | 'github'
-    | 'tweet'
-    | 'personal site'
-    | 'linkedin profile'
-    | 'financial report' // and others
+    | "company"
+    | "research paper"
+    | "news"
+    | "pdf"
+    | "github"
+    | "tweet"
+    | "personal site"
+    | "linkedin profile"
+    | "financial report" // and others
   contents?: ExaContentsOptions
   // use_autoprompt?: boolean; // This seems to be part of older or specific SDK methods, for API it's often handled by query phrasing
 }
@@ -87,7 +87,7 @@ interface ExaSearchApiResponse {
 
 // --- Configuration ---
 
-const EXA_API_BASE_URL = 'https://api.exa.ai'
+const EXA_API_BASE_URL = "https://api.exa.ai"
 
 // --- Helper Functions for Error Parsing ---
 
@@ -95,11 +95,11 @@ const EXA_API_BASE_URL = 'https://api.exa.ai'
  * Extracts request ID from API response for tracking
  */
 function extractRequestId(responseData: unknown): string | undefined {
-  if (typeof responseData === 'object' && responseData !== null) {
+  if (typeof responseData === "object" && responseData !== null) {
     const data = responseData as Record<string, unknown>
-    return typeof data.requestId === 'string'
+    return typeof data.requestId === "string"
       ? data.requestId
-      : typeof data.request_id === 'string'
+      : typeof data.request_id === "string"
         ? data.request_id
         : undefined
   }
@@ -110,14 +110,14 @@ function extractRequestId(responseData: unknown): string | undefined {
  * Extracts retry-after value from response headers
  */
 function extractRetryAfter(headers: unknown): number | undefined {
-  if (!headers || typeof headers !== 'object') {
+  if (!headers || typeof headers !== "object") {
     return undefined
   }
 
   const headersObj = headers as Record<string, unknown>
-  const retryAfter = headersObj['retry-after'] || headersObj['Retry-After']
+  const retryAfter = headersObj["retry-after"] || headersObj["Retry-After"]
 
-  if (typeof retryAfter === 'string') {
+  if (typeof retryAfter === "string") {
     const seconds = Number.parseInt(retryAfter, 10)
     return Number.isNaN(seconds) ? undefined : seconds
   }
@@ -130,42 +130,42 @@ function extractRetryAfter(headers: unknown): number | undefined {
  */
 function extractRateLimitType(
   responseData: unknown
-): 'requests' | 'quota' | 'concurrent' {
-  if (typeof responseData === 'object' && responseData !== null) {
+): "requests" | "quota" | "concurrent" {
+  if (typeof responseData === "object" && responseData !== null) {
     const data = responseData as Record<string, unknown>
     const errorMessage =
-      typeof data.error === 'string'
+      typeof data.error === "string"
         ? data.error.toLowerCase()
-        : typeof data.message === 'string'
+        : typeof data.message === "string"
           ? data.message.toLowerCase()
-          : ''
+          : ""
 
-    if (errorMessage.includes('quota') || errorMessage.includes('usage')) {
-      return 'quota'
+    if (errorMessage.includes("quota") || errorMessage.includes("usage")) {
+      return "quota"
     }
     if (
-      errorMessage.includes('concurrent') ||
-      errorMessage.includes('parallel')
+      errorMessage.includes("concurrent") ||
+      errorMessage.includes("parallel")
     ) {
-      return 'concurrent'
+      return "concurrent"
     }
   }
-  return 'requests'
+  return "requests"
 }
 
 /**
  * Gets a user-friendly message for rate limit types
  */
 function getRateLimitMessage(
-  rateLimitType: 'requests' | 'quota' | 'concurrent'
+  rateLimitType: "requests" | "quota" | "concurrent"
 ): string {
   switch (rateLimitType) {
-    case 'quota':
-      return 'Monthly usage quota exceeded.'
-    case 'concurrent':
-      return 'Too many concurrent requests.'
+    case "quota":
+      return "Monthly usage quota exceeded."
+    case "concurrent":
+      return "Too many concurrent requests."
     default:
-      return 'Request rate limit exceeded.'
+      return "Request rate limit exceeded."
   }
 }
 
@@ -174,39 +174,39 @@ function getRateLimitMessage(
  */
 function extractAuthErrorType(
   responseData: unknown,
-  defaultType: 'invalid_key' | 'insufficient_permissions'
-): 'invalid_key' | 'insufficient_permissions' | 'expired_key' | 'unknown' {
-  if (typeof responseData !== 'object' || responseData === null) {
+  defaultType: "invalid_key" | "insufficient_permissions"
+): "invalid_key" | "insufficient_permissions" | "expired_key" | "unknown" {
+  if (typeof responseData !== "object" || responseData === null) {
     return defaultType
   }
 
   const data = responseData as Record<string, unknown>
   const errorMessage = getErrorMessage(data)
 
-  if (errorMessage.includes('expired')) {
-    return 'expired_key'
+  if (errorMessage.includes("expired")) {
+    return "expired_key"
   }
-  if (errorMessage.includes('invalid')) {
-    return 'invalid_key'
+  if (errorMessage.includes("invalid")) {
+    return "invalid_key"
   }
   if (
-    errorMessage.includes('permission') ||
-    errorMessage.includes('forbidden')
+    errorMessage.includes("permission") ||
+    errorMessage.includes("forbidden")
   ) {
-    return 'insufficient_permissions'
+    return "insufficient_permissions"
   }
 
   return defaultType
 }
 
 function getErrorMessage(data: Record<string, unknown>): string {
-  if (typeof data.error === 'string') {
+  if (typeof data.error === "string") {
     return data.error.toLowerCase()
   }
-  if (typeof data.message === 'string') {
+  if (typeof data.message === "string") {
     return data.message.toLowerCase()
   }
-  return ''
+  return ""
 }
 
 /**
@@ -215,15 +215,15 @@ function getErrorMessage(data: Record<string, unknown>): string {
 function getServerErrorMessage(status: number): string {
   switch (status) {
     case 500:
-      return 'Internal server error. Please try again later.'
+      return "Internal server error. Please try again later."
     case 502:
-      return 'Bad gateway. The server is temporarily unavailable.'
+      return "Bad gateway. The server is temporarily unavailable."
     case 503:
-      return 'Service unavailable. The server is temporarily overloaded.'
+      return "Service unavailable. The server is temporarily overloaded."
     case 504:
-      return 'Gateway timeout. The server took too long to respond.'
+      return "Gateway timeout. The server took too long to respond."
     default:
-      return 'Server error occurred. Please try again later.'
+      return "Server error occurred. Please try again later."
   }
 }
 
@@ -237,17 +237,17 @@ function getClientErrorMessage(status: number, errorCode?: string): string {
 
   switch (status) {
     case 400:
-      return 'Bad request. Please check your search parameters.'
+      return "Bad request. Please check your search parameters."
     case 404:
-      return 'Endpoint not found. Please check the API URL.'
+      return "Endpoint not found. Please check the API URL."
     case 408:
-      return 'Request timeout. Please try again.'
+      return "Request timeout. Please try again."
     case 413:
-      return 'Request too large. Please reduce the query size.'
+      return "Request too large. Please reduce the query size."
     case 422:
-      return 'Unprocessable entity. Please check your request format.'
+      return "Unprocessable entity. Please check your request format."
     default:
-      return 'Client error occurred. Please check your request.'
+      return "Client error occurred. Please check your request."
   }
 }
 
@@ -255,11 +255,11 @@ function getClientErrorMessage(status: number, errorCode?: string): string {
  * Extracts error code from API response
  */
 function extractErrorCode(responseData: unknown): string | undefined {
-  if (typeof responseData === 'object' && responseData !== null) {
+  if (typeof responseData === "object" && responseData !== null) {
     const data = responseData as Record<string, unknown>
-    return typeof data.code === 'string'
+    return typeof data.code === "string"
       ? data.code
-      : typeof data.error_code === 'string'
+      : typeof data.error_code === "string"
         ? data.error_code
         : undefined
   }
@@ -276,26 +276,26 @@ function extractValidationErrors(responseData: unknown):
       value?: unknown
     }>
   | undefined {
-  if (typeof responseData === 'object' && responseData !== null) {
+  if (typeof responseData === "object" && responseData !== null) {
     const data = responseData as Record<string, unknown>
 
     // Check for validation errors in different formats
     if (Array.isArray(data.errors)) {
       return data.errors.map((error: unknown) => {
-        if (typeof error === 'object' && error !== null) {
+        if (typeof error === "object" && error !== null) {
           const errorObj = error as Record<string, unknown>
           return {
             field:
-              typeof errorObj.field === 'string' ? errorObj.field : 'unknown',
+              typeof errorObj.field === "string" ? errorObj.field : "unknown",
             message:
-              typeof errorObj.message === 'string'
+              typeof errorObj.message === "string"
                 ? errorObj.message
                 : String(errorObj),
             value: errorObj.value,
           }
         }
         return {
-          field: 'unknown',
+          field: "unknown",
           message: String(error),
         }
       })
@@ -304,11 +304,11 @@ function extractValidationErrors(responseData: unknown):
     if (Array.isArray(data.validation_errors)) {
       return data.validation_errors.map((error: unknown) => ({
         field:
-          typeof error === 'object' && error !== null
-            ? String((error as Record<string, unknown>).field || 'unknown')
-            : 'unknown',
+          typeof error === "object" && error !== null
+            ? String((error as Record<string, unknown>).field || "unknown")
+            : "unknown",
         message:
-          typeof error === 'object' && error !== null
+          typeof error === "object" && error !== null
             ? String((error as Record<string, unknown>).message || error)
             : String(error),
       }))
@@ -332,9 +332,9 @@ function extractValidationErrors(responseData: unknown):
 function validateApiKey(): string {
   const EXA_API_KEY = process.env.EXA_API_KEY
 
-  if (!EXA_API_KEY || EXA_API_KEY.trim() === '') {
-    throw new ExaConfigError('EXA_API_KEY environment variable is not set', {
-      configType: 'missing_api_key',
+  if (!EXA_API_KEY || EXA_API_KEY.trim() === "") {
+    throw new ExaConfigError("EXA_API_KEY environment variable is not set", {
+      configType: "missing_api_key",
     })
   }
 
@@ -350,7 +350,7 @@ function buildRequestBody(
   const requestBody: ExaSearchRequestBody = {
     query: bamlSearchQuery.query_string,
     num_results: numResults,
-    type: 'auto',
+    type: "auto",
     contents: {},
   }
 
@@ -373,13 +373,13 @@ async function makeExaApiRequest(
   apiKey: string
 ): Promise<AxiosResponse<ExaSearchApiResponse>> {
   console.log(`Executing Exa search for: "${requestBody.query}"`)
-  console.log('Request body:', JSON.stringify(requestBody, null, 2))
+  console.log("Request body:", JSON.stringify(requestBody, null, 2))
 
   try {
-    console.log('Making axios request to:', `${EXA_API_BASE_URL}/search`)
-    console.log('Headers:', {
-      'Content-Type': 'application/json',
-      'x-api-key': `${apiKey.substring(0, 8)}...`,
+    console.log("Making axios request to:", `${EXA_API_BASE_URL}/search`)
+    console.log("Headers:", {
+      "Content-Type": "application/json",
+      "x-api-key": `${apiKey.substring(0, 8)}...`,
     })
 
     const response = await axios.post<ExaSearchApiResponse>(
@@ -387,15 +387,15 @@ async function makeExaApiRequest(
       requestBody,
       {
         headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
         },
         timeout: 30000,
         validateStatus: () => true,
       }
     )
 
-    console.log('Axios response received:', {
+    console.log("Axios response received:", {
       status: response?.status,
       statusText: response?.statusText,
       hasData: !!response?.data,
@@ -404,7 +404,7 @@ async function makeExaApiRequest(
 
     return response
   } catch (requestError) {
-    console.error('Axios request failed:', {
+    console.error("Axios request failed:", {
       message:
         requestError instanceof Error
           ? requestError.message
@@ -429,18 +429,18 @@ function validateApiResponse(
         query: queryString,
         isTimeout: false,
         isConnectionError: true,
-        cause: new Error('Response is undefined'),
+        cause: new Error("Response is undefined"),
       }
     )
   }
 
-  if (!response.data || typeof response.data !== 'object') {
+  if (!response.data || typeof response.data !== "object") {
     throw new ExaParsingError(
-      'Invalid response format: Response data is missing or not an object',
+      "Invalid response format: Response data is missing or not an object",
       {
         response: response?.data,
-        expectedFormat: 'object with results array',
-        actualFormat: response ? typeof response.data : 'undefined response',
+        expectedFormat: "object with results array",
+        actualFormat: response ? typeof response.data : "undefined response",
       }
     )
   }
@@ -448,11 +448,11 @@ function validateApiResponse(
   const exaResults = response.data.results
   if (!Array.isArray(exaResults)) {
     throw new ExaParsingError(
-      'Invalid response format: Results field is not an array',
+      "Invalid response format: Results field is not an array",
       {
         response: response.data,
-        expectedFormat: 'array of search results',
-        actualFormat: Array.isArray(exaResults) ? 'array' : typeof exaResults,
+        expectedFormat: "array of search results",
+        actualFormat: Array.isArray(exaResults) ? "array" : typeof exaResults,
       }
     )
   }
@@ -461,23 +461,23 @@ function validateApiResponse(
 }
 
 function validateResultItem(exaRes: ExaApiResult, index: number): void {
-  if (!exaRes || typeof exaRes !== 'object') {
+  if (!exaRes || typeof exaRes !== "object") {
     throw new ExaParsingError(
       `Invalid result format at index ${index}: Result is not an object`,
       {
         response: exaRes,
-        expectedFormat: 'search result object',
+        expectedFormat: "search result object",
         actualFormat: typeof exaRes,
       }
     )
   }
 
-  if (!exaRes.url || typeof exaRes.url !== 'string') {
+  if (!exaRes.url || typeof exaRes.url !== "string") {
     throw new ExaParsingError(
       `Invalid result format at index ${index}: Missing or invalid URL`,
       {
         response: exaRes,
-        expectedFormat: 'string URL',
+        expectedFormat: "string URL",
         actualFormat: typeof exaRes.url,
       }
     )
@@ -495,11 +495,11 @@ function mapExaResultToBaml(
 
   let snippet: string | null = null
   if (exaRes.highlights && exaRes.highlights.length > 0) {
-    snippet = exaRes.highlights.slice(0, 2).join(' ... ')
+    snippet = exaRes.highlights.slice(0, 2).join(" ... ")
   }
 
   const metadata: Record<string, string> = {
-    exa_internal_id: exaRes.id || 'unknown',
+    exa_internal_id: exaRes.id || "unknown",
   }
   if (autopromptString) {
     metadata.exa_autoprompt = autopromptString
@@ -509,7 +509,7 @@ function mapExaResultToBaml(
     id: exaRes.url,
     url: exaRes.url,
     title: exaRes.title ?? null,
-    source_name: 'Exa Search',
+    source_name: "Exa Search",
     snippet: snippet,
     full_text: exaRes.text ?? null,
     published_date: exaRes.publishedDate ?? null,
@@ -548,9 +548,9 @@ function handleAxiosError(error: AxiosError, queryString: string): never {
   }
 
   if (status === 401) {
-    const authType = extractAuthErrorType(responseData, 'invalid_key')
+    const authType = extractAuthErrorType(responseData, "invalid_key")
     throw new ExaAuthError(
-      'Exa API authentication failed: Invalid or expired API key.',
+      "Exa API authentication failed: Invalid or expired API key.",
       { ...baseErrorOptions, authType }
     )
   }
@@ -558,10 +558,10 @@ function handleAxiosError(error: AxiosError, queryString: string): never {
   if (status === 403) {
     const authType = extractAuthErrorType(
       responseData,
-      'insufficient_permissions'
+      "insufficient_permissions"
     )
     throw new ExaAuthError(
-      'Exa API authorization failed: Insufficient permissions for this operation.',
+      "Exa API authorization failed: Insufficient permissions for this operation.",
       { ...baseErrorOptions, authType }
     )
   }
@@ -588,9 +588,9 @@ function handleAxiosError(error: AxiosError, queryString: string): never {
   }
 
   const isTimeout =
-    error.code === 'ECONNABORTED' || error.message.includes('timeout')
+    error.code === "ECONNABORTED" || error.message.includes("timeout")
   const isConnectionError =
-    error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND'
+    error.code === "ECONNREFUSED" || error.code === "ENOTFOUND"
 
   throw new ExaNetworkError(
     `Network error during Exa API request: ${error.message}`,
@@ -599,7 +599,7 @@ function handleAxiosError(error: AxiosError, queryString: string): never {
 }
 
 function handleNonAxiosError(error: unknown, queryString: string): never {
-  if (error instanceof Error && error.message.includes('timeout')) {
+  if (error instanceof Error && error.message.includes("timeout")) {
     throw new ExaNetworkError(
       `Exa API request timed out for query "${queryString}". The search API may be experiencing high load.`,
       {
@@ -625,7 +625,7 @@ function handleNonAxiosError(error: unknown, queryString: string): never {
 
   if (
     error instanceof TypeError &&
-    error.message.includes('Cannot read properties of undefined')
+    error.message.includes("Cannot read properties of undefined")
   ) {
     throw new ExaNetworkError(
       `Network error: Received invalid response from Exa API for query "${queryString}". The API may be temporarily unavailable.`,

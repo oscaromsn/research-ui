@@ -215,7 +215,7 @@ bun baml:generate
 bun typecheck
 
 # Linting & Formatting
-bun lint && bun format
+bun check
 
 # Build (ensures app compiles)
 bun run build
@@ -240,7 +240,7 @@ Before considering a feature complete ensure that:
 2. ✅ All tests pass (`bun run test`)
 3. ✅ Test coverage meets guidelines (`bun test:coverage`)
 4. ✅ Type checking passes (`bun typecheck`)
-5. ✅ Linting passes (`bun lint`)
+5. ✅ Linting passes (`bun check`)
 6. ✅ Build succeeds (`bun build`).
 7. ✅ No runtime errors in the console
 8. ✅ Bundle size impact is reasonable

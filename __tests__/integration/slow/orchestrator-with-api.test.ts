@@ -3,30 +3,30 @@
  * This test requires actual API keys and will be skipped in CI unless keys are available
  */
 
-import { beforeAll, beforeEach, expect, vi } from 'vitest'
+import { beforeAll, beforeEach, expect, vi } from "vitest"
 
-import { conductResearch } from '@/app/actions/researchAgentOrchestrator'
-import type { ResearchUpdate } from '@/app/actions/researchAgentOrchestrator'
-import type { FinalLegalReport } from '@/baml_client/types'
+import { conductResearch } from "@/app/actions/researchAgentOrchestrator"
+import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator"
+import type { FinalLegalReport } from "@/baml_client/types"
 
 import {
   API_KEYS,
   describeWithApiKeys,
   itWithApiKeys,
   logApiKeyStatus,
-} from '../../utils/api-test-helpers'
+} from "../../utils/api-test-helpers"
 
 // Unmock axios for integration tests that need real HTTP requests
-vi.unmock('axios')
+vi.unmock("axios")
 
 // This entire test suite requires both Google AI and Exa Search APIs
 describeWithApiKeys(
-  'Research Orchestrator - Real API Integration',
+  "Research Orchestrator - Real API Integration",
   [...API_KEYS.GOOGLE_AI, ...API_KEYS.EXA_SEARCH],
   () => {
     beforeAll(() => {
       // Log API key status when debugging
-      if (process.env.DEBUG_API_TESTS === 'true') {
+      if (process.env.DEBUG_API_TESTS === "true") {
         logApiKeyStatus([...API_KEYS.GOOGLE_AI, ...API_KEYS.EXA_SEARCH])
       }
     })
@@ -37,11 +37,11 @@ describeWithApiKeys(
     })
 
     itWithApiKeys(
-      'should complete full research pipeline with real APIs',
+      "should complete full research pipeline with real APIs",
       [...API_KEYS.GOOGLE_AI, ...API_KEYS.EXA_SEARCH],
       async () => {
         const legalQuestion =
-          'What are the basic requirements for forming a valid contract in California?'
+          "What are the basic requirements for forming a valid contract in California?"
 
         // Use real APIs - no mocking
         const stream = await conductResearch(legalQuestion)
@@ -67,7 +67,7 @@ describeWithApiKeys(
             }
 
             const chunk = decoder.decode(value)
-            const lines = chunk.split('\n').filter(line => line.trim())
+            const lines = chunk.split("\n").filter(line => line.trim())
 
             for (const line of lines) {
               try {
@@ -75,7 +75,7 @@ describeWithApiKeys(
                 updates.push(update)
 
                 // Log progress when debugging
-                if (process.env.DEBUG_API_TESTS === 'true') {
+                if (process.env.DEBUG_API_TESTS === "true") {
                   console.log(
                     `Update: ${update.stage} - ${update.type}`,
                     update.message
@@ -84,10 +84,10 @@ describeWithApiKeys(
 
                 // Consider multiple valid completion states
                 if (
-                  update.stage === 'COMPLETED' ||
-                  update.stage === 'HUMAN_REVIEW_REQUESTED' ||
-                  update.stage === 'ITERATION_PAUSED' ||
-                  update.type === 'ERROR'
+                  update.stage === "COMPLETED" ||
+                  update.stage === "HUMAN_REVIEW_REQUESTED" ||
+                  update.stage === "ITERATION_PAUSED" ||
+                  update.type === "ERROR"
                 ) {
                   completedFound = true
                   break
@@ -114,17 +114,17 @@ describeWithApiKeys(
         const types = updates.map(u => u.type)
 
         // Either we completed successfully or handled errors gracefully
-        const hasInitialization = stages.includes('INITIALIZING')
-        const hasCompletion = stages.includes('COMPLETED')
-        const hasHumanReview = stages.includes('HUMAN_REVIEW_REQUESTED')
-        const hasIterationPaused = stages.includes('ITERATION_PAUSED')
-        const hasError = types.includes('ERROR')
+        const hasInitialization = stages.includes("INITIALIZING")
+        const hasCompletion = stages.includes("COMPLETED")
+        const hasHumanReview = stages.includes("HUMAN_REVIEW_REQUESTED")
+        const hasIterationPaused = stages.includes("ITERATION_PAUSED")
+        const hasError = types.includes("ERROR")
 
         expect(hasInitialization).toBe(true)
 
         if (hasError) {
           // If there were errors, verify they were handled gracefully
-          const errorUpdates = updates.filter(u => u.type === 'ERROR')
+          const errorUpdates = updates.filter(u => u.type === "ERROR")
           expect(errorUpdates.length).toBeGreaterThan(0)
           expect(errorUpdates[0]?.message).toBeDefined()
         } else {
@@ -134,14 +134,14 @@ describeWithApiKeys(
           expect(hasValidEndState).toBe(true)
 
           // Verify we got actual data, not just mocked responses
-          const dataUpdates = updates.filter(u => u.type === 'DATA')
+          const dataUpdates = updates.filter(u => u.type === "DATA")
           if (dataUpdates.length > 0) {
             // Check that we have meaningful content (not just mock data)
             const hasRealContent = dataUpdates.some(
               update =>
                 update.data &&
-                typeof update.data === 'object' &&
-                JSON.stringify(update.data).toLowerCase().includes('california')
+                typeof update.data === "object" &&
+                JSON.stringify(update.data).toLowerCase().includes("california")
             )
             expect(hasRealContent).toBe(true)
           }
@@ -211,7 +211,7 @@ describeWithApiKeys(
         return []
       }
       const chunk = new TextDecoder().decode(value)
-      const lines = chunk.split('\n').filter(line => line.trim())
+      const lines = chunk.split("\n").filter(line => line.trim())
       const updates: ResearchUpdate[] = []
 
       for (const line of lines) {
@@ -232,12 +232,12 @@ describeWithApiKeys(
     } {
       const hasCompleted = updates.some(
         update =>
-          update.stage === 'COMPLETED' ||
-          update.stage === 'HUMAN_REVIEW_REQUESTED' ||
-          update.stage === 'ITERATION_PAUSED'
+          update.stage === "COMPLETED" ||
+          update.stage === "HUMAN_REVIEW_REQUESTED" ||
+          update.stage === "ITERATION_PAUSED"
       )
 
-      const hasError = updates.some(update => update.type === 'ERROR')
+      const hasError = updates.some(update => update.type === "ERROR")
 
       return { completed: hasCompleted, error: hasError }
     }
@@ -246,12 +246,12 @@ describeWithApiKeys(
       updates: ResearchUpdate[]
     ): FinalLegalReport | null {
       for (const update of updates) {
-        if (update.type === 'DATA' && update.data) {
+        if (update.type === "DATA" && update.data) {
           if (
-            typeof update.data === 'object' &&
+            typeof update.data === "object" &&
             update.data !== null &&
-            ('executive_summary' in update.data ||
-              'executiveSummary' in update.data)
+            ("executive_summary" in update.data ||
+              "executiveSummary" in update.data)
           ) {
             return update.data as FinalLegalReport
           }
@@ -278,9 +278,9 @@ describeWithApiKeys(
     }
 
     function validateErrorHandling(updates: ResearchUpdate[]): void {
-      const errorUpdate = updates.find(u => u.type === 'ERROR')
+      const errorUpdate = updates.find(u => u.type === "ERROR")
       expect(errorUpdate?.message).toBeDefined()
-      console.log('Test handled error gracefully:', errorUpdate?.message)
+      console.log("Test handled error gracefully:", errorUpdate?.message)
     }
 
     function validateSuccessfulCompletion(finalReport: FinalLegalReport): void {
@@ -292,23 +292,23 @@ describeWithApiKeys(
 
       const reportText = JSON.stringify(finalReport).toLowerCase()
       const isRelevant =
-        reportText.includes('statute') ||
-        reportText.includes('limitation') ||
-        reportText.includes('new york') ||
-        reportText.includes('personal injury')
+        reportText.includes("statute") ||
+        reportText.includes("limitation") ||
+        reportText.includes("new york") ||
+        reportText.includes("personal injury")
 
       expect(isRelevant).toBe(true)
 
-      console.log('✅ Structured legal analysis completed successfully')
+      console.log("✅ Structured legal analysis completed successfully")
       console.log(`Report title: ${finalReport.report_title}`)
       console.log(`Number of sections: ${finalReport.sections.length}`)
     }
 
     function validateProgressMade(updates: ResearchUpdate[]): void {
       const stages = updates.map(u => u.stage)
-      expect(stages).toContain('INITIALIZING')
+      expect(stages).toContain("INITIALIZING")
 
-      const hasDataUpdates = updates.some(u => u.type === 'DATA')
+      const hasDataUpdates = updates.some(u => u.type === "DATA")
       if (hasDataUpdates) {
         console.log("Test made progress with data updates but didn't complete")
       } else {
@@ -317,11 +317,11 @@ describeWithApiKeys(
     }
 
     itWithApiKeys(
-      'should handle API errors gracefully',
+      "should handle API errors gracefully",
       [...API_KEYS.GOOGLE_AI, ...API_KEYS.EXA_SEARCH],
       async () => {
         // Test with an empty question - this should still complete gracefully
-        const stream = await conductResearch('')
+        const stream = await conductResearch("")
 
         const updates: ResearchUpdate[] = []
         const reader = stream.getReader()
@@ -338,7 +338,7 @@ describeWithApiKeys(
                 `Error handling test timeout after ${maxTimeoutMs}ms - got ${updates.length} updates`
               )
               console.warn(
-                'Last few updates:',
+                "Last few updates:",
                 updates.slice(-3).map(u => `${u.stage}:${u.type}:${u.message}`)
               )
               break
@@ -350,7 +350,7 @@ describeWithApiKeys(
             }
 
             const chunk = new TextDecoder().decode(value)
-            const lines = chunk.split('\n').filter(line => line.trim())
+            const lines = chunk.split("\n").filter(line => line.trim())
 
             for (const line of lines) {
               try {
@@ -358,17 +358,17 @@ describeWithApiKeys(
                 updates.push(update)
 
                 // Log progress for debugging
-                if (process.env.DEBUG_API_TESTS === 'true') {
+                if (process.env.DEBUG_API_TESTS === "true") {
                   console.log(
                     `Error test update: ${update.stage} - ${update.type}: ${update.message}`
                   )
                 }
 
                 if (
-                  update.stage === 'COMPLETED' ||
-                  update.stage === 'HUMAN_REVIEW_REQUESTED' ||
-                  update.stage === 'ITERATION_PAUSED' ||
-                  update.type === 'ERROR'
+                  update.stage === "COMPLETED" ||
+                  update.stage === "HUMAN_REVIEW_REQUESTED" ||
+                  update.stage === "ITERATION_PAUSED" ||
+                  update.type === "ERROR"
                 ) {
                   completedFound = true
                   break
@@ -388,14 +388,14 @@ describeWithApiKeys(
         }
 
         // Should either complete successfully, request review, pause, or fail gracefully
-        const hasCompletion = updates.some(u => u.stage === 'COMPLETED')
+        const hasCompletion = updates.some(u => u.stage === "COMPLETED")
         const hasHumanReview = updates.some(
-          u => u.stage === 'HUMAN_REVIEW_REQUESTED'
+          u => u.stage === "HUMAN_REVIEW_REQUESTED"
         )
         const hasIterationPaused = updates.some(
-          u => u.stage === 'ITERATION_PAUSED'
+          u => u.stage === "ITERATION_PAUSED"
         )
-        const hasError = updates.some(u => u.type === 'ERROR')
+        const hasError = updates.some(u => u.type === "ERROR")
 
         // Verify we got some meaningful response regardless of outcome
         expect(updates.length).toBeGreaterThan(0)
@@ -405,12 +405,12 @@ describeWithApiKeys(
 
         // Log final outcome for debugging
         if (hasError) {
-          const errorUpdate = updates.find(u => u.type === 'ERROR')
-          console.log('Test completed with error:', errorUpdate?.message)
+          const errorUpdate = updates.find(u => u.type === "ERROR")
+          console.log("Test completed with error:", errorUpdate?.message)
         } else if (hasCompletion) {
-          console.log('Test completed successfully')
+          console.log("Test completed successfully")
         } else if (hasHumanReview || hasIterationPaused) {
-          console.log('Test completed with review/pause request')
+          console.log("Test completed with review/pause request")
         }
       },
       {
@@ -420,11 +420,11 @@ describeWithApiKeys(
     )
 
     itWithApiKeys(
-      'should produce structured legal analysis',
+      "should produce structured legal analysis",
       [...API_KEYS.GOOGLE_AI, ...API_KEYS.EXA_SEARCH],
       async () => {
         const legalQuestion =
-          'What is the statute of limitations for personal injury claims in New York?'
+          "What is the statute of limitations for personal injury claims in New York?"
 
         const stream = await conductResearch(legalQuestion)
         const reader = stream.getReader()

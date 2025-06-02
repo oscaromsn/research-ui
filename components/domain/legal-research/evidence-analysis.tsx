@@ -1,18 +1,18 @@
-'use client'
+"use client"
 
-import { useAtomValue, useSetAtom } from 'jotai'
-import { Brain, Gavel, Scroll } from 'lucide-react'
-import { useState } from 'react'
+import { useAtomValue, useSetAtom } from "jotai"
+import { Brain, Gavel, Scroll } from "lucide-react"
+import { useState } from "react"
 
-import type { ClientAnalyzedDoc } from '@/lib/state/researchAtoms'
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms"
 import {
   analyzedDocsSummaryAtom,
   researchSessionAtom,
   selectedAnalyzedDocIdAtom,
-} from '@/lib/state/researchAtoms'
+} from "@/lib/state/researchAtoms"
 
-import { AnalysisReasoningModal } from './modals/analysis-reasoning-modal'
-import { CaseModal } from './modals/case-modal'
+import { AnalysisReasoningModal } from "./modals/analysis-reasoning-modal"
+import { CaseModal } from "./modals/case-modal"
 
 export function EvidenceAnalysis() {
   const [selectedCase, setSelectedCase] = useState<ClientAnalyzedDoc | null>(
@@ -52,7 +52,7 @@ export function EvidenceAnalysis() {
     doc: ClientAnalyzedDoc,
     event: React.KeyboardEvent
   ) => {
-    if (event.key === 'Enter') {
+    if (event.key === "Enter") {
       handleDocumentClick(doc)
     }
   }
@@ -60,20 +60,20 @@ export function EvidenceAnalysis() {
   // Helper function for entity styling
   const getEntityStyle = (type: string) => {
     const styles = {
-      Case: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+      Case: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
       Statute:
-        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
       Regulation:
-        'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
       Person:
-        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
       Organization:
-        'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+        "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
       LegalConcept:
-        'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+        "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
       Jurisdiction:
-        'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
-      default: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+        "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
+      default: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
     }
     return styles[type as keyof typeof styles] || styles.default
   }
@@ -118,7 +118,7 @@ export function EvidenceAnalysis() {
         <div className="p-4">
           {sortedDocuments.map(doc => {
             const isSelected = selectedDocId === doc.docId
-            const documentType = doc.title?.includes('§') ? 'statute' : 'case'
+            const documentType = doc.title?.includes("§") ? "statute" : "case"
 
             return (
               <button
@@ -126,8 +126,8 @@ export function EvidenceAnalysis() {
                 type="button"
                 className={`mb-2 w-full cursor-pointer rounded-lg p-3 text-left ${
                   isSelected
-                    ? 'border-[#3a7bb7] border-l-4 bg-[#edf2f7] dark:bg-[#242a3d]'
-                    : 'bg-white hover:bg-[#f8fafc] dark:bg-[#1e2436] dark:hover:bg-[#212941]'
+                    ? "border-[#3a7bb7] border-l-4 bg-[#edf2f7] dark:bg-[#242a3d]"
+                    : "bg-white hover:bg-[#f8fafc] dark:bg-[#1e2436] dark:hover:bg-[#212941]"
                 }`}
                 onClick={() => handleDocumentClick(doc)}
                 onKeyUp={e => handleDocumentKeyUp(doc, e)}
@@ -135,11 +135,11 @@ export function EvidenceAnalysis() {
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="mb-1 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
-                      {doc.title || 'Untitled Document'}
+                      {doc.title || "Untitled Document"}
                     </h3>
                     <div className="mb-1 flex items-center text-[#64748b] text-xs dark:text-[#94a3b8]">
                       <span>
-                        {doc.url ? new URL(doc.url).hostname : 'Unknown Source'}
+                        {doc.url ? new URL(doc.url).hostname : "Unknown Source"}
                       </span>
                       <span className="mx-1">•</span>
                       <span>Relevance: {doc.relevanceScore || 0}/10</span>
@@ -148,19 +148,19 @@ export function EvidenceAnalysis() {
                           <span className="mx-1">•</span>
                           <span>
                             {new Date(doc.timestamp).toLocaleTimeString([], {
-                              hour: '2-digit',
-                              minute: '2-digit',
+                              hour: "2-digit",
+                              minute: "2-digit",
                             })}
                           </span>
                         </>
                       )}
                     </div>
                     <p className="text-[#4a5568] text-xs dark:text-[#a0aec0]">
-                      {doc.summarySnippet || 'No summary available.'}
+                      {doc.summarySnippet || "No summary available."}
                     </p>
                   </div>
                   <div className="mt-1 ml-2">
-                    {documentType === 'case' ? (
+                    {documentType === "case" ? (
                       <Gavel
                         size={14}
                         className="text-[#64748b] dark:text-[#94a3b8]"
@@ -196,7 +196,7 @@ export function EvidenceAnalysis() {
                 </h3>
                 <div className="text-[#4a5568] text-xs leading-relaxed dark:text-[#a0aec0]">
                   {selectedDocument.fullText
-                    .split('\n')
+                    .split("\n")
                     .map((paragraph, idx) => (
                       <p
                         key={`paragraph-${selectedDocument.docId}-${idx}`}
@@ -238,10 +238,10 @@ export function EvidenceAnalysis() {
               </p>
               <p className="text-[#4a5568] text-xs dark:text-[#a0aec0]">
                 {selectedDocument?.summarySnippet ||
-                  'No analysis available for this document.'}
+                  "No analysis available for this document."}
                 <span
                   className="ml-0.5 inline-block h-3 w-0.5 animate-caret-blink bg-[#4a5568] dark:bg-[#a0aec0]"
-                  style={{ verticalAlign: 'text-top' }}
+                  style={{ verticalAlign: "text-top" }}
                 />
               </p>
             </div>

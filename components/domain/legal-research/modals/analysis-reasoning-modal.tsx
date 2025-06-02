@@ -1,7 +1,7 @@
-'use client'
+"use client"
 
-import { Modal } from '@/components/ui/modal'
-import type { ClientAnalysisReasoning } from '@/lib/state/researchAtoms'
+import { Modal } from "@/components/ui/modal"
+import type { ClientAnalysisReasoning } from "@/lib/state/researchAtoms"
 
 interface AnalysisReasoningModalProps {
   isOpen: boolean
@@ -20,7 +20,7 @@ export function AnalysisReasoningModal({
     <Modal
       isOpen={isOpen}
       onClose={onCloseAction}
-      title={`Analysis Reasoning: ${documentTitle || 'Document'}`}
+      title={`Analysis Reasoning: ${documentTitle || "Document"}`}
       size="xl"
     >
       <div className="p-6">
@@ -34,7 +34,7 @@ export function AnalysisReasoningModal({
               className="rounded bg-[#f8fafc] p-3 text-[#4a5568] text-sm leading-relaxed dark:bg-[#1e2436] dark:text-[#a0aec0]"
             >
               {reasoning?.analyzeLegalQuestionSummary ||
-                'No reasoning available for the legal question analysis.'}
+                "No reasoning available for the legal question analysis."}
             </p>
           </div>
 
@@ -47,7 +47,7 @@ export function AnalysisReasoningModal({
               className="rounded bg-[#f8fafc] p-3 text-[#4a5568] text-sm leading-relaxed dark:bg-[#1e2436] dark:text-[#a0aec0]"
             >
               {reasoning?.considerRelevantPrinciplesSummary ||
-                'No reasoning available for legal principles consideration.'}
+                "No reasoning available for legal principles consideration."}
             </p>
           </div>
 

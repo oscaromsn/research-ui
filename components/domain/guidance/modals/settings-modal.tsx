@@ -1,6 +1,6 @@
-import { Bell, Globe, LogOut, Moon, Settings, Shield, User } from 'lucide-react'
+import { Bell, Globe, LogOut, Moon, Settings, Shield, User } from "lucide-react"
 
-import { Modal } from '@ui/modal'
+import { Modal } from "@ui/modal"
 
 interface SettingsModalProps {
   isOpen: boolean
@@ -31,22 +31,22 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           {[
             {
               icon: Settings,
-              label: 'General Preferences',
+              label: "General Preferences",
               badge: null,
             },
             {
               icon: Bell,
-              label: 'Notifications',
-              badge: '3',
+              label: "Notifications",
+              badge: "3",
             },
             {
               icon: Globe,
-              label: 'Language & Region',
+              label: "Language & Region",
               badge: null,
             },
             {
               icon: Shield,
-              label: 'Privacy & Security',
+              label: "Privacy & Security",
               badge: null,
             },
           ].map(item => (

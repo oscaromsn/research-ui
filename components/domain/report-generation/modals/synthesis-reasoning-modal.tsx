@@ -1,8 +1,8 @@
-import { AlertTriangle, CheckCircle, Clock } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Clock } from "lucide-react"
 
-import type { DetailedReasoning } from '@/baml_client/types'
-import { Modal } from '@/components/ui/modal'
-import type { ClientSynthesis } from '@/lib/state/researchAtoms'
+import type { DetailedReasoning } from "@/baml_client/types"
+import { Modal } from "@/components/ui/modal"
+import type { ClientSynthesis } from "@/lib/state/researchAtoms"
 
 interface SynthesisReasoningModalProps {
   isOpen: boolean
@@ -30,24 +30,24 @@ export function SynthesisReasoningModal({
 
     const steps = [
       {
-        status: 'complete' as const,
+        status: "complete" as const,
         text:
           reasoning.analyze_legal_question?.summary ||
-          'Analyzed legal question',
+          "Analyzed legal question",
         details: reasoning.analyze_legal_question?.items_considered,
       },
       {
-        status: 'complete' as const,
+        status: "complete" as const,
         text:
           reasoning.consider_relevant_legal_principles?.summary ||
-          'Considered relevant legal principles',
+          "Considered relevant legal principles",
         details: reasoning.consider_relevant_legal_principles?.items_considered,
       },
     ]
 
     if (reasoning.formulate_search_queries_strategy?.summary) {
       steps.push({
-        status: 'complete' as const,
+        status: "complete" as const,
         text: reasoning.formulate_search_queries_strategy.summary,
         details: reasoning.formulate_search_queries_strategy.items_considered,
       })
@@ -55,7 +55,7 @@ export function SynthesisReasoningModal({
 
     if (reasoning.specify_expected_information_strategy?.summary) {
       steps.push({
-        status: 'complete' as const,
+        status: "complete" as const,
         text: reasoning.specify_expected_information_strategy.summary,
         details:
           reasoning.specify_expected_information_strategy.items_considered,
@@ -64,7 +64,7 @@ export function SynthesisReasoningModal({
 
     if (reasoning.ensure_comprehensive_coverage_strategy?.summary) {
       steps.push({
-        status: 'complete' as const,
+        status: "complete" as const,
         text: reasoning.ensure_comprehensive_coverage_strategy.summary,
         details:
           reasoning.ensure_comprehensive_coverage_strategy.items_considered,
@@ -88,7 +88,7 @@ export function SynthesisReasoningModal({
           <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
           <p>
             {synthesisData?.reasoningSummary ||
-              'This synthesis is based on the analyzed documents and AI reasoning. Please review for accuracy.'}
+              "This synthesis is based on the analyzed documents and AI reasoning. Please review for accuracy."}
           </p>
         </div>
         <div className="space-y-4">
@@ -104,12 +104,12 @@ export function SynthesisReasoningModal({
                     className="flex items-start"
                   >
                     <div className="mt-1 mr-2">
-                      {step.status === 'complete' ? (
+                      {step.status === "complete" ? (
                         <CheckCircle
                           size={14}
                           className="text-[#16a34a] dark:text-[#86efac]"
                         />
-                      ) : step.status === 'warning' ? (
+                      ) : step.status === "warning" ? (
                         <AlertTriangle size={14} className="text-[#eab308]" />
                       ) : (
                         <Clock
@@ -126,7 +126,7 @@ export function SynthesisReasoningModal({
                         <ul className="mt-1 ml-4 list-disc text-[#64748b] text-xs dark:text-[#94a3b8]">
                           {step.details.map((detail, detailIndex) => (
                             <li
-                              key={`detail-${detailIndex}-${detail.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '')}`}
+                              key={`detail-${detailIndex}-${detail.slice(0, 20).replace(/[^a-zA-Z0-9]/g, "")}`}
                             >
                               {detail}
                             </li>
@@ -196,7 +196,7 @@ export function SynthesisReasoningModal({
                     {synthesisData.unansweredAspects.map(
                       (aspect: string, index: number) => (
                         <li
-                          key={`unanswered-${index}-${aspect.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '')}`}
+                          key={`unanswered-${index}-${aspect.slice(0, 20).replace(/[^a-zA-Z0-9]/g, "")}`}
                         >
                           {aspect}
                         </li>
@@ -216,7 +216,7 @@ export function SynthesisReasoningModal({
                     {synthesisData.emergingQuestions.map(
                       (question: string, index: number) => (
                         <li
-                          key={`question-${index}-${question.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '')}`}
+                          key={`question-${index}-${question.slice(0, 20).replace(/[^a-zA-Z0-9]/g, "")}`}
                         >
                           {question}
                         </li>

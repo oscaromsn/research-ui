@@ -57,15 +57,8 @@ bun format
 
 ### Linting Commands
 ```bash
-# Lint all files (quiet mode)
-bun lint
-
-# Lint and auto-fix issues
-bun lint:fix
-
-# Strict linting with zero warnings allowed
-bun lint:strict
-```
+# Lint all files and auto-fix issues
+bun check
 
 ### Validation Commands
 ```bash

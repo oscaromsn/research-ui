@@ -69,7 +69,7 @@ export abstract class ExaError extends Error {
  */
 export class ExaRateLimitError extends ExaError {
   public readonly retryAfter?: number
-  public readonly rateLimitType?: 'requests' | 'quota' | 'concurrent'
+  public readonly rateLimitType?: "requests" | "quota" | "concurrent"
 
   constructor(
     message: string,
@@ -79,7 +79,7 @@ export class ExaRateLimitError extends ExaError {
       requestId?: string
       query?: string
       retryAfter?: number
-      rateLimitType?: 'requests' | 'quota' | 'concurrent'
+      rateLimitType?: "requests" | "quota" | "concurrent"
       cause?: Error
     } = {}
   ) {
@@ -87,7 +87,7 @@ export class ExaRateLimitError extends ExaError {
     if (options.retryAfter !== undefined) {
       this.retryAfter = options.retryAfter
     }
-    this.rateLimitType = options.rateLimitType || 'requests'
+    this.rateLimitType = options.rateLimitType || "requests"
   }
 
   /**
@@ -109,10 +109,10 @@ export class ExaRateLimitError extends ExaError {
  */
 export class ExaAuthError extends ExaError {
   public readonly authType:
-    | 'invalid_key'
-    | 'insufficient_permissions'
-    | 'expired_key'
-    | 'unknown'
+    | "invalid_key"
+    | "insufficient_permissions"
+    | "expired_key"
+    | "unknown"
 
   constructor(
     message: string,
@@ -122,15 +122,15 @@ export class ExaAuthError extends ExaError {
       requestId?: string
       query?: string
       authType?:
-        | 'invalid_key'
-        | 'insufficient_permissions'
-        | 'expired_key'
-        | 'unknown'
+        | "invalid_key"
+        | "insufficient_permissions"
+        | "expired_key"
+        | "unknown"
       cause?: Error
     } = {}
   ) {
     super(message, options)
-    this.authType = options.authType || 'unknown'
+    this.authType = options.authType || "unknown"
   }
 
   /**
@@ -138,7 +138,7 @@ export class ExaAuthError extends ExaError {
    */
   isRecoverable(): boolean {
     // Invalid or expired keys are not recoverable, insufficient permissions might be
-    return this.authType === 'insufficient_permissions'
+    return this.authType === "insufficient_permissions"
   }
 }
 
@@ -216,7 +216,7 @@ export class ExaClientError extends ExaError {
    */
   isRetryable(): boolean {
     // Most client errors are not retryable, except for some timeout-related ones
-    return this.status === 408 || this.errorCode === 'timeout'
+    return this.status === 408 || this.errorCode === "timeout"
   }
 }
 
@@ -262,24 +262,24 @@ export class ExaNetworkError extends ExaError {
  */
 export class ExaConfigError extends ExaError {
   public readonly configType:
-    | 'missing_api_key'
-    | 'invalid_base_url'
-    | 'invalid_timeout'
-    | 'unknown'
+    | "missing_api_key"
+    | "invalid_base_url"
+    | "invalid_timeout"
+    | "unknown"
 
   constructor(
     message: string,
     options: {
       configType?:
-        | 'missing_api_key'
-        | 'invalid_base_url'
-        | 'invalid_timeout'
-        | 'unknown'
+        | "missing_api_key"
+        | "invalid_base_url"
+        | "invalid_timeout"
+        | "unknown"
       cause?: Error
     } = {}
   ) {
     super(message, options)
-    this.configType = options.configType || 'unknown'
+    this.configType = options.configType || "unknown"
   }
 
   /**

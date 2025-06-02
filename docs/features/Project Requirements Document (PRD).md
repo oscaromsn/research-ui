@@ -214,7 +214,7 @@ This section details the specific technical requirements for each feature, follo
 - **6.2. Unit Tests (Vitest):** Utility functions, Jotai atom logic (if complex), and custom hooks (`useResearchAgent`) shall have unit tests.
 - **6.3. Component Tests (React Testing Library):** UI components shall be tested for rendering, interactions, and state-driven display changes.
 - **6.4. Type Checking:** `bun typecheck` must pass.
-- **6.5. Linting:** `bun lint` (using Biome) must pass.
+- **6.5. Linting:** `bun check` (using Biome) must pass.
 
 **7. Documentation Requirements**
 

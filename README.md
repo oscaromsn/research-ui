@@ -234,8 +234,7 @@ For complete testing documentation, troubleshooting, and best practices, see [do
 
 ### Code Quality & Conventions
 
-*   **Formatting:** Code is automatically formatted by Biome. Run `bun format` to format manually.
-*   **Linting:** Biome is configured for comprehensive linting. Run `bun lint` to lint and fix issues.
+*   **Formatting and linting:** Code is automatically formatted and linted by Biome. Run `bun check` to automatically format, lint and fix issues. manually.
 *   **Commit Messages:** Follow Conventional Commits. `bun commit` can be used for guided commits (via `git-cz`), and `commitlint` (triggered by Husky) enforces this.
 *   **Type Checking:** Run `bun typecheck` regularly.
 *   **Husky Hooks:** Pre-commit and pre-push hooks are configured in `.husky/` to run lint-staged, type checks, etc.
@@ -247,8 +246,7 @@ For complete testing documentation, troubleshooting, and best practices, see [do
 *   `bun dev`: Starts the Next.js development server.
 *   `bun run build`: Builds the application for production.
 *   `bun start`: Starts the production server.
-*   `bun format`: Formats code using Biome.
-*   `bun lint`: Lints code using Biome.
+*   `bun check`: Formats and lints code using Biome.
 *   `bun typecheck`: Runs TypeScript compiler checks.
 *   `bun run test`: Runs all Vitest unit/component tests.
 *   `bun test:e2e`: Runs all Playwright E2E tests.

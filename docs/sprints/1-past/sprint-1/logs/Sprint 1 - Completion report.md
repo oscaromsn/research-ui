@@ -224,7 +224,7 @@ function createMockStream(updates: ResearchUpdate[]) {
 
 **Biome Validation:**
 ```bash
-> bun lint
+> bun check
 ✅ PASSED - No Biome warnings or errors
 ```
 

@@ -225,7 +225,7 @@
     *   **Details:**
         *   Confirm which tool is primary for formatting (likely Biome per `CLAUDE.md`). Ensure its configuration is optimal.
         *   Ensure `ignore` patterns in both `biome.json` and `tsconfig.json` for consistency.
-        *   Ensure `bun lint` and `bun format` (if it exists) scripts run the intended tools correctly.
+        *   Ensure `bun check` and `bun typecheck` scripts run the intended tools correctly.
     *   **Acceptance Criteria:** ✅ Linting and formatting setup is consistent and documented (e.g., in the main `README.md` or `CLAUDE.md`).
 
 **Checkpoint 4 (End of Cleanup):** Project structure and tooling are more organized.

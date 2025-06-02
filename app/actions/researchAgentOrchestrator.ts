@@ -1,7 +1,7 @@
-'use server'
+"use server"
 
-import { b } from '@/baml_client'
-import type { partial_types } from '@/baml_client'
+import { b } from "@/baml_client"
+import type { partial_types } from "@/baml_client"
 import type {
   AnalyzedDocument,
   FinalLegalReport,
@@ -10,28 +10,28 @@ import type {
   ResearchAssessment,
   SearchQueryItem,
   SearchResultItem,
-} from '@/baml_client/types'
-import { executeExaSearch } from '@/lib/utils/exaSearchUtil'
-import type { BamlStream } from '@boundaryml/baml'
+} from "@/baml_client/types"
+import { executeExaSearch } from "@/lib/utils/exaSearchUtil"
+import type { BamlStream } from "@boundaryml/baml"
 
 // Research pipeline stage enum
 export type ResearchStage =
-  | 'IDLE'
-  | 'INITIALIZING'
-  | 'GENERATING_QUERIES'
-  | 'FETCHING_DOCUMENTS'
-  | 'ANALYZING_DOCUMENTS'
-  | 'SYNTHESIZING_FINDINGS'
-  | 'ASSESSING_RESEARCH'
-  | 'GENERATING_REPORT'
-  | 'ITERATION_PAUSED'
-  | 'HUMAN_REVIEW_REQUESTED'
-  | 'COMPLETED'
-  | 'ERROR'
+  | "IDLE"
+  | "INITIALIZING"
+  | "GENERATING_QUERIES"
+  | "FETCHING_DOCUMENTS"
+  | "ANALYZING_DOCUMENTS"
+  | "SYNTHESIZING_FINDINGS"
+  | "ASSESSING_RESEARCH"
+  | "GENERATING_REPORT"
+  | "ITERATION_PAUSED"
+  | "HUMAN_REVIEW_REQUESTED"
+  | "COMPLETED"
+  | "ERROR"
 
 // Stream communication protocol
 export interface ResearchUpdate {
-  type: 'PROGRESS' | 'DATA' | 'ERROR' | 'STATUS_CHANGE' | 'LOG'
+  type: "PROGRESS" | "DATA" | "ERROR" | "STATUS_CHANGE" | "LOG"
   stage: ResearchStage
   message?: string
   data?: unknown
@@ -58,7 +58,7 @@ function createStream(): {
       try {
         await writer.close()
       } catch (e) {
-        console.error('Error closing stream writer:', e)
+        console.error("Error closing stream writer:", e)
       }
     }
   }
@@ -81,7 +81,7 @@ async function sendUpdate(
     const jsonString = JSON.stringify(update)
     await writer.write(encoder.encode(`${jsonString}\n`))
   } catch (e) {
-    console.error('Stream write error in sendUpdate:', e, 'Update:', update)
+    console.error("Stream write error in sendUpdate:", e, "Update:", update)
   }
 }
 
@@ -118,9 +118,9 @@ async function fetchDocumentsFromQueries(
       )
 
       // Handle rate limiting specifically - consider stopping further searches
-      if (errorMessage.includes('Rate limit exceeded')) {
+      if (errorMessage.includes("Rate limit exceeded")) {
         console.warn(
-          'Orchestrator: Rate limit reached for Exa API. Stopping further search queries for this session.'
+          "Orchestrator: Rate limit reached for Exa API. Stopping further search queries for this session."
         )
         break // Stop executing more queries if we hit rate limits
       }
@@ -166,24 +166,24 @@ async function generateQueriesStage(
   const { writer, encoder, timeoutController, legalQuestion } = context
 
   await sendUpdate(writer, encoder, {
-    type: 'STATUS_CHANGE',
-    stage: 'GENERATING_QUERIES',
-    message: 'Generating initial search queries...',
+    type: "STATUS_CHANGE",
+    stage: "GENERATING_QUERIES",
+    message: "Generating initial search queries...",
   })
 
   if (timeoutController.signal.aborted) {
-    throw new Error('Orchestrator timeout during query generation')
+    throw new Error("Orchestrator timeout during query generation")
   }
 
   const queryAnalysis = await b.GenerateLegalSearchQueries(legalQuestion)
 
   await sendUpdate(writer, encoder, {
-    type: 'DATA',
-    stage: 'GENERATING_QUERIES',
+    type: "DATA",
+    stage: "GENERATING_QUERIES",
     data: {
       queries: queryAnalysis.search_queries.map(q => ({
         query_string: q.query_string,
-        expected_information_summary: `${q.expected_information.join(' ').substring(0, 100)}...`,
+        expected_information_summary: `${q.expected_information.join(" ").substring(0, 100)}...`,
       })),
       reasoningEntryPoints: {
         analyzeLegalQuestionSummary: `${queryAnalysis.reasoning.analyze_legal_question.summary?.substring(0, 150)}...`,
@@ -204,13 +204,13 @@ async function fetchDocumentsStage(
   const { writer, encoder, timeoutController } = context
 
   await sendUpdate(writer, encoder, {
-    type: 'STATUS_CHANGE',
-    stage: 'FETCHING_DOCUMENTS',
-    message: 'Retrieving documents from live search APIs...',
+    type: "STATUS_CHANGE",
+    stage: "FETCHING_DOCUMENTS",
+    message: "Retrieving documents from live search APIs...",
   })
 
   if (timeoutController.signal.aborted) {
-    throw new Error('Orchestrator timeout during document fetching')
+    throw new Error("Orchestrator timeout during document fetching")
   }
 
   try {
@@ -218,21 +218,21 @@ async function fetchDocumentsStage(
 
     if (searchResultItems.length === 0) {
       await sendUpdate(writer, encoder, {
-        type: 'ERROR',
-        stage: 'FETCHING_DOCUMENTS',
-        message: 'No documents found for any of the executed search queries.',
+        type: "ERROR",
+        stage: "FETCHING_DOCUMENTS",
+        message: "No documents found for any of the executed search queries.",
         isFinalForStage: true,
       })
-      throw new Error('No documents found')
+      throw new Error("No documents found")
     }
 
     await sendUpdate(writer, encoder, {
-      type: 'DATA',
-      stage: 'FETCHING_DOCUMENTS',
+      type: "DATA",
+      stage: "FETCHING_DOCUMENTS",
       data: {
         count: searchResultItems.length,
         titles: searchResultItems.map(r =>
-          r.title ? `${r.title.substring(0, 70)}...` : 'Untitled'
+          r.title ? `${r.title.substring(0, 70)}...` : "Untitled"
         ),
         sources: searchResultItems.map(r => r.source_name),
       },
@@ -245,8 +245,8 @@ async function fetchDocumentsStage(
     const errorMessage =
       searchError instanceof Error ? searchError.message : String(searchError)
     await sendUpdate(writer, encoder, {
-      type: 'ERROR',
-      stage: 'FETCHING_DOCUMENTS',
+      type: "ERROR",
+      stage: "FETCHING_DOCUMENTS",
       message: `Failed to retrieve documents: ${errorMessage}`,
     })
     throw searchError
@@ -260,21 +260,21 @@ async function analyzeDocumentsStage(
   const { writer, encoder, timeoutController, legalQuestion } = context
 
   await sendUpdate(writer, encoder, {
-    type: 'STATUS_CHANGE',
-    stage: 'ANALYZING_DOCUMENTS',
+    type: "STATUS_CHANGE",
+    stage: "ANALYZING_DOCUMENTS",
     message: `Starting analysis of ${searchResultItems.length} documents...`,
     totalDocsToProcess: searchResultItems.length,
     currentProcessedDoc: 0,
   })
 
   if (timeoutController.signal.aborted) {
-    throw new Error('Orchestrator timeout during document analysis')
+    throw new Error("Orchestrator timeout during document analysis")
   }
 
   const analyzedDocs: AnalyzedDocument[] = []
   for (let i = 0; i < searchResultItems.length; i++) {
     if (timeoutController.signal.aborted) {
-      throw new Error('Orchestrator timeout during document analysis iteration')
+      throw new Error("Orchestrator timeout during document analysis iteration")
     }
 
     const doc = searchResultItems[i]
@@ -283,9 +283,9 @@ async function analyzeDocumentsStage(
     }
 
     await sendUpdate(writer, encoder, {
-      type: 'PROGRESS',
-      stage: 'ANALYZING_DOCUMENTS',
-      message: `Analyzing document ${i + 1}/${searchResultItems.length}: ${doc.title ? `${doc.title.substring(0, 50)}...` : 'Untitled'}`,
+      type: "PROGRESS",
+      stage: "ANALYZING_DOCUMENTS",
+      message: `Analyzing document ${i + 1}/${searchResultItems.length}: ${doc.title ? `${doc.title.substring(0, 50)}...` : "Untitled"}`,
       currentProcessedDoc: i,
       totalDocsToProcess: searchResultItems.length,
     })
@@ -297,8 +297,8 @@ async function analyzeDocumentsStage(
     analyzedDocs.push(analysis)
 
     await sendUpdate(writer, encoder, {
-      type: 'DATA',
-      stage: 'ANALYZING_DOCUMENTS',
+      type: "DATA",
+      stage: "ANALYZING_DOCUMENTS",
       data: {
         docId: doc.id,
         title: doc.title,
@@ -321,24 +321,24 @@ async function analyzeDocumentsStage(
             analysis.reasoning?.analyze_legal_question?.summary?.substring(
               0,
               500
-            ) || '',
+            ) || "",
           considerRelevantPrinciplesSummary:
             analysis.reasoning?.consider_relevant_legal_principles?.summary?.substring(
               0,
               500
-            ) || '',
+            ) || "",
         },
       },
-      message: `Analysis complete for: ${doc.title ? `${doc.title.substring(0, 50)}...` : 'Untitled'}. Relevance: ${analysis.relevance_score}/10`,
+      message: `Analysis complete for: ${doc.title ? `${doc.title.substring(0, 50)}...` : "Untitled"}. Relevance: ${analysis.relevance_score}/10`,
       currentProcessedDoc: i + 1,
       totalDocsToProcess: searchResultItems.length,
     })
   }
 
   await sendUpdate(writer, encoder, {
-    type: 'LOG',
-    stage: 'ANALYZING_DOCUMENTS',
-    message: 'All documents analyzed.',
+    type: "LOG",
+    stage: "ANALYZING_DOCUMENTS",
+    message: "All documents analyzed.",
     isFinalForStage: true,
     totalDocsToProcess: searchResultItems.length,
     currentProcessedDoc: searchResultItems.length,
@@ -355,29 +355,29 @@ async function synthesizeFindingsStage(
 
   if (analyzedDocs.length === 0) {
     await sendUpdate(writer, encoder, {
-      type: 'ERROR',
-      stage: 'SYNTHESIZING_FINDINGS',
-      message: 'Cannot synthesize findings - no documents were analyzed.',
+      type: "ERROR",
+      stage: "SYNTHESIZING_FINDINGS",
+      message: "Cannot synthesize findings - no documents were analyzed.",
       isFinalForStage: true,
     })
-    throw new Error('No analyzed documents for synthesis')
+    throw new Error("No analyzed documents for synthesis")
   }
 
   await sendUpdate(writer, encoder, {
-    type: 'STATUS_CHANGE',
-    stage: 'SYNTHESIZING_FINDINGS',
-    message: 'Synthesizing findings from analyzed documents...',
+    type: "STATUS_CHANGE",
+    stage: "SYNTHESIZING_FINDINGS",
+    message: "Synthesizing findings from analyzed documents...",
   })
 
   if (timeoutController.signal.aborted) {
-    throw new Error('Orchestrator timeout during findings synthesis')
+    throw new Error("Orchestrator timeout during findings synthesis")
   }
 
   const synthesis = await b.SynthesizeAllFindings(analyzedDocs, legalQuestion)
 
   await sendUpdate(writer, encoder, {
-    type: 'DATA',
-    stage: 'SYNTHESIZING_FINDINGS',
+    type: "DATA",
+    stage: "SYNTHESIZING_FINDINGS",
     data: {
       topics: synthesis.key_synthesized_topics.map(t => ({
         title: t.topic_title,
@@ -389,7 +389,7 @@ async function synthesizeFindingsStage(
       emergingQuestions: synthesis.emerging_questions || [],
       reasoningSummary: `${synthesis.reasoning.analyze_legal_question.summary?.substring(0, 150)}...`,
     },
-    message: 'Overall synthesis complete.',
+    message: "Overall synthesis complete.",
     isFinalForStage: true,
   })
 
@@ -404,13 +404,13 @@ async function assessResearchStage(
   const { writer, encoder, timeoutController, legalQuestion } = context
 
   await sendUpdate(writer, encoder, {
-    type: 'STATUS_CHANGE',
-    stage: 'ASSESSING_RESEARCH',
-    message: 'Assessing research sufficiency and planning next steps...',
+    type: "STATUS_CHANGE",
+    stage: "ASSESSING_RESEARCH",
+    message: "Assessing research sufficiency and planning next steps...",
   })
 
   if (timeoutController.signal.aborted) {
-    throw new Error('Orchestrator timeout during research assessment')
+    throw new Error("Orchestrator timeout during research assessment")
   }
 
   const assessment = await b.AssessResearchAndPlanNextSteps(
@@ -420,16 +420,16 @@ async function assessResearchStage(
   )
 
   await sendUpdate(writer, encoder, {
-    type: 'DATA',
-    stage: 'ASSESSING_RESEARCH',
+    type: "DATA",
+    stage: "ASSESSING_RESEARCH",
     data: {
       isSufficient: assessment.is_sufficient,
       assessmentSummary: assessment.assessment_summary,
       nextAction: assessment.next_action,
       identifiedGaps: assessment.identified_gaps || [],
       suggestedRefinementQueries:
-        assessment.next_action === 'REFINE_QUERIES' ||
-        assessment.next_action === 'NEW_QUERIES'
+        assessment.next_action === "REFINE_QUERIES" ||
+        assessment.next_action === "NEW_QUERIES"
           ? assessment.suggested_queries_for_refinement?.map(
               q => q.query_string
             ) || []
@@ -450,15 +450,15 @@ async function handleExecutiveSummaryStream(
 ): Promise<void> {
   if (report.executive_summary) {
     await sendUpdate(writer, encoder, {
-      type: 'DATA',
-      stage: 'GENERATING_REPORT',
+      type: "DATA",
+      stage: "GENERATING_REPORT",
       data: {
         report_title:
           finalReportAccumulator.report_title || report.report_title,
         executive_summary_chunk: report.executive_summary,
       },
-      message: 'Streaming executive summary...',
-      fieldName: 'executiveSummary',
+      message: "Streaming executive summary...",
+      fieldName: "executiveSummary",
       isFieldComplete: false,
     })
   }
@@ -475,8 +475,8 @@ async function handleSectionsStream(
     ).forEach((section, index) => {
       if (section?.content) {
         sendUpdate(writer, encoder, {
-          type: 'DATA',
-          stage: 'GENERATING_REPORT',
+          type: "DATA",
+          stage: "GENERATING_REPORT",
           data: {
             sectionUpdate: {
               index: index,
@@ -500,11 +500,11 @@ async function handleConclusionStream(
 ): Promise<void> {
   if (report.conclusion) {
     await sendUpdate(writer, encoder, {
-      type: 'DATA',
-      stage: 'GENERATING_REPORT',
+      type: "DATA",
+      stage: "GENERATING_REPORT",
       data: { conclusion_chunk: report.conclusion },
-      message: 'Streaming conclusion...',
-      fieldName: 'conclusion',
+      message: "Streaming conclusion...",
+      fieldName: "conclusion",
       isFieldComplete: false,
     })
   }
@@ -516,8 +516,8 @@ async function sendFinalReportUpdate(
   finalReportObject: FinalLegalReport
 ): Promise<void> {
   await sendUpdate(writer, encoder, {
-    type: 'DATA',
-    stage: 'GENERATING_REPORT',
+    type: "DATA",
+    stage: "GENERATING_REPORT",
     data: {
       title: finalReportObject.report_title,
       executiveSummary: finalReportObject.executive_summary,
@@ -529,7 +529,7 @@ async function sendFinalReportUpdate(
       limitations: finalReportObject.limitations_and_caveats || [],
       appendixDocIds: finalReportObject.appendix_document_ids || [],
     },
-    message: 'Final report completed.',
+    message: "Final report completed.",
     isFinalForStage: true,
   })
 }
@@ -542,7 +542,7 @@ async function handleStreamingReport(
   let finalReportAccumulator: Record<string, unknown> = {}
 
   for await (const partialReport of reportStream) {
-    if (partialReport && typeof partialReport === 'object') {
+    if (partialReport && typeof partialReport === "object") {
       finalReportAccumulator = { ...finalReportAccumulator, ...partialReport }
       const report = partialReport as unknown as Record<string, unknown>
 
@@ -576,8 +576,8 @@ async function handleNonStreamingReport(
   )
 
   await sendUpdate(writer, encoder, {
-    type: 'DATA',
-    stage: 'GENERATING_REPORT',
+    type: "DATA",
+    stage: "GENERATING_REPORT",
     data: {
       title: finalReport.report_title,
       executiveSummary: finalReport.executive_summary,
@@ -589,7 +589,7 @@ async function handleNonStreamingReport(
       limitations: finalReport.limitations_and_caveats || [],
       appendixDocIds: finalReport.appendix_document_ids || [],
     },
-    message: 'Final report generation complete (non-streaming).',
+    message: "Final report generation complete (non-streaming).",
     isFinalForStage: true,
   })
 }
@@ -602,13 +602,13 @@ async function generateReportStage(
   const { writer, encoder, timeoutController, legalQuestion } = context
 
   await sendUpdate(writer, encoder, {
-    type: 'STATUS_CHANGE',
-    stage: 'GENERATING_REPORT',
-    message: 'Generating final legal report...',
+    type: "STATUS_CHANGE",
+    stage: "GENERATING_REPORT",
+    message: "Generating final legal report...",
   })
 
   if (timeoutController.signal.aborted) {
-    throw new Error('Orchestrator timeout during report generation')
+    throw new Error("Orchestrator timeout during report generation")
   }
 
   try {
@@ -620,7 +620,7 @@ async function generateReportStage(
     await handleStreamingReport(writer, encoder, reportStream)
   } catch (streamError) {
     console.log(
-      'Streaming failed, falling back to regular generation:',
+      "Streaming failed, falling back to regular generation:",
       streamError
     )
     await handleNonStreamingReport(
@@ -652,16 +652,16 @@ async function executePipeline(
     synthesis
   )
 
-  if (assessment.next_action === 'GENERATE_REPORT') {
+  if (assessment.next_action === "GENERATE_REPORT") {
     await generateReportStage(context, synthesis, queryAnalysis)
   } else {
     const stage =
-      assessment.next_action === 'REQUEST_HUMAN_REVIEW'
-        ? 'HUMAN_REVIEW_REQUESTED'
-        : 'ITERATION_PAUSED'
+      assessment.next_action === "REQUEST_HUMAN_REVIEW"
+        ? "HUMAN_REVIEW_REQUESTED"
+        : "ITERATION_PAUSED"
 
     await sendUpdate(writer, encoder, {
-      type: 'STATUS_CHANGE',
+      type: "STATUS_CHANGE",
       stage,
       message: autoModeConfig?.isEnabled
         ? `Auto mode: Max iterations (${autoModeConfig.maxIterations}) reached. Manual review required.`
@@ -671,9 +671,9 @@ async function executePipeline(
   }
 
   await sendUpdate(writer, encoder, {
-    type: 'STATUS_CHANGE',
-    stage: 'COMPLETED',
-    message: 'Research process successfully completed.',
+    type: "STATUS_CHANGE",
+    stage: "COMPLETED",
+    message: "Research process successfully completed.",
   })
 }
 
@@ -700,28 +700,28 @@ export async function conductResearch(
     try {
       if (timeoutController.signal.aborted) {
         throw new Error(
-          'Orchestrator timeout: Process exceeded maximum time limit'
+          "Orchestrator timeout: Process exceeded maximum time limit"
         )
       }
 
       await sendUpdate(writer, encoder, {
-        type: 'STATUS_CHANGE',
-        stage: 'INITIALIZING',
-        message: 'Research process initializing...',
+        type: "STATUS_CHANGE",
+        stage: "INITIALIZING",
+        message: "Research process initializing...",
       })
 
       await executePipeline(context, autoModeConfig)
     } catch (error: unknown) {
       const isTimeoutError =
-        error instanceof Error && error.message.includes('timeout')
+        error instanceof Error && error.message.includes("timeout")
       const errorMessage =
         error instanceof Error
           ? error.message
-          : 'An unknown orchestrator error occurred.'
+          : "An unknown orchestrator error occurred."
 
       await sendUpdate(writer, encoder, {
-        type: 'ERROR',
-        stage: 'INITIALIZING',
+        type: "ERROR",
+        stage: "INITIALIZING",
         message: isTimeoutError
           ? `${errorMessage} The operation took longer than expected.`
           : errorMessage,

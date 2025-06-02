@@ -1,13 +1,13 @@
-'use client'
+"use client"
 
-import { useAtomValue, useSetAtom } from 'jotai'
-import { useCallback, useState } from 'react'
+import { useAtomValue, useSetAtom } from "jotai"
+import { useCallback, useState } from "react"
 
-import { conductResearch } from '@/app/actions/researchAgentOrchestrator'
+import { conductResearch } from "@/app/actions/researchAgentOrchestrator"
 import type {
   ResearchStage,
   ResearchUpdate,
-} from '@/app/actions/researchAgentOrchestrator'
+} from "@/app/actions/researchAgentOrchestrator"
 import {
   analyzedDocsSummaryAtom,
   autoModeStateAtom,
@@ -19,14 +19,14 @@ import {
   researchStatusAtom,
   resetResearchStateAtom,
   synthesisDetailsAtom,
-} from '@/lib/state/researchAtoms'
+} from "@/lib/state/researchAtoms"
 import type {
   ClientAnalyzedDoc,
   ClientFinalReport,
   ClientResearchAssessment,
   ClientSynthesis,
   ResearchStatus,
-} from '@/lib/state/researchAtoms'
+} from "@/lib/state/researchAtoms"
 
 interface QueryData {
   query_string: string
@@ -119,10 +119,10 @@ export function useResearchAgent(): UseResearchAgentReturn {
       }))
 
       setResearchStatus({
-        stage: 'INITIALIZING',
+        stage: "INITIALIZING",
         isLoading: true,
         error: null,
-        message: 'Initializing research...',
+        message: "Initializing research...",
         currentProcessedDoc: 0,
         totalDocsToProcess: 0,
         isPaused: false,
@@ -130,8 +130,8 @@ export function useResearchAgent(): UseResearchAgentReturn {
       })
 
       logResearchEvent(
-        'INITIALIZING',
-        'INFO',
+        "INITIALIZING",
+        "INFO",
         `Research process initiated for: "${legalQuestion}"`
       )
     },
@@ -147,12 +147,12 @@ export function useResearchAgent(): UseResearchAgentReturn {
   // Helper function to determine status flags
   const getStatusFlags = useCallback(
     (update: ResearchUpdate) => ({
-      isPaused: update.stage === 'ITERATION_PAUSED',
+      isPaused: update.stage === "ITERATION_PAUSED",
       canResume:
-        update.stage === 'ITERATION_PAUSED' ||
-        (update.stage === 'ASSESSING_RESEARCH' && !autoModeState.isEnabled),
+        update.stage === "ITERATION_PAUSED" ||
+        (update.stage === "ASSESSING_RESEARCH" && !autoModeState.isEnabled),
       error:
-        update.type === 'ERROR' ? update.message || 'An error occurred' : null,
+        update.type === "ERROR" ? update.message || "An error occurred" : null,
     }),
     [autoModeState.isEnabled]
   )
@@ -223,8 +223,8 @@ export function useResearchAgent(): UseResearchAgentReturn {
     (update: ResearchUpdate) => {
       if (
         update.data &&
-        typeof update.data === 'object' &&
-        'document_id' in update.data
+        typeof update.data === "object" &&
+        "document_id" in update.data
       ) {
         const docData = update.data as unknown as ClientAnalyzedDoc
         const timestamp = new Date().toISOString()
@@ -251,8 +251,8 @@ export function useResearchAgent(): UseResearchAgentReturn {
     (update: ResearchUpdate) => {
       if (
         update.data &&
-        typeof update.data === 'object' &&
-        'topics' in update.data
+        typeof update.data === "object" &&
+        "topics" in update.data
       ) {
         const synthesisData = update.data as ClientSynthesis
         const timestamp = new Date().toISOString()
@@ -282,7 +282,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
   // Helper function to handle assessment updates
   const handleAssessmentUpdate = useCallback(
     (update: ResearchUpdate) => {
-      if (update.data && typeof update.data === 'object') {
+      if (update.data && typeof update.data === "object") {
         setResearchAssessment(update.data as ClientResearchAssessment)
       }
     },
@@ -304,7 +304,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
     (reportData: ReportData, newReport: ClientFinalReport) => {
       if (reportData.executive_summary_chunk) {
         newReport.executiveSummary =
-          (newReport.executiveSummary || '') +
+          (newReport.executiveSummary || "") +
           reportData.executive_summary_chunk
       }
       if (reportData.executiveSummary) {
@@ -317,7 +317,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
   // Helper function to update existing section
   const updateExistingSection = useCallback(
     (
-      sections: ClientFinalReport['sections'],
+      sections: ClientFinalReport["sections"],
       existingIndex: number,
       contentChunk: string
     ) => {
@@ -335,7 +335,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
   // Helper function to add new section
   const addNewSection = useCallback(
     (
-      sections: ClientFinalReport['sections'],
+      sections: ClientFinalReport["sections"],
       title: string,
       contentChunk: string
     ) => {
@@ -387,7 +387,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
     (reportData: ReportData, newReport: ClientFinalReport) => {
       if (reportData.conclusion_chunk) {
         newReport.conclusion =
-          (newReport.conclusion || '') + reportData.conclusion_chunk
+          (newReport.conclusion || "") + reportData.conclusion_chunk
       }
       if (reportData.conclusion) {
         newReport.conclusion = reportData.conclusion
@@ -430,27 +430,27 @@ export function useResearchAgent(): UseResearchAgentReturn {
   // Helper function to process individual stream updates
   const processStreamUpdate = useCallback(
     (update: ResearchUpdate) => {
-      logResearchEvent(update.stage, update.type, update.message || '')
+      logResearchEvent(update.stage, update.type, update.message || "")
       updateResearchStatus(update)
 
       switch (update.stage) {
-        case 'GENERATING_QUERIES': {
+        case "GENERATING_QUERIES": {
           handleQueryGenerationUpdate(update)
           break
         }
-        case 'ANALYZING_DOCUMENTS': {
+        case "ANALYZING_DOCUMENTS": {
           handleDocumentAnalysisUpdate(update)
           break
         }
-        case 'SYNTHESIZING_FINDINGS': {
+        case "SYNTHESIZING_FINDINGS": {
           handleSynthesisUpdate(update)
           break
         }
-        case 'ASSESSING_RESEARCH': {
+        case "ASSESSING_RESEARCH": {
           handleAssessmentUpdate(update)
           break
         }
-        case 'GENERATING_REPORT': {
+        case "GENERATING_REPORT": {
           if (update.data) {
             handleReportUpdate(update)
           }
@@ -479,15 +479,15 @@ export function useResearchAgent(): UseResearchAgentReturn {
       setResearchStatus((prev: ResearchStatus) => ({
         ...prev,
         isLoading: false,
-        stage: prev.error ? 'IDLE' : prev.stage || 'IDLE',
+        stage: prev.error ? "IDLE" : prev.stage || "IDLE",
         message: prev.error
-          ? prev.message || 'Research failed.'
-          : prev.message || 'Research process completed.',
+          ? prev.message || "Research failed."
+          : prev.message || "Research process completed.",
         isPaused: false,
         canResume: false,
       }))
 
-      logResearchEvent('COMPLETED', 'INFO', 'Stream ended.')
+      logResearchEvent("COMPLETED", "INFO", "Stream ended.")
       setAbortController(null)
     },
     [setResearchStatus, logResearchEvent]
@@ -500,13 +500,13 @@ export function useResearchAgent(): UseResearchAgentReturn {
         ...prev,
         isLoading: false,
         error: error.message,
-        stage: 'ERROR',
+        stage: "ERROR",
         message: `Research failed: ${error.message}`,
         isPaused: false,
         canResume: false,
       }))
 
-      logResearchEvent('ERROR', 'ERROR', `Research failed: ${error.message}`)
+      logResearchEvent("ERROR", "ERROR", `Research failed: ${error.message}`)
       setAbortController(null)
     },
     [setResearchStatus, logResearchEvent]
@@ -524,9 +524,9 @@ export function useResearchAgent(): UseResearchAgentReturn {
         processStreamUpdate(update)
       } catch (parseError) {
         console.error(
-          'Failed to parse update:',
+          "Failed to parse update:",
           parseError,
-          'Raw update:',
+          "Raw update:",
           stringUpdate
         )
       }
@@ -537,7 +537,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
   // Helper function to process stream value
   const processStreamValue = useCallback(
     (value: string, controller: AbortController) => {
-      const stringUpdates = value.split('\n').filter(s => s.trim() !== '')
+      const stringUpdates = value.split("\n").filter(s => s.trim() !== "")
 
       for (const stringUpdate of stringUpdates) {
         processSingleUpdate(stringUpdate, controller)
@@ -555,7 +555,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
       const { value, done } = await reader.read()
 
       if (controller.signal.aborted) {
-        console.log('Stream reading aborted by AbortController.')
+        console.log("Stream reading aborted by AbortController.")
         return { shouldBreak: true }
       }
 
@@ -590,7 +590,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
           }
         } catch (error) {
           if (controller.signal.aborted) {
-            console.log('Stream reading was aborted.')
+            console.log("Stream reading was aborted.")
             break
           }
           throw error
@@ -620,11 +620,11 @@ export function useResearchAgent(): UseResearchAgentReturn {
         await processResearchStream(stream, controller)
       } catch (error) {
         if (controller.signal.aborted) {
-          console.log('Research was aborted.')
+          console.log("Research was aborted.")
           return
         }
         handleStreamError(
-          error instanceof Error ? error : new Error('Unknown error occurred')
+          error instanceof Error ? error : new Error("Unknown error occurred")
         )
       }
     },
@@ -644,7 +644,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
   const resumeResearch = useCallback(async () => {
     if (!researchStatus.canResume || !autoModeState.originalQuestion) {
       console.error(
-        'Cannot resume research: not in resumable state or missing original question'
+        "Cannot resume research: not in resumable state or missing original question"
       )
       return
     }
@@ -653,11 +653,11 @@ export function useResearchAgent(): UseResearchAgentReturn {
       ...prev,
       isPaused: false,
       isLoading: true,
-      stage: 'INITIALIZING',
-      message: 'Resuming research...',
+      stage: "INITIALIZING",
+      message: "Resuming research...",
     }))
 
-    logResearchEvent('RESUMING', 'INFO', 'Research process resumed')
+    logResearchEvent("RESUMING", "INFO", "Research process resumed")
 
     const controller = new AbortController()
     setAbortController(controller)
@@ -672,11 +672,11 @@ export function useResearchAgent(): UseResearchAgentReturn {
       await processResearchStream(stream, controller)
     } catch (error) {
       if (controller.signal.aborted) {
-        console.log('Resumed research was aborted.')
+        console.log("Resumed research was aborted.")
         return
       }
       handleStreamError(
-        error instanceof Error ? error : new Error('Unknown error occurred')
+        error instanceof Error ? error : new Error("Unknown error occurred")
       )
     }
   }, [
@@ -704,11 +704,11 @@ export function useResearchAgent(): UseResearchAgentReturn {
       isPaused: true,
       isLoading: false,
       canResume: true,
-      stage: 'ITERATION_PAUSED',
-      message: 'Research paused by user',
+      stage: "ITERATION_PAUSED",
+      message: "Research paused by user",
     }))
 
-    logResearchEvent('PAUSED', 'INFO', 'Research process paused by user')
+    logResearchEvent("PAUSED", "INFO", "Research process paused by user")
     setAbortController(null)
   }, [abortController, setResearchStatus, logResearchEvent])
 
@@ -725,11 +725,11 @@ export function useResearchAgent(): UseResearchAgentReturn {
       isLoading: false,
       isPaused: false,
       canResume: false,
-      stage: 'IDLE',
-      message: 'Research aborted by user',
+      stage: "IDLE",
+      message: "Research aborted by user",
     }))
 
-    logResearchEvent('ABORTED', 'INFO', 'Research process aborted by user')
+    logResearchEvent("ABORTED", "INFO", "Research process aborted by user")
     setAbortController(null)
   }, [abortController, setResearchStatus, logResearchEvent])
 

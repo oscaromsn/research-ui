@@ -1,10 +1,10 @@
-'use client'
+"use client"
 
 import {
   CollapsibleContent as Content,
   Root,
   CollapsibleTrigger as Trigger,
-} from '@radix-ui/react-collapsible'
+} from "@radix-ui/react-collapsible"
 
 function Collapsible({ ...props }: React.ComponentProps<typeof Root>) {
   return <Root data-slot="collapsible" {...props} />

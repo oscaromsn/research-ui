@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import { useAtomValue } from 'jotai'
+import { useAtomValue } from "jotai"
 import {
   AlertTriangle,
   Brain,
@@ -9,22 +9,22 @@ import {
   FileText,
   Pause,
   Play,
-} from 'lucide-react'
-import { useState } from 'react'
+} from "lucide-react"
+import { useState } from "react"
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/components/ui/collapsible'
-import { Switch } from '@/components/ui/switch'
-import { useResearchAgent } from '@/lib/hooks/useResearchAgent'
+} from "@/components/ui/collapsible"
+import { Switch } from "@/components/ui/switch"
+import { useResearchAgent } from "@/lib/hooks/useResearchAgent"
 import {
   generatedQueriesAtom,
   researchAssessmentAtom,
   researchLogAtom,
   researchSessionAtom,
-} from '@/lib/state/researchAtoms'
+} from "@/lib/state/researchAtoms"
 
 interface ResearchLogSectionProps {
   researchLogs: string[]
@@ -57,7 +57,7 @@ function ResearchLogSection({ researchLogs }: ResearchLogSectionProps) {
             <ChevronDown
               size={16}
               className={`transform text-[#64748b] transition-transform dark:text-[#94a3b8] ${
-                isLogExpanded ? 'rotate-180' : ''
+                isLogExpanded ? "rotate-180" : ""
               }`}
             />
           </button>
@@ -66,7 +66,7 @@ function ResearchLogSection({ researchLogs }: ResearchLogSectionProps) {
           <div className="mt-2 rounded-lg border border-[#e1e5eb] bg-white p-3 dark:border-[#2a3148] dark:bg-[#1e2436]">
             <div className="h-32 overflow-y-auto">
               <pre className="whitespace-pre-wrap text-[#4a5568] text-xs dark:text-[#a0aec0]">
-                {researchLogs.join('\n')}
+                {researchLogs.join("\n")}
               </pre>
             </div>
           </div>
@@ -198,7 +198,7 @@ function ResearchControlButtons({
     return (
       <div className="space-y-2">
         <div className="rounded-md bg-[#e2e8f0] px-3 py-2 text-[#4a5568] text-sm dark:bg-[#2a3148] dark:text-[#a0aec0]">
-          {agent.autoModeEnabled && 'Auto Mode: '}Processing:{' '}
+          {agent.autoModeEnabled && "Auto Mode: "}Processing:{" "}
           {agent.currentStage}
           {agent.currentMessage && ` - ${agent.currentMessage}`}
         </div>
@@ -252,7 +252,7 @@ function GeneratedQueriesSection({
     <div className="mb-6">
       <div className="mb-2 flex items-center justify-between">
         <h3 className="font-medium text-[#4a5568] text-sm dark:text-[#a0aec0]">
-          Generated Search Queries{' '}
+          Generated Search Queries{" "}
           {totalQueries > 0 && `(${totalQueries} total)`}
         </h3>
         <ChevronRight size={16} className="text-[#a0aec0]" />
@@ -269,8 +269,8 @@ function GeneratedQueriesSection({
             {query.timestamp && (
               <div className="ml-2 text-[#64748b] text-xs dark:text-[#94a3b8]">
                 {new Date(query.timestamp).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
+                  hour: "2-digit",
+                  minute: "2-digit",
                 })}
               </div>
             )}
@@ -319,29 +319,29 @@ function AssessmentSection({ assessment }: AssessmentSectionProps) {
             <AlertTriangle
               size={16}
               className={`mt-0.5 mr-2 flex-shrink-0 ${
-                assessment.isSufficient ? 'text-green-500' : 'text-[#eab308]'
+                assessment.isSufficient ? "text-green-500" : "text-[#eab308]"
               }`}
             />
             <div className="flex-1">
               <h3 className="text-left font-medium text-sm">
-                Agent Assessment{' '}
+                Agent Assessment{" "}
                 <span
                   className={
                     assessment.isSufficient
-                      ? 'text-green-500'
-                      : 'text-[#eab308]'
+                      ? "text-green-500"
+                      : "text-[#eab308]"
                   }
                 >
                   {assessment.isSufficient
-                    ? 'Research Sufficient ✓'
-                    : 'Further Action Needed ⚠️'}
+                    ? "Research Sufficient ✓"
+                    : "Further Action Needed ⚠️"}
                 </span>
               </h3>
             </div>
             <ChevronDown
               size={16}
               className={`transform text-[#64748b] transition-transform dark:text-[#94a3b8] ${
-                isAssessmentExpanded ? 'rotate-180' : ''
+                isAssessmentExpanded ? "rotate-180" : ""
               }`}
             />
           </div>
@@ -409,7 +409,7 @@ function AssessmentDetails({ assessment }: AssessmentDetailsProps) {
 
         <div>
           <h4 className="mb-2 font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
-            Next Action: {assessment.nextAction.replace(/_/g, ' ')}
+            Next Action: {assessment.nextAction.replace(/_/g, " ")}
           </h4>
         </div>
 
@@ -428,7 +428,7 @@ function AssessmentDetails({ assessment }: AssessmentDetailsProps) {
 }
 
 export function GuidanceStrategy() {
-  const [legalQuestion, setLegalQuestion] = useState('')
+  const [legalQuestion, setLegalQuestion] = useState("")
   const agent = useResearchAgent()
   const generatedQueries = useAtomValue(generatedQueriesAtom)
   const researchLogs = useAtomValue(researchLogAtom)

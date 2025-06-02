@@ -11,7 +11,7 @@ bun typecheck:strict
 
 # Auto-fix linting issues and ensure code quality
 echo "🔍 Auto-fixing linting issues..."
-bun lint:fix
+bun check
 
 # Run fast unit tests to ensure core functionality works
 echo "🧪 Running unit tests..."

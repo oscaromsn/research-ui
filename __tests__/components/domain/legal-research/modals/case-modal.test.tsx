@@ -1,12 +1,12 @@
-import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import { describe, expect, it, vi } from "vitest"
 
-import { CaseModal } from '@/components/domain/legal-research/modals/case-modal'
-import type { ClientAnalyzedDoc } from '@/lib/state/researchAtoms'
+import { CaseModal } from "@/components/domain/legal-research/modals/case-modal"
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms"
 
 // Mock the Modal component
-vi.mock('@/components/ui/modal', () => ({
+vi.mock("@/components/ui/modal", () => ({
   Modal: ({
     isOpen,
     onClose,
@@ -37,38 +37,38 @@ vi.mock('@/components/ui/modal', () => ({
   },
 }))
 
-describe('CaseModal Component', () => {
+describe("CaseModal Component", () => {
   const mockDocumentData: ClientAnalyzedDoc = {
-    docId: 'doc-123',
-    title: 'Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)',
-    url: 'https://westlaw.com/doc/123',
+    docId: "doc-123",
+    title: "Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)",
+    url: "https://westlaw.com/doc/123",
     relevanceScore: 8.5,
     confidenceScore: 0.9,
     summarySnippet:
-      'This case discusses force majeure clauses in contracts during the pandemic.',
+      "This case discusses force majeure clauses in contracts during the pandemic.",
     keyArguments: [
-      'Force majeure clauses must explicitly mention pandemic-related events',
-      'Government mandates may constitute qualifying events',
-      'Mere economic hardship insufficient for impossibility defense',
+      "Force majeure clauses must explicitly mention pandemic-related events",
+      "Government mandates may constitute qualifying events",
+      "Mere economic hardship insufficient for impossibility defense",
     ],
     extractedEntities: [
       {
-        name: 'N.D. Cal.',
-        type: 'Jurisdiction',
-        details: 'Northern District of California',
+        name: "N.D. Cal.",
+        type: "Jurisdiction",
+        details: "Northern District of California",
       },
-      { name: 'Smith v. Jones', type: 'Case', details: 'Legal case' },
+      { name: "Smith v. Jones", type: "Case", details: "Legal case" },
     ],
     extractedQuotes: [
-      'The court held that force majeure clauses must be interpreted narrowly.',
-      'Economic hardship alone does not trigger impossibility doctrine.',
+      "The court held that force majeure clauses must be interpreted narrowly.",
+      "Economic hardship alone does not trigger impossibility doctrine.",
     ],
     fullText:
-      'The court, in considering the application of force majeure provisions in the context of the COVID-19 pandemic, held that such clauses must be interpreted narrowly and in accordance with their explicit terms. Furthermore, the mere existence of economic hardship, without more, does not trigger the doctrine of impossibility.',
-    timestamp: '2023-11-15T10:30:00Z',
+      "The court, in considering the application of force majeure provisions in the context of the COVID-19 pandemic, held that such clauses must be interpreted narrowly and in accordance with their explicit terms. Furthermore, the mere existence of economic hardship, without more, does not trigger the doctrine of impossibility.",
+    timestamp: "2023-11-15T10:30:00Z",
   }
 
-  it('renders when isOpen is true', () => {
+  it("renders when isOpen is true", () => {
     render(
       <CaseModal
         isOpen={true}
@@ -78,21 +78,21 @@ describe('CaseModal Component', () => {
     )
 
     // Check title is passed to Modal
-    expect(screen.getByTestId('modal-title')).toHaveTextContent(
-      mockDocumentData.title || ''
+    expect(screen.getByTestId("modal-title")).toHaveTextContent(
+      mockDocumentData.title || ""
     )
 
     // Check content is rendered
-    const content = screen.getByTestId('modal-content')
+    const content = screen.getByTestId("modal-content")
     expect(content).toBeInTheDocument()
 
     // Check if document metadata is rendered
-    expect(content).toHaveTextContent('Case') // Document type
-    expect(content).toHaveTextContent('N.D. Cal.') // Jurisdiction
-    expect(content).toHaveTextContent('Relevance: 85%') // Relevance score
+    expect(content).toHaveTextContent("Case") // Document type
+    expect(content).toHaveTextContent("N.D. Cal.") // Jurisdiction
+    expect(content).toHaveTextContent("Relevance: 85%") // Relevance score
   })
 
-  it('does not render when isOpen is false', () => {
+  it("does not render when isOpen is false", () => {
     render(
       <CaseModal
         isOpen={false}
@@ -102,10 +102,10 @@ describe('CaseModal Component', () => {
     )
 
     // Modal shouldn't render anything when closed
-    expect(screen.queryByTestId('modal-container')).not.toBeInTheDocument()
+    expect(screen.queryByTestId("modal-container")).not.toBeInTheDocument()
   })
 
-  it('calls onClose when close button is clicked', async () => {
+  it("calls onClose when close button is clicked", async () => {
     const onCloseMock = vi.fn()
 
     render(
@@ -117,13 +117,13 @@ describe('CaseModal Component', () => {
     )
 
     // Click the close button
-    await userEvent.click(screen.getByTestId('modal-close-button'))
+    await userEvent.click(screen.getByTestId("modal-close-button"))
 
     // Check that onClose was called
     expect(onCloseMock).toHaveBeenCalledTimes(1)
   })
 
-  it('renders all document content sections', () => {
+  it("renders all document content sections", () => {
     render(
       <CaseModal
         isOpen={true}
@@ -133,22 +133,22 @@ describe('CaseModal Component', () => {
     )
 
     // Check main sections that should be rendered with data
-    expect(screen.getByText('Key Arguments & Reasoning')).toBeInTheDocument()
-    expect(screen.getByText('Key Quotes')).toBeInTheDocument()
-    expect(screen.getByText('Summary')).toBeInTheDocument()
+    expect(screen.getByText("Key Arguments & Reasoning")).toBeInTheDocument()
+    expect(screen.getByText("Key Quotes")).toBeInTheDocument()
+    expect(screen.getByText("Summary")).toBeInTheDocument()
 
     // Check key arguments
     expect(
       screen.getByText(
-        'Force majeure clauses must explicitly mention pandemic-related events'
+        "Force majeure clauses must explicitly mention pandemic-related events"
       )
     ).toBeInTheDocument()
     expect(
-      screen.getByText('Government mandates may constitute qualifying events')
+      screen.getByText("Government mandates may constitute qualifying events")
     ).toBeInTheDocument()
     expect(
       screen.getByText(
-        'Mere economic hardship insufficient for impossibility defense'
+        "Mere economic hardship insufficient for impossibility defense"
       )
     ).toBeInTheDocument()
 
@@ -172,14 +172,14 @@ describe('CaseModal Component', () => {
     ).toBeInTheDocument()
 
     // Check action button - original source link
-    expect(screen.getByText('View Original Source')).toBeInTheDocument()
+    expect(screen.getByText("View Original Source")).toBeInTheDocument()
   })
 
-  it('handles incomplete documentData gracefully', () => {
+  it("handles incomplete documentData gracefully", () => {
     // Render with minimal documentData
     const minimalData: ClientAnalyzedDoc = {
-      docId: 'minimal-123',
-      title: 'Minimal Case',
+      docId: "minimal-123",
+      title: "Minimal Case",
     }
 
     render(
@@ -187,13 +187,13 @@ describe('CaseModal Component', () => {
     )
 
     // Title should be displayed
-    expect(screen.getByTestId('modal-title')).toHaveTextContent('Minimal Case')
+    expect(screen.getByTestId("modal-title")).toHaveTextContent("Minimal Case")
 
     // Should show default values for missing data
-    const content = screen.getByTestId('modal-content')
+    const content = screen.getByTestId("modal-content")
     expect(content).toBeInTheDocument()
-    expect(content).toHaveTextContent('Case') // Document type for "Minimal Case" (contains "case")
-    expect(content).toHaveTextContent('Jurisdiction not specified')
-    expect(content).toHaveTextContent('Date not available')
+    expect(content).toHaveTextContent("Case") // Document type for "Minimal Case" (contains "case")
+    expect(content).toHaveTextContent("Jurisdiction not specified")
+    expect(content).toHaveTextContent("Date not available")
   })
 })

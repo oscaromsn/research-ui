@@ -1,8 +1,8 @@
 // lib/state/researchAtoms.ts
 
-import { atom } from 'jotai'
+import { atom } from "jotai"
 
-import type { ResearchStage } from '@/app/actions/researchAgentOrchestrator'
+import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator"
 
 // --- Client-Friendly Data Structures ---
 
@@ -24,13 +24,13 @@ export interface ClientSearchQuery {
 export interface ClientLegalEntity {
   name: string
   type:
-    | 'Case'
-    | 'Statute'
-    | 'Regulation'
-    | 'Person'
-    | 'Organization'
-    | 'LegalConcept'
-    | 'Jurisdiction'
+    | "Case"
+    | "Statute"
+    | "Regulation"
+    | "Person"
+    | "Organization"
+    | "LegalConcept"
+    | "Jurisdiction"
   details?: string
 }
 
@@ -116,11 +116,11 @@ export interface ClientResearchAssessment {
   assessmentSummary: string // Potentially streaming
   identifiedGaps?: string[]
   nextAction:
-    | 'REFINE_QUERIES'
-    | 'NEW_QUERIES'
-    | 'DEEPER_ANALYSIS_OF_EXISTING_DOCS'
-    | 'GENERATE_REPORT'
-    | 'REQUEST_HUMAN_REVIEW'
+    | "REFINE_QUERIES"
+    | "NEW_QUERIES"
+    | "DEEPER_ANALYSIS_OF_EXISTING_DOCS"
+    | "GENERATE_REPORT"
+    | "REQUEST_HUMAN_REVIEW"
   suggestedRefinementQueries?: ClientSearchQuery[]
   documentIdsForDeeperAnalysis?: string[]
   reasoningSummary?: string // Summarized version for UI display
@@ -157,10 +157,10 @@ export interface AutoModeState {
 
 // FR3.1.1: researchStatusAtom
 export const researchStatusAtom = atom<ResearchStatus>({
-  stage: 'IDLE', // Initial stage
+  stage: "IDLE", // Initial stage
   isLoading: false,
   error: null,
-  message: 'Ready to start research.',
+  message: "Ready to start research.",
   currentProcessedDoc: 0,
   totalDocsToProcess: 0,
   currentStreamingField: null,
@@ -181,15 +181,15 @@ export const synthesisDetailsAtom = atom<ClientSynthesis>({
   topics: [],
   unansweredAspects: [],
   emergingQuestions: [],
-  reasoningSummary: '',
+  reasoningSummary: "",
 })
 
 // FR3.1.6: finalReportContentAtom
 export const finalReportContentAtom = atom<ClientFinalReport>({
-  title: '',
-  executiveSummary: '',
+  title: "",
+  executiveSummary: "",
   sections: [],
-  conclusion: '',
+  conclusion: "",
   limitations: [],
   appendixDocIds: [],
 })
@@ -204,7 +204,7 @@ export const autoModeStateAtom = atom<AutoModeState>({
   isEnabled: false,
   maxIterations: 3, // Default maximum iterations
   currentIteration: 0,
-  originalQuestion: '',
+  originalQuestion: "",
 })
 
 // Research session state for pause/resume functionality
@@ -268,10 +268,10 @@ export const selectedAnalyzedDocIdAtom = atom<string | null>(null)
  */
 export const resetResearchStateAtom = atom(null, (get, set, _value) => {
   set(researchStatusAtom, {
-    stage: 'IDLE',
+    stage: "IDLE",
     isLoading: false,
     error: null,
-    message: 'Ready.',
+    message: "Ready.",
     currentProcessedDoc: 0,
     totalDocsToProcess: 0,
     currentStreamingField: null,
@@ -285,13 +285,13 @@ export const resetResearchStateAtom = atom(null, (get, set, _value) => {
     topics: [],
     unansweredAspects: [],
     emergingQuestions: [],
-    reasoningSummary: '',
+    reasoningSummary: "",
   })
   set(finalReportContentAtom, {
-    title: '',
-    executiveSummary: '',
+    title: "",
+    executiveSummary: "",
     sections: [],
-    conclusion: '',
+    conclusion: "",
     limitations: [],
     appendixDocIds: [],
   })
@@ -303,7 +303,7 @@ export const resetResearchStateAtom = atom(null, (get, set, _value) => {
   set(autoModeStateAtom, {
     ...currentAutoMode,
     currentIteration: 0,
-    originalQuestion: '',
+    originalQuestion: "",
   })
 
   // Reset research session

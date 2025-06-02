@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from "zod"
 
 /**
  * Server-side environment variables schema
@@ -9,7 +9,7 @@ import { z } from 'zod'
  */
 const serverEnvSchema = z.object({
   // Node environment
-  NODE_ENV: z.enum(['development', 'test', 'production']),
+  NODE_ENV: z.enum(["development", "test", "production"]),
 
   // Add your required server environment variables here
   // DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
@@ -37,18 +37,18 @@ function validateEnv() {
 
   if (!serverEnv.success) {
     console.error(
-      '❌ Invalid server environment variables:',
+      "❌ Invalid server environment variables:",
       JSON.stringify(serverEnv.error.format(), null, 2)
     )
-    throw new Error('Invalid server environment variables')
+    throw new Error("Invalid server environment variables")
   }
 
   if (!clientEnv.success) {
     console.error(
-      '❌ Invalid client environment variables:',
+      "❌ Invalid client environment variables:",
       JSON.stringify(clientEnv.error.format(), null, 2)
     )
-    throw new Error('Invalid client environment variables')
+    throw new Error("Invalid client environment variables")
   }
 
   return {

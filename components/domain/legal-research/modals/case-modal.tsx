@@ -1,7 +1,7 @@
-import { BookOpen, Brain, Link, Scale } from 'lucide-react'
+import { BookOpen, Brain, Link, Scale } from "lucide-react"
 
-import { Modal } from '@/components/ui/modal'
-import type { ClientAnalyzedDoc } from '@/lib/state/researchAtoms'
+import { Modal } from "@/components/ui/modal"
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms"
 
 interface CaseModalProps {
   isOpen: boolean
@@ -17,7 +17,7 @@ export function CaseModal({
 }: CaseModalProps) {
   const formatDate = (dateString?: string) => {
     if (!dateString) {
-      return 'Date not available'
+      return "Date not available"
     }
     try {
       return new Date(dateString).toLocaleDateString()
@@ -28,33 +28,33 @@ export function CaseModal({
 
   const getDocumentType = (title?: string) => {
     if (!title) {
-      return 'Document'
+      return "Document"
     }
     const titleLower = title.toLowerCase()
-    if (titleLower.includes('case') || titleLower.includes('v.')) {
-      return 'Case'
+    if (titleLower.includes("case") || titleLower.includes("v.")) {
+      return "Case"
     }
-    if (titleLower.includes('statute')) {
-      return 'Statute'
+    if (titleLower.includes("statute")) {
+      return "Statute"
     }
-    if (titleLower.includes('regulation')) {
-      return 'Regulation'
+    if (titleLower.includes("regulation")) {
+      return "Regulation"
     }
-    return 'Document'
+    return "Document"
   }
 
   const getJurisdiction = () => {
     const jurisdictionEntity = documentData?.extractedEntities?.find(
-      entity => entity.type === 'Jurisdiction'
+      entity => entity.type === "Jurisdiction"
     )
-    return jurisdictionEntity?.name || 'Jurisdiction not specified'
+    return jurisdictionEntity?.name || "Jurisdiction not specified"
   }
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={documentData?.title || 'Document Details'}
+      title={documentData?.title || "Document Details"}
       size="xl"
     >
       <div className="space-y-6">
@@ -110,7 +110,7 @@ export function CaseModal({
           {(documentData?.summarySnippet || documentData?.fullText) && (
             <div>
               <h4 className="mb-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
-                {documentData?.summarySnippet ? 'Summary' : 'Full Text'}
+                {documentData?.summarySnippet ? "Summary" : "Full Text"}
               </h4>
               <div className="max-h-96 space-y-4 overflow-y-auto text-[#4a5568] text-sm dark:text-[#a0aec0]">
                 <p className="whitespace-pre-line">

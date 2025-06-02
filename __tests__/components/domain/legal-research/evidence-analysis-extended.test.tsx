@@ -1,25 +1,25 @@
 /// <reference types="../../../../types/test-globals" />
 
-import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { Provider, createStore } from 'jotai'
-import type React from 'react'
-import type { ReactNode } from 'react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import { Provider, createStore } from "jotai"
+import type React from "react"
+import type { ReactNode } from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { EvidenceAnalysis } from '@/components/domain/legal-research/evidence-analysis'
+import { EvidenceAnalysis } from "@/components/domain/legal-research/evidence-analysis"
 import type {
   ClientAnalysisReasoning,
   ClientAnalyzedDoc,
   ClientLegalEntity,
-} from '@/lib/state/researchAtoms'
+} from "@/lib/state/researchAtoms"
 import {
   analyzedDocsSummaryAtom,
   selectedAnalyzedDocIdAtom,
-} from '@/lib/state/researchAtoms'
+} from "@/lib/state/researchAtoms"
 
 // Mock the CaseModal component
-vi.mock('@/components/domain/legal-research/modals/case-modal', () => ({
+vi.mock("@/components/domain/legal-research/modals/case-modal", () => ({
   CaseModal: ({
     isOpen,
     onClose,
@@ -40,8 +40,8 @@ vi.mock('@/components/domain/legal-research/modals/case-modal', () => ({
     return (
       <div data-testid="case-modal">
         <h3>Case Details</h3>
-        <p>Title: {caseData?.title || 'No title'}</p>
-        <p>Source: {caseData?.source || 'No source'}</p>
+        <p>Title: {caseData?.title || "No title"}</p>
+        <p>Source: {caseData?.source || "No source"}</p>
         <button type="button" onClick={onClose} aria-label="close">
           Close
         </button>
@@ -52,7 +52,7 @@ vi.mock('@/components/domain/legal-research/modals/case-modal', () => ({
 
 // Mock the AnalysisReasoningModal component
 vi.mock(
-  '@/components/domain/legal-research/modals/analysis-reasoning-modal',
+  "@/components/domain/legal-research/modals/analysis-reasoning-modal",
   () => ({
     AnalysisReasoningModal: ({
       isOpen,
@@ -90,7 +90,7 @@ vi.mock(
   })
 )
 
-describe('EvidenceAnalysis Component - Extended Features', () => {
+describe("EvidenceAnalysis Component - Extended Features", () => {
   let store: ReturnType<typeof createStore>
 
   beforeEach(() => {
@@ -108,41 +108,41 @@ describe('EvidenceAnalysis Component - Extended Features', () => {
 
   const mockLegalEntities: ClientLegalEntity[] = [
     {
-      name: 'Smith v. Jones',
-      type: 'Case',
-      details: '345 F.Supp. 2d 123 (N.D. Cal. 2023)',
+      name: "Smith v. Jones",
+      type: "Case",
+      details: "345 F.Supp. 2d 123 (N.D. Cal. 2023)",
     },
     {
-      name: 'John Smith',
-      type: 'Person',
-      details: 'Plaintiff',
+      name: "John Smith",
+      type: "Person",
+      details: "Plaintiff",
     },
     {
-      name: 'Force Majeure',
-      type: 'LegalConcept',
-      details: 'Contractual excuse doctrine',
+      name: "Force Majeure",
+      type: "LegalConcept",
+      details: "Contractual excuse doctrine",
     },
   ]
 
   const mockAnalysisReasoning: ClientAnalysisReasoning = {
     analyzeLegalQuestionSummary:
-      'The legal question involves determining whether COVID-19 restrictions constitute force majeure events under contract law.',
+      "The legal question involves determining whether COVID-19 restrictions constitute force majeure events under contract law.",
     considerRelevantPrinciplesSummary:
-      'Relevant principles include the doctrine of impossibility, force majeure clauses, and government intervention defenses.',
+      "Relevant principles include the doctrine of impossibility, force majeure clauses, and government intervention defenses.",
   }
 
   const mockExtendedDoc: ClientAnalyzedDoc = {
-    docId: 'doc-extended',
-    title: 'Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)',
-    url: 'https://example.com/smith-v-jones',
+    docId: "doc-extended",
+    title: "Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)",
+    url: "https://example.com/smith-v-jones",
     relevanceScore: 9,
     confidenceScore: 8,
     summarySnippet:
-      'The court found that COVID-19 related restrictions constituted force majeure events when explicitly mentioned in the contract.',
+      "The court found that COVID-19 related restrictions constituted force majeure events when explicitly mentioned in the contract.",
     keyArguments: [
-      'Government-mandated closures during COVID-19 constitute unforeseeable circumstances',
-      'Force majeure clauses must be interpreted strictly against the party invoking them',
-      'Performance must be truly impossible, not merely more difficult or expensive',
+      "Government-mandated closures during COVID-19 constitute unforeseeable circumstances",
+      "Force majeure clauses must be interpreted strictly against the party invoking them",
+      "Performance must be truly impossible, not merely more difficult or expensive",
     ],
     extractedEntities: mockLegalEntities,
     extractedQuotes: [
@@ -150,22 +150,22 @@ describe('EvidenceAnalysis Component - Extended Features', () => {
       '"Force majeure relief is available only when performance is truly impossible"',
     ],
     fullText:
-      'This is the full text of the court decision discussing force majeure in the context of COVID-19 pandemic restrictions...',
+      "This is the full text of the court decision discussing force majeure in the context of COVID-19 pandemic restrictions...",
     counterArguments: [
-      'The pandemic was foreseeable by early 2020',
-      'Alternative performance methods were available',
+      "The pandemic was foreseeable by early 2020",
+      "Alternative performance methods were available",
     ],
     analysisReasoning: mockAnalysisReasoning,
   }
 
-  describe('Key Arguments Display', () => {
-    it('displays key arguments when available', () => {
+  describe("Key Arguments Display", () => {
+    it("displays key arguments when available", () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-extended')
+      store.set(selectedAnalyzedDocIdAtom, "doc-extended")
 
       renderWithProvider(<EvidenceAnalysis />)
 
-      expect(screen.getByText('Key Arguments:')).toBeInTheDocument()
+      expect(screen.getByText("Key Arguments:")).toBeInTheDocument()
       expect(
         screen.getByText(/Government-mandated closures during COVID-19/)
       ).toBeInTheDocument()
@@ -177,109 +177,109 @@ describe('EvidenceAnalysis Component - Extended Features', () => {
       ).toBeInTheDocument()
     })
 
-    it('shows placeholder when no key arguments available', () => {
+    it("shows placeholder when no key arguments available", () => {
       const docWithoutArguments: ClientAnalyzedDoc = {
-        docId: 'doc-no-args',
-        title: 'Test Document',
+        docId: "doc-no-args",
+        title: "Test Document",
         relevanceScore: 5,
       }
 
       store.set(analyzedDocsSummaryAtom, [docWithoutArguments])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-no-args')
+      store.set(selectedAnalyzedDocIdAtom, "doc-no-args")
 
       renderWithProvider(<EvidenceAnalysis />)
 
-      expect(screen.getByText('Key Arguments:')).toBeInTheDocument()
+      expect(screen.getByText("Key Arguments:")).toBeInTheDocument()
       expect(
         screen.getByText(/No key arguments identified/)
       ).toBeInTheDocument()
     })
   })
 
-  describe('Extracted Entities Display', () => {
-    it('displays extracted entities with proper styling', () => {
+  describe("Extracted Entities Display", () => {
+    it("displays extracted entities with proper styling", () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-extended')
+      store.set(selectedAnalyzedDocIdAtom, "doc-extended")
 
       renderWithProvider(<EvidenceAnalysis />)
 
-      expect(screen.getByText('Extracted Entities:')).toBeInTheDocument()
-      expect(screen.getByText('Smith v. Jones')).toBeInTheDocument() // Only in entities now
-      expect(screen.getByText('John Smith')).toBeInTheDocument()
-      expect(screen.getByText('Force Majeure')).toBeInTheDocument()
+      expect(screen.getByText("Extracted Entities:")).toBeInTheDocument()
+      expect(screen.getByText("Smith v. Jones")).toBeInTheDocument() // Only in entities now
+      expect(screen.getByText("John Smith")).toBeInTheDocument()
+      expect(screen.getByText("Force Majeure")).toBeInTheDocument()
     })
 
-    it('shows entity details on hover through title attribute', () => {
+    it("shows entity details on hover through title attribute", () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-extended')
+      store.set(selectedAnalyzedDocIdAtom, "doc-extended")
 
       renderWithProvider(<EvidenceAnalysis />)
 
-      const entityElement = screen.getByText('Smith v. Jones')
+      const entityElement = screen.getByText("Smith v. Jones")
       expect(entityElement).toHaveAttribute(
-        'title',
-        '345 F.Supp. 2d 123 (N.D. Cal. 2023)'
+        "title",
+        "345 F.Supp. 2d 123 (N.D. Cal. 2023)"
       )
     })
 
-    it('applies different styling based on entity type', () => {
+    it("applies different styling based on entity type", () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-extended')
+      store.set(selectedAnalyzedDocIdAtom, "doc-extended")
 
       renderWithProvider(<EvidenceAnalysis />)
 
       // Check that entities have different styling classes based on type
-      const caseEntity = screen.getByText('Smith v. Jones')
-      const personEntity = screen.getByText('John Smith')
-      const conceptEntity = screen.getByText('Force Majeure')
+      const caseEntity = screen.getByText("Smith v. Jones")
+      const personEntity = screen.getByText("John Smith")
+      const conceptEntity = screen.getByText("Force Majeure")
 
       // Should have different color schemes
-      expect(caseEntity).toHaveClass('bg-blue-100')
-      expect(personEntity).toHaveClass('bg-yellow-100')
-      expect(conceptEntity).toHaveClass('bg-gray-100')
+      expect(caseEntity).toHaveClass("bg-blue-100")
+      expect(personEntity).toHaveClass("bg-yellow-100")
+      expect(conceptEntity).toHaveClass("bg-gray-100")
     })
 
-    it('shows placeholder when no entities extracted', () => {
+    it("shows placeholder when no entities extracted", () => {
       const docWithoutEntities: ClientAnalyzedDoc = {
-        docId: 'doc-no-entities',
-        title: 'Test Document',
+        docId: "doc-no-entities",
+        title: "Test Document",
         relevanceScore: 5,
         extractedEntities: [],
       }
 
       store.set(analyzedDocsSummaryAtom, [docWithoutEntities])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-no-entities')
+      store.set(selectedAnalyzedDocIdAtom, "doc-no-entities")
 
       renderWithProvider(<EvidenceAnalysis />)
 
-      expect(screen.getByText('Extracted Entities:')).toBeInTheDocument()
+      expect(screen.getByText("Extracted Entities:")).toBeInTheDocument()
       expect(screen.getByText(/No entities extracted/)).toBeInTheDocument()
     })
   })
 
-  describe('Full Document Text Display', () => {
-    it('displays full document text when available', () => {
+  describe("Full Document Text Display", () => {
+    it("displays full document text when available", () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-extended')
+      store.set(selectedAnalyzedDocIdAtom, "doc-extended")
 
       renderWithProvider(<EvidenceAnalysis />)
 
       // Check for document content display - look for the full text
-      expect(screen.getByText('Document Content')).toBeInTheDocument()
+      expect(screen.getByText("Document Content")).toBeInTheDocument()
       expect(
         screen.getByText(/This is the full text of the court decision/)
       ).toBeInTheDocument()
     })
 
-    it('shows placeholder when no document content available', () => {
+    it("shows placeholder when no document content available", () => {
       const docWithoutFullText: ClientAnalyzedDoc = {
-        docId: 'doc-no-text',
-        title: 'Test Document',
+        docId: "doc-no-text",
+        title: "Test Document",
         relevanceScore: 5,
       }
 
       store.set(analyzedDocsSummaryAtom, [docWithoutFullText])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-no-text')
+      store.set(selectedAnalyzedDocIdAtom, "doc-no-text")
 
       renderWithProvider(<EvidenceAnalysis />)
 
@@ -288,85 +288,85 @@ describe('EvidenceAnalysis Component - Extended Features', () => {
       ).toBeInTheDocument()
     })
 
-    it('formats paragraphs correctly for multi-line text', () => {
+    it("formats paragraphs correctly for multi-line text", () => {
       const docWithMultilineText: ClientAnalyzedDoc = {
         ...mockExtendedDoc,
-        fullText: 'First paragraph.\n\nSecond paragraph.\n\nThird paragraph.',
+        fullText: "First paragraph.\n\nSecond paragraph.\n\nThird paragraph.",
       }
 
       store.set(analyzedDocsSummaryAtom, [docWithMultilineText])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-extended')
+      store.set(selectedAnalyzedDocIdAtom, "doc-extended")
 
       renderWithProvider(<EvidenceAnalysis />)
 
-      expect(screen.getByText('First paragraph.')).toBeInTheDocument()
-      expect(screen.getByText('Second paragraph.')).toBeInTheDocument()
-      expect(screen.getByText('Third paragraph.')).toBeInTheDocument()
+      expect(screen.getByText("First paragraph.")).toBeInTheDocument()
+      expect(screen.getByText("Second paragraph.")).toBeInTheDocument()
+      expect(screen.getByText("Third paragraph.")).toBeInTheDocument()
     })
   })
 
-  describe('Analysis Reasoning Modal', () => {
-    it('opens analysis reasoning modal when button is clicked', async () => {
+  describe("Analysis Reasoning Modal", () => {
+    it("opens analysis reasoning modal when button is clicked", async () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-extended')
+      store.set(selectedAnalyzedDocIdAtom, "doc-extended")
 
       renderWithProvider(<EvidenceAnalysis />)
 
       const reasoningButton = screen.getByText(/View Analysis Reasoning/)
       await userEvent.click(reasoningButton)
 
-      expect(screen.getByTestId('analysis-reasoning-modal')).toBeInTheDocument()
+      expect(screen.getByTestId("analysis-reasoning-modal")).toBeInTheDocument()
       expect(
         screen.getByText(
-          'Analysis Reasoning: Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)'
+          "Analysis Reasoning: Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)"
         )
       ).toBeInTheDocument()
     })
 
-    it('displays reasoning content in modal', async () => {
+    it("displays reasoning content in modal", async () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-extended')
+      store.set(selectedAnalyzedDocIdAtom, "doc-extended")
 
       renderWithProvider(<EvidenceAnalysis />)
 
       const reasoningButton = screen.getByText(/View Analysis Reasoning/)
       await userEvent.click(reasoningButton)
 
-      expect(screen.getByTestId('legal-question-summary')).toHaveTextContent(
-        'The legal question involves determining whether COVID-19 restrictions constitute force majeure events'
+      expect(screen.getByTestId("legal-question-summary")).toHaveTextContent(
+        "The legal question involves determining whether COVID-19 restrictions constitute force majeure events"
       )
       expect(
-        screen.getByTestId('relevant-principles-summary')
+        screen.getByTestId("relevant-principles-summary")
       ).toHaveTextContent(
-        'Relevant principles include the doctrine of impossibility'
+        "Relevant principles include the doctrine of impossibility"
       )
     })
 
-    it('closes reasoning modal when close button is clicked', async () => {
+    it("closes reasoning modal when close button is clicked", async () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-extended')
+      store.set(selectedAnalyzedDocIdAtom, "doc-extended")
 
       renderWithProvider(<EvidenceAnalysis />)
 
       const reasoningButton = screen.getByText(/View Analysis Reasoning/)
       await userEvent.click(reasoningButton)
 
-      expect(screen.getByTestId('analysis-reasoning-modal')).toBeInTheDocument()
+      expect(screen.getByTestId("analysis-reasoning-modal")).toBeInTheDocument()
 
-      const closeButton = screen.getByLabelText('close-reasoning')
+      const closeButton = screen.getByLabelText("close-reasoning")
       await userEvent.click(closeButton)
 
       expect(
-        screen.queryByTestId('analysis-reasoning-modal')
+        screen.queryByTestId("analysis-reasoning-modal")
       ).not.toBeInTheDocument()
     })
   })
 
-  describe('Data Integration', () => {
-    it('updates display when document data is updated through atoms', () => {
+  describe("Data Integration", () => {
+    it("updates display when document data is updated through atoms", () => {
       // Initial state
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-extended')
+      store.set(selectedAnalyzedDocIdAtom, "doc-extended")
 
       const { rerender } = renderWithProvider(<EvidenceAnalysis />)
 
@@ -377,7 +377,7 @@ describe('EvidenceAnalysis Component - Extended Features', () => {
       // Update with new arguments
       const updatedDoc: ClientAnalyzedDoc = {
         ...mockExtendedDoc,
-        keyArguments: ['Updated argument 1', 'Updated argument 2'],
+        keyArguments: ["Updated argument 1", "Updated argument 2"],
       }
 
       store.set(analyzedDocsSummaryAtom, [updatedDoc])
@@ -387,11 +387,11 @@ describe('EvidenceAnalysis Component - Extended Features', () => {
         </JotaiProvider>
       )
 
-      expect(screen.getByText('Updated argument 1')).toBeInTheDocument()
-      expect(screen.getByText('Updated argument 2')).toBeInTheDocument()
+      expect(screen.getByText("Updated argument 1")).toBeInTheDocument()
+      expect(screen.getByText("Updated argument 2")).toBeInTheDocument()
     })
 
-    it('handles progressive updates to entity extraction', () => {
+    it("handles progressive updates to entity extraction", () => {
       // Start with empty entities
       const initialDoc: ClientAnalyzedDoc = {
         ...mockExtendedDoc,
@@ -399,7 +399,7 @@ describe('EvidenceAnalysis Component - Extended Features', () => {
       }
 
       store.set(analyzedDocsSummaryAtom, [initialDoc])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-extended')
+      store.set(selectedAnalyzedDocIdAtom, "doc-extended")
 
       const { rerender } = renderWithProvider(<EvidenceAnalysis />)
 
@@ -418,27 +418,27 @@ describe('EvidenceAnalysis Component - Extended Features', () => {
         </JotaiProvider>
       )
 
-      expect(screen.getByText('Smith v. Jones')).toBeInTheDocument()
-      expect(screen.getByText('John Smith')).toBeInTheDocument()
-      expect(screen.getByText('Force Majeure')).toBeInTheDocument()
+      expect(screen.getByText("Smith v. Jones")).toBeInTheDocument()
+      expect(screen.getByText("John Smith")).toBeInTheDocument()
+      expect(screen.getByText("Force Majeure")).toBeInTheDocument()
     })
   })
 
-  describe('Edge Cases', () => {
-    it('handles documents with very long entity names', () => {
+  describe("Edge Cases", () => {
+    it("handles documents with very long entity names", () => {
       const docWithLongEntities: ClientAnalyzedDoc = {
         ...mockExtendedDoc,
         extractedEntities: [
           {
-            name: 'Very Long Legal Case Name That Might Overflow The UI Layout And Cause Display Issues',
-            type: 'Case',
-            details: 'Long citation',
+            name: "Very Long Legal Case Name That Might Overflow The UI Layout And Cause Display Issues",
+            type: "Case",
+            details: "Long citation",
           },
         ],
       }
 
       store.set(analyzedDocsSummaryAtom, [docWithLongEntities])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-extended')
+      store.set(selectedAnalyzedDocIdAtom, "doc-extended")
 
       renderWithProvider(<EvidenceAnalysis />)
 
@@ -446,10 +446,10 @@ describe('EvidenceAnalysis Component - Extended Features', () => {
       expect(screen.getByText(/Very Long Legal Case Name/)).toBeInTheDocument()
     })
 
-    it('handles empty arrays gracefully', () => {
+    it("handles empty arrays gracefully", () => {
       const docWithEmptyArrays: ClientAnalyzedDoc = {
-        docId: 'doc-empty',
-        title: 'Empty Document',
+        docId: "doc-empty",
+        title: "Empty Document",
         relevanceScore: 0,
         keyArguments: [],
         extractedEntities: [],
@@ -458,7 +458,7 @@ describe('EvidenceAnalysis Component - Extended Features', () => {
       }
 
       store.set(analyzedDocsSummaryAtom, [docWithEmptyArrays])
-      store.set(selectedAnalyzedDocIdAtom, 'doc-empty')
+      store.set(selectedAnalyzedDocIdAtom, "doc-empty")
 
       renderWithProvider(<EvidenceAnalysis />)
 

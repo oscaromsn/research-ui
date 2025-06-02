@@ -1,29 +1,29 @@
-import { describe, it } from 'vitest'
+import { describe, it } from "vitest"
 
 import {
   isCI,
   skipIfMissingApiKeys,
   skipInCiIfMissingApiKeys,
-} from '../test-utils'
+} from "../test-utils"
 
 /**
  * Available API providers and their required environment variables
  */
 export const API_KEYS = {
-  GOOGLE_AI: ['GOOGLE_API_KEY'] as string[],
-  OPENAI: ['OPENAI_API_KEY'] as string[],
-  ANTHROPIC: ['ANTHROPIC_API_KEY'] as string[],
-  XAI: ['XAI_API_KEY'] as string[],
-  GROQ: ['GROQ_API_KEY'] as string[],
-  EXA_SEARCH: ['EXA_API_KEY'] as string[],
-  TAVILY_SEARCH: ['TAVILY_API_KEY'] as string[],
-  LINKUP_SEARCH: ['LINKUP_API_KEY'] as string[],
+  GOOGLE_AI: ["GOOGLE_API_KEY"] as string[],
+  OPENAI: ["OPENAI_API_KEY"] as string[],
+  ANTHROPIC: ["ANTHROPIC_API_KEY"] as string[],
+  XAI: ["XAI_API_KEY"] as string[],
+  GROQ: ["GROQ_API_KEY"] as string[],
+  EXA_SEARCH: ["EXA_API_KEY"] as string[],
+  TAVILY_SEARCH: ["TAVILY_API_KEY"] as string[],
+  LINKUP_SEARCH: ["LINKUP_API_KEY"] as string[],
   ALL_LLM: [
-    'GOOGLE_API_KEY',
-    'OPENAI_API_KEY',
-    'ANTHROPIC_API_KEY',
+    "GOOGLE_API_KEY",
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
   ] as string[],
-  ALL_SEARCH: ['EXA_API_KEY', 'TAVILY_API_KEY', 'LINKUP_API_KEY'] as string[],
+  ALL_SEARCH: ["EXA_API_KEY", "TAVILY_API_KEY", "LINKUP_API_KEY"] as string[],
 }
 
 /**
@@ -54,7 +54,7 @@ export const itWithApiKeys = (
 
   const testRunner = only ? it.only : shouldSkip ? it.skip : it
 
-  const titleWithRequirements = `${testName} [requires: ${requiredApiKeys.join(', ')}]`
+  const titleWithRequirements = `${testName} [requires: ${requiredApiKeys.join(", ")}]`
 
   return testRunner(titleWithRequirements, testFn, timeout)
 }
@@ -90,7 +90,7 @@ export const describeWithApiKeys = (
       ? describe.skip
       : describe
 
-  const titleWithRequirements = `${suiteName} [requires: ${requiredApiKeys.join(', ')}]`
+  const titleWithRequirements = `${suiteName} [requires: ${requiredApiKeys.join(", ")}]`
 
   return describeRunner(titleWithRequirements, suiteFn)
 }
@@ -152,7 +152,7 @@ export const itE2eWithApi = (
 export const logApiKeyStatus = (
   keys: string[] = Object.values(API_KEYS).flat()
 ) => {
-  console.log('=== API Key Status ===')
+  console.log("=== API Key Status ===")
   console.log(`CI Environment: ${isCI()}`)
 
   const uniqueKeys = [...new Set(keys)]
@@ -160,13 +160,13 @@ export const logApiKeyStatus = (
     const value = process.env[key]
     const hasKey =
       value &&
-      value.trim() !== '' &&
-      !value.includes('[YOUR_') &&
-      !value.includes('****')
-    const status = hasKey ? '✅ Available' : '❌ Missing/Invalid'
+      value.trim() !== "" &&
+      !value.includes("[YOUR_") &&
+      !value.includes("****")
+    const status = hasKey ? "✅ Available" : "❌ Missing/Invalid"
     console.log(`${key}: ${status}`)
   }
-  console.log('====================')
+  console.log("====================")
 }
 
 /**
@@ -184,9 +184,9 @@ export const apiTestMatchers = {
       const value = process.env[key]
       return (
         value &&
-        value.trim() !== '' &&
-        !value.includes('[YOUR_') &&
-        !value.includes('****')
+        value.trim() !== "" &&
+        !value.includes("[YOUR_") &&
+        !value.includes("****")
       )
     })
 
@@ -194,8 +194,8 @@ export const apiTestMatchers = {
       pass: !hasKeys,
       message: () =>
         hasKeys
-          ? `Expected test to be skipped due to missing API keys, but all keys are available: ${expectedKeys.join(', ')}`
-          : `Test correctly skipped due to missing API keys: ${expectedKeys.join(', ')}`,
+          ? `Expected test to be skipped due to missing API keys, but all keys are available: ${expectedKeys.join(", ")}`
+          : `Test correctly skipped due to missing API keys: ${expectedKeys.join(", ")}`,
     }
   },
 }

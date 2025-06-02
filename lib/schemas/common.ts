@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from "zod"
 
 /**
  * Core schema primitives
@@ -14,40 +14,40 @@ export const string = {
   /**
    * Non-empty trimmed string
    */
-  nonEmpty: z.string().trim().min(1, 'Cannot be empty'),
+  nonEmpty: z.string().trim().min(1, "Cannot be empty"),
 
   /**
    * Email address
    */
-  email: z.string().email('Invalid email address'),
+  email: z.string().email("Invalid email address"),
 
   /**
    * URL
    */
-  url: z.string().url('Invalid URL'),
+  url: z.string().url("Invalid URL"),
 
   /**
    * UUID
    */
-  uuid: z.string().uuid('Invalid UUID'),
+  uuid: z.string().uuid("Invalid UUID"),
 
   /**
    * Strong password
    */
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
+    .min(8, "Password must be at least 8 characters")
     .refine(
       value => /[A-Z]/.test(value),
-      'Password must contain at least one uppercase letter'
+      "Password must contain at least one uppercase letter"
     )
     .refine(
       value => /[a-z]/.test(value),
-      'Password must contain at least one lowercase letter'
+      "Password must contain at least one lowercase letter"
     )
     .refine(
       value => /[0-9]/.test(value),
-      'Password must contain at least one number'
+      "Password must contain at least one number"
     ),
 
   /**
@@ -55,7 +55,7 @@ export const string = {
    */
   numeric: z
     .string()
-    .regex(/^\d+$/, 'Must be a valid integer')
+    .regex(/^\d+$/, "Must be a valid integer")
     .transform(val => Number.parseInt(val, 10)),
 
   /**
@@ -63,7 +63,7 @@ export const string = {
    */
   date: z
     .string()
-    .refine(value => !Number.isNaN(Date.parse(value)), 'Invalid date string'),
+    .refine(value => !Number.isNaN(Date.parse(value)), "Invalid date string"),
 }
 
 /**
@@ -73,17 +73,17 @@ export const number = {
   /**
    * Positive number
    */
-  positive: z.number().positive('Must be a positive number'),
+  positive: z.number().positive("Must be a positive number"),
 
   /**
    * Non-negative number
    */
-  nonNegative: z.number().nonnegative('Cannot be negative'),
+  nonNegative: z.number().nonnegative("Cannot be negative"),
 
   /**
    * Integer
    */
-  integer: z.number().int('Must be an integer'),
+  integer: z.number().int("Must be an integer"),
 }
 
 /**
@@ -95,12 +95,12 @@ export const date = {
    */
   future: z
     .date()
-    .refine(date => date > new Date(), 'Date must be in the future'),
+    .refine(date => date > new Date(), "Date must be in the future"),
 
   /**
    * Past date
    */
-  past: z.date().refine(date => date < new Date(), 'Date must be in the past'),
+  past: z.date().refine(date => date < new Date(), "Date must be in the past"),
 }
 
 /**
@@ -120,7 +120,7 @@ export const object = {
    */
   sorting: z.object({
     sortBy: z.string().optional(),
-    sortOrder: z.enum(['asc', 'desc']).default('asc'),
+    sortOrder: z.enum(["asc", "desc"]).default("asc"),
   }),
 }
 
@@ -175,7 +175,7 @@ export function createEnumSchema<T extends Record<string, string | number>>(
   enumObj: T
 ) {
   return z.enum(
-    Object.values(enumObj).filter(v => typeof v === 'string') as [
+    Object.values(enumObj).filter(v => typeof v === "string") as [
       string,
       ...string[],
     ]
