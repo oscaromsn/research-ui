@@ -197,8 +197,8 @@ export function useResearchAgent(): UseResearchAgentReturn {
   // Helper function to handle query generation updates
   const handleQueryGenerationUpdate = useCallback(
     (update: ResearchUpdate) => {
-      if (update.data && Array.isArray(update.data)) {
-        const queriesData = update.data as QueryData[]
+      if (update.data && typeof update.data === "object" && "queries" in update.data) {
+        const queriesData = (update.data as { queries: QueryData[] }).queries
         const timestamp = new Date().toISOString()
         const queriesWithTimestamp = queriesData.map(q => ({
           ...q,
@@ -224,7 +224,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
       if (
         update.data &&
         typeof update.data === "object" &&
-        "document_id" in update.data
+        "docId" in update.data
       ) {
         const docData = update.data as unknown as ClientAnalyzedDoc
         const timestamp = new Date().toISOString()
@@ -233,14 +233,37 @@ export function useResearchAgent(): UseResearchAgentReturn {
           timestamp,
         }
 
-        setAnalyzedDocs(prev => [...prev, docWithTimestamp])
-        setResearchSession(prev => ({
-          ...prev,
-          accumulatedDocuments: [
-            ...prev.accumulatedDocuments,
-            docWithTimestamp,
-          ],
-        }))
+        setAnalyzedDocs(prev => {
+          const existingIndex = prev.findIndex(doc => doc.docId === docWithTimestamp.docId)
+          if (existingIndex >= 0) {
+            // Update existing document
+            const newDocs = [...prev]
+            newDocs[existingIndex] = { ...newDocs[existingIndex], ...docWithTimestamp }
+            return newDocs
+          }
+          // Add new document
+          return [...prev, docWithTimestamp]
+        })
+        setResearchSession(prev => {
+          const existingIndex = prev.accumulatedDocuments.findIndex(doc => doc.docId === docWithTimestamp.docId)
+          if (existingIndex >= 0) {
+            // Update existing document
+            const newDocs = [...prev.accumulatedDocuments]
+            newDocs[existingIndex] = { ...newDocs[existingIndex], ...docWithTimestamp }
+            return {
+              ...prev,
+              accumulatedDocuments: newDocs,
+            }
+          }
+          // Add new document
+          return {
+            ...prev,
+            accumulatedDocuments: [
+              ...prev.accumulatedDocuments,
+              docWithTimestamp,
+            ],
+          }
+        })
       }
     },
     [setAnalyzedDocs, setResearchSession]

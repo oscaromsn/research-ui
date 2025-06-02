@@ -4,19 +4,19 @@ import { createElement } from "react"
 import type { ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+import { conductResearch } from "@/app/actions/researchAgentOrchestrator"
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent"
 import {
   autoModeStateAtom,
   researchSessionAtom,
 } from "@/lib/state/researchAtoms"
 
-// Mock conductResearch manually
-const mockConductResearch = vi.fn()
-
-// Mock the module
-vi.doMock("@/app/actions/researchAgentOrchestrator", () => ({
-  conductResearch: mockConductResearch,
+// Mock the server action
+vi.mock("@/app/actions/researchAgentOrchestrator", () => ({
+  conductResearch: vi.fn(),
 }))
+
+const mockConductResearch = vi.mocked(conductResearch)
 
 describe("useResearchAgent Hook - Auto Mode", () => {
   let store: ReturnType<typeof createStore>
@@ -234,12 +234,14 @@ describe("useResearchAgent Hook - Auto Mode", () => {
           const update = {
             type: "DATA",
             stage: "GENERATING_QUERIES",
-            data: [
-              {
-                query_string: "patent requirements AI",
-                expected_information_summary: "Patent eligibility for AI",
-              },
-            ],
+            data: {
+              queries: [
+                {
+                  query_string: "patent requirements AI",
+                  expected_information_summary: "Patent eligibility for AI",
+                },
+              ],
+            },
           }
           controller.enqueue(
             new TextEncoder().encode(`${JSON.stringify(update)}\n`)
@@ -278,7 +280,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
             type: "DATA",
             stage: "ANALYZING_DOCUMENTS",
             data: {
-              document_id: "doc-123",
+              docId: "doc-123",
               title: "Test Document",
               relevanceScore: 8,
               summarySnippet: "Test summary",
@@ -307,7 +309,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         const sessionState = store.get(researchSessionAtom)
         expect(sessionState.accumulatedDocuments).toHaveLength(1)
         expect(sessionState.accumulatedDocuments[0]).toMatchObject({
-          document_id: "doc-123",
+          docId: "doc-123",
           title: "Test Document",
           relevanceScore: 8,
           summarySnippet: "Test summary",
