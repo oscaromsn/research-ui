@@ -15,8 +15,8 @@ const config = {
 	// JSON files
 	"**/*.{json,jsonc}": ["biome format --write"],
 
-	// Configuration files (JS/MJS/TS) - use Biome for config files
-	"*.{js,mjs,ts}": ["biome check --write"],
+	// Configuration files (JS/MJS/TS) - use Biome for specific config files only
+	"{*.config.ts,*.config.mjs,commitlint.config.ts,setupTests.ts,vitest.config.ts,vitest.config.no-api.ts,playwright.config.ts,postcss.config.mjs}": ["biome check --write"],
 
 	// Package.json changes - run install
 	"package.json": [() => "bun install --frozen-lockfile"],
