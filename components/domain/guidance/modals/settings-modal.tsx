@@ -1,6 +1,6 @@
 import { Bell, Globe, LogOut, Moon, Settings, Shield, User } from "lucide-react"
 
-import { Modal } from "@ui/modal"
+import { Modal } from "@/components/ui/modal"
 
 interface SettingsModalProps {
   isOpen: boolean

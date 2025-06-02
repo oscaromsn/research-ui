@@ -165,8 +165,8 @@ export function useResearchAgent(): UseResearchAgentReturn {
       setResearchStatus((prevStatus: ResearchStatus) => {
         const newStatus: ResearchStatus = {
           ...prevStatus,
-          stage: update.stage,
-          isLoading: true,
+          stage: update.type === "ERROR" ? "ERROR" : update.stage,
+          isLoading: update.type !== "ERROR",
           error: statusFlags.error,
           isPaused: statusFlags.isPaused,
           canResume: statusFlags.canResume,
@@ -197,7 +197,11 @@ export function useResearchAgent(): UseResearchAgentReturn {
   // Helper function to handle query generation updates
   const handleQueryGenerationUpdate = useCallback(
     (update: ResearchUpdate) => {
-      if (update.data && typeof update.data === "object" && "queries" in update.data) {
+      if (
+        update.data &&
+        typeof update.data === "object" &&
+        "queries" in update.data
+      ) {
         const queriesData = (update.data as { queries: QueryData[] }).queries
         const timestamp = new Date().toISOString()
         const queriesWithTimestamp = queriesData.map(q => ({
@@ -234,22 +238,32 @@ export function useResearchAgent(): UseResearchAgentReturn {
         }
 
         setAnalyzedDocs(prev => {
-          const existingIndex = prev.findIndex(doc => doc.docId === docWithTimestamp.docId)
+          const existingIndex = prev.findIndex(
+            doc => doc.docId === docWithTimestamp.docId
+          )
           if (existingIndex >= 0) {
             // Update existing document
             const newDocs = [...prev]
-            newDocs[existingIndex] = { ...newDocs[existingIndex], ...docWithTimestamp }
+            newDocs[existingIndex] = {
+              ...newDocs[existingIndex],
+              ...docWithTimestamp,
+            }
             return newDocs
           }
           // Add new document
           return [...prev, docWithTimestamp]
         })
         setResearchSession(prev => {
-          const existingIndex = prev.accumulatedDocuments.findIndex(doc => doc.docId === docWithTimestamp.docId)
+          const existingIndex = prev.accumulatedDocuments.findIndex(
+            doc => doc.docId === docWithTimestamp.docId
+          )
           if (existingIndex >= 0) {
             // Update existing document
             const newDocs = [...prev.accumulatedDocuments]
-            newDocs[existingIndex] = { ...newDocs[existingIndex], ...docWithTimestamp }
+            newDocs[existingIndex] = {
+              ...newDocs[existingIndex],
+              ...docWithTimestamp,
+            }
             return {
               ...prev,
               accumulatedDocuments: newDocs,
@@ -502,7 +516,11 @@ export function useResearchAgent(): UseResearchAgentReturn {
       setResearchStatus((prev: ResearchStatus) => ({
         ...prev,
         isLoading: false,
-        stage: prev.error ? "IDLE" : prev.stage || "IDLE",
+        stage: prev.error
+          ? prev.stage === "ERROR"
+            ? "ERROR"
+            : "IDLE"
+          : prev.stage || "IDLE",
         message: prev.error
           ? prev.message || "Research failed."
           : prev.message || "Research process completed.",
@@ -552,9 +570,14 @@ export function useResearchAgent(): UseResearchAgentReturn {
           "Raw update:",
           stringUpdate
         )
+        logResearchEvent(
+          "SYSTEM_ERROR",
+          "ERROR",
+          `Failed to parse JSON update: ${parseError instanceof Error ? parseError.message : String(parseError)}`
+        )
       }
     },
-    [processStreamUpdate]
+    [processStreamUpdate, logResearchEvent]
   )
 
   // Helper function to process stream value
@@ -741,6 +764,9 @@ export function useResearchAgent(): UseResearchAgentReturn {
   const abortResearch = useCallback(() => {
     if (abortController) {
       abortController.abort()
+      console.log("useResearchAgent: Abort signal sent.")
+    } else {
+      console.log("useResearchAgent: No active research to abort.")
     }
 
     setResearchStatus(prev => ({
@@ -749,10 +775,11 @@ export function useResearchAgent(): UseResearchAgentReturn {
       isPaused: false,
       canResume: false,
       stage: "IDLE",
+      error: "Research manually aborted.",
       message: "Research aborted by user",
     }))
 
-    logResearchEvent("ABORTED", "INFO", "Research process aborted by user")
+    logResearchEvent("USER_ACTION", "INFO", "Research abortion requested")
     setAbortController(null)
   }, [abortController, setResearchStatus, logResearchEvent])
 

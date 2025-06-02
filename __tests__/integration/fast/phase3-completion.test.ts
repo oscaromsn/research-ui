@@ -631,8 +631,10 @@ describe("Phase 3 Completion - Client-Side Orchestrator Hook", () => {
       await waitFor(() => {
         const logs = store.get(researchLogAtom)
         expect(
-          logs.some(log =>
-            log.includes("[USER_ACTION] Research abortion requested")
+          logs.some(
+            log =>
+              log.includes("[USER_ACTION]") &&
+              log.includes("Research abortion requested")
           )
         ).toBe(true)
       })

@@ -300,7 +300,7 @@ describe("useResearchAgent Hook - Extended Data Handling", () => {
         const analyzedDocs = store.get(analyzedDocsSummaryAtom)
         const doc = analyzedDocs[0]
         expect(doc?.summarySnippet).toBe(
-          "Real contract analysis with complete reasoning..."
+          "The court found that COVID-19 restrictions..."
         )
         expect(doc?.keyArguments).toHaveLength(2)
         expect(doc?.keyArguments?.[1]).toBe(

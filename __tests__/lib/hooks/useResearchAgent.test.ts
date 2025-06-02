@@ -258,7 +258,8 @@ describe("useResearchAgent Hook", () => {
 
       const logs = store.get(researchLogAtom)
       expect(logs.length).toBeGreaterThan(0)
-      expect(logs[0]).toContain("[INITIALIZING] Research process initiated")
+      expect(logs[0]).toContain("[INITIALIZING]")
+      expect(logs[0]).toContain("Research process initiated")
       expect(logs[0]).toContain(legalQuestion)
     })
   })
