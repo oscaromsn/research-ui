@@ -6,14 +6,21 @@ LexiSynth uses a **comprehensive, multi-layered git hook validation system** tha
 
 ## 🎯 Validation Strategy
 
+### Progressive Validation Approach
+Our git hooks implement a **progressive validation strategy** that balances speed, developer experience, and code quality:
+
+- **🎨 Pre-commit** (~40s): Format files + fast unit tests - *Immediate consistency*
+- **🔍 Pre-push** (~67s): Full linting + comprehensive tests - *Quality gates*
+- **🚀 CI/CD**: Complete validation pipeline - *Final verification*
+
 ### Testing Approach: Three-Tier Integration
 Our testing strategy balances **Developer Experience (DX)** with **Enterprise Code Quality** using a three-tier approach:
 
-- **🚀 Fast** (37 tests, ~3s): Mocked APIs, structural validation - *Included in git hooks*
-- **⚡ Medium** (5 tests, ~8s): Real Exa API validation - *Included in git hooks*  
+- **🚀 Fast** (37 tests, ~3s): Mocked APIs, structural validation - *Pre-commit + Pre-push*
+- **⚡ Medium** (5 tests, ~8s): Real Exa API validation - *Pre-push only*  
 - **🔄 Slow** (comprehensive): Full LLM pipeline with all APIs - *CI/CD only*
 
-This ensures **critical integration paths are validated locally** while keeping git hooks under 65 seconds total.
+This ensures **critical integration paths are validated locally** while keeping git hooks under 70 seconds total.
 
 ### Tool Separation of Concerns
 
@@ -21,14 +28,14 @@ Our git hooks use **multiple specialized tools** with clear separation of respon
 
 #### **🔧 Lint-staged** (File-specific validation)
 - **Purpose**: Process only staged/changed files for efficiency
-- **Scope**: File-level operations (format, lint, related tests)
+- **Scope**: File-level operations (format, related tests)
 - **Speed**: Very fast (~10-20s depending on changes)
 - **Responsibilities**:
   - Auto-format changed code files (Biome)
-  - Auto-fix linting issues (Biome)
   - Run unit tests related to changed files only
   - Generate BAML client when schema files change
   - Validate package.json and config file changes
+  - **Note**: Linting validation deferred to pre-push for better DX
 
 #### **🎭 Husky Pre-commit Hook** (Orchestrator)
 - **Purpose**: Orchestrate file-specific + system-wide validations
@@ -58,13 +65,13 @@ Our git hooks use **multiple specialized tools** with clear separation of respon
   - Final quality gates before remote push
 
 ### Layer 1: Pre-commit Hook (~40 seconds)
-**Runs on every commit** - Fast, targeted validation with early integration feedback
+**Runs on every commit** - Fast formatting and testing with early integration feedback
 
 - ✅ **Auto-formatting** (Biome) - Fixes code style automatically
-- ✅ **Biome auto-fix** - Fixes linting issues automatically  
 - ✅ **Related unit tests** - Only tests affected by changes
 - ✅ **BAML generation** - Updates AI client when BAML files change
 - ✅ **Fast integration tests** - Critical pipeline validation (37 tests, ~5s)
+- ✅ **Progressive validation** - Formatting preserved even with linting issues
 - ✅ **Early feedback** - Catches integration issues immediately
 
 ### Layer 2: Commit Message Validation (<1 second)
@@ -83,7 +90,10 @@ Our git hooks use **multiple specialized tools** with clear separation of respon
   - Strict mode enabled
   - Exact optional properties checking
   - No `any` types allowed
-- ✅ **Auto-fix all linting issues** (`bun check`)
+- ✅ **Full linting validation** (`bun check`)
+  - Complete Biome check with auto-fix
+  - Project-wide linting enforcement
+  - Quality gate before push
 - ✅ **Complete unit test suite** (286 tests)
 - ✅ **Fast integration tests** (37 tests, ~5s)
   - Mocked APIs, structural validation (also in pre-commit)
@@ -126,13 +136,21 @@ Our git hooks use **multiple specialized tools** with clear separation of respon
 6. **✅ Pass medium integration tests** - Real API validation (5 tests)
 7. **✅ Follow commit conventions** - Clean, searchable git history
 
+### After Commit, Your Files Are Guaranteed to:
+
+1. **✅ Be properly formatted** - Immediate style consistency
+2. **✅ Pass related unit tests** - Affected functionality verified
+3. **✅ Pass fast integration tests** - Critical workflows validated
+4. **✅ Have updated BAML client** - When AI schemas change
+5. **✅ Preserve formatting improvements** - Even with pending linting issues
+
 ### Tool-Specific Quality Guarantees
 
 #### **Lint-staged Ensures**:
 - Only changed files are properly formatted
-- Linting issues in changed files are auto-fixed
 - Unit tests related to changes pass
 - BAML client is regenerated when schemas change
+- Formatting improvements are preserved regardless of linting status
 
 #### **Pre-commit Hook Ensures**:
 - All lint-staged guarantees PLUS
@@ -146,44 +164,53 @@ Our git hooks use **multiple specialized tools** with clear separation of respon
 
 #### **Pre-push Hook Ensures**:
 - ALL previous guarantees PLUS
-- Entire codebase is formatted and type-safe
+- Entire codebase is formatted, linted, and type-safe
 - Complete test suite passes
 - Real external API integration works
+- No linting issues exist project-wide
 
 ### Automatic Fixes Applied:
 
+#### **Pre-commit (Always Applied)**:
 - **Code formatting** inconsistencies
-- **Import sorting** and organization  
-- **Linting issues** that can be auto-fixed
+- **Import sorting** and organization
 - **Missing semicolons**, trailing commas, etc.
 - **BAML client generation** when schema changes
+
+#### **Pre-push (Quality Gates)**:
+- **Linting issues** that can be auto-fixed
+- **Project-wide** formatting and import organization
+- **Type errors** flagged for manual resolution
 
 ## 🚀 Developer Experience
 
 ### What Developers See:
 
 ```bash
-# Enhanced commit feedback with integration validation
+# Enhanced commit feedback with progressive validation
 $ git commit -m "feat: add new feature"
 🔍 Running pre-commit checks...
 ✔ Backed up original state in git stash
 ✔ Running tasks for staged files...
+🎨 Auto-formatting staged files...   # Always succeeds
+🧪 Running related unit tests...     # Tests affected code
 ✔ Applying modifications from tasks...
 ⚡ Running fast integration tests for early feedback...
 ✔ 37 integration tests passed in ~5s
 [main abc1234] feat: add new feature
+💡 Note: Full linting validation will run on push
 
 # Comprehensive push validation  
 $ git push
 🔍 Running comprehensive pre-push validations...
-🎨 Auto-formatting code...           # Fixes formatting
-🔧 Running strict TypeScript...      # Validates types
-🔍 Auto-fixing linting issues...     # Fixes lint errors
+🎨 Auto-formatting entire codebase...# Project-wide formatting
+🔧 Running strict TypeScript...      # Validates all types
+🔍 Running full linting validation...# Project-wide linting
 🧪 Running unit tests...             # 286 tests pass
 ⚡ Running fast integration tests... # 37 tests pass (~3s)
 🔗 Running medium integration tests... # 5 tests pass (~8s)
 ✅ All validations completed!
-🚀 Your code is properly formatted, type-safe, and integration-tested!
+🚀 Your code is properly formatted, linted, type-safe, and integration-tested!
 ```
 
 ### Emergency Bypass Options:
@@ -220,16 +247,19 @@ git commit --no-verify -m "bypass commit hooks"
 ## 🎯 Benefits Achieved
 
 ### Code Quality
-- **100% formatted code** - No style inconsistencies reach remote
+- **100% formatted code** - Style consistency enforced at commit time
 - **Type-safe codebase** - Strict TypeScript prevents runtime errors  
-- **Lint-free code** - Maintainable, consistent coding standards
+- **Lint-free pushes** - Quality gates prevent problematic code reaching remote
 - **Unit-tested functionality** - Core features validated (286 tests)
 - **Integration-tested pipeline** - API workflows validated (42 tests)
 - **Real API validation** - External dependencies verified locally
+- **Progressive validation** - Immediate formatting, comprehensive linting at push
 
 ### Developer Productivity  
-- **Automatic fixes** - No manual formatting or simple lint fixes needed
-- **Fast feedback** - Issues caught immediately, not in CI
+- **Immediate formatting** - Style fixes applied instantly at commit
+- **Non-blocking commits** - Formatting preserved even with linting issues
+- **Fast feedback** - Integration issues caught immediately
+- **Progressive quality** - Incremental validation reduces friction
 - **Consistent workflow** - Same validation for all developers
 - **Reduced CI failures** - Fewer failed builds due to simple issues
 
@@ -304,32 +334,35 @@ Since implementing this robust validation system:
 ### ⚖️ DX vs Quality Balance Achieved
 
 - **Developer Experience**: Git hooks complete in ~67 seconds (vs industry average 5+ minutes)
+- **Progressive Validation**: Format immediately, lint comprehensively at push
 - **Early Feedback**: 37 integration tests run on every commit (~40s total)
-- **Comprehensive Validation**: 365 total tests across pre-commit + pre-push
-- **Code Quality**: 286 unit + 42 integration tests before push, 37 integration on commit
+- **Comprehensive Quality Gates**: 365 total tests across pre-commit + pre-push
+- **Non-blocking Commits**: Formatting improvements preserved regardless of linting status
 - **API Validation**: Real external API integration verified in git hooks
-- **Fail-Fast Principle**: Critical issues caught at commit-time, not push-time
+- **Incremental Quality**: Critical issues caught early, comprehensive validation at push
 - **CI Efficiency**: Expensive tests reserved for CI/CD, reducing build times
 - **Team Productivity**: Auto-fixes applied, consistent standards enforced
 
 ### Tool Synergy Benefits
 
 #### **🔄 Progressive Validation**
-1. **Lint-staged**: Immediate feedback on changed files
-2. **Pre-commit**: System-wide integration validation
-3. **Pre-push**: Comprehensive quality gates
+1. **Lint-staged**: Format files and test related functionality
+2. **Pre-commit**: System-wide integration validation with formatted code
+3. **Pre-push**: Comprehensive linting and quality gates
 4. **CI/CD**: Full pipeline and deployment validation
 
 #### **⚡ Optimized Performance**
 - **File-level caching**: Lint-staged only processes changes
 - **Smart test selection**: `vitest related` runs only affected tests
 - **Tiered integration**: Fast/medium/slow tests by complexity
+- **Separated concerns**: Format immediately, lint at quality gates
 - **Auto-fixing**: Issues resolved automatically when possible
 
 #### **🎯 Clear Responsibilities**
-- **Formatting**: Handled by Biome in lint-staged
-- **Linting**: Handled by Biome with auto-fix
+- **Pre-commit Formatting**: Handled by Biome in lint-staged (always succeeds)
+- **Pre-push Linting**: Comprehensive Biome validation with auto-fix
 - **Testing**: Progressive from related → integration → comprehensive
 - **Messaging**: Consistent format enforced by commitlint
+- **Quality Gates**: Incremental validation prevents problematic code
 
-**Result**: Developers get immediate feedback with progressive validation layers, while maintaining enterprise-grade quality standards through specialized, well-coordinated tools.
+**Result**: Developers get immediate formatting and fast feedback, with comprehensive linting validation at push time. This progressive approach maintains enterprise-grade quality standards while preserving beneficial changes and reducing commit friction.
