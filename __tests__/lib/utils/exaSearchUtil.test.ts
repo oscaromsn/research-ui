@@ -94,7 +94,8 @@ describe("executeExaSearch", () => {
   it("should throw ExaConfigError with empty EXA_API_KEY", async () => {
     // Mock the environment variable to be undefined
     const originalEnv = process.env.EXA_API_KEY
-    process.env.EXA_API_KEY = undefined
+    // biome-ignore lint/performance/noDelete: Required for proper environment variable testing
+    delete process.env.EXA_API_KEY
 
     try {
       await expect(executeExaSearch(mockSearchQuery)).rejects.toThrow(
@@ -105,7 +106,7 @@ describe("executeExaSearch", () => {
       )
     } finally {
       // Restore the original environment variable
-      if (originalEnv) {
+      if (originalEnv !== undefined) {
         process.env.EXA_API_KEY = originalEnv
       }
     }

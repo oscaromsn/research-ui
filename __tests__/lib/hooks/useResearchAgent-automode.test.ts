@@ -4,19 +4,19 @@ import { createElement } from "react"
 import type { ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator"
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent"
 import {
   autoModeStateAtom,
   researchSessionAtom,
 } from "@/lib/state/researchAtoms"
 
-// Mock the server action
-vi.mock("@/app/actions/researchAgentOrchestrator", () => ({
-  conductResearch: vi.fn(),
-}))
+// Mock conductResearch manually
+const mockConductResearch = vi.fn()
 
-const mockedConductResearch = vi.mocked(conductResearch)
+// Mock the module
+vi.doMock("@/app/actions/researchAgentOrchestrator", () => ({
+  conductResearch: mockConductResearch,
+}))
 
 describe("useResearchAgent Hook - Auto Mode", () => {
   let store: ReturnType<typeof createStore>
@@ -26,11 +26,11 @@ describe("useResearchAgent Hook - Auto Mode", () => {
 
   beforeEach(() => {
     store = createStore()
-    vi.clearAllMocks()
+    mockConductResearch.mockClear()
   })
 
   afterEach(() => {
-    vi.clearAllMocks()
+    mockConductResearch.mockClear()
   })
 
   describe("Auto Mode Toggle", () => {
@@ -100,7 +100,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         },
       })
 
-      mockedConductResearch.mockResolvedValue(mockStream)
+      mockConductResearch.mockResolvedValue(mockStream)
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
@@ -121,7 +121,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
       })
 
       // Verify conductResearch was called with auto mode config
-      expect(mockedConductResearch).toHaveBeenCalledWith(
+      expect(mockConductResearch).toHaveBeenCalledWith(
         "Test legal question",
         expect.objectContaining({
           isEnabled: true,
@@ -147,7 +147,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         },
       })
 
-      mockedConductResearch.mockResolvedValue(mockStream)
+      mockConductResearch.mockResolvedValue(mockStream)
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
@@ -162,7 +162,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
       })
 
       // Verify conductResearch was called with auto mode disabled
-      expect(mockedConductResearch).toHaveBeenCalledWith(
+      expect(mockConductResearch).toHaveBeenCalledWith(
         "Test legal question",
         expect.objectContaining({
           isEnabled: false,
@@ -182,7 +182,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         },
       })
 
-      mockedConductResearch.mockResolvedValue(mockStream)
+      mockConductResearch.mockResolvedValue(mockStream)
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
@@ -207,7 +207,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         },
       })
 
-      mockedConductResearch.mockResolvedValue(mockStream)
+      mockConductResearch.mockResolvedValue(mockStream)
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
@@ -234,14 +234,12 @@ describe("useResearchAgent Hook - Auto Mode", () => {
           const update = {
             type: "DATA",
             stage: "GENERATING_QUERIES",
-            data: {
-              queries: [
-                {
-                  query_string: "patent requirements AI",
-                  expected_information_summary: "Patent eligibility for AI",
-                },
-              ],
-            },
+            data: [
+              {
+                query_string: "patent requirements AI",
+                expected_information_summary: "Patent eligibility for AI",
+              },
+            ],
           }
           controller.enqueue(
             new TextEncoder().encode(`${JSON.stringify(update)}\n`)
@@ -250,7 +248,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         },
       })
 
-      mockedConductResearch.mockResolvedValue(mockStream)
+      mockConductResearch.mockResolvedValue(mockStream)
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
@@ -280,7 +278,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
             type: "DATA",
             stage: "ANALYZING_DOCUMENTS",
             data: {
-              docId: "doc-123",
+              document_id: "doc-123",
               title: "Test Document",
               relevanceScore: 8,
               summarySnippet: "Test summary",
@@ -293,7 +291,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         },
       })
 
-      mockedConductResearch.mockResolvedValue(mockStream)
+      mockConductResearch.mockResolvedValue(mockStream)
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
@@ -309,7 +307,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         const sessionState = store.get(researchSessionAtom)
         expect(sessionState.accumulatedDocuments).toHaveLength(1)
         expect(sessionState.accumulatedDocuments[0]).toMatchObject({
-          docId: "doc-123",
+          document_id: "doc-123",
           title: "Test Document",
           relevanceScore: 8,
           summarySnippet: "Test summary",
@@ -342,7 +340,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         },
       })
 
-      mockedConductResearch.mockResolvedValue(mockStream)
+      mockConductResearch.mockResolvedValue(mockStream)
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
@@ -389,7 +387,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         },
       })
 
-      mockedConductResearch.mockResolvedValue(mockStream)
+      mockConductResearch.mockResolvedValue(mockStream)
 
       // Start research
       await act(async () => {
@@ -424,7 +422,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         },
       })
 
-      mockedConductResearch.mockResolvedValue(mockStream)
+      mockConductResearch.mockResolvedValue(mockStream)
 
       // Start research
       await act(async () => {
@@ -452,7 +450,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         wrapper: JotaiProvider,
       })
 
-      mockedConductResearch.mockRejectedValue(new Error("Auto mode error"))
+      mockConductResearch.mockRejectedValue(new Error("Auto mode error"))
 
       // Enable auto mode
       act(() => {
@@ -496,7 +494,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         },
       })
 
-      mockedConductResearch.mockResolvedValue(mockStream)
+      mockConductResearch.mockResolvedValue(mockStream)
 
       // Start new research (which should reset state)
       await act(async () => {

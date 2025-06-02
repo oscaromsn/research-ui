@@ -195,12 +195,14 @@ describe("API Testing Utilities", () => {
       expect(isCI()).toBe(true)
 
       // Clear and test GitHub Actions
-      process.env.CI = undefined
+      // biome-ignore lint/performance/noDelete: Required for proper environment variable testing
+      delete process.env.CI
       process.env.GITHUB_ACTIONS = "true"
       expect(isCI()).toBe(true)
 
       // Test no CI - clear all CI variables
-      process.env.GITHUB_ACTIONS = undefined
+      // biome-ignore lint/performance/noDelete: Required for proper environment variable testing
+      delete process.env.GITHUB_ACTIONS
       expect(isCI()).toBe(false)
 
       // Restore all original environment variables
