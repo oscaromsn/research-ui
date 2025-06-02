@@ -1,41 +1,41 @@
-"use client";
+'use client'
 
-import { useAtomValue } from "jotai";
-import { Brain, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useAtomValue } from 'jotai'
+import { Brain, ChevronRight } from 'lucide-react'
+import { useState } from 'react'
 
 import {
-  synthesisDetailsAtom,
   researchSessionAtom,
-} from "@/lib/state/researchAtoms";
+  synthesisDetailsAtom,
+} from '@/lib/state/researchAtoms'
 
-import { SynthesisReasoningModal } from "./modals/synthesis-reasoning-modal";
-import { ReportDrafter } from "./report-drafter";
+import { SynthesisReasoningModal } from './modals/synthesis-reasoning-modal'
+import { ReportDrafter } from './report-drafter'
 export function SynthesisReporting() {
-  const [activeTab, setActiveTab] = useState("synthesis");
-  const [showSynthesisReasoning, setShowSynthesisReasoning] = useState(false);
-  const synthesis = useAtomValue(synthesisDetailsAtom);
-  const researchSession = useAtomValue(researchSessionAtom);
+  const [activeTab, setActiveTab] = useState('synthesis')
+  const [showSynthesisReasoning, setShowSynthesisReasoning] = useState(false)
+  const synthesis = useAtomValue(synthesisDetailsAtom)
+  const researchSession = useAtomValue(researchSessionAtom)
 
   // Use accumulated topics if available, otherwise fall back to current session
   const allTopics =
     researchSession.accumulatedTopics.length > 0
       ? researchSession.accumulatedTopics
-      : synthesis.topics;
+      : synthesis.topics
 
   // Sort topics by timestamp (most recent first)
   const sortedTopics = [...allTopics].sort((a, b) => {
-    const aTime = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-    const bTime = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-    return bTime - aTime;
-  });
+    const aTime = a.timestamp ? new Date(a.timestamp).getTime() : 0
+    const bTime = b.timestamp ? new Date(b.timestamp).getTime() : 0
+    return bTime - aTime
+  })
 
   const getConfidenceLabel = (confidence?: number): string => {
-    if (!confidence) return "Unknown";
-    if (confidence >= 80) return `High (${confidence}%)`;
-    if (confidence >= 60) return `Medium (${confidence}%)`;
-    return `Low (${confidence}%)`;
-  };
+    if (!confidence) return 'Unknown'
+    if (confidence >= 80) return `High (${confidence}%)`
+    if (confidence >= 60) return `Medium (${confidence}%)`
+    return `Low (${confidence}%)`
+  }
   return (
     <div className="bg-[#f8f9fa] dark:bg-[#171c2c] p-4 w-full md:w-1/3 overflow-y-auto">
       <div className="mb-4">
@@ -45,26 +45,26 @@ export function SynthesisReporting() {
         <div className="flex mb-4 border-[#e1e5eb] dark:border-[#2a3148] border-b">
           <button
             type="button"
-            className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "synthesis" ? "border-b-2 border-[#3a7bb7] text-[#3a7bb7]" : "text-[#64748b] dark:text-[#94a3b8] hover:text-[#4a5568] dark:hover:text-[#e2e8f0]"}`}
-            onClick={() => setActiveTab("synthesis")}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'synthesis' ? 'border-b-2 border-[#3a7bb7] text-[#3a7bb7]' : 'text-[#64748b] dark:text-[#94a3b8] hover:text-[#4a5568] dark:hover:text-[#e2e8f0]'}`}
+            onClick={() => setActiveTab('synthesis')}
           >
             Synthesis Studio
           </button>
           <button
             type="button"
-            className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "report" ? "border-b-2 border-[#3a7bb7] text-[#3a7bb7]" : "text-[#64748b] dark:text-[#94a3b8] hover:text-[#4a5568] dark:hover:text-[#e2e8f0]"}`}
-            onClick={() => setActiveTab("report")}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'report' ? 'border-b-2 border-[#3a7bb7] text-[#3a7bb7]' : 'text-[#64748b] dark:text-[#94a3b8] hover:text-[#4a5568] dark:hover:text-[#e2e8f0]'}`}
+            onClick={() => setActiveTab('report')}
           >
             Report Drafter
           </button>
         </div>
       </div>
-      {activeTab === "synthesis" ? (
+      {activeTab === 'synthesis' ? (
         <div className="mb-6">
           <div className="mb-3">
             <div className="flex justify-between items-center mb-2 cursor-pointer">
               <h3 className="font-medium text-[#4a5568] dark:text-[#a0aec0] text-sm">
-                Synthesized Topics{" "}
+                Synthesized Topics{' '}
                 {researchSession.accumulatedTopics.length > 0 &&
                   `(${sortedTopics.length} total)`}
               </h3>
@@ -83,8 +83,8 @@ export function SynthesisReporting() {
                     {topic.timestamp && (
                       <div className="text-[#64748b] dark:text-[#94a3b8] text-xs ml-2">
                         {new Date(topic.timestamp).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
+                          hour: '2-digit',
+                          minute: '2-digit',
                         })}
                       </div>
                     )}
@@ -94,7 +94,7 @@ export function SynthesisReporting() {
                     <span
                       className="inline-block bg-[#4a5568] dark:bg-[#a0aec0] w-0.5 h-3 ml-0.5 animate-caret-blink"
                       style={{
-                        verticalAlign: "text-top",
+                        verticalAlign: 'text-top',
                       }}
                     />
                   </p>
@@ -142,8 +142,8 @@ export function SynthesisReporting() {
                       key={aspect || `aspect-${index}`}
                       className={
                         index < (synthesis.unansweredAspects?.length ?? 0) - 1
-                          ? "mb-1"
-                          : ""
+                          ? 'mb-1'
+                          : ''
                       }
                     >
                       {aspect}
@@ -174,8 +174,8 @@ export function SynthesisReporting() {
         onClose={() => setShowSynthesisReasoning(false)}
         synthesisData={synthesis}
         sourcesUsed={sortedTopics.flatMap(
-          (topic) =>
-            topic.docIds?.map((docId) => ({
+          topic =>
+            topic.docIds?.map(docId => ({
               docId,
               title: topic.title,
               confidence: (topic.confidence || 0) / 100,
@@ -183,5 +183,5 @@ export function SynthesisReporting() {
         )}
       />
     </div>
-  );
+  )
 }

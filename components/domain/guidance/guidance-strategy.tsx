@@ -1,70 +1,70 @@
-"use client";
+'use client'
 
-import { useAtomValue } from "jotai";
+import { useAtomValue } from 'jotai'
 import {
   AlertTriangle,
   Brain,
   ChevronDown,
   ChevronRight,
+  FileText,
   Pause,
   Play,
-  FileText,
-} from "lucide-react";
-import { useState } from "react";
+} from 'lucide-react'
+import { useState } from 'react'
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Switch } from "@/components/ui/switch";
-import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
+} from '@/components/ui/collapsible'
+import { Switch } from '@/components/ui/switch'
+import { useResearchAgent } from '@/lib/hooks/useResearchAgent'
 import {
   generatedQueriesAtom,
   researchAssessmentAtom,
   researchLogAtom,
   researchSessionAtom,
-} from "@/lib/state/researchAtoms";
+} from '@/lib/state/researchAtoms'
 export function GuidanceStrategy() {
-  const [isAssessmentExpanded, setIsAssessmentExpanded] = useState(false);
-  const [isLogExpanded, setIsLogExpanded] = useState(true);
-  const [legalQuestion, setLegalQuestion] = useState("");
-  const agent = useResearchAgent();
-  const generatedQueries = useAtomValue(generatedQueriesAtom);
-  const researchLogs = useAtomValue(researchLogAtom);
-  const assessment = useAtomValue(researchAssessmentAtom);
-  const researchSession = useAtomValue(researchSessionAtom);
+  const [isAssessmentExpanded, setIsAssessmentExpanded] = useState(false)
+  const [isLogExpanded, setIsLogExpanded] = useState(true)
+  const [legalQuestion, setLegalQuestion] = useState('')
+  const agent = useResearchAgent()
+  const generatedQueries = useAtomValue(generatedQueriesAtom)
+  const researchLogs = useAtomValue(researchLogAtom)
+  const assessment = useAtomValue(researchAssessmentAtom)
+  const researchSession = useAtomValue(researchSessionAtom)
 
   // Use accumulated queries if available, otherwise fall back to current session
   const allQueries =
     researchSession.accumulatedQueries.length > 0
       ? researchSession.accumulatedQueries
-      : generatedQueries;
+      : generatedQueries
 
   // Sort queries by timestamp (most recent first)
   const sortedQueries = [...allQueries].sort((a, b) => {
-    const aTime = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-    const bTime = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-    return bTime - aTime;
-  });
+    const aTime = a.timestamp ? new Date(a.timestamp).getTime() : 0
+    const bTime = b.timestamp ? new Date(b.timestamp).getTime() : 0
+    return bTime - aTime
+  })
 
   const handleStartResearch = () => {
     if (legalQuestion.trim()) {
-      agent.startResearch(legalQuestion);
+      agent.startResearch(legalQuestion)
     }
-  };
+  }
 
   const handleAbortResearch = () => {
-    agent.abortResearch();
-  };
+    agent.abortResearch()
+  }
 
   const handlePauseResearch = () => {
-    agent.pauseResearch();
-  };
+    agent.pauseResearch()
+  }
 
   const handleResumeResearch = () => {
-    agent.resumeResearch();
-  };
+    agent.resumeResearch()
+  }
   return (
     <div className="bg-[#f8f9fa] dark:bg-[#171c2c] p-4 border-[#e1e5eb] dark:border-[#2a3148] border-r w-full md:w-1/3 overflow-y-auto">
       <div className="mb-4">
@@ -76,7 +76,7 @@ export function GuidanceStrategy() {
           {researchLogs.length > 0 && (
             <div className="mb-4">
               <Collapsible open={isLogExpanded} onOpenChange={setIsLogExpanded}>
-                <CollapsibleTrigger asChild>
+                <CollapsibleTrigger asChild={true}>
                   <button
                     type="button"
                     className="flex items-center justify-between w-full p-3 bg-white dark:bg-[#1e2436] border border-[#e1e5eb] dark:border-[#2a3148] rounded-md hover:bg-gray-50 dark:hover:bg-[#242a3d] transition-colors"
@@ -93,7 +93,7 @@ export function GuidanceStrategy() {
                     <ChevronDown
                       size={16}
                       className={`text-[#64748b] dark:text-[#94a3b8] transform transition-transform ${
-                        isLogExpanded ? "rotate-180" : ""
+                        isLogExpanded ? 'rotate-180' : ''
                       }`}
                     />
                   </button>
@@ -102,7 +102,7 @@ export function GuidanceStrategy() {
                   <div className="mt-2 bg-white dark:bg-[#1e2436] p-3 border border-[#e1e5eb] dark:border-[#2a3148] rounded-lg">
                     <div className="h-32 overflow-y-auto">
                       <pre className="text-[#4a5568] dark:text-[#a0aec0] text-xs whitespace-pre-wrap">
-                        {researchLogs.join("\n")}
+                        {researchLogs.join('\n')}
                       </pre>
                     </div>
                   </div>
@@ -132,7 +132,7 @@ export function GuidanceStrategy() {
             type="text"
             placeholder="Enter Legal Question or Research Topic"
             value={legalQuestion}
-            onChange={(e) => setLegalQuestion(e.target.value)}
+            onChange={e => setLegalQuestion(e.target.value)}
             disabled={agent.isLoading}
             className="bg-white dark:bg-[#1e2436] mb-3 px-4 py-3 border border-[#e1e5eb] dark:border-[#2a3148] rounded-md focus:outline-none focus:ring-1 focus:ring-[#4a90e2] w-full text-sm"
           />
@@ -171,7 +171,7 @@ export function GuidanceStrategy() {
             {agent.isLoading && (
               <div className="space-y-2">
                 <div className="bg-[#e2e8f0] dark:bg-[#2a3148] py-2 px-3 rounded-md text-[#4a5568] dark:text-[#a0aec0] text-sm">
-                  {agent.autoModeEnabled && "Auto Mode: "}Processing:{" "}
+                  {agent.autoModeEnabled && 'Auto Mode: '}Processing:{' '}
                   {agent.currentStage}
                   {agent.currentMessage && ` - ${agent.currentMessage}`}
                 </div>
@@ -209,7 +209,7 @@ export function GuidanceStrategy() {
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <h3 className="font-medium text-[#4a5568] dark:text-[#a0aec0] text-sm">
-              Generated Search Queries{" "}
+              Generated Search Queries{' '}
               {researchSession.accumulatedQueries.length > 0 &&
                 `(${sortedQueries.length} total)`}
             </h3>
@@ -227,8 +227,8 @@ export function GuidanceStrategy() {
                 {query.timestamp && (
                   <div className="text-[#64748b] dark:text-[#94a3b8] text-xs ml-2">
                     {new Date(query.timestamp).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
+                      hour: '2-digit',
+                      minute: '2-digit',
                     })}
                   </div>
                 )}
@@ -261,30 +261,30 @@ export function GuidanceStrategy() {
                   size={16}
                   className={`flex-shrink-0 mt-0.5 mr-2 ${
                     assessment.isSufficient
-                      ? "text-green-500"
-                      : "text-[#eab308]"
+                      ? 'text-green-500'
+                      : 'text-[#eab308]'
                   }`}
                 />
                 <div className="flex-1">
                   <h3 className="font-medium text-sm text-left">
-                    Agent Assessment{" "}
+                    Agent Assessment{' '}
                     <span
                       className={
                         assessment.isSufficient
-                          ? "text-green-500"
-                          : "text-[#eab308]"
+                          ? 'text-green-500'
+                          : 'text-[#eab308]'
                       }
                     >
                       {assessment.isSufficient
-                        ? "Research Sufficient ✓"
-                        : "Further Action Needed ⚠️"}
+                        ? 'Research Sufficient ✓'
+                        : 'Further Action Needed ⚠️'}
                     </span>
                   </h3>
                 </div>
                 <ChevronDown
                   size={16}
                   className={`text-[#64748b] dark:text-[#94a3b8] transform transition-transform ${
-                    isAssessmentExpanded ? "rotate-180" : ""
+                    isAssessmentExpanded ? 'rotate-180' : ''
                   }`}
                 />
               </div>
@@ -333,7 +333,7 @@ export function GuidanceStrategy() {
 
                   <div>
                     <h4 className="mb-2 font-medium text-[#4a5568] dark:text-[#a0aec0] text-xs">
-                      Next Action: {assessment.nextAction.replace(/_/g, " ")}
+                      Next Action: {assessment.nextAction.replace(/_/g, ' ')}
                     </h4>
                   </div>
 
@@ -353,5 +353,5 @@ export function GuidanceStrategy() {
         </div>
       )}
     </div>
-  );
+  )
 }

@@ -6,136 +6,136 @@
  * For real API tests, see integration tests with API key requirements
  */
 
-import { beforeEach, vi } from "vitest";
+import { beforeEach, vi } from 'vitest'
 
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
-import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator";
+import { conductResearch } from '@/app/actions/researchAgentOrchestrator'
+import type { ResearchUpdate } from '@/app/actions/researchAgentOrchestrator'
 
 // Mock the BAML client to avoid real API calls
 // This allows the test to run without requiring API keys
-vi.mock("@/baml_client", () => import("@/__mocks__/baml_client"));
+vi.mock('@/baml_client', () => import('@/__mocks__/baml_client'))
 
 // Mock the executeExaSearch function to avoid real search API calls during testing
-vi.mock("@/lib/utils/exaSearchUtil", () => ({
+vi.mock('@/lib/utils/exaSearchUtil', () => ({
   executeExaSearch: vi.fn().mockResolvedValue([
     {
-      id: "doc_001",
-      url: "https://example.com/case1",
-      title: "Smith v. Jones - Contract Dispute Resolution",
-      source_name: "Federal Court Database",
-      snippet: "This case establishes precedent for contract interpretation...",
+      id: 'doc_001',
+      url: 'https://example.com/case1',
+      title: 'Smith v. Jones - Contract Dispute Resolution',
+      source_name: 'Federal Court Database',
+      snippet: 'This case establishes precedent for contract interpretation...',
       full_text:
-        "Full text of the case discussing contract law principles and interpretation methods...",
-      published_date: "2023-05-15",
+        'Full text of the case discussing contract law principles and interpretation methods...',
+      published_date: '2023-05-15',
       retrieval_date: new Date().toISOString(),
-      author: "Judge Williams",
+      author: 'Judge Williams',
       score: 0.92,
-      metadata: { court: "federal", jurisdiction: "US" },
+      metadata: { court: 'federal', jurisdiction: 'US' },
       original_query: {
-        query_string: "contract breach legal implications",
-        expected_information: ["breach definition", "damages", "remedies"],
+        query_string: 'contract breach legal implications',
+        expected_information: ['breach definition', 'damages', 'remedies'],
       },
     },
   ]),
-}));
+}))
 
-describe("Research Orchestrator - Basic Streaming", () => {
+describe('Research Orchestrator - Basic Streaming', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-  });
+    vi.clearAllMocks()
+  })
 
-  it("should stream INITIALIZING and COMPLETED updates", async () => {
-    const legalQuestion = "Test question";
-    const stream = await conductResearch(legalQuestion);
+  it('should stream INITIALIZING and COMPLETED updates', async () => {
+    const legalQuestion = 'Test question'
+    const stream = await conductResearch(legalQuestion)
 
-    const updates: ResearchUpdate[] = [];
-    const reader = stream.getReader();
-    const decoder = new TextDecoder();
+    const updates: ResearchUpdate[] = []
+    const reader = stream.getReader()
+    const decoder = new TextDecoder()
 
     // Set a timeout to prevent hanging
     const timeout = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Test timeout")), 9000)
-    );
+      setTimeout(() => reject(new Error('Test timeout')), 9000)
+    )
 
     try {
       await Promise.race([
         (async () => {
-          let completedFound = false;
+          let completedFound = false
           while (!completedFound) {
-            const { done, value } = await reader.read();
-            if (done) break;
+            const { done, value } = await reader.read()
+            if (done) break
 
-            const chunk = decoder.decode(value);
-            const lines = chunk.split("\n").filter((line) => line.trim());
+            const chunk = decoder.decode(value)
+            const lines = chunk.split('\n').filter(line => line.trim())
 
             for (const line of lines) {
               try {
-                const update = JSON.parse(line) as ResearchUpdate;
-                updates.push(update);
-                if (update.stage === "COMPLETED") {
-                  completedFound = true;
+                const update = JSON.parse(line) as ResearchUpdate
+                updates.push(update)
+                if (update.stage === 'COMPLETED') {
+                  completedFound = true
                 }
               } catch {
-                console.warn("Failed to parse JSON line:", line);
+                console.warn('Failed to parse JSON line:', line)
               }
             }
           }
         })(),
         timeout,
-      ]);
+      ])
     } catch (error) {
-      if (error instanceof Error && error.message !== "Test timeout") {
-        console.warn("Stream processing error:", error.message);
+      if (error instanceof Error && error.message !== 'Test timeout') {
+        console.warn('Stream processing error:', error.message)
       }
     } finally {
-      reader.releaseLock();
+      reader.releaseLock()
     }
 
     // Verify basic flow
-    expect(updates.length).toBeGreaterThanOrEqual(2);
-    expect(updates[0].type).toBe("STATUS_CHANGE");
-    expect(updates[0].stage).toBe("INITIALIZING");
-    expect(updates[updates.length - 1].stage).toBe("COMPLETED");
-  }, 10000); // 10 second timeout
+    expect(updates.length).toBeGreaterThanOrEqual(2)
+    expect(updates[0].type).toBe('STATUS_CHANGE')
+    expect(updates[0].stage).toBe('INITIALIZING')
+    expect(updates[updates.length - 1].stage).toBe('COMPLETED')
+  }, 10000) // 10 second timeout
 
-  it("should handle empty legal question gracefully", async () => {
-    const stream = await conductResearch("");
-    const reader = stream.getReader();
+  it('should handle empty legal question gracefully', async () => {
+    const stream = await conductResearch('')
+    const reader = stream.getReader()
 
-    let hasCompleted = false;
+    let hasCompleted = false
 
     // Set a timeout to prevent hanging
     const timeout = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Test timeout")), 9000)
-    );
+      setTimeout(() => reject(new Error('Test timeout')), 9000)
+    )
 
     try {
       await Promise.race([
         (async () => {
           while (!hasCompleted) {
-            const { done, value } = await reader.read();
-            if (done) break;
+            const { done, value } = await reader.read()
+            if (done) break
 
-            const chunk = new TextDecoder().decode(value);
-            const lines = chunk.split("\n").filter((line) => line.trim());
+            const chunk = new TextDecoder().decode(value)
+            const lines = chunk.split('\n').filter(line => line.trim())
 
             for (const line of lines) {
-              const update = JSON.parse(line) as ResearchUpdate;
-              if (update.stage === "COMPLETED") hasCompleted = true;
+              const update = JSON.parse(line) as ResearchUpdate
+              if (update.stage === 'COMPLETED') hasCompleted = true
             }
           }
         })(),
         timeout,
-      ]);
+      ])
     } catch (error) {
-      if (error instanceof Error && error.message !== "Test timeout") {
-        console.warn("Stream processing error:", error.message);
+      if (error instanceof Error && error.message !== 'Test timeout') {
+        console.warn('Stream processing error:', error.message)
       }
     } finally {
-      reader.releaseLock();
+      reader.releaseLock()
     }
 
     // Should complete successfully even with empty question (for now)
-    expect(hasCompleted).toBe(true);
-  }, 10000); // 10 second timeout
-});
+    expect(hasCompleted).toBe(true)
+  }, 10000) // 10 second timeout
+})

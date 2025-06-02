@@ -32,7 +32,6 @@ When I ask you to find information or understand project context, refer to these
 
 - **Development Tooling & Environment**:
 	- `@tooling/DEVTOOLS.md` and `@tooling/DEVTOOLS_SUMMARY.md`: Overview of configured development tools (Commitlint, Size Limit, Dependency Cruiser, Husky, Lint Staged).
-	- `@tooling/ESLINT_CONFIGURATION.md`: Details on ESLint setup and migration.
 	- `@tooling/TESTING_README.MD` and `@tooling/TESTING_SUMMARY.MD`: Guides for the testing setup (Vitest, Testing Library, Playwright).
 	- `@tooling/DEVTOOLS_TESTING_REPORT.md`: A snapshot of tooling health and fixes, useful for understanding how devtool issues are addressed.
 

@@ -11,7 +11,7 @@ echo "💡 To skip: SKIP_HOOKS=true git commit"
 # === FILE-SPECIFIC VALIDATION (via lint-staged) ===
 # Processes only staged/changed files:
 # - Auto-format changed files (Biome)
-# - Auto-fix linting issues (ESLint)
+# - Auto-fix linting issues (Biome)
 # - Run related unit tests only
 # - Generate BAML client if schema changes
 bunx lint-staged

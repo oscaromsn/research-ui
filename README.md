@@ -66,7 +66,7 @@ The application emphasizes a server-first approach using Next.js App Router with
     *   BAML Native Tests
     *   Vitest & React Testing Library (Unit/Component/Integration)
     *   Playwright (End-to-End)
-*   **Code Quality:** Biome (formatting) ESLint (linting)
+*   **Code Quality:** Biome (formatting and linting)
 *   **DevOps & Tooling:** Husky, lint-staged, commitlint, Knip, Dependency-Cruiser
 
 ## Architecture
@@ -85,7 +85,7 @@ A brief overview of key directories:
 *   `/components/`: React UI components, categorized into `ui/`, `domain/`, and `layout/`.
 *   `/lib/`: Shared utilities, custom React hooks (`lib/hooks/`), Zod schemas (`lib/schemas/`), and Jotai atoms (`lib/state/`).
 *   `/e2e/`: Playwright end-to-end tests.
-*   (Root): Configuration files for Next.js, TypeScript, ESLint, Biome, Vitest, Playwright, Husky, etc.
+*   (Root): Configuration files for Next.js, TypeScript, Biome, Vitest, Playwright, Husky, etc.
 
 ### Research Agent Orchestrator Pattern
 
@@ -234,8 +234,8 @@ For complete testing documentation, troubleshooting, and best practices, see [do
 
 ### Code Quality & Conventions
 
-*   **Formatting:** Code is automatically formatted by Biome (and ESLint for certain aspects). Run `bun format` to format manually.
-*   **Linting:** ESLint is configured for comprehensive linting. Run `bun lint` or `bun lint:fix`.
+*   **Formatting:** Code is automatically formatted by Biome. Run `bun format` to format manually.
+*   **Linting:** Biome is configured for comprehensive linting. Run `bun lint` to lint and fix issues.
 *   **Commit Messages:** Follow Conventional Commits. `bun commit` can be used for guided commits (via `git-cz`), and `commitlint` (triggered by Husky) enforces this.
 *   **Type Checking:** Run `bun typecheck` regularly.
 *   **Husky Hooks:** Pre-commit and pre-push hooks are configured in `.husky/` to run lint-staged, type checks, etc.
@@ -248,7 +248,7 @@ For complete testing documentation, troubleshooting, and best practices, see [do
 *   `bun build`: Builds the application for production.
 *   `bun start`: Starts the production server.
 *   `bun format`: Formats code using Biome.
-*   `bun lint`: Lints code using ESLint.
+*   `bun lint`: Lints code using Biome.
 *   `bun typecheck`: Runs TypeScript compiler checks.
 *   `bun run test`: Runs all Vitest unit/component tests.
 *   `bun test:e2e`: Runs all Playwright E2E tests.

@@ -210,8 +210,8 @@ Automated checks are enforced via Husky hooks.
 
 ### Linting
 
-*   ESLint is configured with various plugins (Next.js, React, TypeScript, Import, JSX-A11Y, Promise, Security, Testing Library, Vitest).
-*   Run `bun lint` to check for linting errors.
+*   Biome is configured for comprehensive linting and formatting (TypeScript, React, JSX-A11Y, security, and more).
+*   Run `bun lint` to check for linting errors and apply fixes.
 *   Run `bun lint:fix` to attempt automatic fixes.
 
 ### Type Checking

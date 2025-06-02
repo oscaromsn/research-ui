@@ -1,25 +1,25 @@
-import { X } from "lucide-react";
-import type React from "react";
+import { X } from 'lucide-react'
+import type React from 'react'
 interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  children: React.ReactNode;
-  size?: "md" | "lg" | "xl";
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  children: React.ReactNode
+  size?: 'md' | 'lg' | 'xl'
 }
 export function Modal({
   isOpen,
   onClose,
   title,
   children,
-  size = "md",
+  size = 'md',
 }: ModalProps) {
-  if (!isOpen) return null;
+  if (!isOpen) return null
   const sizeClasses = {
-    md: "max-w-md",
-    lg: "max-w-lg",
-    xl: "max-w-xl",
-  };
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+  }
   return (
     <div className="z-50 fixed inset-0 flex justify-center items-center bg-black/50 animate-in fade-in-0">
       <div
@@ -40,5 +40,5 @@ export function Modal({
         <div className="p-4 max-h-[80vh] overflow-y-auto">{children}</div>
       </div>
     </div>
-  );
+  )
 }

@@ -40,5 +40,5 @@ const fileMap = {
   "types/synthesized_topic.baml": "// For synthesizing findings from multiple documents\nclass SynthesizedTopic {\n  topic_title string @description(\"A title for this synthesized topic or legal principle.\")\n  synthesis string @description(\"A coherent synthesis of information related to this topic, drawing from multiple analyzed documents. Should explain convergences, divergences, and overall themes.\")\n  supporting_document_ids string[] @description(\"IDs of the AnalyzedDocuments that support this synthesis.\")\n  confidence_score int @description(\"Confidence in the accuracy and completeness of this synthesis (1-10).\")\n}",
 }
 export const getBamlFiles = () => {
-    return fileMap;
-}
+	return fileMap;
+};

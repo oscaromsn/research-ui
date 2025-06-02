@@ -1,13 +1,13 @@
-"use client";
+'use client'
 
-import { Modal } from "@/components/ui/modal";
-import type { ClientAnalysisReasoning } from "@/lib/state/researchAtoms";
+import { Modal } from '@/components/ui/modal'
+import type { ClientAnalysisReasoning } from '@/lib/state/researchAtoms'
 
 interface AnalysisReasoningModalProps {
-  isOpen: boolean;
-  onCloseAction: () => void;
-  reasoning?: ClientAnalysisReasoning;
-  documentTitle?: string;
+  isOpen: boolean
+  onCloseAction: () => void
+  reasoning?: ClientAnalysisReasoning
+  documentTitle?: string
 }
 
 export function AnalysisReasoningModal({
@@ -20,7 +20,7 @@ export function AnalysisReasoningModal({
     <Modal
       isOpen={isOpen}
       onClose={onCloseAction}
-      title={`Analysis Reasoning: ${documentTitle || "Document"}`}
+      title={`Analysis Reasoning: ${documentTitle || 'Document'}`}
       size="xl"
     >
       <div className="p-6">
@@ -34,7 +34,7 @@ export function AnalysisReasoningModal({
               className="text-sm text-[#4a5568] dark:text-[#a0aec0] leading-relaxed bg-[#f8fafc] dark:bg-[#1e2436] p-3 rounded"
             >
               {reasoning?.analyzeLegalQuestionSummary ||
-                "No reasoning available for the legal question analysis."}
+                'No reasoning available for the legal question analysis.'}
             </p>
           </div>
 
@@ -47,7 +47,7 @@ export function AnalysisReasoningModal({
               className="text-sm text-[#4a5568] dark:text-[#a0aec0] leading-relaxed bg-[#f8fafc] dark:bg-[#1e2436] p-3 rounded"
             >
               {reasoning?.considerRelevantPrinciplesSummary ||
-                "No reasoning available for legal principles consideration."}
+                'No reasoning available for legal principles consideration.'}
             </p>
           </div>
 
@@ -96,5 +96,5 @@ export function AnalysisReasoningModal({
         </div>
       </div>
     </Modal>
-  );
+  )
 }

@@ -1,7 +1,7 @@
-import { GuidanceStrategy } from "@domain/guidance/guidance-strategy";
-import { EvidenceAnalysis } from "@domain/legal-research/evidence-analysis";
-import { SynthesisReporting } from "@domain/report-generation/synthesis-reporting";
-import { Header } from "@layout/header";
+import { GuidanceStrategy } from '@domain/guidance/guidance-strategy'
+import { EvidenceAnalysis } from '@domain/legal-research/evidence-analysis'
+import { SynthesisReporting } from '@domain/report-generation/synthesis-reporting'
+import { Header } from '@layout/header'
 
 export default function Home() {
   return (
@@ -13,5 +13,5 @@ export default function Home() {
         <SynthesisReporting />
       </main>
     </>
-  );
+  )
 }

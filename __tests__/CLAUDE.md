@@ -159,7 +159,7 @@ bun run typecheck:strict
 - Proper optional property handling
 - `null` vs `undefined` alignment with external APIs
 
-### Code Quality (ESLint)
+### Code Quality (Biome)
 
 #### Continuous Linting
 ```bash
@@ -318,7 +318,7 @@ const props = {
 const result = externalApiResult ?? null; // not undefined
 ```
 
-### ESLint Errors
+### Biome Errors
 
 #### Systematic Resolution
 1. **Auto-fix first**: `bun run lint:fix`

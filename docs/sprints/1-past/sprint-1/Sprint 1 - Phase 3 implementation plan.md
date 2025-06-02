@@ -204,7 +204,6 @@ This is the core of the hook. Modify the `try` block in `startResearch`:
     // ... (inside startResearch, after `const stream = await conductResearch(legalQuestion);`)
 
             const reader = stream.pipeThrough(new TextDecoderStream(), { signal: controller.signal }).getReader();
-            // eslint-disable-next-line no-constant-condition
             while (true) {
                 try {
                     const { value, done } = await reader.read();

@@ -23,7 +23,7 @@ LexiSynth is a Next.js 15 application designed to assist legal professionals by 
 - **Axios**: HTTP client for external API calls.
 - **Vitest & React Testing Library**: unit/component tests.
 - **Playwright**: E2E tests.
-- **Biome & ESLint**: Code quality and formatting
+- **Biome**: Code quality, formatting, and linting
 
 ## Code Standards
 
@@ -214,9 +214,8 @@ bun baml:generate
 # Type checking
 bun typecheck
 
-# Linting & Formatting (Biome based on CLAUDE.md intent, though package.json shows eslint)
-# Assuming biome script: bun lint && bun format
-# Or if ESLint is used: next lint
+# Linting & Formatting
+bun lint && bun format
 
 # Build (ensures app compiles)
 bun build

@@ -1,10 +1,10 @@
-"use client";
+'use client'
 
-import { Provider } from "jotai/react";
-import type { ReactNode } from "react";
+import { Provider } from 'jotai/react'
+import type { ReactNode } from 'react'
 
 interface JotaiProviderProps {
-  children: ReactNode;
+  children: ReactNode
 }
 
 /**
@@ -12,5 +12,5 @@ interface JotaiProviderProps {
  * This prevents the "multiple Jotai instances" warning and ensures consistent state.
  */
 export function JotaiProvider({ children }: JotaiProviderProps) {
-  return <Provider>{children}</Provider>;
+  return <Provider>{children}</Provider>
 }

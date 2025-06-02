@@ -1,19 +1,19 @@
-import { AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock } from 'lucide-react'
 
-import type { DetailedReasoning } from "@/baml_client/types";
-import type { ClientSynthesis } from "@/lib/state/researchAtoms";
-import { Modal } from "@ui/modal";
+import type { DetailedReasoning } from '@/baml_client/types'
+import type { ClientSynthesis } from '@/lib/state/researchAtoms'
+import { Modal } from '@ui/modal'
 
 interface SynthesisReasoningModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  synthesisData?: ClientSynthesis;
-  reasoning?: DetailedReasoning;
+  isOpen: boolean
+  onClose: () => void
+  synthesisData?: ClientSynthesis
+  reasoning?: DetailedReasoning
   sourcesUsed?: Array<{
-    docId: string;
-    title?: string;
-    confidence: number;
-  }>;
+    docId: string
+    title?: string
+    confidence: number
+  }>
 }
 
 export function SynthesisReasoningModal({
@@ -24,55 +24,55 @@ export function SynthesisReasoningModal({
   sourcesUsed = [],
 }: SynthesisReasoningModalProps) {
   const getReasoningSteps = () => {
-    if (!reasoning) return [];
+    if (!reasoning) return []
 
     const steps = [
       {
-        status: "complete" as const,
+        status: 'complete' as const,
         text:
           reasoning.analyze_legal_question?.summary ||
-          "Analyzed legal question",
+          'Analyzed legal question',
         details: reasoning.analyze_legal_question?.items_considered,
       },
       {
-        status: "complete" as const,
+        status: 'complete' as const,
         text:
           reasoning.consider_relevant_legal_principles?.summary ||
-          "Considered relevant legal principles",
+          'Considered relevant legal principles',
         details: reasoning.consider_relevant_legal_principles?.items_considered,
       },
-    ];
+    ]
 
     if (reasoning.formulate_search_queries_strategy?.summary) {
       steps.push({
-        status: "complete" as const,
+        status: 'complete' as const,
         text: reasoning.formulate_search_queries_strategy.summary,
         details: reasoning.formulate_search_queries_strategy.items_considered,
-      });
+      })
     }
 
     if (reasoning.specify_expected_information_strategy?.summary) {
       steps.push({
-        status: "complete" as const,
+        status: 'complete' as const,
         text: reasoning.specify_expected_information_strategy.summary,
         details:
           reasoning.specify_expected_information_strategy.items_considered,
-      });
+      })
     }
 
     if (reasoning.ensure_comprehensive_coverage_strategy?.summary) {
       steps.push({
-        status: "complete" as const,
+        status: 'complete' as const,
         text: reasoning.ensure_comprehensive_coverage_strategy.summary,
         details:
           reasoning.ensure_comprehensive_coverage_strategy.items_considered,
-      });
+      })
     }
 
-    return steps;
-  };
+    return steps
+  }
 
-  const reasoningSteps = getReasoningSteps();
+  const reasoningSteps = getReasoningSteps()
 
   return (
     <Modal
@@ -86,7 +86,7 @@ export function SynthesisReasoningModal({
           <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
           <p>
             {synthesisData?.reasoningSummary ||
-              "This synthesis is based on the analyzed documents and AI reasoning. Please review for accuracy."}
+              'This synthesis is based on the analyzed documents and AI reasoning. Please review for accuracy.'}
           </p>
         </div>
         <div className="space-y-4">
@@ -99,12 +99,12 @@ export function SynthesisReasoningModal({
                 reasoningSteps.map((step, index) => (
                   <div key={index} className="flex items-start">
                     <div className="mt-1 mr-2">
-                      {step.status === "complete" ? (
+                      {step.status === 'complete' ? (
                         <CheckCircle
                           size={14}
                           className="text-[#16a34a] dark:text-[#86efac]"
                         />
-                      ) : step.status === "warning" ? (
+                      ) : step.status === 'warning' ? (
                         <AlertTriangle size={14} className="text-[#eab308]" />
                       ) : (
                         <Clock
@@ -212,5 +212,5 @@ export function SynthesisReasoningModal({
         </div>
       </div>
     </Modal>
-  );
+  )
 }

@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { useAtomValue } from "jotai";
+import { useAtomValue } from 'jotai'
 import {
   Brain,
   CheckSquare,
@@ -9,126 +9,131 @@ import {
   Loader2,
   Pen,
   Search,
-} from "lucide-react";
-import { useMemo } from "react";
-import type { ReactElement } from "react";
+} from 'lucide-react'
+import { useMemo } from 'react'
+import type { ReactElement } from 'react'
 
-import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
-import { researchStatusAtom } from "@/lib/state/researchAtoms";
+import type { ResearchStage } from '@/app/actions/researchAgentOrchestrator'
+import { researchStatusAtom } from '@/lib/state/researchAtoms'
 
 // Stage styling constants
 const STAGE_STYLES = {
-  active: "bg-[#3a7bb7] text-white",
-  completed: "bg-green-500 dark:bg-green-600 text-white",
-  pending: "bg-[#242a3d] text-[#6b7280]",
-} as const;
+  active: 'bg-[#3a7bb7] text-white',
+  completed: 'bg-green-500 dark:bg-green-600 text-white',
+  pending: 'bg-[#242a3d] text-[#6b7280]',
+} as const
 
 const TEXT_STYLES = {
-  active: "text-[#3a7bb7] font-medium",
-  completed: "text-green-500 dark:text-green-400",
-  pending: "text-[#6b7280]",
-} as const;
+  active: 'text-[#3a7bb7] font-medium',
+  completed: 'text-green-500 dark:text-green-400',
+  pending: 'text-[#6b7280]',
+} as const
 
 const CONNECTOR_STYLES = {
-  completed: "bg-green-500 dark:bg-green-600",
-  pending: "bg-[#242a3d]",
-} as const;
+  completed: 'bg-green-500 dark:bg-green-600',
+  pending: 'bg-[#242a3d]',
+} as const
 
 // Mapping from orchestrator stages to lifecycle display stages
-const STAGE_MAPPING: Record<ResearchStage | "IDLE", string> = {
-  IDLE: "Ideate",
-  INITIALIZING: "Ideate",
-  GENERATING_QUERIES: "Plan",
-  FETCHING_DOCUMENTS: "Research",
-  ANALYZING_DOCUMENTS: "Analyze",
-  SYNTHESIZING_FINDINGS: "Review",
-  ASSESSING_RESEARCH: "Review",
-  GENERATING_REPORT: "Draft",
-  COMPLETED: "Draft",
-  ERROR: "Ideate",
-  HUMAN_REVIEW_REQUESTED: "Review",
-  ITERATION_PAUSED: "Review",
-};
+const STAGE_MAPPING: Record<ResearchStage | 'IDLE', string> = {
+  IDLE: 'Ideate',
+  INITIALIZING: 'Ideate',
+  GENERATING_QUERIES: 'Plan',
+  FETCHING_DOCUMENTS: 'Research',
+  ANALYZING_DOCUMENTS: 'Analyze',
+  SYNTHESIZING_FINDINGS: 'Review',
+  ASSESSING_RESEARCH: 'Review',
+  GENERATING_REPORT: 'Draft',
+  COMPLETED: 'Draft',
+  ERROR: 'Ideate',
+  HUMAN_REVIEW_REQUESTED: 'Review',
+  ITERATION_PAUSED: 'Review',
+}
 
-type StageStatus = "completed" | "active" | "pending";
+type StageStatus = 'completed' | 'active' | 'pending'
 
 interface StageInfo {
-  name: string;
-  icon: ReactElement;
-  status: StageStatus;
+  name: string
+  icon: ReactElement
+  status: StageStatus
 }
 
 export function ResearchLifecycle() {
-  const status = useAtomValue(researchStatusAtom);
+  const status = useAtomValue(researchStatusAtom)
 
   const researchStageToLifecycleName = (
     stage: ResearchStage | null
   ): string => {
-    if (!stage) return "Ideate";
-    return STAGE_MAPPING[stage] || "Ideate";
-  };
+    if (!stage) return 'Ideate'
+    return STAGE_MAPPING[stage] || 'Ideate'
+  }
 
   const lifecycleStageMap: Record<
     string,
     { name: string; icon: ReactElement }
   > = useMemo(
     () => ({
-      Ideate: { name: "Ideate", icon: <Lightbulb size={16} /> },
-      Plan: { name: "Plan", icon: <Compass size={16} /> },
-      Research: { name: "Research", icon: <Search size={16} /> },
-      Analyze: { name: "Analyze", icon: <Brain size={16} /> },
-      Review: { name: "Review", icon: <CheckSquare size={16} /> },
-      Draft: { name: "Draft", icon: <Pen size={16} /> },
+      Ideate: { name: 'Ideate', icon: <Lightbulb size={16} /> },
+      Plan: { name: 'Plan', icon: <Compass size={16} /> },
+      Research: { name: 'Research', icon: <Search size={16} /> },
+      Analyze: { name: 'Analyze', icon: <Brain size={16} /> },
+      Review: { name: 'Review', icon: <CheckSquare size={16} /> },
+      Draft: { name: 'Draft', icon: <Pen size={16} /> },
     }),
     []
-  );
+  )
 
   const stages: StageInfo[] = useMemo(() => {
-    const activeLifecycleStageName = researchStageToLifecycleName(status.stage);
-    const lifecycleStageOrder = Object.keys(lifecycleStageMap);
+    const activeLifecycleStageName = researchStageToLifecycleName(status.stage)
+    const lifecycleStageOrder = Object.keys(lifecycleStageMap)
     const activeStageIndex = lifecycleStageOrder.indexOf(
       activeLifecycleStageName
-    );
+    )
 
     return lifecycleStageOrder.map((stageName, stageIndex) => {
-      const stageInfo = lifecycleStageMap[stageName];
-      let stageStatus: StageStatus = "pending";
+      const stageInfo = lifecycleStageMap[stageName]
+      if (!stageInfo) {
+        throw new Error(`Stage info not found for stage: ${stageName}`)
+      }
 
-      if (status.stage === "COMPLETED") {
-        stageStatus = "completed";
+      let stageStatus: StageStatus = 'pending'
+
+      if (status.stage === 'COMPLETED') {
+        stageStatus = 'completed'
       } else if (
-        status.stage === "ERROR" ||
-        status.stage === "HUMAN_REVIEW_REQUESTED" ||
-        status.stage === "ITERATION_PAUSED" ||
+        status.stage === 'ERROR' ||
+        status.stage === 'HUMAN_REVIEW_REQUESTED' ||
+        status.stage === 'ITERATION_PAUSED' ||
         status.isLoading
       ) {
         if (stageIndex < activeStageIndex) {
-          stageStatus = "completed";
+          stageStatus = 'completed'
         } else if (stageIndex === activeStageIndex) {
-          stageStatus = "active";
+          stageStatus = 'active'
         } else {
-          stageStatus = "pending";
+          stageStatus = 'pending'
         }
       }
 
       return {
-        ...stageInfo,
+        name: stageInfo.name,
+        icon: stageInfo.icon,
         status: stageStatus,
-      };
-    });
-  }, [status.stage, status.isLoading, lifecycleStageMap]);
+      }
+    })
+  }, [status.stage, status.isLoading, lifecycleStageMap])
 
   return (
     <div className="flex items-center">
       <div className="flex items-center">
         {stages.map((stage, index) => {
-          const isLastStage = index === stages.length - 1;
-          const nextStage = stages[index + 1];
-          const showLoader = stage.status === "active" && status.isLoading;
+          const isLastStage = index === stages.length - 1
+          const nextStage = stages[index + 1]
+          const showLoader = stage.status === 'active' && status.isLoading
           const connectorStyle =
-            stage.status === "pending" && nextStage?.status === "pending"
+            stage.status === 'pending' && nextStage?.status === 'pending'
               ? CONNECTOR_STYLES.pending
-              : CONNECTOR_STYLES.completed;
+              : CONNECTOR_STYLES.completed
 
           return (
             <div
@@ -167,9 +172,9 @@ export function ResearchLifecycle() {
                 {stage.name}
               </span>
             </div>
-          );
+          )
         })}
       </div>
     </div>
-  );
+  )
 }
