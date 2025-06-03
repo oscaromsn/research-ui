@@ -123,6 +123,7 @@
         "noEmptyCharacterClassInRegex": "error",
         "noEmptyPattern": "error",
         "noGlobalObjectCalls": "error",
+        "noInnerDeclarations": "error",
         "noInvalidConstructorSuper": "error",
         "noInvalidNewBuiltin": "error",
         "noInvalidUseBeforeDeclaration": "error",
@@ -224,6 +225,7 @@
       },
       "suspicious": {
         "recommended": true,
+        "noAsyncPromiseExecutor": "error",
         "noApproximativeNumericConstant": "error",
         "noArrayIndexKey": "error",
         "noAssignInExpressions": "error",
