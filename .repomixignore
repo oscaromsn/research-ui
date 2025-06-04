@@ -4,6 +4,8 @@
 # tmp/
 docs/dependencies/**
 docs/exemplars/**
+docs/sprints/3-future/**
+
 .gemini/**
 **.svg
 .repomixignore
