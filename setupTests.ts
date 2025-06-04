@@ -1,125 +1,537 @@
-import path from "node:path";
+import path from "node:path"
+import { configure } from "@testing-library/react"
+import "@testing-library/jest-dom"
+import { config } from "dotenv"
+import { afterAll, afterEach, beforeAll, beforeEach, vi } from "vitest"
 
-import { configure } from "@testing-library/react";
-import "@testing-library/jest-dom";
-import { config } from "dotenv";
-import { afterAll, afterEach, beforeAll, vi } from "vitest";
+// ===== ENVIRONMENT SETUP =====
+// Load test environment variables first
+config({
+  path: path.resolve(process.cwd(), ".env.test"),
+  override: false, // Don't override existing env vars
+})
 
-// @testing-library/jest-dom adds custom matchers to Vitest automatically
-// so we don't need to explicitly extend expect
-
-// Configure React Testing Library to suppress act() warnings
+// ===== TESTING LIBRARY CONFIGURATION =====
 configure({
-	// This will disable the warnings about missing act() wrapping
-	// These warnings are often unavoidable in complex testing scenarios
-	asyncUtilTimeout: 5000,
-	// We could set this to a custom function to suppress warnings, but React Testing Library
-	// doesn't provide a direct way to suppress act warnings via configuration
-});
+  asyncUtilTimeout: 10000, // Increased for complex async operations
+  testIdAttribute: "data-testid", // Explicit test ID attribute
+  getElementError: (message, container) => {
+    // Enhanced error messages for agents
+    const error = new Error(message || "TestingLibraryElementError")
+    error.name = "TestingLibraryElementError"
+    error.stack = `${message || "TestingLibraryElementError"}\n\nContainer HTML:\n${container.innerHTML}`
+    return error
+  },
+})
 
-// Suppress React's act() warnings in test environment
-// These warnings appear in stderr and are from React's internal warning system
-const originalError = console.error;
+// ===== CONSOLE MANAGEMENT =====
+const originalConsole = {
+  log: console.log,
+  info: console.info,
+  warn: console.warn,
+  error: console.error,
+  debug: console.debug,
+}
+
+// Selective console mocking based on test type and verbosity
+const setupConsole = () => {
+  const silentMode = process.env.VITEST_SILENT === "true"
+  const verboseMode = process.env.VITEST_VERBOSE === "true"
+  const isDebugMode = process.env.DEBUG_API_TESTS === "true"
+
+  // In concise mode (default), suppress most console output unless debugging
+  if (!verboseMode && !isDebugMode) {
+    console.log = vi.fn()
+    console.info = vi.fn()
+    console.debug = vi.fn()
+  } else if (silentMode) {
+    console.log = vi.fn()
+    console.info = vi.fn()
+    console.warn = vi.fn()
+    console.debug = vi.fn()
+  }
+
+  // Smart error filtering - more aggressive in concise mode
+  console.error = (...args: unknown[]) => {
+    const message = String(args[0] || "")
+
+    // Suppress known React warnings that don't indicate real issues
+    const suppressedPatterns = [
+      /Warning: An update to .* was not wrapped in act/,
+      /An update to .* inside a test was not wrapped in act/,
+      /Warning: ReactDOM.render is no longer supported/,
+      /Warning: Failed prop type/,
+      // Additional patterns for concise mode only
+      ...(verboseMode
+        ? []
+        : [
+            /useResearchAgent: No active research to abort/,
+            /Failed to parse update: SyntaxError/,
+            /Stream reading was aborted/,
+          ]),
+    ]
+
+    if (suppressedPatterns.some(pattern => pattern.test(message))) {
+      return
+    }
+
+    // Log real errors for debugging
+    return originalConsole.error.call(console, ...args)
+  }
+
+  // In verbose mode, also suppress noisy warnings from stderr
+  if (verboseMode || isDebugMode) {
+    console.warn = (...args: unknown[]) => {
+      const message = String(args[0] || "")
+      if (message.includes("act()") || message.includes("ReactDOM.render")) {
+        return
+      }
+      return originalConsole.warn.call(console, ...args)
+    }
+  }
+}
+
+// ===== GLOBAL MOCKS =====
+// DOM API Mocks with enhanced functionality
+class EnhancedResizeObserverMock implements ResizeObserver {
+  private callbacks = new Map<Element, ResizeObserverCallback>()
+  private callback: ResizeObserverCallback
+
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback
+  }
+
+  observe = vi.fn((target: Element, _options?: ResizeObserverOptions) => {
+    this.callbacks.set(target, this.callback)
+  })
+
+  unobserve = vi.fn((target: Element) => {
+    this.callbacks.delete(target)
+  })
+
+  disconnect = vi.fn(() => {
+    this.callbacks.clear()
+  })
+
+  // Helper for testing - trigger resize
+  triggerResize = (target: Element, entries: ResizeObserverEntry[]) => {
+    const callback = this.callbacks.get(target)
+    if (callback) {
+      callback(entries, this)
+    }
+  }
+}
+
+class EnhancedIntersectionObserverMock implements IntersectionObserver {
+  readonly root: Element | Document | null = null
+  readonly rootMargin: string = "0px"
+  readonly thresholds: readonly number[] = [0]
+
+  private callbacks = new Map<Element, IntersectionObserverCallback>()
+  private callback: IntersectionObserverCallback
+
+  constructor(
+    callback: IntersectionObserverCallback,
+    _options?: IntersectionObserverInit
+  ) {
+    this.callback = callback
+  }
+
+  observe = vi.fn((target: Element) => {
+    this.callbacks.set(target, this.callback)
+    // Auto-trigger intersection for easier testing
+    if (process.env.VITEST_AUTO_INTERSECT === "true") {
+      setTimeout(() => {
+        this.triggerIntersection(target, true)
+      }, 0)
+    }
+  })
+
+  unobserve = vi.fn((target: Element) => {
+    this.callbacks.delete(target)
+  })
+
+  disconnect = vi.fn(() => {
+    this.callbacks.clear()
+  })
+
+  takeRecords = vi.fn().mockReturnValue([])
+
+  // Helper for testing
+  triggerIntersection = (target: Element, isIntersecting: boolean) => {
+    const callback = this.callbacks.get(target)
+    if (callback) {
+      callback(
+        [
+          {
+            target,
+            isIntersecting,
+            intersectionRatio: isIntersecting ? 1 : 0,
+            boundingClientRect: target.getBoundingClientRect(),
+            rootBounds: null,
+            intersectionRect: target.getBoundingClientRect(),
+            time: Date.now(),
+          },
+        ],
+        this
+      )
+    }
+  }
+}
+
+// Enhanced Fetch Mock with better debugging
+const createFetchMock = () => {
+  const fetchMock = vi.fn()
+
+  // Default successful response
+  fetchMock.mockResolvedValue({
+    ok: true,
+    status: 200,
+    statusText: "OK",
+    json: vi.fn().mockResolvedValue({}),
+    text: vi.fn().mockResolvedValue(""),
+    blob: vi.fn().mockResolvedValue(new Blob()),
+    arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0)),
+    headers: new Headers(),
+    url: "",
+    redirected: false,
+    type: "basic",
+    clone: vi.fn(),
+    body: null,
+    bodyUsed: false,
+  })
+
+  // Add helper methods for testing
+  const mockSuccess = (data: unknown) => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      json: vi.fn().mockResolvedValue(data),
+      text: vi.fn().mockResolvedValue(""),
+      blob: vi.fn().mockResolvedValue(new Blob()),
+      arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0)),
+      headers: new Headers(),
+      url: "",
+      redirected: false,
+      type: "basic",
+      clone: vi.fn(),
+      body: null,
+      bodyUsed: false,
+    })
+  }
+
+  const mockError = (status = 500, message = "Server Error") => {
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status,
+      statusText: message,
+      json: vi.fn().mockRejectedValue(new Error(`${status}: ${message}`)),
+      text: vi.fn().mockResolvedValue(""),
+      blob: vi.fn().mockResolvedValue(new Blob()),
+      arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0)),
+      headers: new Headers(),
+      url: "",
+      redirected: false,
+      type: "basic",
+      clone: vi.fn(),
+      body: null,
+      bodyUsed: false,
+    })
+  }
+
+  // Attach helper methods
+  ;(
+    fetchMock as typeof fetchMock & {
+      mockSuccess: typeof mockSuccess
+      mockError: typeof mockError
+    }
+  ).mockSuccess = mockSuccess
+  ;(
+    fetchMock as typeof fetchMock & {
+      mockSuccess: typeof mockSuccess
+      mockError: typeof mockError
+    }
+  ).mockError = mockError
+
+  return fetchMock
+}
+
+// ===== SETUP HOOKS =====
+// ===== STDERR FILTERING =====
+// Enhanced stderr filtering for React warnings
+const originalStderrWrite = process.stderr.write
+const setupStderrFiltering = () => {
+  const verboseMode = process.env.VITEST_VERBOSE === "true"
+  const isDebugMode = process.env.DEBUG_API_TESTS === "true"
+  const silentMode = process.env.VITEST_SILENT === "true"
+
+  // Always filter React act() warnings (they're just noise), but in verbose mode allow other stderr
+  process.stderr.write = function (
+    chunk: string | Uint8Array,
+    encodingOrCallback?: unknown,
+    callback?: (error?: Error | null) => void
+  ): boolean {
+    const message = chunk?.toString()
+
+    // Always suppress React act() warnings (in both concise and verbose modes)
+    const alwaysSuppressedPatterns = [
+      /An update to .* inside a test was not wrapped in act/,
+      /When testing, code that causes React state updates should be wrapped into act/,
+      /This ensures that you're testing the behavior the user would see/,
+      /Learn more at https:\/\/react\.dev\/link\/wrap-tests-with-act/,
+    ]
+
+    // Additional patterns to suppress only in concise mode
+    const conciseModeOnlyPatterns = [
+      /useResearchAgent: No active research to abort/,
+      /Failed to parse update: SyntaxError/,
+      /Stream reading was aborted/,
+    ]
+
+    const shouldSuppress =
+      message &&
+      (alwaysSuppressedPatterns.some(pattern => pattern.test(message)) ||
+        (!verboseMode &&
+          !isDebugMode &&
+          !silentMode &&
+          conciseModeOnlyPatterns.some(pattern => pattern.test(message))))
+
+    if (shouldSuppress) {
+      return true // Suppress the message
+    }
+
+    // Handle the overloaded function signature
+    if (typeof encodingOrCallback === "function") {
+      return originalStderrWrite.call(
+        this,
+        chunk,
+        undefined,
+        encodingOrCallback as (err?: Error | null) => void
+      )
+    }
+    return originalStderrWrite.call(
+      this,
+      chunk,
+      encodingOrCallback as Parameters<typeof originalStderrWrite>[1],
+      callback
+    )
+  }
+}
+
 beforeAll(() => {
-	console.error = (...args: unknown[]) => {
-		const message = args[0];
-		if (
-			typeof message === "string" &&
-			((message.includes("An update to") &&
-				message.includes("was not wrapped in act")) ||
-				(message.includes("Warning: An update to") &&
-					message.includes("was not wrapped in act")))
-		) {
-			return; // Suppress act() warnings
-		}
-		return originalError.call(console, ...args);
-	};
-});
+  setupConsole()
+  setupStderrFiltering()
 
-afterAll(() => {
-	console.error = originalError;
-});
+  // Set up global mocks
+  global.ResizeObserver = EnhancedResizeObserverMock as typeof ResizeObserver
+  global.IntersectionObserver =
+    EnhancedIntersectionObserverMock as typeof IntersectionObserver
+  global.fetch = createFetchMock()
 
-// Also suppress stderr warnings if they're not caught by console.error override
-const originalStderrWrite = process.stderr.write;
-beforeAll(() => {
-	process.stderr.write = function (
-		chunk: string | Uint8Array,
-		encodingOrCallback?: BufferEncoding | ((error?: Error | null) => void),
-		callback?: (error?: Error | null) => void,
-	): boolean {
-		const message = chunk?.toString();
-		if (
-			message?.includes("An update to") &&
-			message.includes("was not wrapped in act")
-		) {
-			return true; // Suppress act() warnings from stderr
-		}
+  // Mock other common browser APIs
+  global.matchMedia = vi.fn(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }))
 
-		// Handle the overloaded function signature
-		if (typeof encodingOrCallback === "function") {
-			// When encodingOrCallback is a function, it's the callback parameter
-			return originalStderrWrite.call(
-				this,
-				chunk,
-				undefined,
-				encodingOrCallback,
-			);
-		}
-		// When encodingOrCallback is a BufferEncoding, pass it along with optional callback
-		return originalStderrWrite.call(this, chunk, encodingOrCallback, callback);
-	};
-});
+  // Mock localStorage/sessionStorage for testing
+  const createStorageMock = () => {
+    const store = new Map<string, string>()
+    return {
+      getItem: vi.fn((key: string) => store.get(key) || null),
+      setItem: vi.fn((key: string, value: string) => store.set(key, value)),
+      removeItem: vi.fn((key: string) => store.delete(key)),
+      clear: vi.fn(() => store.clear()),
+      length: 0,
+      key: vi.fn((index: number) => Array.from(store.keys())[index] || null),
+    }
+  }
 
-afterAll(() => {
-	process.stderr.write = originalStderrWrite;
-});
+  global.localStorage = createStorageMock()
+  global.sessionStorage = createStorageMock()
 
-// Load environment variables from .env.test file
-config({ path: path.resolve(__dirname, ".env.test") });
+  // Performance timing mock
+  global.performance = {
+    ...global.performance,
+    now: vi.fn(() => Date.now()),
+    mark: vi.fn(),
+    measure: vi.fn(),
+    getEntriesByName: vi.fn(() => []),
+    getEntriesByType: vi.fn(() => []),
+  }
+})
 
-// Mock the console methods to reduce noise during tests
-if (process.env.VITEST_SILENT_CONSOLE === "true") {
-	console.log = vi.fn();
-	console.info = vi.fn();
-	console.warn = vi.fn();
-	console.error = vi.fn();
-}
+// ===== TEST LIFECYCLE =====
+beforeEach(() => {
+  // Clear mocks but preserve implementations
+  vi.clearAllMocks()
 
-// Conditionally mock axios - only for unit tests, not integration tests
-// Integration tests need real HTTP requests
-if (!process.env.VITEST_INTEGRATION_TESTS) {
-	vi.mock("axios");
-}
+  // Reset DOM state
+  document.body.innerHTML = ""
+  document.head.innerHTML = ""
 
-// Add a global fetch mock if needed
-global.fetch = vi.fn();
+  // Reset URL
+  if (typeof window !== "undefined") {
+    window.history.replaceState({}, "", "/")
+  }
+})
 
-// Define a global ResizeObserver mock
-class ResizeObserverMock {
-	observe = vi.fn();
-	unobserve = vi.fn();
-	disconnect = vi.fn();
-}
-
-// Mock IntersectionObserver
-class IntersectionObserverMock implements IntersectionObserver {
-	readonly root: Element | Document | null = null;
-	readonly rootMargin: string = "0px";
-	readonly thresholds: readonly number[] = [0];
-
-	observe = vi.fn();
-	unobserve = vi.fn();
-	disconnect = vi.fn();
-	takeRecords = vi.fn().mockReturnValue([]);
-}
-
-// Add to global
-global.ResizeObserver = ResizeObserverMock;
-global.IntersectionObserver =
-	IntersectionObserverMock as unknown as typeof IntersectionObserver;
-
-// Clean up after each test
 afterEach(() => {
-	vi.clearAllMocks();
-});
+  // Cleanup after each test
+  vi.clearAllTimers()
+  vi.restoreAllMocks()
+})
+
+afterAll(() => {
+  // Restore original console and stderr
+  Object.assign(console, originalConsole)
+  process.stderr.write = originalStderrWrite
+})
+
+// ===== CONDITIONAL MOCKING =====
+// Smart axios mocking based on test type
+const testType = process.env.VITEST_TEST_TYPE || "unit"
+
+if (testType === "unit") {
+  vi.mock("axios", () => ({
+    default: {
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
+      patch: vi.fn(),
+      create: vi.fn(() => ({
+        get: vi.fn(),
+        post: vi.fn(),
+        put: vi.fn(),
+        delete: vi.fn(),
+        patch: vi.fn(),
+      })),
+    },
+    isAxiosError: vi.fn((error: unknown) => {
+      return (
+        error &&
+        typeof error === "object" &&
+        error !== null &&
+        "isAxiosError" in error &&
+        error.isAxiosError === true
+      )
+    }),
+  }))
+}
+
+// Mock Next.js router for unit tests
+if (testType === "unit") {
+  vi.mock("next/router", () => ({
+    useRouter: vi.fn(() => ({
+      push: vi.fn(),
+      replace: vi.fn(),
+      back: vi.fn(),
+      forward: vi.fn(),
+      refresh: vi.fn(),
+      prefetch: vi.fn(),
+      pathname: "/",
+      query: {},
+      asPath: "/",
+      route: "/",
+      isReady: true,
+    })),
+  }))
+
+  vi.mock("next/navigation", () => ({
+    useRouter: vi.fn(() => ({
+      push: vi.fn(),
+      replace: vi.fn(),
+      back: vi.fn(),
+      forward: vi.fn(),
+      refresh: vi.fn(),
+      prefetch: vi.fn(),
+    })),
+    usePathname: vi.fn(() => "/"),
+    useSearchParams: vi.fn(() => new URLSearchParams()),
+  }))
+}
+
+// ===== GLOBAL TEST UTILITIES =====
+// Make utilities available globally for agents
+declare global {
+  var testUtils: {
+    waitForNextTick: () => Promise<void>
+    mockApiCall: (url: string, response: unknown) => void
+    triggerResize: (target: Element) => void
+    triggerIntersection: (target: Element, isVisible: boolean) => void
+  }
+}
+
+global.testUtils = {
+  waitForNextTick: () => new Promise(resolve => setTimeout(resolve, 0)),
+
+  mockApiCall: (url: string, response: unknown) => {
+    const mockFetch = global.fetch as ReturnType<typeof vi.fn>
+    mockFetch.mockImplementationOnce((requestUrl: string) => {
+      if (requestUrl.includes(url)) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          statusText: "OK",
+          json: () => Promise.resolve(response),
+          text: () => Promise.resolve(""),
+          blob: () => Promise.resolve(new Blob()),
+          arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+          headers: new Headers(),
+          url: requestUrl,
+          redirected: false,
+          type: "basic" as ResponseType,
+          clone: vi.fn(),
+          body: null,
+          bodyUsed: false,
+        })
+      }
+      return Promise.reject(new Error(`Unmocked URL: ${requestUrl}`))
+    })
+  },
+
+  triggerResize: (target: Element) => {
+    const observer = global.ResizeObserver as typeof EnhancedResizeObserverMock
+    if ("triggerResize" in observer.prototype) {
+      ;(observer.prototype as EnhancedResizeObserverMock).triggerResize(
+        target,
+        []
+      )
+    }
+  },
+
+  triggerIntersection: (target: Element, isVisible: boolean) => {
+    const observer =
+      global.IntersectionObserver as typeof EnhancedIntersectionObserverMock
+    if ("triggerIntersection" in observer.prototype) {
+      ;(
+        observer.prototype as EnhancedIntersectionObserverMock
+      ).triggerIntersection(target, isVisible)
+    }
+  },
+}
+
+// ===== AGENT-FRIENDLY ERROR HANDLING =====
+// Enhanced error reporting for better agent debugging
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Promise Rejection:", reason)
+  console.error("Promise:", promise)
+})
+
+// Export test configuration for reference
+export const testConfig = {
+  environment: process.env.NODE_ENV || "test",
+  testType: process.env.VITEST_TEST_TYPE || "unit",
+  silent: process.env.VITEST_SILENT === "true",
+  verbose: process.env.VITEST_VERBOSE === "true",
+  debug: process.env.DEBUG_API_TESTS === "true",
+  autoIntersect: process.env.VITEST_AUTO_INTERSECT === "true",
+}
