@@ -19,7 +19,7 @@ test AssessmentWithNoSynthesis {
         }
       ]
     }
-    current_synthesis none
+    current_synthesis null
   }
   // First pass assessment should identify need for research
   @@assert( {{ this.is_sufficient == false }} )
