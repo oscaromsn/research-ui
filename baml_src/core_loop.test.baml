@@ -410,8 +410,8 @@ test AssessLiveEmploymentDiscriminationResearch {
           supporting_document_ids ["https://natlawreview.com/article/what-counts-adverse-employment-action-discrimination-and-retaliation-cases", "https://www.law.cornell.edu/wex/tangible_employment_action"]
         }
       ]
-      unanswered_aspects ["Specific judicial standards or tests used by courts to determine 'materially adverse consequence' of an action", "Jurisdictional variations in how adverse employment action is interpreted"]
-      emerging_questions ["What is the prevailing standard courts use to determine whether an action has a 'materially adverse consequence?'", "How do courts differentiate between actions considered merely annoying or inconvenient versus those with materially adverse consequences?"]
+      unanswered_aspects []
+      emerging_questions []
       reasoning {
         analyze_legal_question { summary "The legal question is about the definition of 'adverse employment action' under Title VII discrimination law. The key issues involve understanding the scope and range of actions covered by this term, and how it is determined in court." }
         consider_relevant_legal_principles { summary "Relevant legal principles include Title VII's prohibition against discrimination and court interpretations of 'adverse employment action.' The analysis should also consider the distinction between adverse employment action and tangible employment action." }

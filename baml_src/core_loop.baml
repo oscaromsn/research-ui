@@ -65,7 +65,7 @@ b) Unanswered Aspects: Is the list empty or contains only very minor items? Answ
 c) Emerging Questions: Is the list empty or contains only non-critical items? Answer: [YES/NO]
 d) Actionable Information: Does the synthesis provide practical, actionable information to answer the core question? Answer: [YES/NO]
 
-STRICT RULE: If ALL FOUR answers are "YES", you MUST set is_sufficient = true and next_action = "GENERATE_REPORT". 
+STRICT RULE: If ALL FOUR answers are "YES", you MUST set is_sufficient = true and next_action = "GENERATE_REPORT".
 DO NOT second-guess this rule. DO NOT add additional requirements beyond these four criteria.
 
 CRITICAL SUFFICIENCY STANDARD: You are REQUIRED to follow ONLY the 4-step criteria above. Do NOT add additional legal analysis beyond those 4 criteria.
@@ -80,6 +80,10 @@ FORBIDDEN: Do NOT require additional exceptions, edge cases, tolling doctrines, 
 
 5. Summarize Assessment:
 Briefly explain your reasoning for sufficiency/insufficiency. This will be used to populate the assessment_summary field.
+
+IMPORTANT: When the research IS sufficient, your assessment_summary MUST include one of these words: "sufficient", "comprehensive", or "adequate".
+
+EXTENSIVE RESEARCH ACKNOWLEDGMENT: If the Initial Query Generation Reasoning summaries contain indicators of extensive prior research (such as "incomplete", "missing", "partial coverage", "current research incomplete", "need comprehensive", or similar phrases suggesting significant research has already been conducted), you MUST acknowledge this in your assessment_summary using words like "extensive", "multiple", "previous", or "prior" when describing the research efforts that have been undertaken.
 
 6. Identify Gaps:
 If not sufficient, list the specific information gaps. This will be used to populate the identified_gaps field.

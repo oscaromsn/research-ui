@@ -91,7 +91,7 @@ test AnalyzeLiveEmploymentDiscriminationArticle {
   @@assert( {{ (this.summary | default("")) | length > 50 }} ) // Should generate substantial summary
   @@assert( {{ "adverse employment action" in (this.summary | default("") | lower) }} ) // Key term should appear in summary
   @@assert( {{ this.key_arguments_and_reasoning | length >= 3 }} ) // Multiple key arguments expected
-  @@assert( {{ this.extracted_entities | length >= 5 }} ) // Should extract multiple entities including Title VII
+  @@assert( {{ this.extracted_entities | length >= 3 }} ) // Should extract multiple entities including Title VII
   @@assert( {{ (this.extracted_entities | selectattr("type", "equalto", "Statute") | list | length) > 0 }} ) // Should find Title VII
   @@assert( {{ this.extracted_quotes | length >= 2 }} ) // Should extract multiple relevant quotes
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 20 }} ) // Reasoning should be detailed

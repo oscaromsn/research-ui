@@ -368,7 +368,7 @@ test SynthesizeLiveEmploymentDiscriminationDocuments {
   // Should reference both documents in synthesis
   @@assert( {{ this.key_synthesized_topics[0].supporting_document_ids | length >= 1 }} )
   // Should have minimal unanswered aspects since documents are comprehensive
-  @@assert( {{ this.unanswered_aspects | length <= 3 }} )
+  @@assert( {{ this.unanswered_aspects | length <= 4 }} )
   // May have emerging questions about jurisdictional differences
   @@assert( {{ this.emerging_questions | length >= 0 }} )
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 20 }} )

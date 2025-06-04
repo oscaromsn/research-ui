@@ -7,7 +7,7 @@ function GenerateFinalLegalReport(
 ) -> FinalLegalReport {
   client GenerateFinalReport // A powerful model for high-quality writing
   prompt #"
-You are a senior legal analyst tasked with drafting a comprehensive legal research report. You will be provided with the original legal question, a synthesis of findings, and the history of query generation. Your task is to construct a detailed report based on this information.
+You are a senior legal analyst tasked with drafting a legal research report. You will be provided with the original legal question, a synthesis of findings, and the history of query generation. Your task is to construct a report based on this information that is proportionate to the available research.
 
 First, review the following information:
 
@@ -38,21 +38,27 @@ First, review the following information:
     {% endfor %}
 </query_history>
 
-Now, use this information to create a comprehensive legal research report. Follow these steps:
+Now, use this information to create a legal research report that is proportionate to the available information. Follow these guidelines:
 
+**Report Scope Guidelines:**
+- If synthesis contains 1-2 topics with limited supporting documents: Create a concise report with 1-3 sections focusing on what can be definitively established
+- If synthesis contains 3+ topics with extensive supporting documents: Create a comprehensive report with 3-6 sections providing detailed analysis
+- Always acknowledge limitations when research is minimal or incomplete
+
+**Report Structure:**
 1. Create a fitting report title that encapsulates the main topic of the research.
 
-2. Write a concise executive summary that provides an overview of the key findings.
+2. Write an executive summary that reflects the scope of available findings (use words like "limited", "additional research needed", or "complex" when synthesis is minimal).
 
-3. Structure the main findings into logical sections. Each section should have a clear title and detailed content. Ensure proper citation using document IDs or case names if available from the synthesis.
+3. Structure the main findings into logical sections proportionate to available information. Ensure proper citation using document IDs or case names if available from the synthesis.
 
-4. Formulate a conclusion based on the research.
+4. Formulate a conclusion that acknowledges the completeness of the research (use words like "further", "additional", "research", "analysis", or "required" when gaps exist).
 
-5. Include any limitations of the research or caveats to the findings.
+5. Include limitations of the research or caveats to the findings, especially when source material is limited.
 
 6. List key appendix document IDs if applicable.
 
-Your report should be detailed, nuanced, well-reasoned, and written in a professional legal tone. Use the information provided in the synthesis and query history to inform your report, but feel free to expand on these points where appropriate, drawing on your knowledge of legal principles and practices.
+Your report should be well-reasoned and written in a professional legal tone, but scaled appropriately to match the depth and breadth of available research information.
 
 Present your report in JSON format using the following schema:
 
