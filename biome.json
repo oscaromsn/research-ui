@@ -11,7 +11,6 @@
     "ignore": [
       "*.config.js",
       "*.config.mjs",
-      "*.config.ts",
       ".env*",
       ".next/**",
       "build/**",
@@ -28,6 +27,10 @@
       "*.spec.tsx",
       "*.test.ts",
       "*.test.tsx",
+      "*.config.ts",
+      "*.config.mjs",
+      "setupTests.ts",
+      "commitlint.config.ts",
       "__tests__/**/*.ts",
       "__tests__/**/*.tsx",
       "app/**/*.ts",
