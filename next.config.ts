@@ -1,8 +1,9 @@
-import { withBaml } from "@boundaryml/baml-nextjs-plugin";
-import type { NextConfig } from "next";
+import { withBaml } from "@boundaryml/baml-nextjs-plugin"
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-	/* config options here */
-};
+  /* config options here */
+}
 
-export default withBaml()(nextConfig);
+// biome-ignore lint/style/noDefaultExport: Next.js requires default export for config
+export default withBaml()(nextConfig)
