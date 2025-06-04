@@ -1,47 +1,47 @@
 // Learn more about clients at https://docs.boundaryml.com/docs/snippets/clients/overview
 
 client<llm> QueryGeneration {
-  provider google-ai
+  provider openai
   retry_policy TestSafely
   options {
-    model "gemini-2.0-flash-lite"
-    api_key env.GOOGLE_API_KEY
+    model "gpt-4.1-mini"
+    api_key env.OPENAI_API_KEY
   }
 }
 
 client<llm> DocumentAnalysis {
-  provider google-ai
+  provider openai
   retry_policy TestSafely
   options {
-    model "gemini-2.0-flash-lite"
-    api_key env.GOOGLE_API_KEY
+    model "gpt-4.1-mini"
+    api_key env.OPENAI_API_KEY
   }
 }
 
 client<llm> FindingsSynthetizing {
-  provider google-ai
+  provider openai
   retry_policy TestSafely
   options {
-    model "gemini-2.0-flash-lite"
-    api_key env.GOOGLE_API_KEY
+    model "gpt-4.1-mini"
+    api_key env.OPENAI_API_KEY
   }
 }
 
 client<llm> DecidesNextStep {
-  provider google-ai
+  provider openai
   retry_policy TestSafely
   options {
-    model "gemini-2.0-flash-lite"
-    api_key env.GOOGLE_API_KEY
+    model "gpt-4.1-mini"
+    api_key env.OPENAI_API_KEY
   }
 }
 
 client<llm> GenerateFinalReport {
-  provider google-ai
+  provider openai
   retry_policy TestSafely
   options {
-    model "gemini-2.0-flash-lite"
-    api_key env.GOOGLE_API_KEY
+    model "gpt-4.1-mini"
+    api_key env.OPENAI_API_KEY
   }
 }
 
@@ -109,6 +109,16 @@ retry_policy Constant {
 }
 
 retry_policy TestSafely {
+  max_retries 1
+  strategy {
+    type exponential_backoff
+    delay_ms 200
+    multiplier 1.5
+    max_delay_ms 10000
+  }
+}
+
+retry_policy TestFast {
   max_retries 1
   strategy {
     type exponential_backoff
