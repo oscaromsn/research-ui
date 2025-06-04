@@ -1,0 +1,11 @@
+# Add patterns to ignore here, one per line
+# Example:
+# *.log
+# tmp/
+docs/dependencies/**
+docs/exemplars/**
+.gemini/**
+**.svg
+.repomixignore
+repomix.config.json
+**/todo.md
