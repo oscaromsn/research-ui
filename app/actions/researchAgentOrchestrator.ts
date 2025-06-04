@@ -637,7 +637,17 @@ async function executePipeline(
   context: StageContext,
   autoModeConfig?: AutoModeConfig
 ): Promise<void> {
-  const { writer, encoder } = context
+  const { writer, encoder, legalQuestion } = context
+
+  // Handle empty legal question gracefully
+  if (!legalQuestion || legalQuestion.trim().length === 0) {
+    await sendUpdate(writer, encoder, {
+      type: "STATUS_CHANGE",
+      stage: "COMPLETED",
+      message: "Research process completed. No legal question provided.",
+    })
+    return
+  }
 
   const queryAnalysis = await generateQueriesStage(context)
   const searchResultItems = await fetchDocumentsStage(

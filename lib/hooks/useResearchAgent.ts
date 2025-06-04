@@ -564,12 +564,6 @@ export function useResearchAgent(): UseResearchAgentReturn {
         const update = JSON.parse(stringUpdate) as ResearchUpdate
         processStreamUpdate(update)
       } catch (parseError) {
-        console.error(
-          "Failed to parse update:",
-          parseError,
-          "Raw update:",
-          stringUpdate
-        )
         logResearchEvent(
           "SYSTEM_ERROR",
           "ERROR",
