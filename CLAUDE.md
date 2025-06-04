@@ -196,7 +196,13 @@ You always read the full planning files relevant for your taks at hand, while Uu
 
 1. **BAML Tests (`.test.baml` files):**
 	- Write for every BAML function covering various inputs and asserting output structure/key values.
-	- Run with `bun baml-cli test`.
+	- Run with `bun baml:test` to run all tests.
+	- Run with `bun baml:this` to run a specific test. Adopt the following:
+	  - "FunctionName::TestName" will match the specific test "TestName" in the function "FunctionName"
+		- "FunctionName::" will run all tests in the function "FunctionName"
+		- "::TestName" will run the test "TestName" in any function
+		- "Get*::*Bar" will match any functions that start with "Get" and have a test that ends with "Bar"
+		- "Foo::" -i "Bar::" will run all tests in the functions "Foo" and "Bar"
 2. **Server-Side Orchestrator Tests (Vitest):**
 	- Unit test `conductResearch`. Mock the BAML client (`b`) to simulate BAML function responses (including streams). Assert that the correct sequence of `ResearchUpdate` objects is produced on its output stream.
 3. **Client-Side Hook Tests (Vitest + RTL - PRD 6.2):**
