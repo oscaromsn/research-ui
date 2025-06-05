@@ -1,0 +1,90 @@
+import { Gavel, Scroll } from "lucide-react"
+
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms"
+
+import {
+  DocumentStatusIndicator,
+  getStatusIndicator,
+} from "./document-status-indicator"
+
+interface DocumentListItemProps {
+  doc: ClientAnalyzedDoc
+  isSelected: boolean
+  onDocumentClick: (doc: ClientAnalyzedDoc) => void
+  onDocumentKeyUp: (doc: ClientAnalyzedDoc, event: React.KeyboardEvent) => void
+}
+
+export function DocumentListItem({
+  doc,
+  isSelected,
+  onDocumentClick,
+  onDocumentKeyUp,
+}: DocumentListItemProps) {
+  const documentType = doc.title?.includes("§") ? "statute" : "case"
+  const statusIndicator = getStatusIndicator(doc.status)
+
+  return (
+    <button
+      key={doc.docId}
+      type="button"
+      className={`mb-2 w-full cursor-pointer rounded-lg border p-3 text-left transition-all ${
+        isSelected
+          ? "border-[#3a7bb7] border-l-4 bg-[#edf2f7] dark:bg-[#242a3d]"
+          : `${statusIndicator.bgColor} ${statusIndicator.borderColor} hover:bg-[#f8fafc] dark:hover:bg-[#212941]`
+      }`}
+      onClick={() => onDocumentClick(doc)}
+      onKeyUp={e => onDocumentKeyUp(doc, e)}
+      disabled={doc.status === "error"}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="mb-1 flex items-center gap-2">
+            <h3 className="font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
+              {doc.title || "Untitled Document"}
+            </h3>
+            <DocumentStatusIndicator status={doc.status} />
+          </div>
+          <div className="mb-1 flex items-center text-[#64748b] text-xs dark:text-[#94a3b8]">
+            <span>
+              {doc.source ||
+                (doc.url ? new URL(doc.url).hostname : "Unknown Source")}
+            </span>
+            {doc.status === "analyzed" && doc.relevanceScore && (
+              <>
+                <span className="mx-1">•</span>
+                <span>Relevance: {doc.relevanceScore}/10</span>
+              </>
+            )}
+            {doc.timestamp && (
+              <>
+                <span className="mx-1">•</span>
+                <span>
+                  {new Date(doc.timestamp).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </>
+            )}
+          </div>
+          <p className="text-[#4a5568] text-xs dark:text-[#a0aec0]">
+            {doc.status === "error"
+              ? doc.errorMessage || "Failed to process document"
+              : doc.status === "fetched"
+                ? "Document retrieved, analysis pending..."
+                : doc.status === "analyzing"
+                  ? doc.summarySnippet || "Analysis in progress..."
+                  : doc.summarySnippet || "No summary available."}
+          </p>
+        </div>
+        <div className="mt-1 ml-2 flex flex-col items-center gap-1">
+          {documentType === "case" ? (
+            <Gavel size={14} className="text-[#64748b] dark:text-[#94a3b8]" />
+          ) : (
+            <Scroll size={14} className="text-[#64748b] dark:text-[#94a3b8]" />
+          )}
+        </div>
+      </div>
+    </button>
+  )
+}
