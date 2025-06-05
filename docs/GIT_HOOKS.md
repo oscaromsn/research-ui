@@ -366,3 +366,34 @@ Since implementing this robust validation system:
 - **Quality Gates**: Incremental validation prevents problematic code
 
 **Result**: Developers get immediate formatting and fast feedback, with comprehensive linting validation at push time. This progressive approach maintains enterprise-grade quality standards while preserving beneficial changes and reducing commit friction.
+
+## 🔧 Troubleshooting
+
+### "No files were processed" Error Fix
+
+**Problem**: Git hooks failing with Biome error: `internalError/io: No files were processed in the specified paths.`
+
+**Root Cause**: Biome commands in lint-staged were returning error codes when no files matched certain patterns, causing the entire git hook to fail.
+
+**Solution Applied**: Added `--no-errors-on-unmatched` flag to all Biome commands to prevent errors when no files are found.
+
+#### Files Updated:
+
+**1. `.lintstagedrc.mjs`**: All `biome format --write` commands now include `--no-errors-on-unmatched` flag
+```javascript
+// Before: "biome format --write"  
+// After: "biome format --write --no-errors-on-unmatched"
+```
+
+**2. `package.json`**: All Biome scripts updated with the flag
+```json
+"check": "biome check . --write --no-errors-on-unmatched",
+"format": "biome format . --write --no-errors-on-unmatched",
+"lint": "biome lint . --write --no-errors-on-unmatched"
+```
+
+#### Result:
+- ✅ Git hooks now succeed even when file patterns match no files
+- ✅ Commits complete successfully without "no files processed" errors  
+- ✅ All 37 integration tests continue to pass
+- ✅ Progressive validation strategy remains intact
