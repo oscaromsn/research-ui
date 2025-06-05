@@ -1,17 +1,16 @@
 // Learn more about clients at https://docs.boundaryml.com/docs/snippets/clients/overview
 
 client<llm> QueryGeneration {
-  provider openai
-  retry_policy TestSafely
+  provider "openai-generic"
   options {
-    model "gpt-4.1-mini"
-    api_key env.OPENAI_API_KEY
+    base_url "https://api.cerebras.ai/v1"
+    model "llama-4-scout-17b-16e-instruct"
+    api_key env.CEREBRAS_API_KEY
   }
 }
 
 client<llm> DocumentAnalysis {
   provider openai
-  retry_policy TestSafely
   options {
     model "gpt-4.1-mini"
     api_key env.OPENAI_API_KEY
@@ -19,37 +18,45 @@ client<llm> DocumentAnalysis {
 }
 
 client<llm> FindingsSynthetizing {
-  provider openai
-  retry_policy TestSafely
+  provider "openai-generic"
   options {
-    model "gpt-4.1-mini"
-    api_key env.OPENAI_API_KEY
+    base_url "https://api.cerebras.ai/v1"
+    model "llama-4-scout-17b-16e-instruct"
+    api_key env.CEREBRAS_API_KEY
   }
 }
 
 client<llm> DecidesNextStep {
-  provider openai
-  retry_policy TestSafely
+  provider "openai-generic"
   options {
-    model "gpt-4.1-mini"
-    api_key env.OPENAI_API_KEY
+    base_url "https://api.cerebras.ai/v1"
+    model "llama-4-scout-17b-16e-instruct"
+    api_key env.CEREBRAS_API_KEY
   }
 }
 
 client<llm> GenerateFinalReport {
-  provider openai
-  retry_policy TestSafely
+  provider "openai-generic"
   options {
-    model "gpt-4.1-mini"
-    api_key env.OPENAI_API_KEY
+    base_url "https://api.cerebras.ai/v1"
+    model "llama-4-scout-17b-16e-instruct"
+    api_key env.CEREBRAS_API_KEY
   }
 }
 
+client<llm> CustomCerebras {
+  provider "openai-generic"
+  options {
+    base_url "https://api.cerebras.ai/v1"
+    model "llama-4-scout-17b-16e-instruct"
+    api_key env.CEREBRAS_API_KEY
+  }
+}
 
-client<llm> CustomGPT4o {
+client<llm> GptMini {
   provider openai
   options {
-    model "gpt-4o"
+    model "gpt-4.1-mini"
     api_key env.OPENAI_API_KEY
   }
 }
