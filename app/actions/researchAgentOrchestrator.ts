@@ -729,6 +729,19 @@ async function executePipeline(
     return
   }
 
+  let currentIteration = autoModeConfig?.currentIteration || 0
+  const maxIterations = autoModeConfig?.maxIterations || 5
+
+  // Check if we've already reached max iterations before starting
+  if (autoModeConfig?.isEnabled && currentIteration >= maxIterations) {
+    await sendUpdate(writer, encoder, {
+      type: "STATUS_CHANGE",
+      stage: "ITERATION_PAUSED",
+      message: `Auto mode: Max iterations (${maxIterations}) reached. Manual review required.`,
+    })
+    return
+  }
+
   const queryAnalysis = await generateQueriesStage(context)
   const searchResultItems = await fetchDocumentsStage(
     context,
@@ -745,6 +758,13 @@ async function executePipeline(
   if (assessment.next_action === "GENERATE_REPORT") {
     await generateReportStage(context, synthesis, queryAnalysis)
   } else {
+    // Increment iteration count after completing one iteration
+    currentIteration += 1
+
+    // Check if we've reached max iterations after this iteration
+    const hasReachedMaxIterations =
+      autoModeConfig?.isEnabled && currentIteration >= maxIterations
+
     const stage =
       assessment.next_action === "REQUEST_HUMAN_REVIEW"
         ? "HUMAN_REVIEW_REQUESTED"
@@ -754,9 +774,25 @@ async function executePipeline(
       type: "STATUS_CHANGE",
       stage,
       message: autoModeConfig?.isEnabled
-        ? `Auto mode: Max iterations (${autoModeConfig.maxIterations}) reached. Manual review required.`
+        ? hasReachedMaxIterations
+          ? `Auto mode: Max iterations (${maxIterations}) reached. Manual review required.`
+          : `Auto mode: Iteration ${currentIteration} of ${maxIterations} completed. Continuing research...`
         : `Research paused. Suggested next action: ${assessment.next_action}. Summary: ${assessment.assessment_summary}`,
     })
+
+    // If we haven't reached max iterations and we're in auto mode, continue with next iteration
+    if (autoModeConfig?.isEnabled && !hasReachedMaxIterations) {
+      // Update the auto mode config with the new iteration count
+      const updatedAutoModeConfig = {
+        ...autoModeConfig,
+        currentIteration,
+      }
+
+      // Recursively continue with the next iteration
+      await executePipeline(context, updatedAutoModeConfig)
+      return
+    }
+
     return
   }
 
