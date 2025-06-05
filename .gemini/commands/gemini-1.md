@@ -7,6 +7,8 @@
 
 > good. now write an highly detailed, comprehensive and actionable plan for the envisioned sprint
 
+> carefully map the baml data structures to the atoms and react components where they are currently implemented
+
 OR
 
 ## Creating detailed implementation plans for each phase:

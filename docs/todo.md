@@ -8,12 +8,16 @@
 	- ![[Pasted image 20250530200302.png]]
 	- Elipsis on incomplete texts and prevent cut on words.
 	- Fix report streaming showing [object object]
+  - prevent evidence resorting and naming changing after analysis. keep the sorting by retrival time.
+  - ensure the iteration limit is respected on auto mode. currently it detects prematurely that the 5 iteration limit was reached. the counting is not working. 
 
-## CHORES
+## IMPROVEMENTS
 	- Move research log above guidance and add env flag to turn it on or off and make it with fixed height and scrolable and collapsable.
 	- Move agent assessment above generated search queries.
-	- Pad the analyzis into botton, always show
-
+	- Pad the analyzis into botton, always show.
+	- understand how to show, when to show the information
+	- increase the number of retrieved documents
+	- redesign the research pipeline to rely on cerebras models, at least for prototyping
 
 ## FEATURES
 	- Allow write feedback to the agent to better nudge the research
@@ -23,6 +27,7 @@
 
 
 ## TOOLING/DX:
+  - use the 'show docs before analysis' to fix the vi.mocv sucessive issues #IMPORTANT
   - Improve the validation scripts.
   - Also the name validation appears to confuse the agent, that instead of check the validations for a task defined for the 
   - Commit when finalizing the phase
@@ -34,6 +39,7 @@
 	- Ensure it doesn't allows pull/sync with remote if not all tests passes.
 
   - change typecheck to typecheck:strict?
+    - Actually i think with my current tsconfig.json it has no difference - ask claude for confirmation.
 
   - too long `bun run test`, change to:
     - bun run test --reporter=basic
