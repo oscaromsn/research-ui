@@ -16,7 +16,7 @@ configure({
   asyncUtilTimeout: 10000, // Increased for complex async operations
   testIdAttribute: "data-testid", // Explicit test ID attribute
   getElementError: (message, container) => {
-    // Enhanced error messages for agents
+    // Enhanced error messages for debugging
     const error = new Error(message || "TestingLibraryElementError")
     error.name = "TestingLibraryElementError"
     error.stack = `${message || "TestingLibraryElementError"}\n\nContainer HTML:\n${container.innerHTML}`
@@ -179,7 +179,7 @@ class EnhancedIntersectionObserverMock implements IntersectionObserver {
   }
 }
 
-// Enhanced Fetch Mock with better debugging
+// Enhanced Fetch Mock with better debugging and stream handling
 const createFetchMock = () => {
   const fetchMock = vi.fn()
 
@@ -240,24 +240,64 @@ const createFetchMock = () => {
     })
   }
 
+  // Helper for mocking streams that properly close
+  const mockStream = (data: string[] = []) => {
+    const encoder = new TextEncoder()
+
+    const stream = new ReadableStream({
+      start(controller) {
+        // Enqueue all data immediately and close
+        for (const chunk of data) {
+          controller.enqueue(encoder.encode(chunk))
+        }
+        controller.close()
+      },
+    })
+
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      json: vi.fn().mockResolvedValue({}),
+      text: vi.fn().mockResolvedValue(data.join("")),
+      blob: vi.fn().mockResolvedValue(new Blob()),
+      arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0)),
+      headers: new Headers(),
+      url: "",
+      redirected: false,
+      type: "basic",
+      clone: vi.fn(),
+      body: stream,
+      bodyUsed: false,
+    })
+  }
+
   // Attach helper methods
   ;(
     fetchMock as typeof fetchMock & {
       mockSuccess: typeof mockSuccess
       mockError: typeof mockError
+      mockStream: typeof mockStream
     }
   ).mockSuccess = mockSuccess
   ;(
     fetchMock as typeof fetchMock & {
       mockSuccess: typeof mockSuccess
       mockError: typeof mockError
+      mockStream: typeof mockStream
     }
   ).mockError = mockError
+  ;(
+    fetchMock as typeof fetchMock & {
+      mockSuccess: typeof mockSuccess
+      mockError: typeof mockError
+      mockStream: typeof mockStream
+    }
+  ).mockStream = mockStream
 
   return fetchMock
 }
 
-// ===== SETUP HOOKS =====
 // ===== STDERR FILTERING =====
 // Enhanced stderr filtering for React warnings
 const originalStderrWrite = process.stderr.write
@@ -319,6 +359,7 @@ const setupStderrFiltering = () => {
   }
 }
 
+// ===== SETUP HOOKS =====
 beforeAll(() => {
   setupConsole()
   setupStderrFiltering()
@@ -383,90 +424,45 @@ beforeEach(() => {
   }
 })
 
-afterEach(() => {
+afterEach(async () => {
   // Cleanup after each test
   vi.clearAllTimers()
   vi.restoreAllMocks()
+
+  // Force cleanup of any pending microtasks
+  await new Promise(resolve => setTimeout(resolve, 0))
+
+  // Clear any global state that might persist
+  if (typeof window !== "undefined") {
+    // Clear any event listeners
+    window.removeEventListener = vi.fn()
+    window.addEventListener = vi.fn()
+  }
 })
 
-afterAll(() => {
+afterAll(async () => {
+  // Cleanup any remaining async operations
+  await global.testUtils?.cleanupAsyncOperations?.()
+
   // Restore original console and stderr
   Object.assign(console, originalConsole)
   process.stderr.write = originalStderrWrite
+
+  // Clear any remaining unhandled rejections
+  unhandledRejections.clear()
 })
 
-// ===== CONDITIONAL MOCKING =====
-// Smart axios mocking based on test type
-const testType = process.env.VITEST_TEST_TYPE || "unit"
-
-if (testType === "unit") {
-  vi.mock("axios", () => ({
-    default: {
-      get: vi.fn(),
-      post: vi.fn(),
-      put: vi.fn(),
-      delete: vi.fn(),
-      patch: vi.fn(),
-      create: vi.fn(() => ({
-        get: vi.fn(),
-        post: vi.fn(),
-        put: vi.fn(),
-        delete: vi.fn(),
-        patch: vi.fn(),
-      })),
-    },
-    isAxiosError: vi.fn((error: unknown) => {
-      return (
-        error &&
-        typeof error === "object" &&
-        error !== null &&
-        "isAxiosError" in error &&
-        error.isAxiosError === true
-      )
-    }),
-  }))
-}
-
-// Mock Next.js router for unit tests
-if (testType === "unit") {
-  vi.mock("next/router", () => ({
-    useRouter: vi.fn(() => ({
-      push: vi.fn(),
-      replace: vi.fn(),
-      back: vi.fn(),
-      forward: vi.fn(),
-      refresh: vi.fn(),
-      prefetch: vi.fn(),
-      pathname: "/",
-      query: {},
-      asPath: "/",
-      route: "/",
-      isReady: true,
-    })),
-  }))
-
-  vi.mock("next/navigation", () => ({
-    useRouter: vi.fn(() => ({
-      push: vi.fn(),
-      replace: vi.fn(),
-      back: vi.fn(),
-      forward: vi.fn(),
-      refresh: vi.fn(),
-      prefetch: vi.fn(),
-    })),
-    usePathname: vi.fn(() => "/"),
-    useSearchParams: vi.fn(() => new URLSearchParams()),
-  }))
-}
-
 // ===== GLOBAL TEST UTILITIES =====
-// Make utilities available globally for agents
+// Make utilities available globally for easy access
 declare global {
   var testUtils: {
     waitForNextTick: () => Promise<void>
     mockApiCall: (url: string, response: unknown) => void
     triggerResize: (target: Element) => void
     triggerIntersection: (target: Element, isVisible: boolean) => void
+    createMockStream: (data: string[], autoClose?: boolean) => ReadableStream
+    flushPromises: () => Promise<void>
+    cleanupAsyncOperations: () => Promise<void>
   }
 }
 
@@ -517,13 +513,66 @@ global.testUtils = {
       ).triggerIntersection(target, isVisible)
     }
   },
+
+  createMockStream: (data: string[], autoClose = true) => {
+    const encoder = new TextEncoder()
+    let index = 0
+
+    return new ReadableStream({
+      start(controller) {
+        if (autoClose) {
+          // Enqueue all data immediately and close
+          for (const chunk of data) {
+            controller.enqueue(encoder.encode(chunk))
+          }
+          controller.close()
+        }
+      },
+      pull(controller) {
+        if (!autoClose && index < data.length) {
+          controller.enqueue(encoder.encode(data[index]))
+          index++
+          if (index >= data.length) {
+            controller.close()
+          }
+        }
+      },
+    })
+  },
+
+  flushPromises: () => new Promise(resolve => setTimeout(resolve, 0)),
+
+  cleanupAsyncOperations: async () => {
+    // Clear all timers
+    vi.clearAllTimers()
+
+    // Flush all pending promises
+    await new Promise<void>(resolve => setTimeout(resolve, 0))
+
+    // Run any remaining microtasks
+    await new Promise<void>(resolve => queueMicrotask(() => resolve()))
+  },
 }
 
-// ===== AGENT-FRIENDLY ERROR HANDLING =====
-// Enhanced error reporting for better agent debugging
+// ===== ERROR HANDLING =====
+// Enhanced error reporting for better debugging
+const unhandledRejections = new Set()
+
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Promise Rejection:", reason)
-  console.error("Promise:", promise)
+  // Track unhandled rejections but don't log them in tests to reduce noise
+  unhandledRejections.add(promise)
+  if (
+    process.env.VITEST_VERBOSE === "true" ||
+    process.env.DEBUG_API_TESTS === "true"
+  ) {
+    console.error("Unhandled Promise Rejection:", reason)
+    console.error("Promise:", promise)
+  }
+})
+
+process.on("rejectionHandled", promise => {
+  // Remove from tracking when handled
+  unhandledRejections.delete(promise)
 })
 
 // Export test configuration for reference

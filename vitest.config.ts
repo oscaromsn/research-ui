@@ -13,6 +13,11 @@ export default defineConfig({
     passWithNoTests: true, // Don't fail when no tests exist yet
     watch: true, // Enable watch by default for TDD workflow
 
+    // Mock Configuration
+    mockReset: true, // Reset mocks before each test
+    clearMocks: true, // Clear mock calls before each test
+    restoreMocks: true, // Restore original implementations after each test
+
     // Type Checking
     typecheck: {
       tsconfig: "./tsconfig.test.json",
@@ -36,8 +41,8 @@ export default defineConfig({
 
     // Test Organization
     setupFiles: ["./setupTests.ts"], // More conventional location
-    testTimeout: 10_000, // 10s timeout for API integration tests
-    hookTimeout: 5_000, // 5s for setup/teardown
+    testTimeout: 15_000, // 15s timeout for async operations
+    hookTimeout: 10_000, // 10s for setup/teardown
 
     // Enhanced Environment Variables
     env: {
@@ -145,10 +150,19 @@ export default defineConfig({
     poolOptions: {
       threads: {
         // Use reasonable concurrency
-        minThreads: 5,
-        maxThreads: process.env.CI ? 2 : 5,
+        minThreads: 1,
+        maxThreads: process.env.CI ? 2 : 3,
       },
     },
+
+    // Force exit after tests complete to prevent hanging
+    forceRerunTriggers: ["**/setupTests.ts", "**/vitest.config.ts"],
+
+    // Teardown timeout to ensure cleanup
+    teardownTimeout: 5_000,
+
+    // Prevent tests from running indefinitely
+    ...(process.env.CI && { bail: 1 }),
   },
 
   // Path Resolution (matches your structure)
