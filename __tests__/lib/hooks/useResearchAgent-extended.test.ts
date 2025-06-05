@@ -61,6 +61,7 @@ describe("useResearchAgent Hook - Extended Data Handling", () => {
     confidenceScore: 8,
     summarySnippet:
       "The court found that COVID-19 related restrictions constituted force majeure events when explicitly mentioned in the contract.",
+    status: "analyzed",
     keyArguments: [
       "Government-mandated closures during COVID-19 constitute unforeseeable circumstances",
       "Force majeure clauses must be interpreted strictly against the party invoking them",

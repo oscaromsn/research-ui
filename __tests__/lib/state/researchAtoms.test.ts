@@ -115,18 +115,20 @@ describe("ResearchAtoms - Type Definitions and Initial States", () => {
       const docs: ClientAnalyzedDoc[] = [
         {
           docId: "doc1",
-          title: "Contract Law Basics",
-          relevanceScore: 0.95,
-          confidenceScore: 0.87,
+          title: "Contract Law Fundamentals",
+          relevanceScore: 8.5,
+          confidenceScore: 9.2,
           summarySnippet:
             "This document covers fundamental contract principles...",
+          status: "analyzed",
         },
         {
           docId: "doc2",
           title: "Intellectual Property Rights",
-          relevanceScore: 0.82,
-          confidenceScore: 0.91,
+          relevanceScore: 7.8,
+          confidenceScore: 8.6,
           summarySnippet: "IP protection mechanisms and legal frameworks...",
+          status: "analyzed",
         },
       ]
 
@@ -334,7 +336,12 @@ describe("ResearchAtoms - Reset Functionality", () => {
     ])
 
     store.set(analyzedDocsSummaryAtom, [
-      { docId: "test-doc", title: "Test Document", relevanceScore: 0.8 },
+      {
+        docId: "test-doc",
+        title: "Test Document",
+        relevanceScore: 0.8,
+        status: "analyzed",
+      },
     ])
 
     store.set(synthesisDetailsAtom, {

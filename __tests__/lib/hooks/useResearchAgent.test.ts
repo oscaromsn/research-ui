@@ -9,6 +9,7 @@ import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator"
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent"
 import {
   analyzedDocsSummaryAtom,
+  finalReportContentAtom,
   generatedQueriesAtom,
   researchLogAtom,
   researchStatusAtom,
@@ -33,8 +34,10 @@ describe("useResearchAgent Hook", () => {
     vi.clearAllMocks()
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     vi.clearAllTimers()
+    // Ensure all async operations complete
+    await global.testUtils?.flushPromises?.()
   })
 
   describe("Hook Skeleton and Basic Structure", () => {
@@ -158,13 +161,10 @@ describe("useResearchAgent Hook", () => {
     })
 
     it("should set initializing state when starting research", async () => {
-      let streamController:
-        | ReadableStreamDefaultController<Uint8Array>
-        | undefined
       const mockStream = new ReadableStream({
         start(controller) {
-          streamController = controller
           // Don't close immediately, keep stream open for testing
+          setTimeout(() => controller.close(), 100)
         },
       })
       mockedConductResearch.mockResolvedValue(mockStream)
@@ -188,9 +188,6 @@ describe("useResearchAgent Hook", () => {
       expect(status.isLoading).toBe(true)
       expect(status.error).toBe(null)
       expect(status.message).toBe("Initializing research...")
-
-      // Clean up by closing the stream
-      streamController?.close()
     })
 
     it("should call conductResearch server action with legal question", async () => {
@@ -215,7 +212,7 @@ describe("useResearchAgent Hook", () => {
       expect(mockedConductResearch).toHaveBeenCalledWith(legalQuestion, {
         currentIteration: 0,
         isEnabled: false,
-        maxIterations: 3,
+        maxIterations: 5,
       })
       expect(mockedConductResearch).toHaveBeenCalledTimes(1)
     })
@@ -229,13 +226,19 @@ describe("useResearchAgent Hook", () => {
       })
 
       await act(async () => {
-        await result.current.startResearch("Test question")
+        try {
+          await result.current.startResearch("Test question")
+        } catch {
+          // Expected error, handle gracefully
+        }
       })
 
-      const status = store.get(researchStatusAtom)
-      expect(status.stage).toBe("ERROR")
-      expect(status.isLoading).toBe(false)
-      expect(status.error).toBe(errorMessage)
+      await waitFor(() => {
+        const status = store.get(researchStatusAtom)
+        expect(status.stage).toBe("ERROR")
+        expect(status.isLoading).toBe(false)
+        expect(status.error).toBe(errorMessage)
+      })
     })
 
     it("should add log entries when starting research", async () => {
@@ -685,6 +688,125 @@ describe("useResearchAgent Hook", () => {
         expect(logEntry).toBeDefined()
       })
     })
+
+    it("should process streaming report generation updates with replacement logic", async () => {
+      // Test that streaming text fields are REPLACED, not appended
+      const updates = [
+        // First chunk - initial partial executive summary
+        JSON.stringify({
+          type: "DATA",
+          stage: "GENERATING_REPORT",
+          message: "Generating executive summary",
+          data: {
+            executive_summary_chunk: "This report analyzes",
+          },
+        }),
+        // Second chunk - expanded executive summary (full current state)
+        JSON.stringify({
+          type: "DATA",
+          stage: "GENERATING_REPORT",
+          message: "Continuing executive summary",
+          data: {
+            executive_summary_chunk:
+              "This report analyzes the legal implications of artificial intelligence",
+          },
+        }),
+        // Third chunk - complete executive summary
+        JSON.stringify({
+          type: "DATA",
+          stage: "GENERATING_REPORT",
+          message: "Finalizing executive summary",
+          data: {
+            executive_summary_chunk:
+              "This report analyzes the legal implications of artificial intelligence in healthcare settings and examines liability frameworks.",
+          },
+        }),
+        // Section content streaming
+        JSON.stringify({
+          type: "DATA",
+          stage: "GENERATING_REPORT",
+          message: "Generating section content",
+          data: {
+            sectionUpdate: {
+              title: "Legal Framework",
+              content_chunk: "The current legal framework establishes",
+            },
+          },
+        }),
+        // Updated section content (full current state)
+        JSON.stringify({
+          type: "DATA",
+          stage: "GENERATING_REPORT",
+          message: "Continuing section content",
+          data: {
+            sectionUpdate: {
+              title: "Legal Framework",
+              content_chunk:
+                "The current legal framework establishes clear guidelines for AI deployment in medical environments, with specific requirements for liability allocation.",
+            },
+          },
+        }),
+        // Conclusion streaming
+        JSON.stringify({
+          type: "DATA",
+          stage: "GENERATING_REPORT",
+          message: "Generating conclusion",
+          data: {
+            conclusion_chunk: "Based on this analysis",
+          },
+        }),
+        JSON.stringify({
+          type: "DATA",
+          stage: "GENERATING_REPORT",
+          message: "Finalizing conclusion",
+          data: {
+            conclusion_chunk:
+              "Based on this analysis, healthcare providers must implement comprehensive AI governance frameworks to ensure regulatory compliance and limit liability exposure.",
+          },
+        }),
+      ].join("\n")
+
+      const mockStream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode(updates))
+          controller.close()
+        },
+      })
+      mockedConductResearch.mockResolvedValue(mockStream)
+
+      const { result } = renderHook(() => useResearchAgent(), {
+        wrapper: JotaiProvider,
+      })
+
+      await act(async () => {
+        await result.current.startResearch("Test legal question")
+      })
+
+      await waitFor(
+        () => {
+          const report = store.get(finalReportContentAtom)
+
+          // Executive summary should show the final complete state, not concatenated chunks
+          expect(report.executiveSummary).toBe(
+            "This report analyzes the legal implications of artificial intelligence in healthcare settings and examines liability frameworks."
+          )
+
+          // Should have one section with complete content
+          expect(report.sections).toHaveLength(1)
+          expect(report.sections[0]).toEqual({
+            title: "Legal Framework",
+            content:
+              "The current legal framework establishes clear guidelines for AI deployment in medical environments, with specific requirements for liability allocation.",
+          })
+
+          // Conclusion should show final complete state
+          expect(report.conclusion).toBe(
+            "Based on this analysis, healthcare providers must implement comprehensive AI governance frameworks to ensure regulatory compliance and limit liability exposure."
+          )
+        },
+        { timeout: 15000 }
+      )
+    }, 20000)
   })
 
   describe("AbortController Management", () => {

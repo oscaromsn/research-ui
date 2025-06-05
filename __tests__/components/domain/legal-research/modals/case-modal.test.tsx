@@ -46,6 +46,7 @@ describe("CaseModal Component", () => {
     confidenceScore: 0.9,
     summarySnippet:
       "This case discusses force majeure clauses in contracts during the pandemic.",
+    status: "analyzed",
     keyArguments: [
       "Force majeure clauses must explicitly mention pandemic-related events",
       "Government mandates may constitute qualifying events",
@@ -180,6 +181,7 @@ describe("CaseModal Component", () => {
     const minimalData: ClientAnalyzedDoc = {
       docId: "minimal-123",
       title: "Minimal Case",
+      status: "analyzed",
     }
 
     render(

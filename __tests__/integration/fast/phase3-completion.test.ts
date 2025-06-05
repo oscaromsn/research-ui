@@ -79,7 +79,7 @@ describe("Phase 3 Completion - Client-Side Orchestrator Hook", () => {
       // Pre-populate atoms with data
       store.set(generatedQueriesAtom, [{ query_string: "old query" }])
       store.set(analyzedDocsSummaryAtom, [
-        { docId: "old-doc", title: "Old Doc" },
+        { docId: "old-doc", title: "Old Doc", status: "analyzed" as const },
       ])
       store.set(synthesisDetailsAtom, {
         topics: [{ title: "Old Topic", synthesisSnippet: "old" }],
@@ -200,7 +200,7 @@ describe("Phase 3 Completion - Client-Side Orchestrator Hook", () => {
       expect(mockedConductResearch).toHaveBeenCalledWith(testQuestion, {
         currentIteration: 0,
         isEnabled: false,
-        maxIterations: 3,
+        maxIterations: 5,
       })
       expect(mockedConductResearch).toHaveBeenCalledTimes(1)
     })

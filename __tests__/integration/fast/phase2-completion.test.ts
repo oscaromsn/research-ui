@@ -170,6 +170,7 @@ describe("Phase 2 Completion Criteria Validation", () => {
         relevanceScore: 0.95,
         confidenceScore: 0.87,
         summarySnippet: "Initial snippet...",
+        status: "analyzed" as const,
       }
 
       store.set(analyzedDocsSummaryAtom, [mockDoc])
@@ -180,6 +181,7 @@ describe("Phase 2 Completion Criteria Validation", () => {
         ...mockDoc,
         docId: "test-doc-2",
         title: "Second Document",
+        status: "analyzed" as const,
       }
       store.set(analyzedDocsSummaryAtom, [...currentDocs, newDoc])
 
@@ -262,10 +264,11 @@ describe("Phase 2 Completion Criteria Validation", () => {
       store.set(analyzedDocsSummaryAtom, [
         {
           docId: "doc1",
-          title: "Contract Law Fundamentals",
-          relevanceScore: 0.92,
-          confidenceScore: 0.88,
+          title: "Contract Law Basics",
+          relevanceScore: 8,
+          confidenceScore: 9,
           summarySnippet: "This document covers basic contract principles...",
+          status: "analyzed",
         },
       ])
 

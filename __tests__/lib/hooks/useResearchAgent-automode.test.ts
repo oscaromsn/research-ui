@@ -125,7 +125,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         "Test legal question",
         expect.objectContaining({
           isEnabled: true,
-          maxIterations: 3,
+          maxIterations: 5,
           currentIteration: 0,
         })
       )
@@ -166,7 +166,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         "Test legal question",
         expect.objectContaining({
           isEnabled: false,
-          maxIterations: 3,
+          maxIterations: 5,
           currentIteration: 0,
         })
       )
@@ -213,16 +213,14 @@ describe("useResearchAgent Hook - Auto Mode", () => {
         wrapper: JotaiProvider,
       })
 
-      const testQuestion = "What are the patent requirements for AI inventions?"
+      const legalQuestion = "What are the implications of AI in healthcare?"
 
-      // Start research
       await act(async () => {
-        await result.current.startResearch(testQuestion)
+        await result.current.startResearch(legalQuestion)
       })
 
-      // Check that auto mode state was updated
       const autoModeState = store.get(autoModeStateAtom)
-      expect(autoModeState.originalQuestion).toBe(testQuestion)
+      expect(autoModeState.originalQuestion).toBe(legalQuestion)
       expect(autoModeState.currentIteration).toBe(0)
     })
   })
@@ -265,7 +263,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
       await waitFor(() => {
         const sessionState = store.get(researchSessionAtom)
         expect(sessionState.accumulatedQueries).toHaveLength(1)
-        expect(sessionState.accumulatedQueries[0]).toMatchObject({
+        expect(sessionState.accumulatedQueries[0]).toEqual({
           query_string: "patent requirements AI",
           expected_information_summary: "Patent eligibility for AI",
           timestamp: expect.any(String),
@@ -308,7 +306,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
       await waitFor(() => {
         const sessionState = store.get(researchSessionAtom)
         expect(sessionState.accumulatedDocuments).toHaveLength(1)
-        expect(sessionState.accumulatedDocuments[0]).toMatchObject({
+        expect(sessionState.accumulatedDocuments[0]).toEqual({
           docId: "doc-123",
           title: "Test Document",
           relevanceScore: 8,
@@ -357,7 +355,7 @@ describe("useResearchAgent Hook - Auto Mode", () => {
       await waitFor(() => {
         const sessionState = store.get(researchSessionAtom)
         expect(sessionState.accumulatedTopics).toHaveLength(1)
-        expect(sessionState.accumulatedTopics[0]).toMatchObject({
+        expect(sessionState.accumulatedTopics[0]).toEqual({
           title: "Patent Eligibility",
           synthesisSnippet: "AI inventions must meet...",
           confidence: 85,
@@ -461,7 +459,11 @@ describe("useResearchAgent Hook - Auto Mode", () => {
 
       // Start research
       await act(async () => {
-        await result.current.startResearch("Test legal question")
+        try {
+          await result.current.startResearch("Test legal question")
+        } catch {
+          // Expected error, handle gracefully
+        }
       })
 
       // Check error state
@@ -490,13 +492,13 @@ describe("useResearchAgent Hook - Auto Mode", () => {
       })
 
       // Mock a successful stream to trigger state reset
-      const mockStream = new ReadableStream({
+      const mockResetStream = new ReadableStream({
         start(controller) {
           controller.close()
         },
       })
 
-      mockConductResearch.mockResolvedValue(mockStream)
+      mockConductResearch.mockResolvedValue(mockResetStream)
 
       // Start new research (which should reset state)
       await act(async () => {

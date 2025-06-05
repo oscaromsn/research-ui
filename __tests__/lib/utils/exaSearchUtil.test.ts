@@ -1,4 +1,3 @@
-import axios, { isAxiosError } from "axios"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import type { SearchQueryItem } from "@/baml_client/types"
@@ -23,11 +22,26 @@ import {
 } from "@/lib/utils/exaSearchErrors"
 import { executeExaSearch } from "@/lib/utils/exaSearchUtil"
 
-// axios is already mocked in setupTests.ts
-const mockedAxios = axios as unknown as {
-  post: ReturnType<typeof vi.fn>
-}
-const mockedIsAxiosError = isAxiosError as unknown as ReturnType<typeof vi.fn>
+// Mock axios
+vi.mock("axios", () => ({
+  default: {
+    post: vi.fn(),
+    get: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+    patch: vi.fn(),
+    create: vi.fn(),
+  },
+  isAxiosError: vi.fn(),
+}))
+
+import axios, { isAxiosError } from "axios"
+
+const mockedAxios = vi.mocked(axios)
+const mockedIsAxiosError = vi.mocked(isAxiosError)
+
+// Type assertion for the mocked axios methods to include vitest mock properties
+const mockPost = mockedAxios.post as ReturnType<typeof vi.fn>
 
 // Get the actual API key from .env.test (loaded by Vitest config)
 const EXA_API_KEY_FROM_ENV = process.env.EXA_API_KEY
@@ -114,15 +128,15 @@ describe("executeExaSearch", () => {
 
   it("should correctly build request body based on parameters", async () => {
     // Setup
-    mockedAxios.post.mockResolvedValueOnce(mockExaResponse)
+    mockPost.mockResolvedValueOnce(mockExaResponse)
 
     // Execute
     await executeExaSearch(mockSearchQuery, 10, true, 5)
 
     // Verify
-    expect(mockedAxios.post).toHaveBeenCalledTimes(1)
+    expect(mockPost).toHaveBeenCalledTimes(1)
 
-    const mockCall = mockedAxios.post.mock.calls[0]
+    const mockCall = mockPost.mock.calls[0]
     if (!mockCall) {
       throw new Error("Expected mock call")
     }
@@ -153,13 +167,13 @@ describe("executeExaSearch", () => {
 
   it("should build request body with different numResults values", async () => {
     // Setup
-    mockedAxios.post.mockResolvedValueOnce(mockExaResponse)
+    mockPost.mockResolvedValueOnce(mockExaResponse)
 
     // Execute with different numResults
     await executeExaSearch(mockSearchQuery, 3, true, 2)
 
     // Verify
-    const mockCall = mockedAxios.post.mock.calls[0]
+    const mockCall = mockPost.mock.calls[0]
     if (!mockCall) {
       throw new Error("Expected mock call")
     }
@@ -170,13 +184,13 @@ describe("executeExaSearch", () => {
 
   it("should build request body with fetchFullText false", async () => {
     // Setup
-    mockedAxios.post.mockResolvedValueOnce(mockExaResponse)
+    mockPost.mockResolvedValueOnce(mockExaResponse)
 
     // Execute with fetchFullText false
     await executeExaSearch(mockSearchQuery, 5, false, 3)
 
     // Verify
-    const mockCall = mockedAxios.post.mock.calls[0]
+    const mockCall = mockPost.mock.calls[0]
     if (!mockCall) {
       throw new Error("Expected mock call")
     }
@@ -187,7 +201,7 @@ describe("executeExaSearch", () => {
 
   it("should correctly transform Exa API response to BAML SearchResultItem[]", async () => {
     // Setup
-    mockedAxios.post.mockResolvedValueOnce(mockExaResponse)
+    mockPost.mockResolvedValueOnce(mockExaResponse)
     vi.spyOn(console, "log").mockImplementation(() => {
       // Silence console logs during test
     })
@@ -245,7 +259,7 @@ describe("executeExaSearch", () => {
       },
     }
 
-    mockedAxios.post.mockResolvedValueOnce(minimalResponse)
+    mockPost.mockResolvedValueOnce(minimalResponse)
     vi.spyOn(console, "log").mockImplementation(() => {
       // Silence console logs during test
     })
@@ -290,7 +304,7 @@ describe("executeExaSearch", () => {
       },
     }
 
-    mockedAxios.post.mockResolvedValueOnce(responseWithISODate)
+    mockPost.mockResolvedValueOnce(responseWithISODate)
 
     // Execute
     const results = await executeExaSearch(mockSearchQuery)
@@ -301,7 +315,7 @@ describe("executeExaSearch", () => {
 
   it("should properly set retrieval_date as ISO8601 string", async () => {
     // Setup
-    mockedAxios.post.mockResolvedValueOnce(mockExaResponse)
+    mockPost.mockResolvedValueOnce(mockExaResponse)
 
     // Set a fixed date for testing
     const fixedDate = new Date("2023-05-01T12:00:00Z")
@@ -331,7 +345,7 @@ describe("executeExaSearch", () => {
       status: 401,
       data: { message: "Unauthorized" },
     }
-    mockedAxios.post.mockRejectedValueOnce(apiError)
+    mockPost.mockRejectedValueOnce(apiError)
     mockedIsAxiosError.mockReturnValueOnce(true)
 
     vi.spyOn(console, "error").mockImplementation(() => {
@@ -347,7 +361,7 @@ describe("executeExaSearch", () => {
   it("should handle non-axios errors correctly", async () => {
     // Setup
     const genericError = new Error("Something went wrong")
-    mockedAxios.post.mockRejectedValueOnce(genericError)
+    mockPost.mockRejectedValueOnce(genericError)
     mockedIsAxiosError.mockReturnValueOnce(false)
 
     vi.spyOn(console, "error").mockImplementation(() => {
@@ -371,7 +385,7 @@ describe("executeExaSearch", () => {
       status: 429,
       data: { error: "Too many requests" },
     }
-    mockedAxios.post.mockRejectedValueOnce(rateLimitError)
+    mockPost.mockRejectedValueOnce(rateLimitError)
     mockedIsAxiosError.mockReturnValueOnce(true)
 
     vi.spyOn(console, "error").mockImplementation(() => {
@@ -395,7 +409,7 @@ describe("executeExaSearch", () => {
       status: 403,
       data: { message: "Invalid API key" },
     }
-    mockedAxios.post.mockRejectedValueOnce(forbiddenError)
+    mockPost.mockRejectedValueOnce(forbiddenError)
     mockedIsAxiosError.mockReturnValueOnce(true)
 
     vi.spyOn(console, "error").mockImplementation(() => {
@@ -410,7 +424,7 @@ describe("executeExaSearch", () => {
 
   it("should handle 500 server errors correctly", async () => {
     // Setup
-    const serverError = new Error("Internal server error")
+    const serverError: MockAxiosError = new Error("Internal server error")
     ;(
       serverError as Error & {
         response: { status: number; data: { error: string } }
@@ -419,7 +433,7 @@ describe("executeExaSearch", () => {
       status: 500,
       data: { error: "Internal server error" },
     }
-    mockedAxios.post.mockRejectedValueOnce(serverError)
+    mockPost.mockRejectedValueOnce(serverError)
     mockedIsAxiosError.mockReturnValueOnce(true)
 
     vi.spyOn(console, "error").mockImplementation(() => {
@@ -452,7 +466,7 @@ describe("executeExaSearch", () => {
       },
     }
 
-    mockedAxios.post.mockResolvedValueOnce(responseWithoutHighlights)
+    mockPost.mockResolvedValueOnce(responseWithoutHighlights)
 
     // Execute
     const results = await executeExaSearch(mockSearchQuery)
@@ -464,13 +478,13 @@ describe("executeExaSearch", () => {
 
   it("should set contents.text=true when fetchFullText is true", async () => {
     // Setup
-    mockedAxios.post.mockResolvedValueOnce(mockExaResponse)
+    mockPost.mockResolvedValueOnce(mockExaResponse)
 
     // Execute
     await executeExaSearch(mockSearchQuery, 5, true, 0)
 
     // Verify
-    const mockCall = mockedAxios.post.mock.calls[0]
+    const mockCall = mockPost.mock.calls[0]
     if (!mockCall) {
       throw new Error("Expected mock call")
     }
@@ -481,13 +495,13 @@ describe("executeExaSearch", () => {
 
   it("should not include highlights when numHighlightSentences is 0", async () => {
     // Setup
-    mockedAxios.post.mockResolvedValueOnce(mockExaResponse)
+    mockPost.mockResolvedValueOnce(mockExaResponse)
 
     // Execute
     await executeExaSearch(mockSearchQuery, 5, false, 0)
 
     // Verify
-    const mockCall = mockedAxios.post.mock.calls[0]
+    const mockCall = mockPost.mock.calls[0]
     if (!mockCall) {
       throw new Error("Expected mock call")
     }
@@ -510,7 +524,7 @@ describe("executeExaSearch", () => {
         data: { error: "Too many requests", type: "rate_limit" },
         headers: { "retry-after": "60" },
       }
-      mockedAxios.post.mockRejectedValueOnce(rateLimitError)
+      mockPost.mockRejectedValueOnce(rateLimitError)
       mockedIsAxiosError.mockReturnValueOnce(true)
 
       try {
@@ -533,7 +547,7 @@ describe("executeExaSearch", () => {
         status: 429,
         data: { error: "Monthly usage quota exceeded" },
       }
-      mockedAxios.post.mockRejectedValueOnce(rateLimitError)
+      mockPost.mockRejectedValueOnce(rateLimitError)
       mockedIsAxiosError.mockReturnValueOnce(true)
 
       try {
@@ -553,7 +567,7 @@ describe("executeExaSearch", () => {
         status: 401,
         data: { error: "Invalid API key" },
       }
-      mockedAxios.post.mockRejectedValueOnce(authError)
+      mockPost.mockRejectedValueOnce(authError)
       mockedIsAxiosError.mockReturnValueOnce(true)
 
       try {
@@ -575,7 +589,7 @@ describe("executeExaSearch", () => {
         status: 403,
         data: { error: "Insufficient permissions for this operation" },
       }
-      mockedAxios.post.mockRejectedValueOnce(authError)
+      mockPost.mockRejectedValueOnce(authError)
       mockedIsAxiosError.mockReturnValueOnce(true)
 
       try {
@@ -597,7 +611,7 @@ describe("executeExaSearch", () => {
         status: 500,
         data: { error: "Internal server error" },
       }
-      mockedAxios.post.mockRejectedValueOnce(serverError)
+      mockPost.mockRejectedValueOnce(serverError)
       mockedIsAxiosError.mockReturnValueOnce(true)
 
       try {
@@ -619,7 +633,7 @@ describe("executeExaSearch", () => {
         status: 501,
         data: { error: "Not implemented" },
       }
-      mockedAxios.post.mockRejectedValueOnce(serverError)
+      mockPost.mockRejectedValueOnce(serverError)
       mockedIsAxiosError.mockReturnValueOnce(true)
 
       try {
@@ -638,12 +652,12 @@ describe("executeExaSearch", () => {
       clientError.response = {
         status: 400,
         data: {
-          error: "Validation failed",
+          error: "Bad request",
           code: "VALIDATION_ERROR",
           errors: [{ field: "query", message: "Query cannot be empty" }],
         },
       }
-      mockedAxios.post.mockRejectedValueOnce(clientError)
+      mockPost.mockRejectedValueOnce(clientError)
       mockedIsAxiosError.mockReturnValueOnce(true)
 
       try {
@@ -666,7 +680,7 @@ describe("executeExaSearch", () => {
         status: 408,
         data: { error: "Request timeout" },
       }
-      mockedAxios.post.mockRejectedValueOnce(clientError)
+      mockPost.mockRejectedValueOnce(clientError)
       mockedIsAxiosError.mockReturnValueOnce(true)
 
       try {
@@ -683,7 +697,7 @@ describe("executeExaSearch", () => {
     it("should throw ExaNetworkError for connection errors", async () => {
       const networkError: MockAxiosError = new Error("Network error")
       networkError.code = "ECONNREFUSED"
-      mockedAxios.post.mockRejectedValueOnce(networkError)
+      mockPost.mockRejectedValueOnce(networkError)
       mockedIsAxiosError.mockReturnValueOnce(true)
 
       try {
@@ -702,7 +716,7 @@ describe("executeExaSearch", () => {
     it("should throw ExaNetworkError for timeout errors", async () => {
       const timeoutError: MockAxiosError = new Error("Request timeout")
       timeoutError.code = "ECONNABORTED"
-      mockedAxios.post.mockRejectedValueOnce(timeoutError)
+      mockPost.mockRejectedValueOnce(timeoutError)
       mockedIsAxiosError.mockReturnValueOnce(true)
 
       try {
@@ -719,7 +733,7 @@ describe("executeExaSearch", () => {
 
     it("should throw ExaNetworkError for generic timeout messages", async () => {
       const timeoutError = new Error("Request timeout occurred")
-      mockedAxios.post.mockRejectedValueOnce(timeoutError)
+      mockPost.mockRejectedValueOnce(timeoutError)
       mockedIsAxiosError.mockReturnValueOnce(false)
 
       try {
@@ -741,7 +755,7 @@ describe("executeExaSearch", () => {
           message: "Success",
         },
       }
-      mockedAxios.post.mockResolvedValueOnce(invalidResponse)
+      mockPost.mockResolvedValueOnce(invalidResponse)
 
       try {
         await executeExaSearch(mockSearchQuery)
@@ -757,7 +771,7 @@ describe("executeExaSearch", () => {
 
     it("should throw ExaParsingError for null response data", async () => {
       const nullResponse = { data: null }
-      mockedAxios.post.mockResolvedValueOnce(nullResponse)
+      mockPost.mockResolvedValueOnce(nullResponse)
 
       try {
         await executeExaSearch(mockSearchQuery)
@@ -780,7 +794,7 @@ describe("executeExaSearch", () => {
           ],
         },
       }
-      mockedAxios.post.mockResolvedValueOnce(invalidResultResponse)
+      mockPost.mockResolvedValueOnce(invalidResultResponse)
 
       try {
         await executeExaSearch(mockSearchQuery)
@@ -805,7 +819,7 @@ describe("executeExaSearch", () => {
           ],
         },
       }
-      mockedAxios.post.mockResolvedValueOnce(missingUrlResponse)
+      mockPost.mockResolvedValueOnce(missingUrlResponse)
 
       try {
         await executeExaSearch(mockSearchQuery)
@@ -820,7 +834,7 @@ describe("executeExaSearch", () => {
 
     it("should wrap unknown errors in ExaParsingError", async () => {
       const unknownError = { weird: "object" }
-      mockedAxios.post.mockRejectedValueOnce(unknownError)
+      mockPost.mockRejectedValueOnce(unknownError)
       mockedIsAxiosError.mockReturnValueOnce(false)
 
       try {

@@ -139,6 +139,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
     confidenceScore: 8,
     summarySnippet:
       "The court found that COVID-19 related restrictions constituted force majeure events when explicitly mentioned in the contract.",
+    status: "analyzed",
     keyArguments: [
       "Government-mandated closures during COVID-19 constitute unforeseeable circumstances",
       "Force majeure clauses must be interpreted strictly against the party invoking them",
@@ -180,8 +181,9 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
     it("shows placeholder when no key arguments available", () => {
       const docWithoutArguments: ClientAnalyzedDoc = {
         docId: "doc-no-args",
-        title: "Test Document",
-        relevanceScore: 5,
+        title: "Case Without Arguments",
+        relevanceScore: 7,
+        status: "analyzed",
       }
 
       store.set(analyzedDocsSummaryAtom, [docWithoutArguments])
@@ -242,9 +244,10 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
     it("shows placeholder when no entities extracted", () => {
       const docWithoutEntities: ClientAnalyzedDoc = {
         docId: "doc-no-entities",
-        title: "Test Document",
-        relevanceScore: 5,
+        title: "Case Without Entities",
+        relevanceScore: 6,
         extractedEntities: [],
+        status: "analyzed",
       }
 
       store.set(analyzedDocsSummaryAtom, [docWithoutEntities])
@@ -274,8 +277,9 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
     it("shows placeholder when no document content available", () => {
       const docWithoutFullText: ClientAnalyzedDoc = {
         docId: "doc-no-text",
-        title: "Test Document",
+        title: "Case Without Full Text",
         relevanceScore: 5,
+        status: "analyzed",
       }
 
       store.set(analyzedDocsSummaryAtom, [docWithoutFullText])
@@ -451,6 +455,7 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
         docId: "doc-empty",
         title: "Empty Document",
         relevanceScore: 0,
+        status: "analyzed",
         keyArguments: [],
         extractedEntities: [],
         extractedQuotes: [],

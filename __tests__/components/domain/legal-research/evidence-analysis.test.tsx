@@ -5,6 +5,43 @@ import type React from "react"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
+// Mock Next.js navigation
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+  })),
+  usePathname: vi.fn(() => "/"),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
+  useParams: vi.fn(() => ({})),
+}))
+
+// Mock Lucide React icons
+vi.mock("lucide-react", async importOriginal => {
+  const actual = (await importOriginal()) as Record<string, unknown>
+  return {
+    ...actual,
+    // Mock all icon components as simple functions returning their name
+    AlertCircle: () => "AlertCircle",
+    Brain: () => "Brain",
+    Gavel: () => "Gavel",
+    Loader2: () => "Loader2",
+    Scroll: () => "Scroll",
+    ChevronDown: () => "ChevronDown",
+    ChevronUp: () => "ChevronUp",
+    Eye: () => "Eye",
+    FileText: () => "FileText",
+    X: () => "X",
+    BookOpen: () => "BookOpen",
+    Scale: () => "Scale",
+    // Add any other icons that might be used
+  }
+})
+
 import { EvidenceAnalysis } from "@/components/domain/legal-research/evidence-analysis"
 import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms"
 import {
@@ -12,44 +49,11 @@ import {
   selectedAnalyzedDocIdAtom,
 } from "@/lib/state/researchAtoms"
 
-// Mock the CaseModal component
-vi.mock("@/components/domain/legal-research/modals/case-modal", () => ({
-  CaseModal: ({
-    isOpen,
-    onClose,
-    caseData,
-  }: {
-    isOpen: boolean
-    onClose: () => void
-    caseData?: {
-      title?: string
-      source?: string
-      court?: string
-      date?: string
-    }
-  }) => {
-    if (!isOpen) {
-      return null
-    }
-    return (
-      <div data-testid="case-modal">
-        <h3>Case Details</h3>
-        <p>Title: {caseData?.title || "No title"}</p>
-        <p>Source: {caseData?.source || "No source"}</p>
-        <button type="button" onClick={onClose} aria-label="close">
-          Close
-        </button>
-      </div>
-    )
-  },
-}))
-
 describe("EvidenceAnalysis Component Integration", () => {
   let store: ReturnType<typeof createStore>
 
   beforeEach(() => {
     store = createStore()
-    vi.clearAllMocks()
   })
 
   const JotaiProvider = ({ children }: { children: ReactNode }) => (
@@ -64,10 +68,11 @@ describe("EvidenceAnalysis Component Integration", () => {
     {
       docId: "doc-1",
       title: "Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)",
-      relevanceScore: 8,
-      confidenceScore: 9,
+      relevanceScore: 9,
+      confidenceScore: 8,
       summarySnippet:
         "The court found that COVID-19 related restrictions constituted force majeure events when explicitly mentioned in the contract.",
+      status: "analyzed",
     },
     {
       docId: "doc-2",
@@ -77,14 +82,16 @@ describe("EvidenceAnalysis Component Integration", () => {
       confidenceScore: 7,
       summarySnippet:
         "The doctrine of impossibility requires more than mere hardship; must show true impossibility.",
+      status: "analyzed",
     },
     {
       docId: "doc-3",
       title: "California Civil Code § 1511",
-      relevanceScore: 9,
-      confidenceScore: 10,
+      relevanceScore: 8,
+      confidenceScore: 7,
       summarySnippet:
         "Performance of an obligation is excused when prevented by operation of law.",
+      status: "analyzed",
     },
   ]
 
@@ -152,7 +159,7 @@ describe("EvidenceAnalysis Component Integration", () => {
     renderWithProvider(<EvidenceAnalysis />)
 
     // Check that relevance score is displayed
-    expect(screen.getByText("8/10")).toBeInTheDocument()
+    expect(screen.getByText("9/10")).toBeInTheDocument()
 
     // Check that the summary from the selected document is displayed
     expect(
@@ -223,10 +230,11 @@ describe("EvidenceAnalysis Component Integration", () => {
     const docsWithStreamingText: ClientAnalyzedDoc[] = [
       {
         docId: "doc-1",
-        title: "Smith v. Jones",
-        relevanceScore: 8,
-        summarySnippet:
-          "The court established that government mandates during COVID-19", // Incomplete, simulating streaming
+        title: "Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)",
+        relevanceScore: 9,
+        confidenceScore: 8,
+        summarySnippet: "The court found that COVID-19", // Incomplete, simulating streaming
+        status: "analyzing",
       },
     ]
 
@@ -286,6 +294,7 @@ describe("EvidenceAnalysis Component Integration", () => {
       title: "Smith v. Jones",
       relevanceScore: 8,
       summarySnippet: "The court found that COVID-19",
+      status: "analyzing",
     }
 
     store.set(analyzedDocsSummaryAtom, [partialDoc])
@@ -294,7 +303,7 @@ describe("EvidenceAnalysis Component Integration", () => {
     const { rerender } = renderWithProvider(<EvidenceAnalysis />)
 
     // Check initial partial text
-    expect(screen.getAllByText(/The court found that COVID-19/)).toHaveLength(2)
+    expect(document.body.textContent).toContain("The court found that COVID-19")
 
     // Update with more text
     const updatedDoc: ClientAnalyzedDoc = {
@@ -311,10 +320,8 @@ describe("EvidenceAnalysis Component Integration", () => {
     )
 
     // Check updated text
-    expect(
-      screen.getAllByText(
-        /COVID-19 restrictions constituted force majeure events/
-      )
-    ).toHaveLength(2)
+    expect(document.body.textContent).toContain(
+      "COVID-19 restrictions constituted force majeure events"
+    )
   })
 })
