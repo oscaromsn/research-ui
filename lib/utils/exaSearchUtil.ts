@@ -697,5 +697,12 @@ export async function executeExaSearch(
     } else {
       handleNonAxiosError(error, bamlSearchQuery.query_string)
     }
+
+    // This should never be reached since error handlers always throw,
+    // but added for TypeScript safety to ensure function never returns undefined
+    // @ts-ignore: Unreachable code is intentional for runtime safety
+    throw new Error(
+      "Unexpected: error handlers should have thrown an exception"
+    )
   }
 }

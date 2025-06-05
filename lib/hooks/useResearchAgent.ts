@@ -70,6 +70,10 @@ interface UseResearchAgentReturn {
  * orchestrating the entire research lifecycle from query generation to final report creation.
  * It manages the connection to the server-side research orchestrator and updates Jotai atoms
  * based on streaming updates received from the backend.
+ *
+ * IMPORTANT: For streaming text fields (marked with @stream.with_state in BAML), the "chunk"
+ * received from the orchestrator represents the FULL CURRENT VALUE of that field, not an
+ * incremental addition. Therefore, we REPLACE (not append) the field value with each chunk.
  */
 export function useResearchAgent(): UseResearchAgentReturn {
   // Get Jotai setters and readers
@@ -143,6 +147,35 @@ export function useResearchAgent(): UseResearchAgentReturn {
       logResearchEvent,
     ]
   )
+
+  // Helper function to cleanup orphaned documents that remain in "analyzing" state
+  const cleanupOrphanedDocuments = useCallback(() => {
+    setAnalyzedDocs(prev =>
+      prev.map(doc => {
+        if (doc.status === "analyzing") {
+          return {
+            ...doc,
+            status: "error" as const,
+            errorMessage: "Analysis was interrupted or failed to complete",
+          }
+        }
+        return doc
+      })
+    )
+    setResearchSession(prev => ({
+      ...prev,
+      accumulatedDocuments: prev.accumulatedDocuments.map(doc => {
+        if (doc.status === "analyzing") {
+          return {
+            ...doc,
+            status: "error" as const,
+            errorMessage: "Analysis was interrupted or failed to complete",
+          }
+        }
+        return doc
+      }),
+    }))
+  }, [setAnalyzedDocs, setResearchSession])
 
   // Helper function to determine status flags
   const getStatusFlags = useCallback(
@@ -283,6 +316,68 @@ export function useResearchAgent(): UseResearchAgentReturn {
     [setAnalyzedDocs, setResearchSession]
   )
 
+  // Helper function to handle document fetch updates during FETCHING_DOCUMENTS stage
+  const handleDocumentFetchUpdate = useCallback(
+    (update: ResearchUpdate) => {
+      if (
+        update.data &&
+        typeof update.data === "object" &&
+        "docId" in update.data
+      ) {
+        const docData = update.data as unknown as ClientAnalyzedDoc
+        const timestamp = new Date().toISOString()
+        const docWithTimestamp = {
+          ...docData,
+          timestamp,
+          status: docData.status || "fetched",
+        } as ClientAnalyzedDoc
+
+        setAnalyzedDocs(prev => {
+          const existingIndex = prev.findIndex(
+            doc => doc.docId === docWithTimestamp.docId
+          )
+          if (existingIndex >= 0) {
+            // Update existing document
+            const newDocs = [...prev]
+            newDocs[existingIndex] = {
+              ...newDocs[existingIndex],
+              ...docWithTimestamp,
+            }
+            return newDocs
+          }
+          // Add new document
+          return [...prev, docWithTimestamp]
+        })
+        setResearchSession(prev => {
+          const existingIndex = prev.accumulatedDocuments.findIndex(
+            doc => doc.docId === docWithTimestamp.docId
+          )
+          if (existingIndex >= 0) {
+            // Update existing document
+            const newDocs = [...prev.accumulatedDocuments]
+            newDocs[existingIndex] = {
+              ...newDocs[existingIndex],
+              ...docWithTimestamp,
+            }
+            return {
+              ...prev,
+              accumulatedDocuments: newDocs,
+            }
+          }
+          // Add new document
+          return {
+            ...prev,
+            accumulatedDocuments: [
+              ...prev.accumulatedDocuments,
+              docWithTimestamp,
+            ],
+          }
+        })
+      }
+    },
+    [setAnalyzedDocs, setResearchSession]
+  )
+
   // Helper function to handle synthesis updates
   const handleSynthesisUpdate = useCallback(
     (update: ResearchUpdate) => {
@@ -337,14 +432,16 @@ export function useResearchAgent(): UseResearchAgentReturn {
   )
 
   // Helper function to update executive summary
+  // NOTE: executive_summary_chunk contains the complete current text, not an incremental chunk
   const updateExecutiveSummary = useCallback(
     (reportData: ReportData, newReport: ClientFinalReport) => {
-      if (reportData.executive_summary_chunk) {
-        newReport.executiveSummary =
-          (newReport.executiveSummary || "") +
-          reportData.executive_summary_chunk
-      }
-      if (reportData.executiveSummary) {
+      if (reportData.executive_summary_chunk !== undefined) {
+        // If a chunk is present, it's the latest full state of this field.
+        // We REPLACE (not append) because BAML @stream.with_state sends the complete value.
+        newReport.executiveSummary = reportData.executive_summary_chunk // REPLACE
+      } else if (reportData.executiveSummary !== undefined) {
+        // This branch handles the case where the full field is sent without the "_chunk" suffix,
+        // typically for the final update of the entire report object.
         newReport.executiveSummary = reportData.executiveSummary
       }
     },
@@ -352,17 +449,21 @@ export function useResearchAgent(): UseResearchAgentReturn {
   )
 
   // Helper function to update existing section
+  // NOTE: contentChunk contains the complete current section content, not an incremental chunk
   const updateExistingSection = useCallback(
     (
       sections: ClientFinalReport["sections"],
       existingIndex: number,
-      contentChunk: string
+      contentChunk: string,
+      titleChunk?: string // Optional: if title can also stream or be updated
     ) => {
       const existingSection = sections[existingIndex]
       if (existingSection) {
         sections[existingIndex] = {
-          title: existingSection.title,
-          content: existingSection.content + contentChunk,
+          // Preserve existing title unless a new one is explicitly provided in this chunk
+          title: titleChunk !== undefined ? titleChunk : existingSection.title,
+          // We REPLACE (not append) because BAML @stream.with_state sends the complete value.
+          content: contentChunk, // REPLACE content
         }
       }
     },
@@ -400,7 +501,8 @@ export function useResearchAgent(): UseResearchAgentReturn {
           updateExistingSection(
             sections,
             existingIndex,
-            reportData.sectionUpdate.content_chunk
+            reportData.sectionUpdate.content_chunk,
+            reportData.sectionUpdate.title // Pass title if available in sectionUpdate
           )
         } else {
           addNewSection(
@@ -420,15 +522,16 @@ export function useResearchAgent(): UseResearchAgentReturn {
   )
 
   // Helper function to update conclusion and metadata
+  // NOTE: conclusion_chunk contains the complete current conclusion text, not an incremental chunk
   const updateConclusionAndMetadata = useCallback(
     (reportData: ReportData, newReport: ClientFinalReport) => {
-      if (reportData.conclusion_chunk) {
-        newReport.conclusion =
-          (newReport.conclusion || "") + reportData.conclusion_chunk
-      }
-      if (reportData.conclusion) {
+      if (reportData.conclusion_chunk !== undefined) {
+        // We REPLACE (not append) because BAML @stream.with_state sends the complete value.
+        newReport.conclusion = reportData.conclusion_chunk // REPLACE
+      } else if (reportData.conclusion !== undefined) {
         newReport.conclusion = reportData.conclusion
       }
+      // ... rest for limitations, appendixDocIds ...
       if (reportData.limitations) {
         newReport.limitations = reportData.limitations
       }
@@ -475,6 +578,10 @@ export function useResearchAgent(): UseResearchAgentReturn {
           handleQueryGenerationUpdate(update)
           break
         }
+        case "FETCHING_DOCUMENTS": {
+          handleDocumentFetchUpdate(update)
+          break
+        }
         case "ANALYZING_DOCUMENTS": {
           handleDocumentAnalysisUpdate(update)
           break
@@ -503,6 +610,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
       logResearchEvent,
       updateResearchStatus,
       handleQueryGenerationUpdate,
+      handleDocumentFetchUpdate,
       handleDocumentAnalysisUpdate,
       handleSynthesisUpdate,
       handleAssessmentUpdate,
@@ -537,6 +645,19 @@ export function useResearchAgent(): UseResearchAgentReturn {
   // Helper function to handle stream errors
   const handleStreamError = useCallback(
     (error: Error) => {
+      // Only log errors in verbose mode or when debugging
+      const shouldLog =
+        process.env.VITEST_VERBOSE === "true" ||
+        process.env.DEBUG_API_TESTS === "true" ||
+        !process.env.VITEST
+
+      if (shouldLog) {
+        console.error("Stream processing error:", error)
+      }
+
+      // Clean up any orphaned documents
+      cleanupOrphanedDocuments()
+
       setResearchStatus(prev => ({
         ...prev,
         isLoading: false,
@@ -550,7 +671,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
       logResearchEvent("ERROR", "ERROR", `Research failed: ${error.message}`)
       setAbortController(null)
     },
-    [setResearchStatus, logResearchEvent]
+    [setResearchStatus, logResearchEvent, cleanupOrphanedDocuments]
   )
 
   // Helper function to process a single string update
@@ -683,9 +804,6 @@ export function useResearchAgent(): UseResearchAgentReturn {
    */
   const resumeResearch = useCallback(async () => {
     if (!researchStatus.canResume || !autoModeState.originalQuestion) {
-      console.error(
-        "Cannot resume research: not in resumable state or missing original question"
-      )
       return
     }
 
@@ -763,6 +881,9 @@ export function useResearchAgent(): UseResearchAgentReturn {
       console.log("useResearchAgent: No active research to abort.")
     }
 
+    // Clean up any orphaned documents
+    cleanupOrphanedDocuments()
+
     setResearchStatus(prev => ({
       ...prev,
       isLoading: false,
@@ -775,7 +896,12 @@ export function useResearchAgent(): UseResearchAgentReturn {
 
     logResearchEvent("USER_ACTION", "INFO", "Research abortion requested")
     setAbortController(null)
-  }, [abortController, setResearchStatus, logResearchEvent])
+  }, [
+    abortController,
+    setResearchStatus,
+    logResearchEvent,
+    cleanupOrphanedDocuments,
+  ])
 
   /**
    * Toggles the auto mode setting.

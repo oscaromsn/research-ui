@@ -105,6 +105,16 @@ async function fetchDocumentsFromQueries(
         `Orchestrator: Executing live search for query: "${query.query_string}"`
       )
       const results = await executeExaSearch(query, RESULTS_PER_QUERY, true, 2)
+
+      // Guard against executeExaSearch returning undefined (should never happen but adds safety)
+      if (!results || !Array.isArray(results)) {
+        console.error(
+          `Orchestrator: executeExaSearch returned invalid results for query "${query.query_string}":`,
+          results
+        )
+        continue
+      }
+
       allFetchedResults.push(...results)
       console.log(
         `Orchestrator: Query "${query.query_string}" yielded ${results.length} results.`
@@ -226,6 +236,33 @@ async function fetchDocumentsStage(
       throw new Error("No documents found")
     }
 
+    // Send individual document updates as they are fetched
+    for (let i = 0; i < searchResultItems.length; i++) {
+      const item = searchResultItems[i]
+      if (!item) {
+        continue
+      }
+
+      const timestamp = new Date().toISOString()
+
+      await sendUpdate(writer, encoder, {
+        type: "DATA",
+        stage: "FETCHING_DOCUMENTS",
+        message: `Document ${i + 1}/${searchResultItems.length} retrieved: ${item.title ? `${item.title.substring(0, 50)}...` : "Untitled"}`,
+        data: {
+          docId: item.id,
+          title: item.title,
+          url: item.url,
+          source: item.source_name,
+          status: "fetched",
+          timestamp,
+        },
+        currentProcessedDoc: i + 1,
+        totalDocsToProcess: searchResultItems.length,
+      })
+    }
+
+    // Send final summary update for backward compatibility
     await sendUpdate(writer, encoder, {
       type: "DATA",
       stage: "FETCHING_DOCUMENTS",
@@ -290,12 +327,7 @@ async function analyzeDocumentsStage(
       totalDocsToProcess: searchResultItems.length,
     })
 
-    const analysis: AnalyzedDocument = await b.AnalyzeSingleDocument(
-      doc,
-      legalQuestion
-    )
-    analyzedDocs.push(analysis)
-
+    // Update document status to "analyzing"
     await sendUpdate(writer, encoder, {
       type: "DATA",
       stage: "ANALYZING_DOCUMENTS",
@@ -303,36 +335,84 @@ async function analyzeDocumentsStage(
         docId: doc.id,
         title: doc.title,
         url: doc.url,
-        relevanceScore: analysis.relevance_score,
-        confidenceScore: analysis.confidence_score,
-        summarySnippet: analysis.summary.substring(0, 300),
-        keyArguments: analysis.key_arguments_and_reasoning,
-        extractedEntities:
-          analysis.extracted_entities?.map(entity => ({
-            name: entity.name,
-            type: entity.type,
-            details: entity.details,
-          })) || [],
-        extractedQuotes: analysis.extracted_quotes || [],
-        fullText: doc.full_text?.substring(0, 5000),
-        counterArguments: analysis.counter_arguments_or_nuances || [],
-        analysisReasoning: {
-          analyzeLegalQuestionSummary:
-            analysis.reasoning?.analyze_legal_question?.summary?.substring(
-              0,
-              500
-            ) || "",
-          considerRelevantPrinciplesSummary:
-            analysis.reasoning?.consider_relevant_legal_principles?.summary?.substring(
-              0,
-              500
-            ) || "",
-        },
+        status: "analyzing",
       },
-      message: `Analysis complete for: ${doc.title ? `${doc.title.substring(0, 50)}...` : "Untitled"}. Relevance: ${analysis.relevance_score}/10`,
-      currentProcessedDoc: i + 1,
-      totalDocsToProcess: searchResultItems.length,
+      message: `Started analysis for: ${doc.title ? `${doc.title.substring(0, 50)}...` : "Untitled"}`,
     })
+
+    try {
+      const analysis: AnalyzedDocument = await b.AnalyzeSingleDocument(
+        doc,
+        legalQuestion
+      )
+      analyzedDocs.push(analysis)
+
+      await sendUpdate(writer, encoder, {
+        type: "DATA",
+        stage: "ANALYZING_DOCUMENTS",
+        data: {
+          docId: doc.id,
+          title: doc.title,
+          url: doc.url,
+          status: "analyzed",
+          relevanceScore: analysis.relevance_score,
+          confidenceScore: analysis.confidence_score,
+          summarySnippet: analysis.summary.substring(0, 300),
+          keyArguments: analysis.key_arguments_and_reasoning,
+          extractedEntities:
+            analysis.extracted_entities?.map(entity => ({
+              name: entity.name,
+              type: entity.type,
+              details: entity.details,
+            })) || [],
+          extractedQuotes: analysis.extracted_quotes || [],
+          fullText: doc.full_text?.substring(0, 5000),
+          counterArguments: analysis.counter_arguments_or_nuances || [],
+          analysisReasoning: {
+            analyzeLegalQuestionSummary:
+              analysis.reasoning?.analyze_legal_question?.summary?.substring(
+                0,
+                500
+              ) || "",
+            considerRelevantPrinciplesSummary:
+              analysis.reasoning?.consider_relevant_legal_principles?.summary?.substring(
+                0,
+                500
+              ) || "",
+          },
+        },
+        message: `Analysis complete for: ${doc.title ? `${doc.title.substring(0, 50)}...` : "Untitled"}. Relevance: ${analysis.relevance_score}/10`,
+        currentProcessedDoc: i + 1,
+        totalDocsToProcess: searchResultItems.length,
+      })
+    } catch (analysisError: unknown) {
+      const errorMessage =
+        analysisError instanceof Error
+          ? analysisError.message
+          : String(analysisError)
+      // Send error update for this specific document
+      await sendUpdate(writer, encoder, {
+        type: "DATA",
+        stage: "ANALYZING_DOCUMENTS",
+        data: {
+          docId: doc.id,
+          title: doc.title,
+          url: doc.url,
+          status: "error",
+          errorMessage: `Analysis failed: ${errorMessage}`,
+        },
+        message: `Failed to analyze: ${doc.title ? `${doc.title.substring(0, 50)}...` : "Untitled"}. Error: ${errorMessage}`,
+        currentProcessedDoc: i + 1,
+        totalDocsToProcess: searchResultItems.length,
+      })
+
+      // Log the error but continue processing other documents
+      await sendUpdate(writer, encoder, {
+        type: "LOG",
+        stage: "ANALYZING_DOCUMENTS",
+        message: `Skipping document due to analysis error: ${errorMessage}`,
+      })
+    }
   }
 
   await sendUpdate(writer, encoder, {
@@ -693,7 +773,7 @@ export async function conductResearch(
 ): Promise<ReadableStream<Uint8Array>> {
   const { stream, writer, encoder, closeStream } = createStream()
 
-  const ORCHESTRATOR_TIMEOUT_MS = 300000
+  const ORCHESTRATOR_TIMEOUT_MS = 420000
   const timeoutController = new AbortController()
   const timeoutId = setTimeout(
     () => timeoutController.abort(),
