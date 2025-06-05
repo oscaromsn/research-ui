@@ -35,6 +35,8 @@
       "commitlint.config.ts",
       "__tests__/**/*.ts",
       "__tests__/**/*.tsx",
+      "__mock__/**/*.ts",
+      "__mock__/**/*.tsx",
       "app/**/*.ts",
       "app/**/*.tsx",
       "components/**/*.ts",
