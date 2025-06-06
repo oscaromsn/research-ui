@@ -127,7 +127,8 @@ describe("useResearchAgent Hook - Auto Mode", () => {
           isEnabled: true,
           maxIterations: 5,
           currentIteration: 0,
-        })
+        }),
+        []
       )
     })
 
@@ -168,7 +169,8 @@ describe("useResearchAgent Hook - Auto Mode", () => {
           isEnabled: false,
           maxIterations: 5,
           currentIteration: 0,
-        })
+        }),
+        []
       )
     })
   })

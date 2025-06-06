@@ -89,6 +89,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
   const resetAllResearchState = useSetAtom(resetResearchStateAtom)
   const autoModeState = useAtomValue(autoModeStateAtom)
   const researchStatus = useAtomValue(researchStatusAtom)
+  const researchSession = useAtomValue(researchSessionAtom)
 
   // Local state for the AbortController
   const [abortController, setAbortController] =
@@ -873,11 +874,15 @@ export function useResearchAgent(): UseResearchAgentReturn {
       setAbortController(controller)
 
       try {
-        const stream = await conductResearch(legalQuestion, {
-          isEnabled: autoModeState.isEnabled,
-          maxIterations: autoModeState.maxIterations,
-          currentIteration: autoModeState.currentIteration,
-        })
+        const stream = await conductResearch(
+          legalQuestion,
+          {
+            isEnabled: autoModeState.isEnabled,
+            maxIterations: autoModeState.maxIterations,
+            currentIteration: autoModeState.currentIteration,
+          },
+          researchSession.accumulatedDocuments
+        )
 
         await processResearchStream(stream, controller)
       } catch (error) {
@@ -895,6 +900,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
       autoModeState.isEnabled,
       autoModeState.maxIterations,
       autoModeState.currentIteration,
+      researchSession.accumulatedDocuments,
       processResearchStream,
       handleStreamError,
     ]
@@ -922,11 +928,15 @@ export function useResearchAgent(): UseResearchAgentReturn {
     setAbortController(controller)
 
     try {
-      const stream = await conductResearch(autoModeState.originalQuestion, {
-        isEnabled: autoModeState.isEnabled,
-        maxIterations: autoModeState.maxIterations,
-        currentIteration: autoModeState.currentIteration,
-      })
+      const stream = await conductResearch(
+        autoModeState.originalQuestion,
+        {
+          isEnabled: autoModeState.isEnabled,
+          maxIterations: autoModeState.maxIterations,
+          currentIteration: autoModeState.currentIteration,
+        },
+        researchSession.accumulatedDocuments
+      )
 
       await processResearchStream(stream, controller)
     } catch (error) {
@@ -944,6 +954,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
     autoModeState.isEnabled,
     autoModeState.maxIterations,
     autoModeState.currentIteration,
+    researchSession.accumulatedDocuments,
     setResearchStatus,
     logResearchEvent,
     processResearchStream,

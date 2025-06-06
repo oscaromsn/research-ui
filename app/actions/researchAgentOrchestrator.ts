@@ -175,6 +175,13 @@ interface StageContext {
   encoder: TextEncoder
   timeoutController: AbortController
   legalQuestion: string
+  previouslyAnalyzedDocs: Array<{
+    docId: string
+    title?: string
+    url?: string
+    timestamp?: string
+    status: string
+  }>
 }
 
 async function generateQueriesStage(
@@ -443,13 +450,39 @@ async function analyzeDocumentsStage(
   context: StageContext,
   searchResultItems: SearchResultItem[]
 ): Promise<AnalyzedDocument[]> {
-  const { writer, encoder, timeoutController } = context
+  const { writer, encoder, timeoutController, previouslyAnalyzedDocs } = context
+
+  // Filter out documents that have already been analyzed
+  const alreadyAnalyzedDocIds = new Set(
+    previouslyAnalyzedDocs
+      .filter(doc => doc.status === "analyzed")
+      .map(doc => doc.docId)
+  )
+
+  const documentsToAnalyze = searchResultItems.filter(
+    doc => !alreadyAnalyzedDocIds.has(doc.id)
+  )
+
+  // Sort documents by the order they appear in searchResultItems (which maintains fetch order)
+  // This ensures analysis happens in the same order as documents appear in the UI
+  const sortedDocumentsToAnalyze = [...documentsToAnalyze].sort((a, b) => {
+    const aIndex = searchResultItems.findIndex(item => item.id === a.id)
+    const bIndex = searchResultItems.findIndex(item => item.id === b.id)
+    return aIndex - bIndex // Maintain original fetch order
+  })
+
+  console.log(
+    `Orchestrator: Document analysis stage - Total fetched: ${searchResultItems.length}, Already analyzed: ${alreadyAnalyzedDocIds.size}, To analyze: ${documentsToAnalyze.length}`
+  )
 
   await sendUpdate(writer, encoder, {
     type: "STATUS_CHANGE",
     stage: "ANALYZING_DOCUMENTS",
-    message: `Starting analysis of ${searchResultItems.length} documents...`,
-    totalDocsToProcess: searchResultItems.length,
+    message:
+      documentsToAnalyze.length === 0
+        ? "All documents have already been analyzed."
+        : `Starting analysis of ${documentsToAnalyze.length} new documents (${alreadyAnalyzedDocIds.size} already analyzed)...`,
+    totalDocsToProcess: documentsToAnalyze.length,
     currentProcessedDoc: 0,
   })
 
@@ -458,30 +491,55 @@ async function analyzeDocumentsStage(
   }
 
   const analyzedDocs: AnalyzedDocument[] = []
-  for (let i = 0; i < searchResultItems.length; i++) {
-    const doc = searchResultItems[i]
+
+  // If no new documents to analyze, return empty array
+  if (sortedDocumentsToAnalyze.length === 0) {
+    await sendUpdate(writer, encoder, {
+      type: "LOG",
+      stage: "ANALYZING_DOCUMENTS",
+      message: "No new documents to analyze.",
+      isFinalForStage: true,
+      totalDocsToProcess: 0,
+      currentProcessedDoc: 0,
+    })
+    return analyzedDocs
+  }
+
+  for (let i = 0; i < sortedDocumentsToAnalyze.length; i++) {
+    const doc = sortedDocumentsToAnalyze[i]
     if (!doc) {
       continue
     }
+
+    console.log(
+      `Orchestrator: Analyzing document ${i + 1}/${sortedDocumentsToAnalyze.length}: ${doc.title || "Untitled"} (ID: ${doc.id})`
+    )
 
     const analysis = await processDocument(
       context,
       doc,
       i,
-      searchResultItems.length
+      sortedDocumentsToAnalyze.length
     )
     if (analysis) {
       analyzedDocs.push(analysis)
+      console.log(
+        `Orchestrator: Successfully analyzed document: ${doc.title || "Untitled"}`
+      )
+    } else {
+      console.log(
+        `Orchestrator: Failed to analyze document: ${doc.title || "Untitled"}`
+      )
     }
   }
 
   await sendUpdate(writer, encoder, {
     type: "LOG",
     stage: "ANALYZING_DOCUMENTS",
-    message: "All documents analyzed.",
+    message: "All new documents analyzed.",
     isFinalForStage: true,
-    totalDocsToProcess: searchResultItems.length,
-    currentProcessedDoc: searchResultItems.length,
+    totalDocsToProcess: sortedDocumentsToAnalyze.length,
+    currentProcessedDoc: sortedDocumentsToAnalyze.length,
   })
 
   return analyzedDocs
@@ -870,7 +928,14 @@ async function executePipeline(
 
 export async function conductResearch(
   legalQuestion: string,
-  autoModeConfig?: AutoModeConfig
+  autoModeConfig?: AutoModeConfig,
+  previouslyAnalyzedDocs?: Array<{
+    docId: string
+    title?: string
+    url?: string
+    timestamp?: string
+    status: string
+  }>
 ): Promise<ReadableStream<Uint8Array>> {
   const { stream, writer, encoder, closeStream } = createStream()
 
@@ -886,6 +951,7 @@ export async function conductResearch(
     encoder,
     timeoutController,
     legalQuestion,
+    previouslyAnalyzedDocs: previouslyAnalyzedDocs || [],
   }
   ;(async () => {
     try {

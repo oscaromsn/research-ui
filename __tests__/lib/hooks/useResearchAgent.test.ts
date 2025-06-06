@@ -209,11 +209,15 @@ describe("useResearchAgent Hook", () => {
         await result.current.startResearch(legalQuestion)
       })
 
-      expect(mockedConductResearch).toHaveBeenCalledWith(legalQuestion, {
-        currentIteration: 0,
-        isEnabled: false,
-        maxIterations: 5,
-      })
+      expect(mockedConductResearch).toHaveBeenCalledWith(
+        legalQuestion,
+        {
+          currentIteration: 0,
+          isEnabled: false,
+          maxIterations: 5,
+        },
+        []
+      )
       expect(mockedConductResearch).toHaveBeenCalledTimes(1)
     })
 

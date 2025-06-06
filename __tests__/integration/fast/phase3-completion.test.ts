@@ -197,11 +197,15 @@ describe("Phase 3 Completion - Client-Side Orchestrator Hook", () => {
         await result.current.startResearch(testQuestion)
       })
 
-      expect(mockedConductResearch).toHaveBeenCalledWith(testQuestion, {
-        currentIteration: 0,
-        isEnabled: false,
-        maxIterations: 5,
-      })
+      expect(mockedConductResearch).toHaveBeenCalledWith(
+        testQuestion,
+        {
+          currentIteration: 0,
+          isEnabled: false,
+          maxIterations: 5,
+        },
+        []
+      )
       expect(mockedConductResearch).toHaveBeenCalledTimes(1)
     })
 
