@@ -243,6 +243,44 @@ describe("GuidanceStrategy Component Integration", () => {
     expect(mockStartResearch).not.toHaveBeenCalled()
   })
 
+  it("renders a textarea instead of input for legal questions", () => {
+    renderWithProvider(<GuidanceStrategy />)
+
+    const textarea = screen.getByPlaceholderText(
+      "Enter Legal Question or Research Topic"
+    )
+
+    // Verify it's a textarea element
+    expect(textarea.tagName).toBe("TEXTAREA")
+
+    // Verify it has the proper attributes for auto-resizing
+    expect(textarea).toHaveClass("resize-none")
+    expect(textarea).toHaveClass("max-h-48")
+    expect(textarea).toHaveClass("overflow-y-auto")
+  })
+
+  it("handles multi-line legal questions correctly", async () => {
+    renderWithProvider(<GuidanceStrategy />)
+
+    const textarea = screen.getByPlaceholderText(
+      "Enter Legal Question or Research Topic"
+    )
+    const startButton = screen.getByText("Start Research")
+
+    // Type a multi-line legal question
+    const multiLineQuestion =
+      "What are the implications of force majeure during COVID-19?\nSpecifically, how do courts interpret impossibility of performance?\nAre there any recent precedents from the 9th Circuit?"
+
+    await userEvent.clear(textarea)
+    await userEvent.type(textarea, multiLineQuestion)
+
+    // Click start research
+    await userEvent.click(startButton)
+
+    // Verify the hook was called with the complete multi-line question
+    expect(mockStartResearch).toHaveBeenCalledWith(multiLineQuestion)
+  })
+
   it("toggles assessment section visibility", async () => {
     // Set up mock assessment data
     const mockAssessment: ClientResearchAssessment = {

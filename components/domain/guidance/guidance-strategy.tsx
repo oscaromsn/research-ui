@@ -11,6 +11,7 @@ import {
   Play,
 } from "lucide-react"
 import { useState } from "react"
+import TextareaAutosize from "react-textarea-autosize"
 
 import {
   Collapsible,
@@ -114,13 +115,14 @@ function ResearchControlsSection({
         />
       </div>
 
-      <input
-        type="text"
+      <TextareaAutosize
         placeholder="Enter Legal Question or Research Topic"
         value={legalQuestion}
         onChange={e => onLegalQuestionChange(e.target.value)}
         disabled={agent.isLoading}
-        className="mb-3 w-full rounded-md border border-[#e1e5eb] bg-white px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#4a90e2] dark:border-[#2a3148] dark:bg-[#1e2436]"
+        minRows={1}
+        maxRows={6}
+        className="mb-3 max-h-48 w-full resize-none overflow-y-auto rounded-md border border-[#e1e5eb] bg-white px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#4a90e2] dark:border-[#2a3148] dark:bg-[#1e2436]"
       />
 
       <div className="mb-4 flex flex-wrap gap-2">
