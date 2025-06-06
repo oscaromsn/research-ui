@@ -5,7 +5,7 @@ const config: UserConfig = {
   parserPreset: {
     parserOpts: {
       // Custom parser to handle optional gitmoji at the start
-      headerPattern: /^(?:\p{Emoji}\s*)?(\w*)(?:\(([^)]*)\))?!?:\s*(.*)$/u,
+      headerPattern: /^(?:[^\w\s()]+\s+)?(\w+)(?:\(([^)]*)\))?!?:\s*(.+)$/,
       headerCorrespondence: ["type", "scope", "subject"],
     },
   },
@@ -51,7 +51,7 @@ const config: UserConfig = {
     "footer-max-line-length": [0], // Disabled
 
     // Scope rules - optional but helpful
-    "scope-case": [1, "always", "lower-case"], // Warning only
+    "scope-case": [0], // Disabled - allow any case for scopes
     "scope-empty": [0], // Allow empty scopes
   },
   helpUrl:
