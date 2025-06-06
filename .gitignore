@@ -66,3 +66,7 @@ bundle-analysis.json
 
 # Husky generated files
 .husky/_
+
+# misc
+repomix-output.xml
+todo.md
