@@ -264,45 +264,126 @@ export function useResearchAgent(): UseResearchAgentReturn {
         "docId" in update.data
       ) {
         const docData = update.data as unknown as ClientAnalyzedDoc
-        const timestamp = new Date().toISOString()
-        const docWithTimestamp = {
-          ...docData,
-          timestamp,
-        }
 
         setAnalyzedDocs(prev => {
           const existingIndex = prev.findIndex(
-            doc => doc.docId === docWithTimestamp.docId
+            doc => doc.docId === docData.docId
           )
           if (existingIndex >= 0) {
-            // Update existing document
+            // Update existing document - preserve timestamp, title, and other original data
+            const existing = prev[existingIndex]
+            if (!existing) {
+              return prev
+            }
             const newDocs = [...prev]
             newDocs[existingIndex] = {
-              ...newDocs[existingIndex],
-              ...docWithTimestamp,
+              ...existing,
+              // Only update analysis-specific fields, preserve original metadata
+              ...(docData.relevanceScore !== undefined && {
+                relevanceScore: docData.relevanceScore,
+              }),
+              ...(docData.confidenceScore !== undefined && {
+                confidenceScore: docData.confidenceScore,
+              }),
+              ...(docData.summarySnippet !== undefined && {
+                summarySnippet: docData.summarySnippet,
+              }),
+              ...(docData.keyArguments !== undefined && {
+                keyArguments: docData.keyArguments,
+              }),
+              ...(docData.extractedEntities !== undefined && {
+                extractedEntities: docData.extractedEntities,
+              }),
+              ...(docData.extractedQuotes !== undefined && {
+                extractedQuotes: docData.extractedQuotes,
+              }),
+              ...(docData.fullText !== undefined && {
+                fullText: docData.fullText,
+              }),
+              ...(docData.counterArguments !== undefined && {
+                counterArguments: docData.counterArguments,
+              }),
+              ...(docData.analysisReasoning !== undefined && {
+                analysisReasoning: docData.analysisReasoning,
+              }),
+              ...(docData.errorMessage !== undefined && {
+                errorMessage: docData.errorMessage,
+              }),
+              ...(docData.iterationIndex !== undefined && {
+                iterationIndex: docData.iterationIndex,
+              }),
+              status: docData.status || existing.status,
             }
             return newDocs
           }
-          // Add new document
+          // Add new document with timestamp (fallback case)
+          const timestamp = new Date().toISOString()
+          const docWithTimestamp = {
+            ...docData,
+            timestamp,
+          }
           return [...prev, docWithTimestamp]
         })
         setResearchSession(prev => {
           const existingIndex = prev.accumulatedDocuments.findIndex(
-            doc => doc.docId === docWithTimestamp.docId
+            doc => doc.docId === docData.docId
           )
           if (existingIndex >= 0) {
-            // Update existing document
+            // Update existing document - preserve timestamp, title, and other original data
+            const existing = prev.accumulatedDocuments[existingIndex]
+            if (!existing) {
+              return prev
+            }
             const newDocs = [...prev.accumulatedDocuments]
             newDocs[existingIndex] = {
-              ...newDocs[existingIndex],
-              ...docWithTimestamp,
+              ...existing,
+              // Only update analysis-specific fields, preserve original metadata
+              ...(docData.relevanceScore !== undefined && {
+                relevanceScore: docData.relevanceScore,
+              }),
+              ...(docData.confidenceScore !== undefined && {
+                confidenceScore: docData.confidenceScore,
+              }),
+              ...(docData.summarySnippet !== undefined && {
+                summarySnippet: docData.summarySnippet,
+              }),
+              ...(docData.keyArguments !== undefined && {
+                keyArguments: docData.keyArguments,
+              }),
+              ...(docData.extractedEntities !== undefined && {
+                extractedEntities: docData.extractedEntities,
+              }),
+              ...(docData.extractedQuotes !== undefined && {
+                extractedQuotes: docData.extractedQuotes,
+              }),
+              ...(docData.fullText !== undefined && {
+                fullText: docData.fullText,
+              }),
+              ...(docData.counterArguments !== undefined && {
+                counterArguments: docData.counterArguments,
+              }),
+              ...(docData.analysisReasoning !== undefined && {
+                analysisReasoning: docData.analysisReasoning,
+              }),
+              ...(docData.errorMessage !== undefined && {
+                errorMessage: docData.errorMessage,
+              }),
+              ...(docData.iterationIndex !== undefined && {
+                iterationIndex: docData.iterationIndex,
+              }),
+              status: docData.status || existing.status,
             }
             return {
               ...prev,
               accumulatedDocuments: newDocs,
             }
           }
-          // Add new document
+          // Add new document with timestamp (fallback case)
+          const timestamp = new Date().toISOString()
+          const docWithTimestamp = {
+            ...docData,
+            timestamp,
+          }
           return {
             ...prev,
             accumulatedDocuments: [
@@ -325,46 +406,66 @@ export function useResearchAgent(): UseResearchAgentReturn {
         "docId" in update.data
       ) {
         const docData = update.data as unknown as ClientAnalyzedDoc
-        const timestamp = new Date().toISOString()
-        const docWithTimestamp = {
-          ...docData,
-          timestamp,
-          status: docData.status || "fetched",
-        } as ClientAnalyzedDoc
 
         setAnalyzedDocs(prev => {
           const existingIndex = prev.findIndex(
-            doc => doc.docId === docWithTimestamp.docId
+            doc => doc.docId === docData.docId
           )
           if (existingIndex >= 0) {
-            // Update existing document
+            // Update existing document - preserve timestamp and other original data
+            const existing = prev[existingIndex]
+            if (!existing) {
+              return prev
+            }
             const newDocs = [...prev]
             newDocs[existingIndex] = {
-              ...newDocs[existingIndex],
-              ...docWithTimestamp,
+              ...existing,
+              ...docData,
+              // Preserve original timestamp if it exists
+              timestamp: existing.timestamp || new Date().toISOString(),
+              status: docData.status || "fetched",
             }
             return newDocs
           }
-          // Add new document
+          // Add new document with timestamp
+          const timestamp = new Date().toISOString()
+          const docWithTimestamp = {
+            ...docData,
+            timestamp,
+            status: docData.status || "fetched",
+          } as ClientAnalyzedDoc
           return [...prev, docWithTimestamp]
         })
         setResearchSession(prev => {
           const existingIndex = prev.accumulatedDocuments.findIndex(
-            doc => doc.docId === docWithTimestamp.docId
+            doc => doc.docId === docData.docId
           )
           if (existingIndex >= 0) {
-            // Update existing document
+            // Update existing document - preserve timestamp and other original data
+            const existing = prev.accumulatedDocuments[existingIndex]
+            if (!existing) {
+              return prev
+            }
             const newDocs = [...prev.accumulatedDocuments]
             newDocs[existingIndex] = {
-              ...newDocs[existingIndex],
-              ...docWithTimestamp,
+              ...existing,
+              ...docData,
+              // Preserve original timestamp if it exists
+              timestamp: existing.timestamp || new Date().toISOString(),
+              status: docData.status || "fetched",
             }
             return {
               ...prev,
               accumulatedDocuments: newDocs,
             }
           }
-          // Add new document
+          // Add new document with timestamp
+          const timestamp = new Date().toISOString()
+          const docWithTimestamp = {
+            ...docData,
+            timestamp,
+            status: docData.status || "fetched",
+          } as ClientAnalyzedDoc
           return {
             ...prev,
             accumulatedDocuments: [
