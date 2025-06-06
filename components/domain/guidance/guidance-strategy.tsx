@@ -509,12 +509,12 @@ export function GuidanceStrategy() {
         </div>
       </div>
 
+      {assessment && <AssessmentSection assessment={assessment} />}
+
       <GeneratedQueriesSection
         queries={sortedQueries}
         totalQueries={researchSession.accumulatedQueries.length}
       />
-
-      {assessment && <AssessmentSection assessment={assessment} />}
     </div>
   )
 }
