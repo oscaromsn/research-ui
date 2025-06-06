@@ -12,6 +12,13 @@ import type {
   SearchResultItem,
 } from "@/baml_client/types"
 import { executeExaSearch } from "@/lib/utils/exaSearchUtil"
+import {
+  smartTruncate,
+  truncateForBrief,
+  truncateForReasoning,
+  truncateForSummary,
+  truncateForTitle,
+} from "@/lib/utils/textTruncation"
 import type { BamlStream } from "@boundaryml/baml"
 
 // Research pipeline stage enum
@@ -193,10 +200,16 @@ async function generateQueriesStage(
     data: {
       queries: queryAnalysis.search_queries.map(q => ({
         query_string: q.query_string,
-        expected_information_summary: `${q.expected_information.join(" ").substring(0, 100)}...`,
+        expected_information_summary: smartTruncate(
+          q.expected_information.join(" "),
+          100
+        ),
       })),
       reasoningEntryPoints: {
-        analyzeLegalQuestionSummary: `${queryAnalysis.reasoning.analyze_legal_question.summary?.substring(0, 150)}...`,
+        analyzeLegalQuestionSummary: smartTruncate(
+          queryAnalysis.reasoning.analyze_legal_question.summary || "",
+          150
+        ),
         totalStepsAnalyzed: 5,
       },
     },
@@ -248,7 +261,7 @@ async function fetchDocumentsStage(
       await sendUpdate(writer, encoder, {
         type: "DATA",
         stage: "FETCHING_DOCUMENTS",
-        message: `Document ${i + 1}/${searchResultItems.length} retrieved: ${item.title ? `${item.title.substring(0, 50)}...` : "Untitled"}`,
+        message: `Document ${i + 1}/${searchResultItems.length} retrieved: ${item.title ? truncateForBrief(item.title) : "Untitled"}`,
         data: {
           docId: item.id,
           title: item.title,
@@ -269,7 +282,7 @@ async function fetchDocumentsStage(
       data: {
         count: searchResultItems.length,
         titles: searchResultItems.map(r =>
-          r.title ? `${r.title.substring(0, 70)}...` : "Untitled"
+          r.title ? truncateForTitle(r.title) : "Untitled"
         ),
         sources: searchResultItems.map(r => r.source_name),
       },
@@ -290,11 +303,147 @@ async function fetchDocumentsStage(
   }
 }
 
+async function sendAnalysisProgressUpdate(
+  context: StageContext,
+  doc: SearchResultItem,
+  index: number,
+  totalCount: number
+): Promise<void> {
+  await sendUpdate(context.writer, context.encoder, {
+    type: "PROGRESS",
+    stage: "ANALYZING_DOCUMENTS",
+    message: `Analyzing document ${index + 1}/${totalCount}: ${doc.title ? truncateForBrief(doc.title) : "Untitled"}`,
+    currentProcessedDoc: index,
+    totalDocsToProcess: totalCount,
+  })
+}
+
+async function sendAnalysisStartUpdate(
+  context: StageContext,
+  doc: SearchResultItem
+): Promise<void> {
+  await sendUpdate(context.writer, context.encoder, {
+    type: "DATA",
+    stage: "ANALYZING_DOCUMENTS",
+    data: {
+      docId: doc.id,
+      title: doc.title,
+      url: doc.url,
+      status: "analyzing",
+    },
+    message: `Started analysis for: ${doc.title ? truncateForBrief(doc.title) : "Untitled"}`,
+  })
+}
+
+async function sendAnalysisSuccessUpdate(
+  context: StageContext,
+  doc: SearchResultItem,
+  analysis: AnalyzedDocument,
+  index: number,
+  totalCount: number
+): Promise<void> {
+  await sendUpdate(context.writer, context.encoder, {
+    type: "DATA",
+    stage: "ANALYZING_DOCUMENTS",
+    data: {
+      docId: doc.id,
+      title: doc.title,
+      url: doc.url,
+      status: "analyzed",
+      relevanceScore: analysis.relevance_score,
+      confidenceScore: analysis.confidence_score,
+      summarySnippet: truncateForSummary(analysis.summary),
+      keyArguments: analysis.key_arguments_and_reasoning,
+      extractedEntities:
+        analysis.extracted_entities?.map(entity => ({
+          name: entity.name,
+          type: entity.type,
+          details: entity.details,
+        })) || [],
+      extractedQuotes: analysis.extracted_quotes || [],
+      fullText: smartTruncate(doc.full_text || "", 5000),
+      counterArguments: analysis.counter_arguments_or_nuances || [],
+      analysisReasoning: {
+        analyzeLegalQuestionSummary: truncateForReasoning(
+          analysis.reasoning?.analyze_legal_question?.summary || ""
+        ),
+        considerRelevantPrinciplesSummary: truncateForReasoning(
+          analysis.reasoning?.consider_relevant_legal_principles?.summary || ""
+        ),
+      },
+    },
+    message: `Analysis complete for: ${doc.title ? truncateForBrief(doc.title) : "Untitled"}. Relevance: ${analysis.relevance_score}/10`,
+    currentProcessedDoc: index + 1,
+    totalDocsToProcess: totalCount,
+  })
+}
+
+async function sendAnalysisErrorUpdate(
+  context: StageContext,
+  doc: SearchResultItem,
+  errorMessage: string,
+  index: number,
+  totalCount: number
+): Promise<void> {
+  await sendUpdate(context.writer, context.encoder, {
+    type: "DATA",
+    stage: "ANALYZING_DOCUMENTS",
+    data: {
+      docId: doc.id,
+      title: doc.title,
+      url: doc.url,
+      status: "error",
+      errorMessage: `Analysis failed: ${errorMessage}`,
+    },
+    message: `Failed to analyze: ${doc.title ? truncateForBrief(doc.title) : "Untitled"}. Error: ${errorMessage}`,
+    currentProcessedDoc: index + 1,
+    totalDocsToProcess: totalCount,
+  })
+
+  await sendUpdate(context.writer, context.encoder, {
+    type: "LOG",
+    stage: "ANALYZING_DOCUMENTS",
+    message: `Skipping document due to analysis error: ${errorMessage}`,
+  })
+}
+
+async function processDocument(
+  context: StageContext,
+  doc: SearchResultItem,
+  index: number,
+  totalCount: number
+): Promise<AnalyzedDocument | null> {
+  if (context.timeoutController.signal.aborted) {
+    throw new Error("Orchestrator timeout during document analysis iteration")
+  }
+
+  await sendAnalysisProgressUpdate(context, doc, index, totalCount)
+  await sendAnalysisStartUpdate(context, doc)
+
+  try {
+    const analysis: AnalyzedDocument = await b.AnalyzeSingleDocument(
+      doc,
+      context.legalQuestion
+    )
+
+    await sendAnalysisSuccessUpdate(context, doc, analysis, index, totalCount)
+    return analysis
+  } catch (analysisError: unknown) {
+    const errorMessage =
+      analysisError instanceof Error
+        ? analysisError.message
+        : String(analysisError)
+
+    await sendAnalysisErrorUpdate(context, doc, errorMessage, index, totalCount)
+    return null
+  }
+}
+
 async function analyzeDocumentsStage(
   context: StageContext,
   searchResultItems: SearchResultItem[]
 ): Promise<AnalyzedDocument[]> {
-  const { writer, encoder, timeoutController, legalQuestion } = context
+  const { writer, encoder, timeoutController } = context
 
   await sendUpdate(writer, encoder, {
     type: "STATUS_CHANGE",
@@ -310,108 +459,19 @@ async function analyzeDocumentsStage(
 
   const analyzedDocs: AnalyzedDocument[] = []
   for (let i = 0; i < searchResultItems.length; i++) {
-    if (timeoutController.signal.aborted) {
-      throw new Error("Orchestrator timeout during document analysis iteration")
-    }
-
     const doc = searchResultItems[i]
     if (!doc) {
       continue
     }
 
-    await sendUpdate(writer, encoder, {
-      type: "PROGRESS",
-      stage: "ANALYZING_DOCUMENTS",
-      message: `Analyzing document ${i + 1}/${searchResultItems.length}: ${doc.title ? `${doc.title.substring(0, 50)}...` : "Untitled"}`,
-      currentProcessedDoc: i,
-      totalDocsToProcess: searchResultItems.length,
-    })
-
-    // Update document status to "analyzing"
-    await sendUpdate(writer, encoder, {
-      type: "DATA",
-      stage: "ANALYZING_DOCUMENTS",
-      data: {
-        docId: doc.id,
-        title: doc.title,
-        url: doc.url,
-        status: "analyzing",
-      },
-      message: `Started analysis for: ${doc.title ? `${doc.title.substring(0, 50)}...` : "Untitled"}`,
-    })
-
-    try {
-      const analysis: AnalyzedDocument = await b.AnalyzeSingleDocument(
-        doc,
-        legalQuestion
-      )
+    const analysis = await processDocument(
+      context,
+      doc,
+      i,
+      searchResultItems.length
+    )
+    if (analysis) {
       analyzedDocs.push(analysis)
-
-      await sendUpdate(writer, encoder, {
-        type: "DATA",
-        stage: "ANALYZING_DOCUMENTS",
-        data: {
-          docId: doc.id,
-          title: doc.title,
-          url: doc.url,
-          status: "analyzed",
-          relevanceScore: analysis.relevance_score,
-          confidenceScore: analysis.confidence_score,
-          summarySnippet: analysis.summary.substring(0, 300),
-          keyArguments: analysis.key_arguments_and_reasoning,
-          extractedEntities:
-            analysis.extracted_entities?.map(entity => ({
-              name: entity.name,
-              type: entity.type,
-              details: entity.details,
-            })) || [],
-          extractedQuotes: analysis.extracted_quotes || [],
-          fullText: doc.full_text?.substring(0, 5000),
-          counterArguments: analysis.counter_arguments_or_nuances || [],
-          analysisReasoning: {
-            analyzeLegalQuestionSummary:
-              analysis.reasoning?.analyze_legal_question?.summary?.substring(
-                0,
-                500
-              ) || "",
-            considerRelevantPrinciplesSummary:
-              analysis.reasoning?.consider_relevant_legal_principles?.summary?.substring(
-                0,
-                500
-              ) || "",
-          },
-        },
-        message: `Analysis complete for: ${doc.title ? `${doc.title.substring(0, 50)}...` : "Untitled"}. Relevance: ${analysis.relevance_score}/10`,
-        currentProcessedDoc: i + 1,
-        totalDocsToProcess: searchResultItems.length,
-      })
-    } catch (analysisError: unknown) {
-      const errorMessage =
-        analysisError instanceof Error
-          ? analysisError.message
-          : String(analysisError)
-      // Send error update for this specific document
-      await sendUpdate(writer, encoder, {
-        type: "DATA",
-        stage: "ANALYZING_DOCUMENTS",
-        data: {
-          docId: doc.id,
-          title: doc.title,
-          url: doc.url,
-          status: "error",
-          errorMessage: `Analysis failed: ${errorMessage}`,
-        },
-        message: `Failed to analyze: ${doc.title ? `${doc.title.substring(0, 50)}...` : "Untitled"}. Error: ${errorMessage}`,
-        currentProcessedDoc: i + 1,
-        totalDocsToProcess: searchResultItems.length,
-      })
-
-      // Log the error but continue processing other documents
-      await sendUpdate(writer, encoder, {
-        type: "LOG",
-        stage: "ANALYZING_DOCUMENTS",
-        message: `Skipping document due to analysis error: ${errorMessage}`,
-      })
     }
   }
 
@@ -461,13 +521,16 @@ async function synthesizeFindingsStage(
     data: {
       topics: synthesis.key_synthesized_topics.map(t => ({
         title: t.topic_title,
-        synthesisSnippet: `${t.synthesis.substring(0, 250)}...`,
+        synthesisSnippet: smartTruncate(t.synthesis, 250),
         confidence: t.confidence_score,
         docIds: t.supporting_document_ids,
       })),
       unansweredAspects: synthesis.unanswered_aspects || [],
       emergingQuestions: synthesis.emerging_questions || [],
-      reasoningSummary: `${synthesis.reasoning.analyze_legal_question.summary?.substring(0, 150)}...`,
+      reasoningSummary: smartTruncate(
+        synthesis.reasoning.analyze_legal_question.summary || "",
+        150
+      ),
     },
     message: "Overall synthesis complete.",
     isFinalForStage: true,
