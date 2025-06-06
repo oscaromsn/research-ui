@@ -25,10 +25,10 @@ export function Modal({
   return (
     <div className="fade-in-0 fixed inset-0 z-50 flex animate-in items-center justify-center bg-black/50">
       <div
-        className={`w-full rounded-lg bg-white shadow-lg dark:bg-[#1a1f2e] ${sizeClasses[size]} mx-4`}
+        className={`mx-4 flex max-h-[90vh] w-full flex-col rounded-lg bg-white shadow-lg dark:bg-[#1a1f2e] ${sizeClasses[size]}`}
       >
         <div className="flex items-center justify-between border-[#e1e5eb] border-b p-4 dark:border-[#2a3148]">
-          <h3 className="font-semibold text-[#1a1f2e] text-lg dark:text-white">
+          <h3 className="break-words font-semibold text-[#1a1f2e] text-lg dark:text-white">
             {title}
           </h3>
           <button
@@ -39,7 +39,7 @@ export function Modal({
             <X size={18} className="text-[#64748b] dark:text-[#94a3b8]" />
           </button>
         </div>
-        <div className="max-h-[80vh] overflow-y-auto p-4">{children}</div>
+        <div className="flex-1 overflow-y-auto p-4">{children}</div>
       </div>
     </div>
   )
