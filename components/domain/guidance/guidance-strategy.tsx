@@ -295,7 +295,10 @@ interface AssessmentData {
   isSufficient: boolean
   assessmentSummary: string
   identifiedGaps?: string[]
-  suggestedRefinementQueries?: Array<{ query_string: string }>
+  suggestedRefinementQueries?: Array<{
+    query_string: string
+    expected_information_summary?: string
+  }>
   nextAction: string
   reasoningSummary?: string
 }
@@ -358,7 +361,10 @@ function AssessmentSection({ assessment }: AssessmentSectionProps) {
 interface AssessmentDetailsProps {
   assessment: {
     identifiedGaps?: string[]
-    suggestedRefinementQueries?: Array<{ query_string: string }>
+    suggestedRefinementQueries?: Array<{
+      query_string: string
+      expected_information_summary?: string
+    }>
     nextAction: string
     reasoningSummary?: string
   }
@@ -393,17 +399,31 @@ function AssessmentDetails({ assessment }: AssessmentDetailsProps) {
               <h4 className="mb-2 font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
                 Suggested Query Refinements:
               </h4>
-              <ul className="space-y-2 text-[#4a5568] text-xs dark:text-[#a0aec0]">
+              <div className="space-y-3">
                 {assessment.suggestedRefinementQueries.map((query, index) => (
-                  <li
+                  <div
                     key={`refinement-${query.query_string}-${index}`}
-                    className="flex items-start"
+                    className="rounded-md border border-[#e1e5eb] bg-white p-3 dark:border-[#2a3148] dark:bg-[#1e2436]"
                   >
-                    <div className="mt-1.5 mr-2 h-1.5 w-1.5 rounded-full bg-[#3a7bb7]" />
-                    {query.query_string}
-                  </li>
+                    <div className="mb-2 flex items-start">
+                      <div className="mt-1.5 mr-2 h-1.5 w-1.5 rounded-full bg-[#3a7bb7]" />
+                      <div className="flex-1 font-mono text-[#2d3748] text-xs dark:text-[#e2e8f0]">
+                        {query.query_string}
+                      </div>
+                    </div>
+                    {query.expected_information_summary && (
+                      <div className="ml-3.5">
+                        <p className="mb-1 font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
+                          Expected Information:
+                        </p>
+                        <p className="text-[#4a5568] text-xs dark:text-[#a0aec0]">
+                          {query.expected_information_summary}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
 

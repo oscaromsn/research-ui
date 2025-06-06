@@ -510,9 +510,11 @@ async function assessResearchStage(
       suggestedRefinementQueries:
         assessment.next_action === "REFINE_QUERIES" ||
         assessment.next_action === "NEW_QUERIES"
-          ? assessment.suggested_queries_for_refinement?.map(
-              q => q.query_string
-            ) || []
+          ? assessment.suggested_queries_for_refinement?.map(q => ({
+              query_string: q.query_string,
+              expected_information_summary:
+                q.expected_information?.join("; ") || undefined,
+            })) || []
           : undefined,
     },
     message: `Assessment complete. Next action: ${assessment.next_action}.`,

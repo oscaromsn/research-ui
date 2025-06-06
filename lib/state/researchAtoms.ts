@@ -137,7 +137,10 @@ export interface ClientResearchAssessment {
     | "DEEPER_ANALYSIS_OF_EXISTING_DOCS"
     | "GENERATE_REPORT"
     | "REQUEST_HUMAN_REVIEW"
-  suggestedRefinementQueries?: ClientSearchQuery[]
+  suggestedRefinementQueries?: Array<{
+    query_string: string
+    expected_information_summary?: string
+  }>
   documentIdsForDeeperAnalysis?: string[]
   reasoningSummary?: string // Summarized version for UI display
 }
