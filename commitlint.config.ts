@@ -29,6 +29,7 @@ const config: UserConfig = {
         "revert", // Reverting previous commits
         "wip", // Work in progress (use sparingly)
         "init", // Initial commit
+        "deps", // Dependency changes
         "release", // Release commits
       ],
     ],
