@@ -4,8 +4,10 @@ const config: UserConfig = {
   extends: ["@commitlint/config-conventional"],
   parserPreset: {
     parserOpts: {
-      // Custom parser to handle optional gitmoji at the start
-      headerPattern: /^(?:[^\w\s()]+\s+)?(\w+)(?:\(([^)]*)\))?!?:\s*(.+)$/,
+      // Custom parser to handle optional gitmoji at the start (both :emoji:
+      // and Unicode emoji)
+      headerPattern:
+        /^(?:(?::[a-z0-9_+-]+:|\p{Emoji_Presentation})\s*)?(\w+)(?:\(([^)]*)\))?!?:\s*(.+)$/u,
       headerCorrespondence: ["type", "scope", "subject"],
     },
   },
@@ -31,6 +33,7 @@ const config: UserConfig = {
         "init", // Initial commit
         "deps", // Dependency changes
         "release", // Release commits
+        "move", // Moving or renaming files/components
       ],
     ],
     "subject-empty": [2, "never"],

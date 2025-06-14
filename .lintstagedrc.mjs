@@ -1,5 +1,5 @@
 /**
- * Lint-staged configuration for LexiSynth project
+ * Lint-staged configuration for JurisConsulta project
  * Progressive validation approach:
  * - Pre-commit: Format files and run unit tests (fast feedback)
  * - Pre-push: Full linting and comprehensive validation (quality gates)
