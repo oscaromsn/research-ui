@@ -1,10 +1,12 @@
 # API Key Testing Guide
 
-This guide explains how to handle tests that require external API keys (like OpenAI, Google AI, Exa Search, etc.) in the LexiSynth project.
+This guide explains how to handle tests that require external API keys (like
+OpenAI, Google AI, Exa Search, etc.) in the JurisConsulta project.
 
 ## Overview
 
 Tests in this project are designed to gracefully handle missing API keys by:
+
 - **Skipping tests** when required API keys are not available
 - **Providing clear warnings** about why tests are being skipped
 - **Differentiating between CI and local environments**
@@ -13,24 +15,28 @@ Tests in this project are designed to gracefully handle missing API keys by:
 ## Test Categories
 
 ### 1. Unit Tests (Always Run)
+
 - Mock all external API calls
 - Test business logic and component behavior
 - No API keys required
 - High coverage expectations
 
 ### 2. Integration Tests with Mocks
+
 - Test component integration
 - Mock BAML client and search APIs
 - No API keys required
 - Verify data flow and error handling
 
 ### 3. Integration Tests with Real APIs
+
 - Require actual API keys
 - Test against real external services
 - Skipped in CI unless keys are provided
 - Useful for development and manual testing
 
 ### 4. E2E Tests
+
 - May require API keys for full functionality
 - Conditionally skip based on key availability
 - Focus on user workflows
@@ -99,6 +105,7 @@ const API_KEYS = {
 ## Running Tests
 
 ### Standard Test Execution
+
 ```bash
 # Run all tests (skips API-dependent tests if keys missing)
 bun run test
@@ -114,6 +121,7 @@ bun run test:coverage
 ```
 
 ### BAML Tests
+
 ```bash
 # Run BAML tests (requires API keys)
 bun run baml:test
@@ -123,6 +131,7 @@ bun run baml:test:safe
 ```
 
 ### Environment-Specific Testing
+
 ```bash
 # Local development (may include API tests)
 NODE_ENV=development bun run test
@@ -250,6 +259,7 @@ jobs:
 ### Environment Variables in CI
 
 Set these as repository secrets for API-dependent tests:
+
 - `GOOGLE_API_KEY` - For Google AI/Gemini API tests
 - `OPENAI_API_KEY` - For OpenAI API tests
 - `EXA_API_KEY` - For Exa Search API tests
@@ -308,11 +318,14 @@ __tests__/
 
 ### Updating Existing Tests
 
-1. **Identify API-dependent tests**: Look for tests that import from `@/baml_client` or make external API calls
+1. **Identify API-dependent tests**: Look for tests that import from
+   `@/baml_client` or make external API calls
 
-2. **Separate concerns**: Create separate test suites for mocked and real API tests
+2. **Separate concerns**: Create separate test suites for mocked and real API
+   tests
 
-3. **Add conditional execution**: Use `itWithApiKeys` or `describeWithApiKeys` for real API tests
+3. **Add conditional execution**: Use `itWithApiKeys` or `describeWithApiKeys`
+   for real API tests
 
 4. **Update timeouts**: Increase timeouts for real API calls
 
@@ -354,10 +367,12 @@ describeWithApiKeys('Research Pipeline (Real API)', API_KEYS.GOOGLE_AI, () => {
 ## Conclusion
 
 This testing approach ensures that:
+
 - **All developers** can run the test suite regardless of API key availability
 - **CI/CD pipelines** remain stable and fast
 - **API functionality** can still be tested when keys are available
 - **Test coverage** remains high for business logic
 - **Development workflow** is not disrupted by missing external dependencies
 
-For questions or issues with API key testing, refer to the test utilities documentation or create an issue in the repository.
+For questions or issues with API key testing, refer to the test utilities
+documentation or create an issue in the repository.

@@ -7457,7 +7457,7 @@ Cancelling test run. Press CTRL+c again to exit forcefully.
 
 error: Failed to run "vitest" due to exit code 130
 
-lexisynth main*​​ ≡8m9s
+JurisConsulta main*​​ ≡8m9s
 ❯ bunx vite preview --outDir test-results
   ➜  Local:   http://localhost:4173/
   ➜  Network: use --host to expose

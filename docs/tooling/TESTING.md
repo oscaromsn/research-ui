@@ -1,10 +1,13 @@
-# Testing Guide for LexiSynth
+# Testing Guide for JurisConsulta
 
-This document provides a comprehensive guide to the testing ecosystem in LexiSynth. Our testing strategy is designed to ensure code quality, reliability, and maintainability across the entire application.
+This document provides a comprehensive guide to the testing ecosystem in
+JurisConsulta. Our testing strategy is designed to ensure code quality,
+reliability, and maintainability across the entire application.
 
 ## Quick Start
 
 ### For New Developers
+
 ```bash
 # Run fast unit tests (recommended for development)
 bun run test
@@ -17,6 +20,7 @@ bun run test:all
 ```
 
 ### For CI/CD
+
 ```bash
 # Complete validation suite
 bun ci
@@ -24,7 +28,8 @@ bun ci
 
 ## Test Architecture Overview
 
-Our testing ecosystem is organized into multiple layers, each serving a specific purpose:
+Our testing ecosystem is organized into multiple layers, each serving a specific
+purpose:
 
 ```
 📁 __tests__/
@@ -59,6 +64,7 @@ Our testing ecosystem is organized into multiple layers, each serving a specific
 ## Test Types & Commands
 
 ### 🚀 Unit Tests (Fast - Recommended for Development)
+
 **What**: Tests individual components, hooks, and utilities in isolation
 **Speed**: ~30-60 seconds
 **Dependencies**: None (mocked)
@@ -80,7 +86,8 @@ bun run test:coverage
 bun run test:unit
 ```
 
-**When to use**: 
+**When to use**:
+
 - Daily development
 - Before committing code
 - Testing individual components/functions
@@ -88,6 +95,7 @@ bun run test:unit
 ### 🔗 Integration Tests (Tiered by Speed)
 
 #### Fast Integration Tests (~1s)
+
 **What**: Tests complete flows with mocked external APIs
 **Speed**: Under 1 second per test
 **Dependencies**: None (all APIs mocked)
@@ -101,6 +109,7 @@ bun run test:integration:fast:watch
 ```
 
 #### Medium Integration Tests (~30s)
+
 **What**: Tests with some real API calls (Exa Search only)
 **Speed**: ~30 seconds per test
 **Dependencies**: `EXA_API_KEY`
@@ -117,6 +126,7 @@ bun run test:integration:medium:watch
 ```
 
 #### Slow Integration Tests (~5min)
+
 **What**: Tests the complete research pipeline with real AI APIs
 **Speed**: ~5-10 minutes per test
 **Dependencies**: `GOOGLE_API_KEY`, `EXA_API_KEY`
@@ -133,6 +143,7 @@ bun run test:integration
 ```
 
 **Setup Requirements**:
+
 ```bash
 # Required environment variables
 export GOOGLE_API_KEY="your-google-ai-key"
@@ -140,6 +151,7 @@ export EXA_API_KEY="your-exa-search-key"
 ```
 
 ### 🤖 BAML/AI Tests (Requires AI API Keys)
+
 **What**: Tests AI function definitions and prompts using BAML framework
 **Speed**: ~2-5 minutes
 **Dependencies**: AI provider API keys
@@ -160,6 +172,7 @@ bun run baml:generate
 ```
 
 ### 🌐 End-to-End Tests (Browser Automation)
+
 **What**: Tests complete user workflows in a real browser
 **Speed**: ~3-10 minutes
 **Dependencies**: Browser automation setup
@@ -178,6 +191,7 @@ bun run test:e2e:debug
 ### Environment Setup
 
 ### Development Environment
+
 ```bash
 # Copy environment template
 cp .env.example .env.local
@@ -189,11 +203,13 @@ EXA_API_KEY=your-key-here
 ```
 
 **Key Files:**
+
 - `.env.example` - Environment template
 - `.env.local` - Local development environment
 - `.env.test` - Test-specific environment variables
 
 ### Testing Environment Variables
+
 ```bash
 # Create test-specific environment file
 cp .env.example .env.test
@@ -205,11 +221,14 @@ EXA_API_KEY=your-test-key
 ```
 
 **Configuration Files:**
+
 - `vitest.config.ts` - Loads `.env.test` automatically
 - `setupTests.ts` - Global test configuration and mocks
 
 ### CI/CD Environment
+
 The CI system automatically:
+
 - Runs unit tests always
 - Skips integration tests unless API keys are provided
 - Runs E2E tests in headless mode
@@ -217,6 +236,7 @@ The CI system automatically:
 ## Test File Organization
 
 ### Naming Conventions
+
 ```
 ComponentName.test.tsx              # React component tests
 hookName.test.ts                   # Custom hook tests
@@ -227,6 +247,7 @@ FunctionName.test.baml            # BAML AI function tests
 ```
 
 **Example File Paths:**
+
 - `__tests__/components/ui/button.test.tsx`
 - `__tests__/lib/hooks/useResearchAgent.test.ts`
 - `__tests__/lib/utils/exaSearchUtil.test.ts`
@@ -235,6 +256,7 @@ FunctionName.test.baml            # BAML AI function tests
 - `baml_src/functions/GenerateLegalSearchQueries.test.baml`
 
 ### File Structure Example
+
 ```typescript
 // Standard test file structure
 // File: __tests__/components/ComponentName.test.tsx
@@ -251,6 +273,7 @@ describe('ComponentName', () => {
 ```
 
 **Import Path Reference:**
+
 - `@/components/*` - Component imports
 - `@/lib/*` - Library and utility imports
 - `@/app/*` - App Router imports
@@ -260,6 +283,7 @@ describe('ComponentName', () => {
 ## Key Testing Libraries
 
 ### Core Testing Stack
+
 - **Vitest**: Fast unit test runner with native ESM support (`vitest.config.ts`)
 - **React Testing Library**: Component testing utilities
 - **Playwright**: End-to-end browser testing (`playwright.config.ts`)
@@ -267,11 +291,13 @@ describe('ComponentName', () => {
 - **Happy DOM**: Lightweight DOM implementation
 
 ### Testing Utilities
+
 - **@testing-library/jest-dom**: DOM matchers (`setupTests.ts`)
 - **@testing-library/user-event**: User interaction simulation
 - **Jotai**: State management testing utilities (`__tests__/test-utils.tsx`)
 
 **Key Utility Files:**
+
 - `__tests__/test-utils.tsx` - Custom render functions and providers
 - `setupTests.ts` - Global test configuration
 - `__tests__/utils/api-test-helpers.test.ts` - API testing utilities
@@ -279,6 +305,7 @@ describe('ComponentName', () => {
 ## Common Testing Patterns
 
 ### React Component Testing
+
 ```typescript
 // File: __tests__/components/domain/MyComponent.test.tsx
 import { renderWithProviders } from '../../test-utils'
@@ -296,10 +323,12 @@ describe('MyComponent', () => {
 ```
 
 **Related Files:**
+
 - `__tests__/test-utils.tsx` - Contains `renderWithProviders` helper
 - `components/domain/MyComponent.tsx` - Component under test
 
 ### Custom Hook Testing with Jotai
+
 ```typescript
 // File: __tests__/lib/hooks/useResearchAgent.test.ts
 import { renderHook, act } from '@testing-library/react'
@@ -330,6 +359,7 @@ describe('useResearchAgent', () => {
 ```
 
 ### Server Action Testing
+
 ```typescript
 // File: __tests__/actions/researchAgentOrchestrator.test.ts
 import { conductResearch } from '@/app/actions/researchAgentOrchestrator'
@@ -356,6 +386,7 @@ describe('conductResearch', () => {
 ```
 
 **Related Files:**
+
 - `app/actions/researchAgentOrchestrator.ts` - Server action under test
 - `lib/utils/exaSearchUtil.ts` - External dependency being mocked
 - `baml_client/index.ts` - Generated BAML client (often mocked)
@@ -363,6 +394,7 @@ describe('conductResearch', () => {
 ### Proper Mock Patterns (Anti-Pattern Prevention)
 
 #### ✅ Correct: Mock at Test File Level
+
 ```typescript
 // File: __tests__/lib/utils/exaSearchUtil.test.ts
 // Mock external dependencies at the top of the test file
@@ -390,6 +422,7 @@ describe('API tests', () => {
 ```
 
 #### ✅ Correct: Using importOriginal for Partial Mocks
+
 ```typescript
 // File: __tests__/components/domain/evidence-analysis.test.tsx
 vi.mock('lucide-react', async (importOriginal) => {
@@ -403,6 +436,7 @@ vi.mock('lucide-react', async (importOriginal) => {
 ```
 
 #### ❌ Incorrect: Conditional Mocking in Setup Files
+
 ```typescript
 // DON'T DO THIS in setupTests.ts
 const testType = process.env.VITEST_TEST_TYPE || "unit"
@@ -415,11 +449,13 @@ if (testType === "unit") {
 ```
 
 **Why this fails:**
+
 - `setupTests.ts` is loaded before test files
 - Conditional mocks violate Vitest's static analysis requirements
 - Can cause unpredictable mock behavior across different test runs
 
 #### ❌ Incorrect: Complex Global Mocks
+
 ```typescript
 // DON'T DO THIS in setupTests.ts - causes unpredictable behavior
 global.fetch = vi.fn() // Use proper vi.mock instead
@@ -430,6 +466,7 @@ global.fetch = vi.fn() // Use proper vi.mock instead
 ### Common Issues & Solutions
 
 **Vitest mock errors**:
+
 ```typescript
 // Problem: "No export defined on mock"
 // Solution: Use importOriginal for partial mocks
@@ -440,6 +477,7 @@ vi.mock('module', async (importOriginal) => {
 ```
 
 **Tests timing out**:
+
 ```bash
 # Increase timeout for specific tests
 bun run test --timeout=60000
@@ -451,6 +489,7 @@ it('slow test', { timeout: 30000 }, async () => {
 ```
 
 **Mock not applying**:
+
 ```typescript
 // Ensure mocks are defined before imports
 vi.mock('@/module')
@@ -463,6 +502,7 @@ afterEach(() => {
 ```
 
 **Integration test failures**:
+
 ```bash
 # Check API key setup
 echo $GOOGLE_API_KEY
@@ -473,6 +513,7 @@ bun run test:integration:medium:debug
 ```
 
 ### Debug Mode
+
 ```bash
 # Run tests with debug output
 DEBUG_API_TESTS=true bun run test:integration
@@ -487,16 +528,18 @@ bun run test:file path/to/test.ts
 ## Performance Considerations
 
 ### Test Execution Times
-| Test Type | Duration | Frequency | Usage |
-|-----------|----------|-----------|--------|
-| Unit Tests | 30-60s | Every commit | Daily development |
-| Fast Integration | 1-5s | Feature testing | Component integration |
-| Medium Integration | 30s-2min | Pre-PR | API validation |
-| Slow Integration | 5-10min | Before releases | Full pipeline |
-| E2E Tests | 3-10min | Nightly/releases | User workflows |
-| BAML Tests | 2-5min | AI changes | Prompt validation |
+
+| Test Type          | Duration | Frequency        | Usage                 |
+|--------------------|----------|------------------|-----------------------|
+| Unit Tests         | 30-60s   | Every commit     | Daily development     |
+| Fast Integration   | 1-5s     | Feature testing  | Component integration |
+| Medium Integration | 30s-2min | Pre-PR           | API validation        |
+| Slow Integration   | 5-10min  | Before releases  | Full pipeline         |
+| E2E Tests          | 3-10min  | Nightly/releases | User workflows        |
+| BAML Tests         | 2-5min   | AI changes       | Prompt validation     |
 
 ### Optimization Tips
+
 1. **Use unit tests for logic validation**
 2. **Use fast integration tests for component integration**
 3. **Reserve medium/slow integration tests for critical paths**
@@ -506,6 +549,7 @@ bun run test:file path/to/test.ts
 ## Continuous Integration
 
 ### GitHub Actions Workflow
+
 ```yaml
 # Automated test execution levels
 - Unit tests: Always run (required for PR)
@@ -517,6 +561,7 @@ bun run test:file path/to/test.ts
 ```
 
 ### Environment-Based Test Execution
+
 ```bash
 # CI automatically skips tests based on available environment variables
 if (process.env.EXA_API_KEY) {
@@ -531,6 +576,7 @@ if (process.env.GOOGLE_API_KEY && process.env.EXA_API_KEY) {
 ## Best Practices
 
 ### Writing Good Tests
+
 1. **Test behavior, not implementation**
 2. **Use descriptive test names**
 3. **Keep tests independent and isolated**
@@ -539,6 +585,7 @@ if (process.env.GOOGLE_API_KEY && process.env.EXA_API_KEY) {
 6. **Use the appropriate test level for what you're testing**
 
 ### Mock Management
+
 1. **Define mocks at the test file level with vi.mock()**
 2. **Use vi.mocked() for TypeScript support**
 3. **Clear mocks between tests with vi.clearAllMocks()**
@@ -546,6 +593,7 @@ if (process.env.GOOGLE_API_KEY && process.env.EXA_API_KEY) {
 5. **Avoid conditional mocking in setup files**
 
 ### Test Organization
+
 1. **Group related tests with describe blocks**
 2. **Use beforeEach/afterEach for setup/teardown**
 3. **Keep test files close to source code**
@@ -553,6 +601,7 @@ if (process.env.GOOGLE_API_KEY && process.env.EXA_API_KEY) {
 5. **Organize integration tests by speed/complexity**
 
 ### Performance
+
 1. **Start with unit tests, then add integration as needed**
 2. **Use fast integration tests for component workflows**
 3. **Reserve slow integration tests for critical user paths**
@@ -563,31 +612,38 @@ if (process.env.GOOGLE_API_KEY && process.env.EXA_API_KEY) {
 ### Common Error Messages
 
 **"vi.mock is not a function"**
+
 - Cause: Missing vitest import
 - Solution: Add `import { vi } from 'vitest'` at top of test file
 
 **"No export defined on mock"**
+
 - Cause: Missing export in mock definition
 - Solution: Use importOriginal or define all needed exports
 
 **"API key not found"**
+
 - Cause: Missing environment variables for integration tests
 - Solution: Check `.env.test` file and API key setup
 
 **"Test timeout"**
+
 - Cause: Integration tests taking too long or hanging
 - Solution: Check network connectivity, API status, and increase timeout
 
 **"MockedFunction is not assignable"**
+
 - Cause: TypeScript type issues with mocks
 - Solution: Use `vi.mocked()` for proper type inference
 
 **Configuration Files to Check:**
+
 - `tsconfig.json` - TypeScript configuration
 - `vitest.config.ts` - Vitest TypeScript settings
 - `setupTests.ts` - Global mock configurations
 
 ### Mock Debugging
+
 ```typescript
 // Debug mock calls in any test file
 console.log(mockedFunction.mock.calls)
@@ -599,6 +655,7 @@ expect(mockedFunction).toHaveBeenCalledWith(expectedArgs)
 ```
 
 ### Getting Help
+
 1. Check test logs for specific error messages
 2. Verify environment setup (API keys, dependencies)
 3. Run tests in isolation to identify issues
@@ -606,6 +663,7 @@ expect(mockedFunction).toHaveBeenCalledWith(expectedArgs)
 5. Use `bun run test:ui` for interactive debugging
 
 **Helpful Files for Debugging:**
+
 - `package.json` - Available test scripts
 - `vitest.config.ts` - Test configuration and paths
 - `setupTests.ts` - Global test setup and mocks
@@ -615,6 +673,7 @@ expect(mockedFunction).toHaveBeenCalledWith(expectedArgs)
 ## Contributing
 
 When adding new features:
+
 1. **Write unit tests first** (TDD approach)
 2. **Add fast integration tests for component interactions**
 3. **Add medium integration tests for API-dependent features**
@@ -623,9 +682,11 @@ When adding new features:
 6. **Ensure all tests pass before PR submission**
 
 ### Test Coverage Guidelines
+
 - **Unit tests**: Aim for 80%+ coverage of business logic
 - **Integration tests**: Cover critical user workflows
 - **E2E tests**: Cover main user journeys
 - **BAML tests**: Cover all AI function variations
 
-For questions or issues with testing, please refer to the team documentation or reach out to the development team.
+For questions or issues with testing, please refer to the team documentation or
+reach out to the development team.

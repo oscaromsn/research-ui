@@ -1,14 +1,14 @@
+import { JotaiProvider } from "@/components/providers/jotai-provider"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 
 import "./globals.css"
-import { JotaiProvider } from "@/components/providers/jotai-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "LexiSynth",
-  description: "Research and legal synthesis platform",
+  title: "JurisConsulta",
+  description: "Pesquisa e relatórios jurídicos",
 }
 
 export default function RootLayout({
