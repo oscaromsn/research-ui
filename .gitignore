@@ -61,12 +61,10 @@ dependency-report.html
 *.local.md
 *.local.json
 
-# Size limit and dependency analysis generated files
-bundle-analysis.json
-
 # Husky generated files
 .husky/_
 
 # misc
+/test-results/
 repomix-output.xml
 todo.md
