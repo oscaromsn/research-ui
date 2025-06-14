@@ -6,9 +6,13 @@
  * For real API tests, see integration tests with API key requirements
  */
 
+import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator"
+import { conductResearch } from "@/app/actions/researchAgentOrchestrator"
+import { executeExaSearch } from "@/lib/utils/exaSearchUtil"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-// Mock the executeExaSearch function to avoid real search API calls during testing
+// Mock the executeExaSearch function to avoid real search API calls during
+// testing
 vi.mock("@/lib/utils/exaSearchUtil", () => ({
   executeExaSearch: vi.fn().mockResolvedValue([
     {
@@ -164,10 +168,6 @@ vi.doMock("@/baml_client", () => {
   }
 })
 
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator"
-import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator"
-import { executeExaSearch } from "@/lib/utils/exaSearchUtil"
-
 describe("Research Orchestrator - Basic Streaming", () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -247,7 +247,6 @@ describe("Research Orchestrator - Basic Streaming", () => {
 
     // For now, accept that the pipeline hangs at BAML calls due to mock limitations
     // This test verifies the orchestrator starts correctly and begins pipeline execution
-    // TODO: Fix BAML mocking in server action context to test full pipeline
     const hasInitializing = updates.some(u => u.stage === "INITIALIZING")
     const hasGeneratingQueries = updates.some(
       u => u.stage === "GENERATING_QUERIES"
