@@ -11,6 +11,16 @@ import type {
   SearchQueryItem,
   SearchResultItem,
 } from "@/baml_client/types"
+
+// Extended SearchResultItem with ordering metadata
+interface OrderedSearchResultItem extends SearchResultItem {
+  globalSequenceNumber: number // Unique across entire research session
+  iterationIndex: number // Which research iteration
+  fetchBatchIndex: number // Which query batch within iteration
+  fetchOrderIndex: number // Order within the batch
+  searchQueryId: string // Which query produced this result
+  fetchTimestamp: string // ISO timestamp for debugging
+}
 import { executeExaSearch } from "@/lib/utils/exaSearchUtil"
 import {
   smartTruncate,
@@ -94,11 +104,12 @@ async function sendUpdate(
 
 // Live document fetching function using Exa API
 async function fetchDocumentsFromQueries(
-  queries: SearchQueryItem[]
-): Promise<SearchResultItem[]> {
+  queries: SearchQueryItem[],
+  context: StageContext
+): Promise<OrderedSearchResultItem[]> {
   const MAX_QUERIES_TO_EXECUTE = 3 // Start conservative for initial implementation
   const RESULTS_PER_QUERY = 2 // Limit results per query to manage API usage
-  const allFetchedResults: SearchResultItem[] = []
+  const allFetchedResults: OrderedSearchResultItem[] = []
 
   console.log(
     `Orchestrator: Starting live document fetch for ${queries.length} queries`
@@ -106,7 +117,12 @@ async function fetchDocumentsFromQueries(
 
   const executedQueries = queries.slice(0, MAX_QUERIES_TO_EXECUTE)
 
-  for (const query of executedQueries) {
+  for (let queryIndex = 0; queryIndex < executedQueries.length; queryIndex++) {
+    const query = executedQueries[queryIndex]
+    if (!query) {
+      continue
+    }
+
     try {
       console.log(
         `Orchestrator: Executing live search for query: "${query.query_string}"`
@@ -122,7 +138,20 @@ async function fetchDocumentsFromQueries(
         continue
       }
 
-      allFetchedResults.push(...results)
+      // Enrich results with ordering metadata
+      const enrichedResults: OrderedSearchResultItem[] = results.map(
+        (result, resultIndex) => ({
+          ...result,
+          globalSequenceNumber: context.globalDocumentCounter.value++,
+          iterationIndex: context.currentIteration,
+          fetchBatchIndex: queryIndex,
+          fetchOrderIndex: resultIndex,
+          searchQueryId: query.query_string,
+          fetchTimestamp: new Date().toISOString(),
+        })
+      )
+
+      allFetchedResults.push(...enrichedResults)
       console.log(
         `Orchestrator: Query "${query.query_string}" yielded ${results.length} results.`
       )
@@ -148,6 +177,7 @@ async function fetchDocumentsFromQueries(
   }
 
   // De-duplicate results based on URL (which is used as the ID)
+  // When duplicates are found, keep the one with the lower globalSequenceNumber (first occurrence)
   const uniqueDocIds = new Set<string>()
   const searchResultItems = allFetchedResults.filter(item => {
     if (!uniqueDocIds.has(item.id)) {
@@ -182,6 +212,8 @@ interface StageContext {
     timestamp?: string
     status: string
   }>
+  globalDocumentCounter: { value: number } // Mutable counter for sequence numbers
+  currentIteration: number // Current research iteration index
 }
 
 async function generateQueriesStage(
@@ -230,7 +262,7 @@ async function generateQueriesStage(
 async function fetchDocumentsStage(
   context: StageContext,
   queries: SearchQueryItem[]
-): Promise<SearchResultItem[]> {
+): Promise<OrderedSearchResultItem[]> {
   const { writer, encoder, timeoutController } = context
 
   await sendUpdate(writer, encoder, {
@@ -244,7 +276,7 @@ async function fetchDocumentsStage(
   }
 
   try {
-    const searchResultItems = await fetchDocumentsFromQueries(queries)
+    const searchResultItems = await fetchDocumentsFromQueries(queries, context)
 
     if (searchResultItems.length === 0) {
       await sendUpdate(writer, encoder, {
@@ -276,6 +308,12 @@ async function fetchDocumentsStage(
           source: item.source_name,
           status: "fetched",
           timestamp,
+          globalSequenceNumber: item.globalSequenceNumber,
+          iterationIndex: item.iterationIndex,
+          fetchBatchIndex: item.fetchBatchIndex,
+          fetchOrderIndex: item.fetchOrderIndex,
+          searchQueryId: item.searchQueryId,
+          fetchTimestamp: item.fetchTimestamp,
         },
         currentProcessedDoc: i + 1,
         totalDocsToProcess: searchResultItems.length,
@@ -448,7 +486,7 @@ async function processDocument(
 
 async function analyzeDocumentsStage(
   context: StageContext,
-  searchResultItems: SearchResultItem[]
+  searchResultItems: OrderedSearchResultItem[]
 ): Promise<AnalyzedDocument[]> {
   const { writer, encoder, timeoutController, previouslyAnalyzedDocs } = context
 
@@ -855,6 +893,9 @@ async function executePipeline(
   let currentIteration = autoModeConfig?.currentIteration || 0
   const maxIterations = autoModeConfig?.maxIterations || 5
 
+  // Update context with current iteration
+  context.currentIteration = currentIteration
+
   // Check if we've already reached max iterations before starting
   if (autoModeConfig?.isEnabled && currentIteration >= maxIterations) {
     await sendUpdate(writer, encoder, {
@@ -883,6 +924,7 @@ async function executePipeline(
   } else {
     // Increment iteration count after completing one iteration
     currentIteration += 1
+    context.currentIteration = currentIteration
 
     // Check if we've reached max iterations after this iteration
     const hasReachedMaxIterations =
@@ -952,6 +994,8 @@ export async function conductResearch(
     timeoutController,
     legalQuestion,
     previouslyAnalyzedDocs: previouslyAnalyzedDocs || [],
+    globalDocumentCounter: { value: 0 }, // Initialize counter at 0
+    currentIteration: 0, // Start at iteration 0
   }
   ;(async () => {
     try {
