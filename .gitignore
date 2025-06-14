@@ -67,4 +67,4 @@ dependency-report.html
 # misc
 /test-results/
 repomix-output.xml
-todo.md
+docs/todo.md
