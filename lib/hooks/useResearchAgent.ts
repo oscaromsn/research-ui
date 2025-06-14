@@ -313,6 +313,22 @@ export function useResearchAgent(): UseResearchAgentReturn {
               ...(docData.iterationIndex !== undefined && {
                 iterationIndex: docData.iterationIndex,
               }),
+              // Preserve ordering metadata
+              ...(docData.globalSequenceNumber !== undefined && {
+                globalSequenceNumber: docData.globalSequenceNumber,
+              }),
+              ...(docData.fetchBatchIndex !== undefined && {
+                fetchBatchIndex: docData.fetchBatchIndex,
+              }),
+              ...(docData.fetchOrderIndex !== undefined && {
+                fetchOrderIndex: docData.fetchOrderIndex,
+              }),
+              ...(docData.searchQueryId !== undefined && {
+                searchQueryId: docData.searchQueryId,
+              }),
+              ...(docData.fetchTimestamp !== undefined && {
+                fetchTimestamp: docData.fetchTimestamp,
+              }),
               status: docData.status || existing.status,
             }
             return newDocs
@@ -371,6 +387,22 @@ export function useResearchAgent(): UseResearchAgentReturn {
               }),
               ...(docData.iterationIndex !== undefined && {
                 iterationIndex: docData.iterationIndex,
+              }),
+              // Preserve ordering metadata
+              ...(docData.globalSequenceNumber !== undefined && {
+                globalSequenceNumber: docData.globalSequenceNumber,
+              }),
+              ...(docData.fetchBatchIndex !== undefined && {
+                fetchBatchIndex: docData.fetchBatchIndex,
+              }),
+              ...(docData.fetchOrderIndex !== undefined && {
+                fetchOrderIndex: docData.fetchOrderIndex,
+              }),
+              ...(docData.searchQueryId !== undefined && {
+                searchQueryId: docData.searchQueryId,
+              }),
+              ...(docData.fetchTimestamp !== undefined && {
+                fetchTimestamp: docData.fetchTimestamp,
               }),
               status: docData.status || existing.status,
             }
