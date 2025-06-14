@@ -87,6 +87,13 @@ export interface ClientAnalyzedDoc {
   // Tracking metadata for accumulative display
   iterationIndex?: number // Track which iteration this analysis came from
   timestamp?: string // ISO timestamp when document was analyzed
+
+  // Document ordering metadata for consistent display order
+  globalSequenceNumber?: number // Unique sequence number across entire research session
+  fetchBatchIndex?: number // Which query batch within iteration
+  fetchOrderIndex?: number // Order within the batch
+  searchQueryId?: string // Which query produced this result
+  fetchTimestamp?: string // ISO timestamp when document was fetched
 }
 
 export interface ClientSynthesisTopic {
@@ -194,6 +201,38 @@ export const generatedQueriesAtom = atom<ClientSearchQuery[]>([])
 // FR3.1.4: analyzedDocsSummaryAtom
 // Using an array for easier UI mapping and ordered display
 export const analyzedDocsSummaryAtom = atom<ClientAnalyzedDoc[]>([])
+
+// Derived atom for documents ordered by globalSequenceNumber
+// This ensures consistent ordering across all UI components
+export const orderedDocumentsAtom = atom(get => {
+  const docs = get(analyzedDocsSummaryAtom)
+  const accumulated = get(researchSessionAtom).accumulatedDocuments
+
+  // Use accumulated documents if available, otherwise fall back to current session
+  const allDocs = accumulated.length > 0 ? accumulated : docs
+
+  // Sort by globalSequenceNumber for guaranteed order
+  // Documents without sequence numbers are placed at the end for backward compatibility
+  return [...allDocs].sort((a, b) => {
+    if (
+      a.globalSequenceNumber === undefined &&
+      b.globalSequenceNumber === undefined
+    ) {
+      // Both undefined, preserve existing order (by timestamp if available)
+      if (a.timestamp && b.timestamp) {
+        return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      }
+      return 0
+    }
+    if (a.globalSequenceNumber === undefined) {
+      return 1 // a goes after b
+    }
+    if (b.globalSequenceNumber === undefined) {
+      return -1 // a goes before b
+    }
+    return a.globalSequenceNumber - b.globalSequenceNumber
+  })
+})
 
 // FR3.1.5: synthesisDetailsAtom
 export const synthesisDetailsAtom = atom<ClientSynthesis>({
