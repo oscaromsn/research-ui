@@ -33,6 +33,7 @@ const config: UserConfig = {
         "init", // Initial commit
         "deps", // Dependency changes
         "release", // Release commits
+        "remove", // Remove files from git tracking
         "move", // Moving or renaming files/components
       ],
     ],
