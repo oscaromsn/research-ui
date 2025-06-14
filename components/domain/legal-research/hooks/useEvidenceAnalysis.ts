@@ -3,8 +3,7 @@ import { useState } from "react"
 
 import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms"
 import {
-  analyzedDocsSummaryAtom,
-  researchSessionAtom,
+  orderedDocumentsAtom,
   selectedAnalyzedDocIdAtom,
 } from "@/lib/state/researchAtoms"
 
@@ -13,23 +12,9 @@ export function useEvidenceAnalysis() {
     null
   )
   const [showReasoningModal, setShowReasoningModal] = useState(false)
-  const analyzedDocs = useAtomValue(analyzedDocsSummaryAtom)
-  const researchSession = useAtomValue(researchSessionAtom)
+  const sortedDocuments = useAtomValue(orderedDocumentsAtom)
   const selectedDocId = useAtomValue(selectedAnalyzedDocIdAtom)
   const setSelectedDocId = useSetAtom(selectedAnalyzedDocIdAtom)
-
-  // Use accumulated documents if available, otherwise fall back to current session
-  const allDocuments =
-    researchSession.accumulatedDocuments.length > 0
-      ? researchSession.accumulatedDocuments
-      : analyzedDocs
-
-  // Sort documents by timestamp (most recent first)
-  const sortedDocuments = [...allDocuments].sort((a, b) => {
-    const aTime = a.timestamp ? new Date(a.timestamp).getTime() : 0
-    const bTime = b.timestamp ? new Date(b.timestamp).getTime() : 0
-    return bTime - aTime
-  })
 
   // Get the currently selected document from our atoms
   const selectedDocument = selectedDocId
