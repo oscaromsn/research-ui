@@ -1,20 +1,20 @@
 // __tests__/components/domain/legal-research/evidence-analysis-document-states.test.ts
 
-import { createStore } from "jotai"
-import { beforeEach, describe, expect, it } from "vitest"
+import { createStore } from "jotai";
+import { beforeEach, describe, expect, it } from "vitest";
 
-import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms"
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 import {
   analyzedDocsSummaryAtom,
   selectedAnalyzedDocIdAtom,
-} from "@/lib/state/researchAtoms"
+} from "@/lib/state/researchAtoms";
 
 describe("Evidence Analysis Component - Document States", () => {
-  let store: ReturnType<typeof createStore>
+  let store: ReturnType<typeof createStore>;
 
   beforeEach(() => {
-    store = createStore()
-  })
+    store = createStore();
+  });
 
   describe("Document Status Display", () => {
     it("should show fetched documents with limited information", () => {
@@ -25,23 +25,23 @@ describe("Evidence Analysis Component - Document States", () => {
         source: "Westlaw",
         status: "fetched",
         timestamp: "2024-01-01T00:00:00Z",
-      }
+      };
 
-      store.set(analyzedDocsSummaryAtom, [fetchedDoc])
+      store.set(analyzedDocsSummaryAtom, [fetchedDoc]);
 
-      const docs = store.get(analyzedDocsSummaryAtom)
-      expect(docs).toHaveLength(1)
+      const docs = store.get(analyzedDocsSummaryAtom);
+      expect(docs).toHaveLength(1);
       expect(docs[0]).toMatchObject({
         docId: "fetched-doc-1",
         title: "Contract Law Fundamentals",
         status: "fetched",
-      })
+      });
 
       // Verify analysis fields are undefined
-      expect(docs[0]?.relevanceScore).toBeUndefined()
-      expect(docs[0]?.summarySnippet).toBeUndefined()
-      expect(docs[0]?.keyArguments).toBeUndefined()
-    })
+      expect(docs[0]?.relevanceScore).toBeUndefined();
+      expect(docs[0]?.summarySnippet).toBeUndefined();
+      expect(docs[0]?.keyArguments).toBeUndefined();
+    });
 
     it("should show analyzing documents with loading indicators", () => {
       const analyzingDoc: ClientAnalyzedDoc = {
@@ -52,23 +52,23 @@ describe("Evidence Analysis Component - Document States", () => {
         status: "analyzing",
         timestamp: "2024-01-01T00:01:00Z",
         fullText: "This document discusses force majeure clauses...",
-      }
+      };
 
-      store.set(analyzedDocsSummaryAtom, [analyzingDoc])
+      store.set(analyzedDocsSummaryAtom, [analyzingDoc]);
 
-      const docs = store.get(analyzedDocsSummaryAtom)
-      expect(docs).toHaveLength(1)
+      const docs = store.get(analyzedDocsSummaryAtom);
+      expect(docs).toHaveLength(1);
       expect(docs[0]).toMatchObject({
         docId: "analyzing-doc-1",
         title: "Force Majeure Case Study",
         status: "analyzing",
         fullText: expect.any(String),
-      })
+      });
 
       // Verify analysis fields are still undefined during analysis
-      expect(docs[0]?.relevanceScore).toBeUndefined()
-      expect(docs[0]?.summarySnippet).toBeUndefined()
-    })
+      expect(docs[0]?.relevanceScore).toBeUndefined();
+      expect(docs[0]?.summarySnippet).toBeUndefined();
+    });
 
     it("should show fully analyzed documents with complete information", () => {
       const analyzedDoc: ClientAnalyzedDoc = {
@@ -99,12 +99,12 @@ describe("Evidence Analysis Component - Document States", () => {
           considerRelevantPrinciplesSummary:
             "Applied relevant legal principles",
         },
-      }
+      };
 
-      store.set(analyzedDocsSummaryAtom, [analyzedDoc])
+      store.set(analyzedDocsSummaryAtom, [analyzedDoc]);
 
-      const docs = store.get(analyzedDocsSummaryAtom)
-      expect(docs).toHaveLength(1)
+      const docs = store.get(analyzedDocsSummaryAtom);
+      expect(docs).toHaveLength(1);
       expect(docs[0]).toMatchObject({
         docId: "analyzed-doc-1",
         title: "Supreme Court Contract Decision",
@@ -114,8 +114,8 @@ describe("Evidence Analysis Component - Document States", () => {
         keyArguments: expect.arrayContaining([
           "Contract terms must be interpreted in context",
         ]),
-      })
-    })
+      });
+    });
 
     it("should show error documents with error information", () => {
       const errorDoc: ClientAnalyzedDoc = {
@@ -126,20 +126,20 @@ describe("Evidence Analysis Component - Document States", () => {
         status: "error",
         timestamp: "2024-01-01T00:03:00Z",
         errorMessage: "Network timeout during analysis",
-      }
+      };
 
-      store.set(analyzedDocsSummaryAtom, [errorDoc])
+      store.set(analyzedDocsSummaryAtom, [errorDoc]);
 
-      const docs = store.get(analyzedDocsSummaryAtom)
-      expect(docs).toHaveLength(1)
+      const docs = store.get(analyzedDocsSummaryAtom);
+      expect(docs).toHaveLength(1);
       expect(docs[0]).toMatchObject({
         docId: "error-doc-1",
         title: "Failed Document",
         status: "error",
         errorMessage: "Network timeout during analysis",
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("Mixed Document States", () => {
     it("should handle documents in different states simultaneously", () => {
@@ -171,29 +171,29 @@ describe("Evidence Analysis Component - Document States", () => {
           timestamp: "2024-01-01T00:03:00Z",
           errorMessage: "Failed to process",
         },
-      ]
+      ];
 
-      store.set(analyzedDocsSummaryAtom, mixedDocs)
+      store.set(analyzedDocsSummaryAtom, mixedDocs);
 
-      const docs = store.get(analyzedDocsSummaryAtom)
-      expect(docs).toHaveLength(4)
+      const docs = store.get(analyzedDocsSummaryAtom);
+      expect(docs).toHaveLength(4);
 
       // Verify each document has the correct status
       const statusCounts = docs.reduce(
         (acc, doc) => {
-          acc[doc.status] = (acc[doc.status] || 0) + 1
-          return acc
+          acc[doc.status] = (acc[doc.status] || 0) + 1;
+          return acc;
         },
         {} as Record<string, number>
-      )
+      );
 
       expect(statusCounts).toEqual({
         fetched: 1,
         analyzing: 1,
         analyzed: 1,
         error: 1,
-      })
-    })
+      });
+    });
 
     it("should maintain document order based on timestamp", () => {
       const docs: ClientAnalyzedDoc[] = [
@@ -215,19 +215,19 @@ describe("Evidence Analysis Component - Document States", () => {
           status: "analyzing",
           timestamp: "2024-01-01T00:01:00Z",
         },
-      ]
+      ];
 
-      store.set(analyzedDocsSummaryAtom, docs)
+      store.set(analyzedDocsSummaryAtom, docs);
 
-      const storedDocs = store.get(analyzedDocsSummaryAtom)
-      expect(storedDocs).toHaveLength(3)
+      const storedDocs = store.get(analyzedDocsSummaryAtom);
+      expect(storedDocs).toHaveLength(3);
 
       // Verify order is preserved as added (not sorted by timestamp in state)
-      expect(storedDocs[0]?.docId).toBe("doc-3")
-      expect(storedDocs[1]?.docId).toBe("doc-1")
-      expect(storedDocs[2]?.docId).toBe("doc-2")
-    })
-  })
+      expect(storedDocs[0]?.docId).toBe("doc-3");
+      expect(storedDocs[1]?.docId).toBe("doc-1");
+      expect(storedDocs[2]?.docId).toBe("doc-2");
+    });
+  });
 
   describe("Document State Transitions", () => {
     it("should transition document from fetched to analyzing", () => {
@@ -237,23 +237,23 @@ describe("Evidence Analysis Component - Document States", () => {
         title: "Transition Test Document",
         status: "fetched",
         timestamp: "2024-01-01T00:00:00Z",
-      }
+      };
 
-      store.set(analyzedDocsSummaryAtom, [fetchedDoc])
+      store.set(analyzedDocsSummaryAtom, [fetchedDoc]);
 
       // Transition to analyzing
-      const currentDocs = store.get(analyzedDocsSummaryAtom)
-      const updatedDocs = currentDocs.map(doc =>
+      const currentDocs = store.get(analyzedDocsSummaryAtom);
+      const updatedDocs = currentDocs.map((doc) =>
         doc.docId === "transition-doc"
           ? { ...doc, status: "analyzing" as const }
           : doc
-      )
-      store.set(analyzedDocsSummaryAtom, updatedDocs)
+      );
+      store.set(analyzedDocsSummaryAtom, updatedDocs);
 
-      const docs = store.get(analyzedDocsSummaryAtom)
-      expect(docs[0]?.status).toBe("analyzing")
-      expect(docs[0]?.docId).toBe("transition-doc")
-    })
+      const docs = store.get(analyzedDocsSummaryAtom);
+      expect(docs[0]?.status).toBe("analyzing");
+      expect(docs[0]?.docId).toBe("transition-doc");
+    });
 
     it("should transition document from analyzing to analyzed with data", () => {
       // Start with analyzing document
@@ -262,13 +262,13 @@ describe("Evidence Analysis Component - Document States", () => {
         title: "Analysis Complete Document",
         status: "analyzing",
         timestamp: "2024-01-01T00:00:00Z",
-      }
+      };
 
-      store.set(analyzedDocsSummaryAtom, [analyzingDoc])
+      store.set(analyzedDocsSummaryAtom, [analyzingDoc]);
 
       // Transition to analyzed with data
-      const currentDocs = store.get(analyzedDocsSummaryAtom)
-      const updatedDocs = currentDocs.map(doc =>
+      const currentDocs = store.get(analyzedDocsSummaryAtom);
+      const updatedDocs = currentDocs.map((doc) =>
         doc.docId === "transition-doc-2"
           ? {
               ...doc,
@@ -278,18 +278,18 @@ describe("Evidence Analysis Component - Document States", () => {
               keyArguments: ["Key point 1", "Key point 2"],
             }
           : doc
-      )
-      store.set(analyzedDocsSummaryAtom, updatedDocs)
+      );
+      store.set(analyzedDocsSummaryAtom, updatedDocs);
 
-      const docs = store.get(analyzedDocsSummaryAtom)
+      const docs = store.get(analyzedDocsSummaryAtom);
       expect(docs[0]).toMatchObject({
         docId: "transition-doc-2",
         status: "analyzed",
         relevanceScore: 7,
         summarySnippet: "Analysis completed successfully",
         keyArguments: ["Key point 1", "Key point 2"],
-      })
-    })
+      });
+    });
 
     it("should handle transition from analyzing to error", () => {
       // Start with analyzing document
@@ -298,13 +298,13 @@ describe("Evidence Analysis Component - Document States", () => {
         title: "Failed Analysis Document",
         status: "analyzing",
         timestamp: "2024-01-01T00:00:00Z",
-      }
+      };
 
-      store.set(analyzedDocsSummaryAtom, [analyzingDoc])
+      store.set(analyzedDocsSummaryAtom, [analyzingDoc]);
 
       // Transition to error
-      const currentDocs = store.get(analyzedDocsSummaryAtom)
-      const updatedDocs = currentDocs.map(doc =>
+      const currentDocs = store.get(analyzedDocsSummaryAtom);
+      const updatedDocs = currentDocs.map((doc) =>
         doc.docId === "transition-error-doc"
           ? {
               ...doc,
@@ -312,17 +312,17 @@ describe("Evidence Analysis Component - Document States", () => {
               errorMessage: "Analysis failed due to timeout",
             }
           : doc
-      )
-      store.set(analyzedDocsSummaryAtom, updatedDocs)
+      );
+      store.set(analyzedDocsSummaryAtom, updatedDocs);
 
-      const docs = store.get(analyzedDocsSummaryAtom)
+      const docs = store.get(analyzedDocsSummaryAtom);
       expect(docs[0]).toMatchObject({
         docId: "transition-error-doc",
         status: "error",
         errorMessage: "Analysis failed due to timeout",
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("Document Selection with Different States", () => {
     it("should allow selection of documents in any state", () => {
@@ -346,20 +346,20 @@ describe("Evidence Analysis Component - Document States", () => {
           timestamp: "2024-01-01T00:02:00Z",
           relevanceScore: 9,
         },
-      ]
+      ];
 
-      store.set(analyzedDocsSummaryAtom, docs)
+      store.set(analyzedDocsSummaryAtom, docs);
 
       // Test selecting each type of document
-      store.set(selectedAnalyzedDocIdAtom, "selectable-fetched")
-      expect(store.get(selectedAnalyzedDocIdAtom)).toBe("selectable-fetched")
+      store.set(selectedAnalyzedDocIdAtom, "selectable-fetched");
+      expect(store.get(selectedAnalyzedDocIdAtom)).toBe("selectable-fetched");
 
-      store.set(selectedAnalyzedDocIdAtom, "selectable-analyzing")
-      expect(store.get(selectedAnalyzedDocIdAtom)).toBe("selectable-analyzing")
+      store.set(selectedAnalyzedDocIdAtom, "selectable-analyzing");
+      expect(store.get(selectedAnalyzedDocIdAtom)).toBe("selectable-analyzing");
 
-      store.set(selectedAnalyzedDocIdAtom, "selectable-analyzed")
-      expect(store.get(selectedAnalyzedDocIdAtom)).toBe("selectable-analyzed")
-    })
+      store.set(selectedAnalyzedDocIdAtom, "selectable-analyzed");
+      expect(store.get(selectedAnalyzedDocIdAtom)).toBe("selectable-analyzed");
+    });
 
     it("should show appropriate details based on document status", () => {
       const docs: ClientAnalyzedDoc[] = [
@@ -382,29 +382,33 @@ describe("Evidence Analysis Component - Document States", () => {
           summarySnippet: "Detailed analysis available",
           keyArguments: ["Argument 1", "Argument 2"],
         },
-      ]
+      ];
 
-      store.set(analyzedDocsSummaryAtom, docs)
+      store.set(analyzedDocsSummaryAtom, docs);
 
       // Select fetched document
-      store.set(selectedAnalyzedDocIdAtom, "detail-fetched")
-      const selectedFetched = docs.find(doc => doc.docId === "detail-fetched")
+      store.set(selectedAnalyzedDocIdAtom, "detail-fetched");
+      const selectedFetched = docs.find(
+        (doc) => doc.docId === "detail-fetched"
+      );
 
-      expect(selectedFetched?.status).toBe("fetched")
-      expect(selectedFetched?.relevanceScore).toBeUndefined()
-      expect(selectedFetched?.summarySnippet).toBeUndefined()
+      expect(selectedFetched?.status).toBe("fetched");
+      expect(selectedFetched?.relevanceScore).toBeUndefined();
+      expect(selectedFetched?.summarySnippet).toBeUndefined();
 
       // Select analyzed document
-      store.set(selectedAnalyzedDocIdAtom, "detail-analyzed")
-      const selectedAnalyzed = docs.find(doc => doc.docId === "detail-analyzed")
+      store.set(selectedAnalyzedDocIdAtom, "detail-analyzed");
+      const selectedAnalyzed = docs.find(
+        (doc) => doc.docId === "detail-analyzed"
+      );
 
-      expect(selectedAnalyzed?.status).toBe("analyzed")
-      expect(selectedAnalyzed?.relevanceScore).toBe(8)
+      expect(selectedAnalyzed?.status).toBe("analyzed");
+      expect(selectedAnalyzed?.relevanceScore).toBe(8);
       expect(selectedAnalyzed?.summarySnippet).toBe(
         "Detailed analysis available"
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("UI State Helpers", () => {
     it("should identify documents that can show detailed analysis", () => {
@@ -426,16 +430,16 @@ describe("Evidence Analysis Component - Document States", () => {
           relevanceScore: 8,
           summarySnippet: "Complete analysis",
         },
-      ]
+      ];
 
       const hasDetailedAnalysis = (doc: ClientAnalyzedDoc) =>
         doc.status === "analyzed" &&
-        (doc.relevanceScore !== undefined || doc.summarySnippet !== undefined)
+        (doc.relevanceScore !== undefined || doc.summarySnippet !== undefined);
 
-      expect(hasDetailedAnalysis(docs[0] as ClientAnalyzedDoc)).toBe(false)
-      expect(hasDetailedAnalysis(docs[1] as ClientAnalyzedDoc)).toBe(false)
-      expect(hasDetailedAnalysis(docs[2] as ClientAnalyzedDoc)).toBe(true)
-    })
+      expect(hasDetailedAnalysis(docs[0] as ClientAnalyzedDoc)).toBe(false);
+      expect(hasDetailedAnalysis(docs[1] as ClientAnalyzedDoc)).toBe(false);
+      expect(hasDetailedAnalysis(docs[2] as ClientAnalyzedDoc)).toBe(true);
+    });
 
     it("should identify documents that are still processing", () => {
       const docs: ClientAnalyzedDoc[] = [
@@ -459,16 +463,16 @@ describe("Evidence Analysis Component - Document States", () => {
           status: "error",
           timestamp: "2024-01-01T00:03:00Z",
         },
-      ]
+      ];
 
       const isProcessing = (doc: ClientAnalyzedDoc) =>
-        doc.status === "analyzing"
+        doc.status === "analyzing";
 
-      expect(isProcessing(docs[0] as ClientAnalyzedDoc)).toBe(false)
-      expect(isProcessing(docs[1] as ClientAnalyzedDoc)).toBe(true)
-      expect(isProcessing(docs[2] as ClientAnalyzedDoc)).toBe(false)
-      expect(isProcessing(docs[3] as ClientAnalyzedDoc)).toBe(false)
-    })
+      expect(isProcessing(docs[0] as ClientAnalyzedDoc)).toBe(false);
+      expect(isProcessing(docs[1] as ClientAnalyzedDoc)).toBe(true);
+      expect(isProcessing(docs[2] as ClientAnalyzedDoc)).toBe(false);
+      expect(isProcessing(docs[3] as ClientAnalyzedDoc)).toBe(false);
+    });
 
     it("should identify documents that need error handling", () => {
       const docs: ClientAnalyzedDoc[] = [
@@ -484,13 +488,13 @@ describe("Evidence Analysis Component - Document States", () => {
           timestamp: "2024-01-01T00:02:00Z",
           errorMessage: "Failed",
         },
-      ]
+      ];
 
-      const hasError = (doc: ClientAnalyzedDoc) => doc.status === "error"
+      const hasError = (doc: ClientAnalyzedDoc) => doc.status === "error";
 
-      expect(hasError(docs[0] as ClientAnalyzedDoc)).toBe(false)
-      expect(hasError(docs[1] as ClientAnalyzedDoc)).toBe(false)
-      expect(hasError(docs[2] as ClientAnalyzedDoc)).toBe(true)
-    })
-  })
-})
+      expect(hasError(docs[0] as ClientAnalyzedDoc)).toBe(false);
+      expect(hasError(docs[1] as ClientAnalyzedDoc)).toBe(false);
+      expect(hasError(docs[2] as ClientAnalyzedDoc)).toBe(true);
+    });
+  });
+});

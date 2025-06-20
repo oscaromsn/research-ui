@@ -1,12 +1,12 @@
-import { act, renderHook, waitFor } from "@testing-library/react"
-import { Provider, createStore } from "jotai"
-import { createElement } from "react"
-import type { ReactNode } from "react"
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { Provider, createStore } from "jotai";
+import { createElement } from "react";
+import type { ReactNode } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator"
-import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator"
-import { useResearchAgent } from "@/lib/hooks/useResearchAgent"
+import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
+import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
+import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
   analyzedDocsSummaryAtom,
   finalReportContentAtom,
@@ -14,37 +14,37 @@ import {
   researchLogAtom,
   researchStatusAtom,
   synthesisDetailsAtom,
-} from "@/lib/state/researchAtoms"
+} from "@/lib/state/researchAtoms";
 
 // Mock the server action
 vi.mock("@/app/actions/researchAgentOrchestrator", () => ({
   conductResearch: vi.fn(),
-}))
+}));
 
-const mockedConductResearch = vi.mocked(conductResearch)
+const mockedConductResearch = vi.mocked(conductResearch);
 
 describe("useResearchAgent Hook", () => {
-  let store: ReturnType<typeof createStore>
+  let store: ReturnType<typeof createStore>;
 
   const JotaiProvider = ({ children }: { children: ReactNode }) =>
-    createElement(Provider, { store }, children)
+    createElement(Provider, { store }, children);
 
   beforeEach(() => {
-    store = createStore()
-    vi.clearAllMocks()
-  })
+    store = createStore();
+    vi.clearAllMocks();
+  });
 
   afterEach(async () => {
-    vi.clearAllTimers()
+    vi.clearAllTimers();
     // Ensure all async operations complete
-    await global.testUtils?.flushPromises?.()
-  })
+    await global.testUtils?.flushPromises?.();
+  });
 
   describe("Hook Skeleton and Basic Structure", () => {
     it("should initialize with correct default state", () => {
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       expect(result.current).toEqual({
         startResearch: expect.any(Function),
@@ -59,26 +59,26 @@ describe("useResearchAgent Hook", () => {
         canResume: false,
         autoModeEnabled: false,
         toggleAutoMode: expect.any(Function),
-      })
-    })
+      });
+    });
 
     it("should provide startResearch function that accepts a legal question", () => {
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
-      expect(typeof result.current.startResearch).toBe("function")
-      expect(result.current.startResearch.length).toBe(1) // should accept one parameter
-    })
+      expect(typeof result.current.startResearch).toBe("function");
+      expect(result.current.startResearch.length).toBe(1); // should accept one parameter
+    });
 
     it("should provide abortResearch function", () => {
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
-      expect(typeof result.current.abortResearch).toBe("function")
-      expect(result.current.abortResearch.length).toBe(0) // should accept no parameters
-    })
+      expect(typeof result.current.abortResearch).toBe("function");
+      expect(result.current.abortResearch.length).toBe(0); // should accept no parameters
+    });
 
     it("should read research status from Jotai atoms correctly", () => {
       // Set initial state in the store
@@ -89,17 +89,19 @@ describe("useResearchAgent Hook", () => {
         message: "Generating search queries...",
         currentProcessedDoc: 0,
         totalDocsToProcess: 5,
-      })
+      });
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
-      expect(result.current.isLoading).toBe(true)
-      expect(result.current.currentStage).toBe("GENERATING_QUERIES")
-      expect(result.current.currentMessage).toBe("Generating search queries...")
-      expect(result.current.error).toBe(null)
-    })
+      expect(result.current.isLoading).toBe(true);
+      expect(result.current.currentStage).toBe("GENERATING_QUERIES");
+      expect(result.current.currentMessage).toBe(
+        "Generating search queries..."
+      );
+      expect(result.current.error).toBe(null);
+    });
 
     it("should expose error state when research status has error", () => {
       store.set(researchStatusAtom, {
@@ -107,17 +109,17 @@ describe("useResearchAgent Hook", () => {
         isLoading: false,
         error: "Failed to generate queries",
         message: "An error occurred",
-      })
+      });
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
-      expect(result.current.isLoading).toBe(false)
-      expect(result.current.currentStage).toBe("ERROR")
-      expect(result.current.error).toBe("Failed to generate queries")
-    })
-  })
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.currentStage).toBe("ERROR");
+      expect(result.current.error).toBe("Failed to generate queries");
+    });
+  });
 
   describe("startResearch Basic Functionality", () => {
     it("should reset all research state when starting new research", async () => {
@@ -127,87 +129,87 @@ describe("useResearchAgent Hook", () => {
         isLoading: false,
         error: null,
         message: "Previous research completed",
-      })
-      store.set(researchLogAtom, ["Previous log entry"])
-      store.set(generatedQueriesAtom, [{ query_string: "old query" }])
+      });
+      store.set(researchLogAtom, ["Previous log entry"]);
+      store.set(generatedQueriesAtom, [{ query_string: "old query" }]);
 
       // Mock a simple stream response
       const mockStream = new ReadableStream({
         start(controller) {
-          controller.close()
+          controller.close();
         },
-      })
-      mockedConductResearch.mockResolvedValue(mockStream)
+      });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       await act(async () => {
         await result.current.startResearch(
           "What are the implications of AI in healthcare?"
-        )
-      })
+        );
+      });
 
       // Check that state was reset
-      expect(store.get(generatedQueriesAtom)).toEqual([])
-      expect(store.get(analyzedDocsSummaryAtom)).toEqual([])
+      expect(store.get(generatedQueriesAtom)).toEqual([]);
+      expect(store.get(analyzedDocsSummaryAtom)).toEqual([]);
       expect(store.get(synthesisDetailsAtom)).toEqual({
         topics: [],
         unansweredAspects: [],
         emergingQuestions: [],
         reasoningSummary: "",
-      })
-    })
+      });
+    });
 
     it("should set initializing state when starting research", async () => {
       const mockStream = new ReadableStream({
         start(controller) {
           // Don't close immediately, keep stream open for testing
-          setTimeout(() => controller.close(), 100)
+          setTimeout(() => controller.close(), 100);
         },
-      })
-      mockedConductResearch.mockResolvedValue(mockStream)
+      });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       // Start research but don't await completion
       act(() => {
-        result.current.startResearch("Test legal question")
-      })
+        result.current.startResearch("Test legal question");
+      });
 
       // Check status immediately after calling startResearch
       await waitFor(() => {
-        const status = store.get(researchStatusAtom)
-        expect(status.stage).toBe("INITIALIZING")
-      })
+        const status = store.get(researchStatusAtom);
+        expect(status.stage).toBe("INITIALIZING");
+      });
 
-      const status = store.get(researchStatusAtom)
-      expect(status.isLoading).toBe(true)
-      expect(status.error).toBe(null)
-      expect(status.message).toBe("Initializing research...")
-    })
+      const status = store.get(researchStatusAtom);
+      expect(status.isLoading).toBe(true);
+      expect(status.error).toBe(null);
+      expect(status.message).toBe("Initializing research...");
+    });
 
     it("should call conductResearch server action with legal question", async () => {
       const mockStream = new ReadableStream({
         start(controller) {
-          controller.close()
+          controller.close();
         },
-      })
-      mockedConductResearch.mockResolvedValue(mockStream)
+      });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       const legalQuestion =
-        "What are the patent implications of AI-generated code?"
+        "What are the patent implications of AI-generated code?";
 
       await act(async () => {
-        await result.current.startResearch(legalQuestion)
-      })
+        await result.current.startResearch(legalQuestion);
+      });
 
       expect(mockedConductResearch).toHaveBeenCalledWith(
         legalQuestion,
@@ -217,91 +219,91 @@ describe("useResearchAgent Hook", () => {
           maxIterations: 5,
         },
         []
-      )
-      expect(mockedConductResearch).toHaveBeenCalledTimes(1)
-    })
+      );
+      expect(mockedConductResearch).toHaveBeenCalledTimes(1);
+    });
 
     it("should handle errors from conductResearch server action", async () => {
-      const errorMessage = "Network error"
-      mockedConductResearch.mockRejectedValue(new Error(errorMessage))
+      const errorMessage = "Network error";
+      mockedConductResearch.mockRejectedValue(new Error(errorMessage));
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       await act(async () => {
         try {
-          await result.current.startResearch("Test question")
+          await result.current.startResearch("Test question");
         } catch {
           // Expected error, handle gracefully
         }
-      })
+      });
 
       await waitFor(() => {
-        const status = store.get(researchStatusAtom)
-        expect(status.stage).toBe("ERROR")
-        expect(status.isLoading).toBe(false)
-        expect(status.error).toBe(errorMessage)
-      })
-    })
+        const status = store.get(researchStatusAtom);
+        expect(status.stage).toBe("ERROR");
+        expect(status.isLoading).toBe(false);
+        expect(status.error).toBe(errorMessage);
+      });
+    });
 
     it("should add log entries when starting research", async () => {
       const mockStream = new ReadableStream({
         start(controller) {
-          controller.close()
+          controller.close();
         },
-      })
-      mockedConductResearch.mockResolvedValue(mockStream)
+      });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
-      const legalQuestion = "Test legal question"
+      const legalQuestion = "Test legal question";
 
       await act(async () => {
-        await result.current.startResearch(legalQuestion)
-      })
+        await result.current.startResearch(legalQuestion);
+      });
 
-      const logs = store.get(researchLogAtom)
-      expect(logs.length).toBeGreaterThan(0)
-      expect(logs[0]).toContain("[INITIALIZING]")
-      expect(logs[0]).toContain("Research process initiated")
-      expect(logs[0]).toContain(legalQuestion)
-    })
-  })
+      const logs = store.get(researchLogAtom);
+      expect(logs.length).toBeGreaterThan(0);
+      expect(logs[0]).toContain("[INITIALIZING]");
+      expect(logs[0]).toContain("Research process initiated");
+      expect(logs[0]).toContain(legalQuestion);
+    });
+  });
 
   describe("abortResearch Basic Functionality", () => {
     it("should be callable without throwing", () => {
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       expect(() => {
-        result.current.abortResearch()
-      }).not.toThrow()
-    })
+        result.current.abortResearch();
+      }).not.toThrow();
+    });
 
     it("should log when no active research to abort", () => {
       const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {
         // Mock implementation - intentionally empty
-      })
+      });
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       act(() => {
-        result.current.abortResearch()
-      })
+        result.current.abortResearch();
+      });
 
       expect(consoleSpy).toHaveBeenCalledWith(
         "useResearchAgent: No active research to abort."
-      )
+      );
 
-      consoleSpy.mockRestore()
-    })
-  })
+      consoleSpy.mockRestore();
+    });
+  });
 
   describe("Stream Processing and Update Handling", () => {
     it("should process STATUS_CHANGE updates correctly", async () => {
@@ -318,33 +320,33 @@ describe("useResearchAgent Hook", () => {
           currentProcessedDoc: 1,
           totalDocsToProcess: 5,
         }),
-      ].join("\n")
+      ].join("\n");
 
       const mockStream = new ReadableStream({
         start(controller) {
-          controller.enqueue(new TextEncoder().encode(updates))
-          controller.close()
+          controller.enqueue(new TextEncoder().encode(updates));
+          controller.close();
         },
-      })
-      mockedConductResearch.mockResolvedValue(mockStream)
+      });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       await act(async () => {
-        await result.current.startResearch("Test legal question")
-      })
+        await result.current.startResearch("Test legal question");
+      });
 
       await waitFor(() => {
-        const status = store.get(researchStatusAtom)
-        expect(status.stage).toBe("FETCHING_DOCUMENTS")
-        expect(status.message).toBe("Searching for documents")
-        expect(status.currentProcessedDoc).toBe(1)
-        expect(status.totalDocsToProcess).toBe(5)
-        expect(status.isLoading).toBe(false) // Stream ended
-      })
-    })
+        const status = store.get(researchStatusAtom);
+        expect(status.stage).toBe("FETCHING_DOCUMENTS");
+        expect(status.message).toBe("Searching for documents");
+        expect(status.currentProcessedDoc).toBe(1);
+        expect(status.totalDocsToProcess).toBe(5);
+        expect(status.isLoading).toBe(false); // Stream ended
+      });
+    });
 
     it("should process DATA updates for generated queries", async () => {
       const queryData = {
@@ -358,7 +360,7 @@ describe("useResearchAgent Hook", () => {
             expected_information_summary: "Malpractice precedents",
           },
         ],
-      }
+      };
 
       const updates = [
         JSON.stringify({
@@ -367,39 +369,39 @@ describe("useResearchAgent Hook", () => {
           message: "Generated search queries",
           data: queryData,
         }),
-      ].join("\n")
+      ].join("\n");
 
       const mockStream = new ReadableStream({
         start(controller) {
-          controller.enqueue(new TextEncoder().encode(updates))
-          controller.close()
+          controller.enqueue(new TextEncoder().encode(updates));
+          controller.close();
         },
-      })
-      mockedConductResearch.mockResolvedValue(mockStream)
+      });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       await act(async () => {
-        await result.current.startResearch("Test legal question")
-      })
+        await result.current.startResearch("Test legal question");
+      });
 
       await waitFor(() => {
-        const queries = store.get(generatedQueriesAtom)
-        expect(queries).toHaveLength(2)
+        const queries = store.get(generatedQueriesAtom);
+        expect(queries).toHaveLength(2);
         expect(queries[0]).toEqual({
           query_string: "AI liability healthcare",
           expected_information_summary: "Cases on AI liability",
           timestamp: expect.any(String),
-        })
+        });
         expect(queries[1]).toEqual({
           query_string: "medical malpractice automation",
           expected_information_summary: "Malpractice precedents",
           timestamp: expect.any(String),
-        })
-      })
-    })
+        });
+      });
+    });
 
     it("should process DATA updates for analyzed documents", async () => {
       const docData = {
@@ -408,7 +410,7 @@ describe("useResearchAgent Hook", () => {
         relevanceScore: 0.85,
         confidenceScore: 0.92,
         summarySnippet: "This case discusses AI liability...",
-      }
+      };
 
       const updates = [
         JSON.stringify({
@@ -417,33 +419,33 @@ describe("useResearchAgent Hook", () => {
           message: "Analyzed document",
           data: docData,
         }),
-      ].join("\n")
+      ].join("\n");
 
       const mockStream = new ReadableStream({
         start(controller) {
-          controller.enqueue(new TextEncoder().encode(updates))
-          controller.close()
+          controller.enqueue(new TextEncoder().encode(updates));
+          controller.close();
         },
-      })
-      mockedConductResearch.mockResolvedValue(mockStream)
+      });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       await act(async () => {
-        await result.current.startResearch("Test legal question")
-      })
+        await result.current.startResearch("Test legal question");
+      });
 
       await waitFor(() => {
-        const docs = store.get(analyzedDocsSummaryAtom)
-        expect(docs).toHaveLength(1)
+        const docs = store.get(analyzedDocsSummaryAtom);
+        expect(docs).toHaveLength(1);
         expect(docs[0]).toEqual({
           ...docData,
           timestamp: expect.any(String),
-        })
-      })
-    })
+        });
+      });
+    });
 
     it("should update existing documents when processing additional data", async () => {
       // First, add a document
@@ -451,14 +453,14 @@ describe("useResearchAgent Hook", () => {
         docId: "doc-456",
         title: "Initial Title",
         relevanceScore: 0.7,
-      }
+      };
 
       // Then update it with more data
       const updatedDoc = {
         docId: "doc-456",
         summarySnippet: "Updated summary snippet",
         confidenceScore: 0.88,
-      }
+      };
 
       const updates = [
         JSON.stringify({
@@ -471,27 +473,27 @@ describe("useResearchAgent Hook", () => {
           stage: "ANALYZING_DOCUMENTS",
           data: updatedDoc,
         }),
-      ].join("\n")
+      ].join("\n");
 
       const mockStream = new ReadableStream({
         start(controller) {
-          controller.enqueue(new TextEncoder().encode(updates))
-          controller.close()
+          controller.enqueue(new TextEncoder().encode(updates));
+          controller.close();
         },
-      })
-      mockedConductResearch.mockResolvedValue(mockStream)
+      });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       await act(async () => {
-        await result.current.startResearch("Test legal question")
-      })
+        await result.current.startResearch("Test legal question");
+      });
 
       await waitFor(() => {
-        const docs = store.get(analyzedDocsSummaryAtom)
-        expect(docs).toHaveLength(1)
+        const docs = store.get(analyzedDocsSummaryAtom);
+        expect(docs).toHaveLength(1);
         expect(docs[0]).toEqual({
           docId: "doc-456",
           title: "Initial Title",
@@ -499,9 +501,9 @@ describe("useResearchAgent Hook", () => {
           summarySnippet: "Updated summary snippet",
           confidenceScore: 0.88,
           timestamp: expect.any(String),
-        })
-      })
-    })
+        });
+      });
+    });
 
     it("should process synthesis findings updates", async () => {
       const synthesisData = {
@@ -520,7 +522,7 @@ describe("useResearchAgent Hook", () => {
         unansweredAspects: ["Jurisdiction variations"],
         emergingQuestions: ["What about future AI capabilities?"],
         reasoningSummary: "Comprehensive analysis shows...",
-      }
+      };
 
       const updates = [
         JSON.stringify({
@@ -529,35 +531,35 @@ describe("useResearchAgent Hook", () => {
           message: "Synthesis complete",
           data: synthesisData,
         }),
-      ].join("\n")
+      ].join("\n");
 
       const mockStream = new ReadableStream({
         start(controller) {
-          controller.enqueue(new TextEncoder().encode(updates))
-          controller.close()
+          controller.enqueue(new TextEncoder().encode(updates));
+          controller.close();
         },
-      })
-      mockedConductResearch.mockResolvedValue(mockStream)
+      });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       await act(async () => {
-        await result.current.startResearch("Test legal question")
-      })
+        await result.current.startResearch("Test legal question");
+      });
 
       await waitFor(() => {
-        const synthesis = store.get(synthesisDetailsAtom)
+        const synthesis = store.get(synthesisDetailsAtom);
         expect(synthesis).toEqual({
           ...synthesisData,
-          topics: synthesisData.topics.map(topic => ({
+          topics: synthesisData.topics.map((topic) => ({
             ...topic,
             timestamp: expect.any(String),
           })),
-        })
-      })
-    })
+        });
+      });
+    });
 
     it("should handle ERROR type updates correctly", async () => {
       const updates = [
@@ -566,31 +568,31 @@ describe("useResearchAgent Hook", () => {
           stage: "GENERATING_QUERIES",
           message: "Failed to generate queries",
         }),
-      ].join("\n")
+      ].join("\n");
 
       const mockStream = new ReadableStream({
         start(controller) {
-          controller.enqueue(new TextEncoder().encode(updates))
-          controller.close()
+          controller.enqueue(new TextEncoder().encode(updates));
+          controller.close();
         },
-      })
-      mockedConductResearch.mockResolvedValue(mockStream)
+      });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       await act(async () => {
-        await result.current.startResearch("Test legal question")
-      })
+        await result.current.startResearch("Test legal question");
+      });
 
       await waitFor(() => {
-        const status = store.get(researchStatusAtom)
-        expect(status.stage).toBe("ERROR")
-        expect(status.isLoading).toBe(false)
-        expect(status.error).toBe("Failed to generate queries")
-      })
-    })
+        const status = store.get(researchStatusAtom);
+        expect(status.stage).toBe("ERROR");
+        expect(status.isLoading).toBe(false);
+        expect(status.error).toBe("Failed to generate queries");
+      });
+    });
 
     it("should handle malformed JSON gracefully", async () => {
       const updates = [
@@ -605,36 +607,38 @@ describe("useResearchAgent Hook", () => {
           stage: "FETCHING_DOCUMENTS",
           message: "Another valid update",
         }),
-      ].join("\n")
+      ].join("\n");
 
       const mockStream = new ReadableStream({
         start(controller) {
-          controller.enqueue(new TextEncoder().encode(updates))
-          controller.close()
+          controller.enqueue(new TextEncoder().encode(updates));
+          controller.close();
         },
-      })
-      mockedConductResearch.mockResolvedValue(mockStream)
+      });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       await act(async () => {
-        await result.current.startResearch("Test legal question")
-      })
+        await result.current.startResearch("Test legal question");
+      });
 
       await waitFor(() => {
-        const status = store.get(researchStatusAtom)
+        const status = store.get(researchStatusAtom);
         // Should process the valid updates despite the malformed one
-        expect(status.stage).toBe("FETCHING_DOCUMENTS")
-        expect(status.message).toBe("Another valid update")
+        expect(status.stage).toBe("FETCHING_DOCUMENTS");
+        expect(status.message).toBe("Another valid update");
 
         // Should log the malformed JSON error
-        const logs = store.get(researchLogAtom)
-        const systemErrorLog = logs.find(log => log.includes("[SYSTEM_ERROR]"))
-        expect(systemErrorLog).toBeDefined()
-      })
-    })
+        const logs = store.get(researchLogAtom);
+        const systemErrorLog = logs.find((log) =>
+          log.includes("[SYSTEM_ERROR]")
+        );
+        expect(systemErrorLog).toBeDefined();
+      });
+    });
 
     it("should update research log for all update types", async () => {
       const updates = [
@@ -653,45 +657,45 @@ describe("useResearchAgent Hook", () => {
           stage: "SYNTHESIZING_FINDINGS",
           message: "Log entry",
         }),
-      ].join("\n")
+      ].join("\n");
 
       const mockStream = new ReadableStream({
         start(controller) {
-          controller.enqueue(new TextEncoder().encode(updates))
-          controller.close()
+          controller.enqueue(new TextEncoder().encode(updates));
+          controller.close();
         },
-      })
-      mockedConductResearch.mockResolvedValue(mockStream)
+      });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       await act(async () => {
-        await result.current.startResearch("Test legal question")
-      })
+        await result.current.startResearch("Test legal question");
+      });
 
       await waitFor(() => {
-        const logs = store.get(researchLogAtom)
+        const logs = store.get(researchLogAtom);
         // Should have initial log plus the three updates
-        expect(logs.length).toBeGreaterThanOrEqual(4)
+        expect(logs.length).toBeGreaterThanOrEqual(4);
 
         // Check that all update types were logged
-        const statusLog = logs.find(log =>
+        const statusLog = logs.find((log) =>
           log.includes("[GENERATING_QUERIES] (STATUS_CHANGE)")
-        )
-        const progressLog = logs.find(log =>
+        );
+        const progressLog = logs.find((log) =>
           log.includes("[ANALYZING_DOCUMENTS] (PROGRESS)")
-        )
-        const logEntry = logs.find(log =>
+        );
+        const logEntry = logs.find((log) =>
           log.includes("[SYNTHESIZING_FINDINGS] (LOG)")
-        )
+        );
 
-        expect(statusLog).toBeDefined()
-        expect(progressLog).toBeDefined()
-        expect(logEntry).toBeDefined()
-      })
-    })
+        expect(statusLog).toBeDefined();
+        expect(progressLog).toBeDefined();
+        expect(logEntry).toBeDefined();
+      });
+    });
 
     it("should process streaming report generation updates with replacement logic", async () => {
       // Test that streaming text fields are REPLACED, not appended
@@ -768,97 +772,97 @@ describe("useResearchAgent Hook", () => {
               "Based on this analysis, healthcare providers must implement comprehensive AI governance frameworks to ensure regulatory compliance and limit liability exposure.",
           },
         }),
-      ].join("\n")
+      ].join("\n");
 
       const mockStream = new ReadableStream({
         start(controller) {
-          controller.enqueue(new TextEncoder().encode(updates))
-          controller.close()
+          controller.enqueue(new TextEncoder().encode(updates));
+          controller.close();
         },
-      })
-      mockedConductResearch.mockResolvedValue(mockStream)
+      });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       await act(async () => {
-        await result.current.startResearch("Test legal question")
-      })
+        await result.current.startResearch("Test legal question");
+      });
 
       await waitFor(
         () => {
-          const report = store.get(finalReportContentAtom)
+          const report = store.get(finalReportContentAtom);
 
           // Executive summary should show the final complete state, not concatenated chunks
           expect(report.executiveSummary).toBe(
             "This report analyzes the legal implications of artificial intelligence in healthcare settings and examines liability frameworks."
-          )
+          );
 
           // Should have one section with complete content
-          expect(report.sections).toHaveLength(1)
+          expect(report.sections).toHaveLength(1);
           expect(report.sections[0]).toEqual({
             title: "Legal Framework",
             content:
               "The current legal framework establishes clear guidelines for AI deployment in medical environments, with specific requirements for liability allocation.",
-          })
+          });
 
           // Conclusion should show final complete state
           expect(report.conclusion).toBe(
             "Based on this analysis, healthcare providers must implement comprehensive AI governance frameworks to ensure regulatory compliance and limit liability exposure."
-          )
+          );
         },
         { timeout: 15000 }
-      )
-    }, 20000)
-  })
+      );
+    }, 20000);
+  });
 
   describe("AbortController Management", () => {
     it("should create AbortController when starting research", async () => {
       let streamController:
         | ReadableStreamDefaultController<Uint8Array>
-        | undefined
+        | undefined;
       const mockStream = new ReadableStream({
         start(controller) {
-          streamController = controller
+          streamController = controller;
           // Keep stream open to test abort functionality
         },
-      })
-      mockedConductResearch.mockResolvedValue(mockStream)
+      });
+      mockedConductResearch.mockResolvedValue(mockStream);
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
-      })
+      });
 
       // Start research but don't await completion to keep controller active
       act(() => {
-        result.current.startResearch("Test question")
-      })
+        result.current.startResearch("Test question");
+      });
 
       // Give it a moment to start
       await waitFor(() => {
-        const status = store.get(researchStatusAtom)
-        expect(status.stage).toBe("INITIALIZING")
-      })
+        const status = store.get(researchStatusAtom);
+        expect(status.stage).toBe("INITIALIZING");
+      });
 
       // Now test abort while controller is still active
       const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {
         // Mock implementation - intentionally empty
-      })
+      });
 
       act(() => {
-        result.current.abortResearch()
-      })
+        result.current.abortResearch();
+      });
 
       // Should log "Abort signal sent" since controller exists
       expect(consoleSpy).toHaveBeenCalledWith(
         "useResearchAgent: Abort signal sent."
-      )
+      );
 
-      consoleSpy.mockRestore()
+      consoleSpy.mockRestore();
 
       // Clean up
-      streamController?.close()
-    })
-  })
-})
+      streamController?.close();
+    });
+  });
+});

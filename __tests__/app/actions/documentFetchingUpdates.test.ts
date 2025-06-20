@@ -1,9 +1,9 @@
 // __tests__/app/actions/documentFetchingUpdates.test.ts
 
-import { describe, expect, it } from "vitest"
+import { describe, expect, it } from "vitest";
 
-import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator"
-import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms"
+import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator";
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 
 // Mock data for testing
 const mockSearchResultItems = [
@@ -39,7 +39,7 @@ const mockSearchResultItems = [
     highlights: ["performance excuse", "operation of law"],
     published_date: "2022-12-01",
   },
-]
+];
 
 describe("Document Fetching Updates", () => {
   describe("Individual Document Updates During FETCHING_DOCUMENTS Stage", () => {
@@ -63,32 +63,32 @@ describe("Document Fetching Updates", () => {
           currentProcessedDoc: index + 1,
           totalDocsToProcess: mockSearchResultItems.length,
         })
-      )
+      );
 
       // Verify the expected structure of individual document updates
       expectedUpdates.forEach((update, index) => {
-        expect(update.type).toBe("DATA")
-        expect(update.stage).toBe("FETCHING_DOCUMENTS")
+        expect(update.type).toBe("DATA");
+        expect(update.stage).toBe("FETCHING_DOCUMENTS");
         expect(update.data).toMatchObject({
           docId: mockSearchResultItems[index]?.id,
           title: mockSearchResultItems[index]?.title,
           url: mockSearchResultItems[index]?.url,
           source: mockSearchResultItems[index]?.source_name,
           status: "fetched",
-        })
+        });
         expect(update.message).toContain(
           `Document ${index + 1}/${mockSearchResultItems.length} retrieved`
-        )
-        expect(update.currentProcessedDoc).toBe(index + 1)
-        expect(update.totalDocsToProcess).toBe(mockSearchResultItems.length)
-      })
-    })
+        );
+        expect(update.currentProcessedDoc).toBe(index + 1);
+        expect(update.totalDocsToProcess).toBe(mockSearchResultItems.length);
+      });
+    });
 
     it("should create ClientAnalyzedDoc-compatible data structure for fetched documents", () => {
       // Expected behavior: Document data sent during FETCHING_DOCUMENTS should be
       // compatible with ClientAnalyzedDoc interface but with minimal analysis fields
 
-      const item = mockSearchResultItems[0]
+      const item = mockSearchResultItems[0];
       const expectedDocData = {
         docId: item?.id,
         title: item?.title,
@@ -96,20 +96,20 @@ describe("Document Fetching Updates", () => {
         source: item?.source_name,
         status: "fetched",
         timestamp: expect.any(String),
-      } as unknown as Partial<ClientAnalyzedDoc>
+      } as unknown as Partial<ClientAnalyzedDoc>;
 
       // Verify the structure is correct
-      expect(expectedDocData.docId).toBeDefined()
-      expect(expectedDocData.title).toBeDefined()
-      expect(expectedDocData.url).toBeDefined()
-      expect(expectedDocData.source).toBeDefined()
-      expect(expectedDocData.status).toBe("fetched")
+      expect(expectedDocData.docId).toBeDefined();
+      expect(expectedDocData.title).toBeDefined();
+      expect(expectedDocData.url).toBeDefined();
+      expect(expectedDocData.source).toBeDefined();
+      expect(expectedDocData.status).toBe("fetched");
 
       // Analysis fields should be undefined
-      expect(expectedDocData.relevanceScore).toBeUndefined()
-      expect(expectedDocData.summarySnippet).toBeUndefined()
-      expect(expectedDocData.keyArguments).toBeUndefined()
-    })
+      expect(expectedDocData.relevanceScore).toBeUndefined();
+      expect(expectedDocData.summarySnippet).toBeUndefined();
+      expect(expectedDocData.keyArguments).toBeUndefined();
+    });
 
     it("should handle documents with missing optional fields gracefully", () => {
       // Test edge case: Some documents might have missing title, source, etc.
@@ -118,7 +118,7 @@ describe("Document Fetching Updates", () => {
         url: "https://example.com/incomplete",
         full_text: "Some content...",
         // Missing title, source_name, etc.
-      }
+      };
 
       const expectedDocData = {
         docId: incompleteDocument.id,
@@ -127,12 +127,12 @@ describe("Document Fetching Updates", () => {
         source: undefined, // Should handle missing source
         status: "fetched",
         timestamp: expect.any(String),
-      } as unknown as Partial<ClientAnalyzedDoc>
+      } as unknown as Partial<ClientAnalyzedDoc>;
 
-      expect(expectedDocData.docId).toBe("incomplete-doc")
-      expect(expectedDocData.url).toBe("https://example.com/incomplete")
-      expect(expectedDocData.status).toBe("fetched")
-    })
+      expect(expectedDocData.docId).toBe("incomplete-doc");
+      expect(expectedDocData.url).toBe("https://example.com/incomplete");
+      expect(expectedDocData.status).toBe("fetched");
+    });
 
     it("should send updates in correct order during document fetching", () => {
       // Expected behavior: Updates should be sent in this order:
@@ -145,7 +145,7 @@ describe("Document Fetching Updates", () => {
         type: "STATUS_CHANGE",
         stage: "FETCHING_DOCUMENTS",
         message: "Retrieving documents from live search APIs...",
-      }
+      };
 
       const expectedIndividualDocUpdate = {
         type: "DATA",
@@ -155,27 +155,27 @@ describe("Document Fetching Updates", () => {
         }),
         currentProcessedDoc: expect.any(Number),
         totalDocsToProcess: mockSearchResultItems.length,
-      }
+      };
 
       const expectedFinalUpdate = {
         type: "DATA",
         stage: "FETCHING_DOCUMENTS",
         message: `${mockSearchResultItems.length} unique documents retrieved.`,
         isFinalForStage: true,
-      }
+      };
 
       // Verify the expected structure of each type of update
-      expect(expectedInitialUpdate.type).toBe("STATUS_CHANGE")
-      expect(expectedInitialUpdate.stage).toBe("FETCHING_DOCUMENTS")
+      expect(expectedInitialUpdate.type).toBe("STATUS_CHANGE");
+      expect(expectedInitialUpdate.stage).toBe("FETCHING_DOCUMENTS");
 
-      expect(expectedIndividualDocUpdate.type).toBe("DATA")
-      expect(expectedIndividualDocUpdate.stage).toBe("FETCHING_DOCUMENTS")
-      expect(expectedIndividualDocUpdate.totalDocsToProcess).toBe(3)
+      expect(expectedIndividualDocUpdate.type).toBe("DATA");
+      expect(expectedIndividualDocUpdate.stage).toBe("FETCHING_DOCUMENTS");
+      expect(expectedIndividualDocUpdate.totalDocsToProcess).toBe(3);
 
-      expect(expectedFinalUpdate.type).toBe("DATA")
-      expect(expectedFinalUpdate.stage).toBe("FETCHING_DOCUMENTS")
-      expect(expectedFinalUpdate.isFinalForStage).toBe(true)
-    })
+      expect(expectedFinalUpdate.type).toBe("DATA");
+      expect(expectedFinalUpdate.stage).toBe("FETCHING_DOCUMENTS");
+      expect(expectedFinalUpdate.isFinalForStage).toBe(true);
+    });
 
     it("should maintain backward compatibility with existing summary data", () => {
       // Expected behavior: The final FETCHING_DOCUMENTS update should still include
@@ -186,14 +186,14 @@ describe("Document Fetching Updates", () => {
         stage: "FETCHING_DOCUMENTS",
         data: {
           count: mockSearchResultItems.length,
-          titles: mockSearchResultItems.map(r =>
+          titles: mockSearchResultItems.map((r) =>
             r.title ? `${r.title.substring(0, 70)}...` : "Untitled"
           ),
-          sources: mockSearchResultItems.map(r => r.source_name),
+          sources: mockSearchResultItems.map((r) => r.source_name),
         },
         message: `${mockSearchResultItems.length} unique documents retrieved.`,
         isFinalForStage: true,
-      }
+      };
 
       expect(expectedFinalUpdate.data).toMatchObject({
         count: 3,
@@ -207,16 +207,16 @@ describe("Document Fetching Updates", () => {
           "LexisNexis",
           "California Legislature",
         ]),
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("Error Handling During Document Fetching", () => {
     it("should send error updates for individual documents that fail to fetch", () => {
       // Expected behavior: If individual document fetching fails,
       // send an error update for that specific document
 
-      const failedDocId = "failed-doc-1"
+      const failedDocId = "failed-doc-1";
       const expectedErrorUpdate: ResearchUpdate = {
         type: "ERROR",
         stage: "FETCHING_DOCUMENTS",
@@ -227,16 +227,16 @@ describe("Document Fetching Updates", () => {
           errorMessage: "Network timeout",
           timestamp: expect.any(String),
         } as Partial<ClientAnalyzedDoc>,
-      }
+      };
 
-      expect(expectedErrorUpdate.type).toBe("ERROR")
-      expect(expectedErrorUpdate.stage).toBe("FETCHING_DOCUMENTS")
+      expect(expectedErrorUpdate.type).toBe("ERROR");
+      expect(expectedErrorUpdate.stage).toBe("FETCHING_DOCUMENTS");
       expect(expectedErrorUpdate.data).toMatchObject({
         docId: failedDocId,
         status: "error",
         errorMessage: "Network timeout",
-      })
-    })
+      });
+    });
 
     it("should continue processing remaining documents after individual failures", () => {
       // Expected behavior: If one document fails, others should still be processed
@@ -271,13 +271,13 @@ describe("Document Fetching Updates", () => {
             status: "fetched",
           }),
         },
-      ]
+      ];
 
       // Verify we get updates for both successful and failed documents
-      expect(expectedUpdates).toHaveLength(3)
-      expect(expectedUpdates[0]?.type).toBe("DATA")
-      expect(expectedUpdates[1]?.type).toBe("ERROR")
-      expect(expectedUpdates[2]?.type).toBe("DATA")
-    })
-  })
-})
+      expect(expectedUpdates).toHaveLength(3);
+      expect(expectedUpdates[0]?.type).toBe("DATA");
+      expect(expectedUpdates[1]?.type).toBe("ERROR");
+      expect(expectedUpdates[2]?.type).toBe("DATA");
+    });
+  });
+});

@@ -1,13 +1,13 @@
-import { render, screen } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
-import { Provider, createStore } from "jotai"
-import type React from "react"
-import type { ReactNode } from "react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { Provider, createStore } from "jotai";
+import type React from "react";
+import type { ReactNode } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SynthesisReporting } from "@/components/domain/report-generation/synthesis-reporting"
-import type { ClientSynthesis } from "@/lib/state/researchAtoms"
-import { synthesisDetailsAtom } from "@/lib/state/researchAtoms"
+import { SynthesisReporting } from "@/components/domain/report-generation/synthesis-reporting";
+import type { ClientSynthesis } from "@/lib/state/researchAtoms";
+import { synthesisDetailsAtom } from "@/lib/state/researchAtoms";
 
 // Mock the SynthesisReasoningModal component
 vi.mock(
@@ -17,11 +17,11 @@ vi.mock(
       isOpen,
       onClose,
     }: {
-      isOpen: boolean
-      onClose: () => void
+      isOpen: boolean;
+      onClose: () => void;
     }) => {
       if (!isOpen) {
-        return null
+        return null;
       }
       return (
         <div data-testid="synthesis-reasoning-modal">
@@ -30,10 +30,10 @@ vi.mock(
             Close
           </button>
         </div>
-      )
+      );
     },
   })
-)
+);
 
 // Mock the ReportDrafter component
 vi.mock("@/components/domain/report-generation/report-drafter", () => ({
@@ -43,23 +43,23 @@ vi.mock("@/components/domain/report-generation/report-drafter", () => ({
       <p>Draft report content goes here...</p>
     </div>
   ),
-}))
+}));
 
 describe("SynthesisReporting Component Integration", () => {
-  let store: ReturnType<typeof createStore>
+  let store: ReturnType<typeof createStore>;
 
   beforeEach(() => {
-    store = createStore()
-    vi.clearAllMocks()
-  })
+    store = createStore();
+    vi.clearAllMocks();
+  });
 
   const JotaiProvider = ({ children }: { children: ReactNode }) => (
     <Provider store={store}>{children}</Provider>
-  )
+  );
 
   const renderWithProvider = (component: React.ReactElement) => {
-    return render(<JotaiProvider>{component}</JotaiProvider>)
-  }
+    return render(<JotaiProvider>{component}</JotaiProvider>);
+  };
 
   const mockSynthesisData: ClientSynthesis = {
     topics: [
@@ -88,103 +88,103 @@ describe("SynthesisReporting Component Integration", () => {
     ],
     reasoningSummary:
       "The synthesis process identified key patterns across multiple jurisdictions regarding duty of care and contract interpretation.",
-  }
+  };
 
   it("renders the component with initial state", () => {
-    renderWithProvider(<SynthesisReporting />)
+    renderWithProvider(<SynthesisReporting />);
 
-    expect(screen.getByText("Synthesis & Reporting")).toBeInTheDocument()
-    expect(screen.getByText("Synthesis Studio")).toBeInTheDocument()
-    expect(screen.getByText("Report Drafter")).toBeInTheDocument()
-  })
+    expect(screen.getByText("Synthesis & Reporting")).toBeInTheDocument();
+    expect(screen.getByText("Synthesis Studio")).toBeInTheDocument();
+    expect(screen.getByText("Report Drafter")).toBeInTheDocument();
+  });
 
   it("displays tabs and switches between them", async () => {
-    renderWithProvider(<SynthesisReporting />)
+    renderWithProvider(<SynthesisReporting />);
 
-    const synthesisTab = screen.getByText("Synthesis Studio")
-    const reportTab = screen.getByText("Report Drafter")
+    const synthesisTab = screen.getByText("Synthesis Studio");
+    const reportTab = screen.getByText("Report Drafter");
 
     // Initially on synthesis tab
     expect(synthesisTab).toHaveClass(
       "border-b-2",
       "border-[#3a7bb7]",
       "text-[#3a7bb7]"
-    )
+    );
     expect(reportTab).not.toHaveClass(
       "border-b-2",
       "border-[#3a7bb7]",
       "text-[#3a7bb7]"
-    )
+    );
 
     // Switch to report tab
-    await userEvent.click(reportTab)
+    await userEvent.click(reportTab);
 
-    expect(screen.getByTestId("report-drafter")).toBeInTheDocument()
+    expect(screen.getByTestId("report-drafter")).toBeInTheDocument();
     expect(reportTab).toHaveClass(
       "border-b-2",
       "border-[#3a7bb7]",
       "text-[#3a7bb7]"
-    )
+    );
 
     // Switch back to synthesis tab
-    await userEvent.click(synthesisTab)
+    await userEvent.click(synthesisTab);
 
-    expect(screen.getByText("Synthesized Topics")).toBeInTheDocument()
+    expect(screen.getByText("Synthesized Topics")).toBeInTheDocument();
     expect(synthesisTab).toHaveClass(
       "border-b-2",
       "border-[#3a7bb7]",
       "text-[#3a7bb7]"
-    )
-  })
+    );
+  });
 
   it("displays synthesized topics from atom state", () => {
-    store.set(synthesisDetailsAtom, mockSynthesisData)
+    store.set(synthesisDetailsAtom, mockSynthesisData);
 
-    renderWithProvider(<SynthesisReporting />)
+    renderWithProvider(<SynthesisReporting />);
 
     // Check that topics are displayed
     expect(
       screen.getByText("Establishing 'Duty of Care' in Negligence Claims")
-    ).toBeInTheDocument()
+    ).toBeInTheDocument();
     expect(
       screen.getByText("Contract Interpretation Standards")
-    ).toBeInTheDocument()
+    ).toBeInTheDocument();
 
     // Check that synthesis snippets are displayed
     expect(
       screen.getByText(
         /Pre-existing duty of care considerations include foreseeability/
       )
-    ).toBeInTheDocument()
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
         /Courts apply objective standards when interpreting contractual terms/
       )
-    ).toBeInTheDocument()
+    ).toBeInTheDocument();
 
     // Check that document IDs are displayed
-    expect(screen.getByText("[DocID-001]")).toBeInTheDocument()
-    expect(screen.getByText("[DocID-003]")).toBeInTheDocument()
-    expect(screen.getByText("[DocID-002]")).toBeInTheDocument()
-    expect(screen.getByText("[DocID-004]")).toBeInTheDocument()
+    expect(screen.getByText("[DocID-001]")).toBeInTheDocument();
+    expect(screen.getByText("[DocID-003]")).toBeInTheDocument();
+    expect(screen.getByText("[DocID-002]")).toBeInTheDocument();
+    expect(screen.getByText("[DocID-004]")).toBeInTheDocument();
 
     // Check confidence displays
-    expect(screen.getByText("High (85%)")).toBeInTheDocument() // For 85% confidence
-  })
+    expect(screen.getByText("High (85%)")).toBeInTheDocument(); // For 85% confidence
+  });
 
   it("displays unanswered aspects from atom state", () => {
-    store.set(synthesisDetailsAtom, mockSynthesisData)
+    store.set(synthesisDetailsAtom, mockSynthesisData);
 
-    renderWithProvider(<SynthesisReporting />)
+    renderWithProvider(<SynthesisReporting />);
 
-    expect(screen.getByText("Unanswered Aspects:")).toBeInTheDocument()
+    expect(screen.getByText("Unanswered Aspects:")).toBeInTheDocument();
     expect(
       screen.getByText("Defining the threshold of causal connection")
-    ).toBeInTheDocument()
+    ).toBeInTheDocument();
     expect(
       screen.getByText("State-by-state variations in force majeure standards")
-    ).toBeInTheDocument()
-  })
+    ).toBeInTheDocument();
+  });
 
   it("shows streaming text updates with caret animation", () => {
     const streamingData: ClientSynthesis = {
@@ -200,48 +200,48 @@ describe("SynthesisReporting Component Integration", () => {
       unansweredAspects: [],
       emergingQuestions: [],
       reasoningSummary: "",
-    }
+    };
 
-    store.set(synthesisDetailsAtom, streamingData)
+    store.set(synthesisDetailsAtom, streamingData);
 
-    renderWithProvider(<SynthesisReporting />)
+    renderWithProvider(<SynthesisReporting />);
 
     // Check for animated caret in synthesis snippet
-    const caret = document.querySelector(".animate-caret-blink")
-    expect(caret).toBeInTheDocument()
-  })
+    const caret = document.querySelector(".animate-caret-blink");
+    expect(caret).toBeInTheDocument();
+  });
 
   it("opens synthesis reasoning modal when button is clicked", async () => {
-    store.set(synthesisDetailsAtom, mockSynthesisData)
+    store.set(synthesisDetailsAtom, mockSynthesisData);
 
-    renderWithProvider(<SynthesisReporting />)
+    renderWithProvider(<SynthesisReporting />);
 
-    const reasoningButton = screen.getByText("View Synthesis Reasoning")
-    await userEvent.click(reasoningButton)
+    const reasoningButton = screen.getByText("View Synthesis Reasoning");
+    await userEvent.click(reasoningButton);
 
-    expect(screen.getByTestId("synthesis-reasoning-modal")).toBeInTheDocument()
-    expect(screen.getByText("Synthesis Reasoning Details")).toBeInTheDocument()
-  })
+    expect(screen.getByTestId("synthesis-reasoning-modal")).toBeInTheDocument();
+    expect(screen.getByText("Synthesis Reasoning Details")).toBeInTheDocument();
+  });
 
   it("closes synthesis reasoning modal when close button is clicked", async () => {
-    store.set(synthesisDetailsAtom, mockSynthesisData)
+    store.set(synthesisDetailsAtom, mockSynthesisData);
 
-    renderWithProvider(<SynthesisReporting />)
+    renderWithProvider(<SynthesisReporting />);
 
     // Open modal
-    const reasoningButton = screen.getByText("View Synthesis Reasoning")
-    await userEvent.click(reasoningButton)
+    const reasoningButton = screen.getByText("View Synthesis Reasoning");
+    await userEvent.click(reasoningButton);
 
-    expect(screen.getByTestId("synthesis-reasoning-modal")).toBeInTheDocument()
+    expect(screen.getByTestId("synthesis-reasoning-modal")).toBeInTheDocument();
 
     // Close modal
-    const closeButton = screen.getByLabelText("close")
-    await userEvent.click(closeButton)
+    const closeButton = screen.getByLabelText("close");
+    await userEvent.click(closeButton);
 
     expect(
       screen.queryByTestId("synthesis-reasoning-modal")
-    ).not.toBeInTheDocument()
-  })
+    ).not.toBeInTheDocument();
+  });
 
   it("displays confidence levels correctly", () => {
     const confidenceTestData: ClientSynthesis = {
@@ -268,16 +268,16 @@ describe("SynthesisReporting Component Integration", () => {
       unansweredAspects: [],
       emergingQuestions: [],
       reasoningSummary: "",
-    }
+    };
 
-    store.set(synthesisDetailsAtom, confidenceTestData)
+    store.set(synthesisDetailsAtom, confidenceTestData);
 
-    renderWithProvider(<SynthesisReporting />)
+    renderWithProvider(<SynthesisReporting />);
 
     // Should show appropriate confidence labels
-    expect(screen.getByText("High (90%)")).toBeInTheDocument() // For 90%
+    expect(screen.getByText("High (90%)")).toBeInTheDocument(); // For 90%
     // Medium and Low confidence might be displayed differently or not at all in current UI
-  })
+  });
 
   it("handles empty synthesis data gracefully", () => {
     const emptySynthesis: ClientSynthesis = {
@@ -285,17 +285,17 @@ describe("SynthesisReporting Component Integration", () => {
       unansweredAspects: [],
       emergingQuestions: [],
       reasoningSummary: "",
-    }
+    };
 
-    store.set(synthesisDetailsAtom, emptySynthesis)
+    store.set(synthesisDetailsAtom, emptySynthesis);
 
-    renderWithProvider(<SynthesisReporting />)
+    renderWithProvider(<SynthesisReporting />);
 
-    expect(screen.getByText("Synthesis & Reporting")).toBeInTheDocument()
-    expect(screen.getByText("Synthesized Topics")).toBeInTheDocument()
-    expect(screen.getByText("Unanswered Aspects:")).toBeInTheDocument()
+    expect(screen.getByText("Synthesis & Reporting")).toBeInTheDocument();
+    expect(screen.getByText("Synthesized Topics")).toBeInTheDocument();
+    expect(screen.getByText("Unanswered Aspects:")).toBeInTheDocument();
     // Should not crash and should show empty state appropriately
-  })
+  });
 
   it("shows progressive synthesis updates", () => {
     // Initial state with partial synthesis
@@ -311,14 +311,14 @@ describe("SynthesisReporting Component Integration", () => {
       unansweredAspects: ["Pending analysis of jurisdiction variations"],
       emergingQuestions: [],
       reasoningSummary: "",
-    }
+    };
 
-    store.set(synthesisDetailsAtom, partialSynthesis)
+    store.set(synthesisDetailsAtom, partialSynthesis);
 
-    const { rerender } = renderWithProvider(<SynthesisReporting />)
+    const { rerender } = renderWithProvider(<SynthesisReporting />);
 
     // Check initial partial content
-    expect(screen.getByText(/Initial analysis shows/)).toBeInTheDocument()
+    expect(screen.getByText(/Initial analysis shows/)).toBeInTheDocument();
 
     // Update with more complete synthesis
     const updatedSynthesis: ClientSynthesis = {
@@ -336,23 +336,23 @@ describe("SynthesisReporting Component Integration", () => {
         "How do recent decisions affect future interpretations?",
       ],
       reasoningSummary: "Comprehensive analysis completed",
-    }
+    };
 
-    store.set(synthesisDetailsAtom, updatedSynthesis)
+    store.set(synthesisDetailsAtom, updatedSynthesis);
     rerender(
       <JotaiProvider>
         <SynthesisReporting />
       </JotaiProvider>
-    )
+    );
 
     // Check updated content
     expect(
       screen.getByText(
         /contract interpretation follows well-established precedents/
       )
-    ).toBeInTheDocument()
+    ).toBeInTheDocument();
     // emergingQuestions are not displayed in the current UI design, so we don't test for them
-  })
+  });
 
   it("handles synthesis reasoning summary display", () => {
     const dataWithReasoning: ClientSynthesis = {
@@ -368,13 +368,13 @@ describe("SynthesisReporting Component Integration", () => {
       emergingQuestions: [],
       reasoningSummary:
         "The synthesis process identified clear patterns across multiple legal precedents, focusing on contractual interpretation and duty of care standards.",
-    }
+    };
 
-    store.set(synthesisDetailsAtom, dataWithReasoning)
+    store.set(synthesisDetailsAtom, dataWithReasoning);
 
-    renderWithProvider(<SynthesisReporting />)
+    renderWithProvider(<SynthesisReporting />);
 
     // The reasoning summary should be available when modal opens
-    expect(screen.getByText("View Synthesis Reasoning")).toBeInTheDocument()
-  })
-})
+    expect(screen.getByText("View Synthesis Reasoning")).toBeInTheDocument();
+  });
+});

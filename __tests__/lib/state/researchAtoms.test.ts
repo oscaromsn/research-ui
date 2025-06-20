@@ -1,7 +1,7 @@
 // __tests__/lib/state/researchAtoms.test.ts
 
-import { createStore } from "jotai"
-import { beforeEach, describe, expect, it } from "vitest"
+import { createStore } from "jotai";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import {
   type ClientAnalyzedDoc,
@@ -25,18 +25,18 @@ import {
   // Reset atom
   resetResearchStateAtom,
   synthesisDetailsAtom,
-} from "@/lib/state/researchAtoms"
+} from "@/lib/state/researchAtoms";
 
 describe("ResearchAtoms - Type Definitions and Initial States", () => {
-  let store: ReturnType<typeof createStore>
+  let store: ReturnType<typeof createStore>;
 
   beforeEach(() => {
-    store = createStore()
-  })
+    store = createStore();
+  });
 
   describe("researchStatusAtom", () => {
     it("should have correct initial state", () => {
-      const initialState = store.get(researchStatusAtom)
+      const initialState = store.get(researchStatusAtom);
 
       expect(initialState).toEqual({
         stage: "IDLE",
@@ -46,8 +46,8 @@ describe("ResearchAtoms - Type Definitions and Initial States", () => {
         currentProcessedDoc: 0,
         totalDocsToProcess: 0,
         currentStreamingField: null,
-      })
-    })
+      });
+    });
 
     it("should accept ResearchStatus type updates", () => {
       const newStatus: ResearchStatus = {
@@ -58,35 +58,35 @@ describe("ResearchAtoms - Type Definitions and Initial States", () => {
         currentProcessedDoc: 0,
         totalDocsToProcess: 5,
         currentStreamingField: "queries",
-      }
+      };
 
-      store.set(researchStatusAtom, newStatus)
-      expect(store.get(researchStatusAtom)).toEqual(newStatus)
-    })
-  })
+      store.set(researchStatusAtom, newStatus);
+      expect(store.get(researchStatusAtom)).toEqual(newStatus);
+    });
+  });
 
   describe("researchLogAtom", () => {
     it("should have empty array as initial state", () => {
-      const initialState = store.get(researchLogAtom)
-      expect(initialState).toEqual([])
-    })
+      const initialState = store.get(researchLogAtom);
+      expect(initialState).toEqual([]);
+    });
 
     it("should accept string array updates", () => {
       const newLog = [
         "Started research",
         "Generated 3 queries",
         "Fetching documents",
-      ]
-      store.set(researchLogAtom, newLog)
-      expect(store.get(researchLogAtom)).toEqual(newLog)
-    })
-  })
+      ];
+      store.set(researchLogAtom, newLog);
+      expect(store.get(researchLogAtom)).toEqual(newLog);
+    });
+  });
 
   describe("generatedQueriesAtom", () => {
     it("should have empty array as initial state", () => {
-      const initialState = store.get(generatedQueriesAtom)
-      expect(initialState).toEqual([])
-    })
+      const initialState = store.get(generatedQueriesAtom);
+      expect(initialState).toEqual([]);
+    });
 
     it("should accept ClientSearchQuery array updates", () => {
       const queries: ClientSearchQuery[] = [
@@ -98,18 +98,18 @@ describe("ResearchAtoms - Type Definitions and Initial States", () => {
           query_string: "intellectual property",
           expected_information_summary: "Patent cases",
         },
-      ]
+      ];
 
-      store.set(generatedQueriesAtom, queries)
-      expect(store.get(generatedQueriesAtom)).toEqual(queries)
-    })
-  })
+      store.set(generatedQueriesAtom, queries);
+      expect(store.get(generatedQueriesAtom)).toEqual(queries);
+    });
+  });
 
   describe("analyzedDocsSummaryAtom", () => {
     it("should have empty array as initial state", () => {
-      const initialState = store.get(analyzedDocsSummaryAtom)
-      expect(initialState).toEqual([])
-    })
+      const initialState = store.get(analyzedDocsSummaryAtom);
+      expect(initialState).toEqual([]);
+    });
 
     it("should accept ClientAnalyzedDoc array updates", () => {
       const docs: ClientAnalyzedDoc[] = [
@@ -130,23 +130,23 @@ describe("ResearchAtoms - Type Definitions and Initial States", () => {
           summarySnippet: "IP protection mechanisms and legal frameworks...",
           status: "analyzed",
         },
-      ]
+      ];
 
-      store.set(analyzedDocsSummaryAtom, docs)
-      expect(store.get(analyzedDocsSummaryAtom)).toEqual(docs)
-    })
-  })
+      store.set(analyzedDocsSummaryAtom, docs);
+      expect(store.get(analyzedDocsSummaryAtom)).toEqual(docs);
+    });
+  });
 
   describe("synthesisDetailsAtom", () => {
     it("should have correct initial state", () => {
-      const initialState = store.get(synthesisDetailsAtom)
+      const initialState = store.get(synthesisDetailsAtom);
       expect(initialState).toEqual({
         topics: [],
         unansweredAspects: [],
         emergingQuestions: [],
         reasoningSummary: "",
-      })
-    })
+      });
+    });
 
     it("should accept ClientSynthesis type updates", () => {
       const synthesis: ClientSynthesis = {
@@ -161,16 +161,16 @@ describe("ResearchAtoms - Type Definitions and Initial States", () => {
         unansweredAspects: ["International jurisdiction"],
         emergingQuestions: ["How does digital signature affect validity?"],
         reasoningSummary: "Analysis shows strong precedent for...",
-      }
+      };
 
-      store.set(synthesisDetailsAtom, synthesis)
-      expect(store.get(synthesisDetailsAtom)).toEqual(synthesis)
-    })
-  })
+      store.set(synthesisDetailsAtom, synthesis);
+      expect(store.get(synthesisDetailsAtom)).toEqual(synthesis);
+    });
+  });
 
   describe("finalReportContentAtom", () => {
     it("should have correct initial state", () => {
-      const initialState = store.get(finalReportContentAtom)
+      const initialState = store.get(finalReportContentAtom);
       expect(initialState).toEqual({
         title: "",
         executiveSummary: "",
@@ -178,8 +178,8 @@ describe("ResearchAtoms - Type Definitions and Initial States", () => {
         conclusion: "",
         limitations: [],
         appendixDocIds: [],
-      })
-    })
+      });
+    });
 
     it("should accept ClientFinalReport type updates", () => {
       const report: ClientFinalReport = {
@@ -195,24 +195,24 @@ describe("ResearchAtoms - Type Definitions and Initial States", () => {
         conclusion: "Based on the analysis...",
         limitations: ["Limited case law in jurisdiction"],
         appendixDocIds: ["doc1", "doc2", "doc3"],
-      }
+      };
 
-      store.set(finalReportContentAtom, report)
-      expect(store.get(finalReportContentAtom)).toEqual(report)
-    })
-  })
-})
+      store.set(finalReportContentAtom, report);
+      expect(store.get(finalReportContentAtom)).toEqual(report);
+    });
+  });
+});
 
 describe("ResearchAtoms - Derived Atoms", () => {
-  let store: ReturnType<typeof createStore>
+  let store: ReturnType<typeof createStore>;
 
   beforeEach(() => {
-    store = createStore()
-  })
+    store = createStore();
+  });
 
   describe("isResearchLoadingAtom", () => {
     it("should reflect loading state from researchStatusAtom", () => {
-      expect(store.get(isResearchLoadingAtom)).toBe(false)
+      expect(store.get(isResearchLoadingAtom)).toBe(false);
 
       store.set(researchStatusAtom, {
         stage: "GENERATING_QUERIES",
@@ -221,15 +221,15 @@ describe("ResearchAtoms - Derived Atoms", () => {
         message: "Loading...",
         currentProcessedDoc: 0,
         totalDocsToProcess: 0,
-      })
+      });
 
-      expect(store.get(isResearchLoadingAtom)).toBe(true)
-    })
-  })
+      expect(store.get(isResearchLoadingAtom)).toBe(true);
+    });
+  });
 
   describe("currentResearchStageAtom", () => {
     it("should reflect stage from researchStatusAtom", () => {
-      expect(store.get(currentResearchStageAtom)).toBe("IDLE")
+      expect(store.get(currentResearchStageAtom)).toBe("IDLE");
 
       store.set(researchStatusAtom, {
         stage: "ANALYZING_DOCUMENTS",
@@ -238,15 +238,15 @@ describe("ResearchAtoms - Derived Atoms", () => {
         message: "Analyzing...",
         currentProcessedDoc: 0,
         totalDocsToProcess: 0,
-      })
+      });
 
-      expect(store.get(currentResearchStageAtom)).toBe("ANALYZING_DOCUMENTS")
-    })
-  })
+      expect(store.get(currentResearchStageAtom)).toBe("ANALYZING_DOCUMENTS");
+    });
+  });
 
   describe("researchErrorAtom", () => {
     it("should reflect error from researchStatusAtom", () => {
-      expect(store.get(researchErrorAtom)).toBe(null)
+      expect(store.get(researchErrorAtom)).toBe(null);
 
       store.set(researchStatusAtom, {
         stage: "ERROR",
@@ -255,15 +255,15 @@ describe("ResearchAtoms - Derived Atoms", () => {
         message: "Error occurred",
         currentProcessedDoc: 0,
         totalDocsToProcess: 0,
-      })
+      });
 
-      expect(store.get(researchErrorAtom)).toBe("Failed to connect to API")
-    })
-  })
+      expect(store.get(researchErrorAtom)).toBe("Failed to connect to API");
+    });
+  });
 
   describe("executiveSummaryDisplayAtom", () => {
     it("should reflect executiveSummary from finalReportContentAtom", () => {
-      expect(store.get(executiveSummaryDisplayAtom)).toBe("")
+      expect(store.get(executiveSummaryDisplayAtom)).toBe("");
 
       store.set(finalReportContentAtom, {
         title: "",
@@ -272,22 +272,22 @@ describe("ResearchAtoms - Derived Atoms", () => {
         conclusion: "",
         limitations: [],
         appendixDocIds: [],
-      })
+      });
 
       expect(store.get(executiveSummaryDisplayAtom)).toBe(
         "This is an executive summary..."
-      )
-    })
-  })
+      );
+    });
+  });
 
   describe("reportSectionsDisplayAtom", () => {
     it("should reflect sections from finalReportContentAtom", () => {
-      expect(store.get(reportSectionsDisplayAtom)).toEqual([])
+      expect(store.get(reportSectionsDisplayAtom)).toEqual([]);
 
       const sections = [
         { title: "Introduction", content: "This report..." },
         { title: "Analysis", content: "The key findings..." },
-      ]
+      ];
 
       store.set(finalReportContentAtom, {
         title: "",
@@ -296,19 +296,19 @@ describe("ResearchAtoms - Derived Atoms", () => {
         conclusion: "",
         limitations: [],
         appendixDocIds: [],
-      })
+      });
 
-      expect(store.get(reportSectionsDisplayAtom)).toEqual(sections)
-    })
-  })
-})
+      expect(store.get(reportSectionsDisplayAtom)).toEqual(sections);
+    });
+  });
+});
 
 describe("ResearchAtoms - Reset Functionality", () => {
-  let store: ReturnType<typeof createStore>
+  let store: ReturnType<typeof createStore>;
 
   beforeEach(() => {
-    store = createStore()
-  })
+    store = createStore();
+  });
 
   it("should reset all atoms to initial state when resetResearchStateAtom is triggered", () => {
     // Set some non-initial values
@@ -320,20 +320,20 @@ describe("ResearchAtoms - Reset Functionality", () => {
       currentProcessedDoc: 3,
       totalDocsToProcess: 10,
       currentStreamingField: "analysis",
-    })
+    });
 
     store.set(researchLogAtom, [
       "Started",
       "Generated queries",
       "Fetching docs",
-    ])
+    ]);
 
     store.set(generatedQueriesAtom, [
       {
         query_string: "test query",
         expected_information_summary: "test info",
       },
-    ])
+    ]);
 
     store.set(analyzedDocsSummaryAtom, [
       {
@@ -342,14 +342,14 @@ describe("ResearchAtoms - Reset Functionality", () => {
         relevanceScore: 0.8,
         status: "analyzed",
       },
-    ])
+    ]);
 
     store.set(synthesisDetailsAtom, {
       topics: [{ title: "Test Topic", synthesisSnippet: "Test snippet" }],
       unansweredAspects: ["aspect1"],
       emergingQuestions: ["question1"],
       reasoningSummary: "Test reasoning",
-    })
+    });
 
     store.set(finalReportContentAtom, {
       title: "Test Report",
@@ -358,10 +358,10 @@ describe("ResearchAtoms - Reset Functionality", () => {
       conclusion: "Test conclusion",
       limitations: ["limitation1"],
       appendixDocIds: ["doc1"],
-    })
+    });
 
     // Trigger reset
-    store.set(resetResearchStateAtom, null)
+    store.set(resetResearchStateAtom, null);
 
     // Verify all atoms are reset to initial states
     expect(store.get(researchStatusAtom)).toEqual({
@@ -374,18 +374,18 @@ describe("ResearchAtoms - Reset Functionality", () => {
       currentStreamingField: null,
       isPaused: false,
       canResume: false,
-    })
+    });
 
-    expect(store.get(researchLogAtom)).toEqual([])
-    expect(store.get(generatedQueriesAtom)).toEqual([])
-    expect(store.get(analyzedDocsSummaryAtom)).toEqual([])
+    expect(store.get(researchLogAtom)).toEqual([]);
+    expect(store.get(generatedQueriesAtom)).toEqual([]);
+    expect(store.get(analyzedDocsSummaryAtom)).toEqual([]);
 
     expect(store.get(synthesisDetailsAtom)).toEqual({
       topics: [],
       unansweredAspects: [],
       emergingQuestions: [],
       reasoningSummary: "",
-    })
+    });
 
     expect(store.get(finalReportContentAtom)).toEqual({
       title: "",
@@ -394,29 +394,29 @@ describe("ResearchAtoms - Reset Functionality", () => {
       conclusion: "",
       limitations: [],
       appendixDocIds: [],
-    })
+    });
 
     // Verify derived atoms also reflect reset state
-    expect(store.get(isResearchLoadingAtom)).toBe(false)
-    expect(store.get(currentResearchStageAtom)).toBe("IDLE")
-    expect(store.get(researchErrorAtom)).toBe(null)
-    expect(store.get(executiveSummaryDisplayAtom)).toBe("")
-    expect(store.get(reportSectionsDisplayAtom)).toEqual([])
-  })
+    expect(store.get(isResearchLoadingAtom)).toBe(false);
+    expect(store.get(currentResearchStageAtom)).toBe("IDLE");
+    expect(store.get(researchErrorAtom)).toBe(null);
+    expect(store.get(executiveSummaryDisplayAtom)).toBe("");
+    expect(store.get(reportSectionsDisplayAtom)).toEqual([]);
+  });
 
   it("should work when called multiple times", () => {
     // Set some values
-    store.set(researchLogAtom, ["test message"])
+    store.set(researchLogAtom, ["test message"]);
 
     // Reset first time
-    store.set(resetResearchStateAtom, null)
-    expect(store.get(researchLogAtom)).toEqual([])
+    store.set(resetResearchStateAtom, null);
+    expect(store.get(researchLogAtom)).toEqual([]);
 
     // Set values again
-    store.set(researchLogAtom, ["another message"])
+    store.set(researchLogAtom, ["another message"]);
 
     // Reset second time
-    store.set(resetResearchStateAtom, null)
-    expect(store.get(researchLogAtom)).toEqual([])
-  })
-})
+    store.set(resetResearchStateAtom, null);
+    expect(store.get(researchLogAtom)).toEqual([]);
+  });
+});

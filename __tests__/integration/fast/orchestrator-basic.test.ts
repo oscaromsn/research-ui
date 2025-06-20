@@ -6,10 +6,10 @@
  * For real API tests, see integration tests with API key requirements
  */
 
-import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator"
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator"
-import { executeExaSearch } from "@/lib/utils/exaSearchUtil"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator";
+import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
+import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the executeExaSearch function to avoid real search API calls during
 // testing
@@ -34,7 +34,7 @@ vi.mock("@/lib/utils/exaSearchUtil", () => ({
       },
     },
   ]),
-}))
+}));
 
 // Mock the BAML client to avoid real API calls
 // This allows the test to run without requiring API keys
@@ -72,7 +72,7 @@ vi.doMock("@/baml_client", () => {
         expected_information: ["enforcement mechanisms", "court procedures"],
       },
     ],
-  })
+  });
 
   return {
     b: {
@@ -145,8 +145,8 @@ vi.doMock("@/baml_client", () => {
               conclusion: "Report conclusion",
               limitations_and_caveats: ["Limitation 1"],
               appendix_document_ids: ["doc-123"],
-            }
-          })()
+            };
+          })();
           return Object.assign(generator, {
             getFinalResponse: vi.fn().mockResolvedValue({
               report_title: "Legal Analysis Report",
@@ -161,143 +161,143 @@ vi.doMock("@/baml_client", () => {
               limitations_and_caveats: ["Limitation 1"],
               appendix_document_ids: ["doc-123"],
             }),
-          })
+          });
         }),
       },
     },
-  }
-})
+  };
+});
 
 describe("Research Orchestrator - Basic Streaming", () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-  })
+    vi.clearAllMocks();
+  });
 
   it("should stream INITIALIZING and COMPLETED updates", async () => {
     console.log(
       "executeExaSearch is mocked:",
       vi.isMockFunction(executeExaSearch)
-    )
+    );
 
-    const legalQuestion = "Test question"
-    const stream = await conductResearch(legalQuestion)
+    const legalQuestion = "Test question";
+    const stream = await conductResearch(legalQuestion);
 
-    const updates: ResearchUpdate[] = []
-    const reader = stream.getReader()
-    const decoder = new TextDecoder()
-    const stagesReceived = new Set<string>()
+    const updates: ResearchUpdate[] = [];
+    const reader = stream.getReader();
+    const decoder = new TextDecoder();
+    const stagesReceived = new Set<string>();
 
     // Set a shorter timeout to see what we get
     const timeout = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("Test timeout")), 5000)
-    )
+    );
 
     try {
       await Promise.race([
         (async () => {
-          let completedFound = false
-          let errorFound = false
-          let iterations = 0
-          const maxIterations = 20 // Prevent infinite loop
+          let completedFound = false;
+          let errorFound = false;
+          let iterations = 0;
+          const maxIterations = 20; // Prevent infinite loop
 
           while (!completedFound && !errorFound && iterations < maxIterations) {
-            iterations++
-            const { done, value } = await reader.read()
+            iterations++;
+            const { done, value } = await reader.read();
             if (done) {
-              break
+              break;
             }
 
-            const chunk = decoder.decode(value)
-            const lines = chunk.split("\n").filter(line => line.trim())
+            const chunk = decoder.decode(value);
+            const lines = chunk.split("\n").filter((line) => line.trim());
 
             for (const line of lines) {
               try {
-                const update = JSON.parse(line) as ResearchUpdate
-                updates.push(update)
-                stagesReceived.add(update.stage)
+                const update = JSON.parse(line) as ResearchUpdate;
+                updates.push(update);
+                stagesReceived.add(update.stage);
 
                 if (update.stage === "COMPLETED") {
-                  completedFound = true
+                  completedFound = true;
                 }
                 if (update.type === "ERROR") {
-                  errorFound = true
+                  errorFound = true;
                 }
               } catch (e) {
-                console.warn("Failed to parse JSON line:", line, e)
+                console.warn("Failed to parse JSON line:", line, e);
               }
             }
           }
         })(),
         timeout,
-      ])
+      ]);
     } catch (error) {
       if (error instanceof Error && error.message !== "Test timeout") {
-        console.warn("Stream processing error:", error.message)
+        console.warn("Stream processing error:", error.message);
       }
     } finally {
-      reader.releaseLock()
+      reader.releaseLock();
     }
 
     // Test what we can verify with the current mock limitations
-    expect(updates.length).toBeGreaterThanOrEqual(2)
-    expect(updates[0]?.type).toBe("STATUS_CHANGE")
-    expect(updates[0]?.stage).toBe("INITIALIZING")
-    expect(updates[1]?.type).toBe("STATUS_CHANGE")
-    expect(updates[1]?.stage).toBe("GENERATING_QUERIES")
+    expect(updates.length).toBeGreaterThanOrEqual(2);
+    expect(updates[0]?.type).toBe("STATUS_CHANGE");
+    expect(updates[0]?.stage).toBe("INITIALIZING");
+    expect(updates[1]?.type).toBe("STATUS_CHANGE");
+    expect(updates[1]?.stage).toBe("GENERATING_QUERIES");
 
     // For now, accept that the pipeline hangs at BAML calls due to mock limitations
     // This test verifies the orchestrator starts correctly and begins pipeline execution
-    const hasInitializing = updates.some(u => u.stage === "INITIALIZING")
+    const hasInitializing = updates.some((u) => u.stage === "INITIALIZING");
     const hasGeneratingQueries = updates.some(
-      u => u.stage === "GENERATING_QUERIES"
-    )
+      (u) => u.stage === "GENERATING_QUERIES"
+    );
 
-    expect(hasInitializing).toBe(true)
-    expect(hasGeneratingQueries).toBe(true)
-  }, 15000) // Increased timeout
+    expect(hasInitializing).toBe(true);
+    expect(hasGeneratingQueries).toBe(true);
+  }, 15000); // Increased timeout
 
   it("should handle empty legal question gracefully", async () => {
-    const stream = await conductResearch("")
-    const reader = stream.getReader()
+    const stream = await conductResearch("");
+    const reader = stream.getReader();
 
-    let hasCompleted = false
+    let hasCompleted = false;
 
     // Set a timeout to prevent hanging
     const timeout = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("Test timeout")), 9000)
-    )
+    );
 
     try {
       await Promise.race([
         (async () => {
           while (!hasCompleted) {
-            const { done, value } = await reader.read()
+            const { done, value } = await reader.read();
             if (done) {
-              break
+              break;
             }
 
-            const chunk = new TextDecoder().decode(value)
-            const lines = chunk.split("\n").filter(line => line.trim())
+            const chunk = new TextDecoder().decode(value);
+            const lines = chunk.split("\n").filter((line) => line.trim());
 
             for (const line of lines) {
-              const update = JSON.parse(line) as ResearchUpdate
+              const update = JSON.parse(line) as ResearchUpdate;
               if (update.stage === "COMPLETED") {
-                hasCompleted = true
+                hasCompleted = true;
               }
             }
           }
         })(),
         timeout,
-      ])
+      ]);
     } catch (error) {
       if (error instanceof Error && error.message !== "Test timeout") {
-        console.warn("Stream processing error:", error.message)
+        console.warn("Stream processing error:", error.message);
       }
     } finally {
-      reader.releaseLock()
+      reader.releaseLock();
     }
 
     // Should complete successfully even with empty question (for now)
-    expect(hasCompleted).toBe(true)
-  }, 10000) // 10 second timeout
-})
+    expect(hasCompleted).toBe(true);
+  }, 10000); // 10 second timeout
+});

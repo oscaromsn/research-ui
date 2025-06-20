@@ -5,21 +5,21 @@
  * functionality to ensure consistent document ordering in the UI.
  */
 
-import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms"
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 import {
   analyzedDocsSummaryAtom,
   orderedDocumentsAtom,
   researchSessionAtom,
-} from "@/lib/state/researchAtoms"
-import { createStore } from "jotai"
-import { beforeEach, describe, expect, it } from "vitest"
+} from "@/lib/state/researchAtoms";
+import { createStore } from "jotai";
+import { beforeEach, describe, expect, it } from "vitest";
 
 describe("Document Ordering Atoms", () => {
-  let store: ReturnType<typeof createStore>
+  let store: ReturnType<typeof createStore>;
 
   beforeEach(() => {
-    store = createStore()
-  })
+    store = createStore();
+  });
 
   describe("orderedDocumentsAtom", () => {
     it("should sort documents by globalSequenceNumber in ascending order", () => {
@@ -43,18 +43,18 @@ describe("Document Ordering Atoms", () => {
           globalSequenceNumber: 1,
           title: "Second Document",
         },
-      ]
+      ];
 
-      store.set(analyzedDocsSummaryAtom, unorderedDocs)
+      store.set(analyzedDocsSummaryAtom, unorderedDocs);
 
-      const orderedDocs = store.get(orderedDocumentsAtom)
+      const orderedDocs = store.get(orderedDocumentsAtom);
 
-      expect(orderedDocs).toHaveLength(3)
-      expect(orderedDocs[0]?.docId).toBe("doc1")
-      expect(orderedDocs[1]?.docId).toBe("doc2")
-      expect(orderedDocs[2]?.docId).toBe("doc3")
-      expect(orderedDocs.map(d => d.globalSequenceNumber)).toEqual([0, 1, 2])
-    })
+      expect(orderedDocs).toHaveLength(3);
+      expect(orderedDocs[0]?.docId).toBe("doc1");
+      expect(orderedDocs[1]?.docId).toBe("doc2");
+      expect(orderedDocs[2]?.docId).toBe("doc3");
+      expect(orderedDocs.map((d) => d.globalSequenceNumber)).toEqual([0, 1, 2]);
+    });
 
     it("should prioritize accumulated documents over current session documents", () => {
       const currentSessionDocs: ClientAnalyzedDoc[] = [
@@ -63,7 +63,7 @@ describe("Document Ordering Atoms", () => {
           status: "analyzed",
           globalSequenceNumber: 10,
         },
-      ]
+      ];
 
       const accumulatedDocs: ClientAnalyzedDoc[] = [
         {
@@ -76,24 +76,26 @@ describe("Document Ordering Atoms", () => {
           status: "analyzed",
           globalSequenceNumber: 1,
         },
-      ]
+      ];
 
-      store.set(analyzedDocsSummaryAtom, currentSessionDocs)
+      store.set(analyzedDocsSummaryAtom, currentSessionDocs);
       store.set(researchSessionAtom, {
         sessionId: "test-session",
         accumulatedQueries: [],
         accumulatedDocuments: accumulatedDocs,
         accumulatedTopics: [],
-      })
+      });
 
-      const orderedDocs = store.get(orderedDocumentsAtom)
+      const orderedDocs = store.get(orderedDocumentsAtom);
 
-      expect(orderedDocs).toHaveLength(2)
-      expect(orderedDocs[0]?.docId).toBe("acc-doc1")
-      expect(orderedDocs[1]?.docId).toBe("acc-doc2")
+      expect(orderedDocs).toHaveLength(2);
+      expect(orderedDocs[0]?.docId).toBe("acc-doc1");
+      expect(orderedDocs[1]?.docId).toBe("acc-doc2");
       // Should not include session docs when accumulated docs exist
-      expect(orderedDocs.find(d => d.docId === "session-doc1")).toBeUndefined()
-    })
+      expect(
+        orderedDocs.find((d) => d.docId === "session-doc1")
+      ).toBeUndefined();
+    });
 
     it("should handle documents without globalSequenceNumber (backward compatibility)", () => {
       const mixedDocs: ClientAnalyzedDoc[] = [
@@ -115,19 +117,19 @@ describe("Document Ordering Atoms", () => {
           // No globalSequenceNumber (legacy)
           timestamp: "2023-01-03T00:00:00Z",
         },
-      ]
+      ];
 
-      store.set(analyzedDocsSummaryAtom, mixedDocs)
+      store.set(analyzedDocsSummaryAtom, mixedDocs);
 
-      const orderedDocs = store.get(orderedDocumentsAtom)
+      const orderedDocs = store.get(orderedDocumentsAtom);
 
-      expect(orderedDocs).toHaveLength(3)
+      expect(orderedDocs).toHaveLength(3);
       // Document with sequence number should come first
-      expect(orderedDocs[0]?.docId).toBe("new-doc")
+      expect(orderedDocs[0]?.docId).toBe("new-doc");
       // Legacy documents should be sorted by timestamp
-      expect(orderedDocs[1]?.docId).toBe("legacy-doc1")
-      expect(orderedDocs[2]?.docId).toBe("legacy-doc2")
-    })
+      expect(orderedDocs[1]?.docId).toBe("legacy-doc1");
+      expect(orderedDocs[2]?.docId).toBe("legacy-doc2");
+    });
 
     it("should handle documents with all undefined sequence numbers and timestamps", () => {
       const docsWithoutMetadata: ClientAnalyzedDoc[] = [
@@ -139,32 +141,32 @@ describe("Document Ordering Atoms", () => {
           docId: "doc-b",
           status: "analyzed",
         },
-      ]
+      ];
 
-      store.set(analyzedDocsSummaryAtom, docsWithoutMetadata)
+      store.set(analyzedDocsSummaryAtom, docsWithoutMetadata);
 
-      const orderedDocs = store.get(orderedDocumentsAtom)
+      const orderedDocs = store.get(orderedDocumentsAtom);
 
-      expect(orderedDocs).toHaveLength(2)
+      expect(orderedDocs).toHaveLength(2);
       // Should preserve original order when no ordering metadata is available
-      expect(orderedDocs[0]?.docId).toBe("doc-a")
-      expect(orderedDocs[1]?.docId).toBe("doc-b")
-    })
+      expect(orderedDocs[0]?.docId).toBe("doc-a");
+      expect(orderedDocs[1]?.docId).toBe("doc-b");
+    });
 
     it("should handle empty document arrays", () => {
-      store.set(analyzedDocsSummaryAtom, [])
+      store.set(analyzedDocsSummaryAtom, []);
       store.set(researchSessionAtom, {
         sessionId: null,
         accumulatedQueries: [],
         accumulatedDocuments: [],
         accumulatedTopics: [],
-      })
+      });
 
-      const orderedDocs = store.get(orderedDocumentsAtom)
+      const orderedDocs = store.get(orderedDocumentsAtom);
 
-      expect(orderedDocs).toHaveLength(0)
-      expect(orderedDocs).toEqual([])
-    })
+      expect(orderedDocs).toHaveLength(0);
+      expect(orderedDocs).toEqual([]);
+    });
 
     it("should handle mixed iteration indexes correctly", () => {
       const multiIterationDocs: ClientAnalyzedDoc[] = [
@@ -192,20 +194,22 @@ describe("Document Ordering Atoms", () => {
           globalSequenceNumber: 3,
           iterationIndex: 1,
         },
-      ]
+      ];
 
-      store.set(analyzedDocsSummaryAtom, multiIterationDocs)
+      store.set(analyzedDocsSummaryAtom, multiIterationDocs);
 
-      const orderedDocs = store.get(orderedDocumentsAtom)
+      const orderedDocs = store.get(orderedDocumentsAtom);
 
-      expect(orderedDocs).toHaveLength(4)
+      expect(orderedDocs).toHaveLength(4);
       // Should be ordered by global sequence, not iteration
-      expect(orderedDocs[0]?.docId).toBe("iter0-doc1")
-      expect(orderedDocs[1]?.docId).toBe("iter0-doc2")
-      expect(orderedDocs[2]?.docId).toBe("iter1-doc1")
-      expect(orderedDocs[3]?.docId).toBe("iter1-doc2")
-      expect(orderedDocs.map(d => d.globalSequenceNumber)).toEqual([0, 1, 2, 3])
-    })
+      expect(orderedDocs[0]?.docId).toBe("iter0-doc1");
+      expect(orderedDocs[1]?.docId).toBe("iter0-doc2");
+      expect(orderedDocs[2]?.docId).toBe("iter1-doc1");
+      expect(orderedDocs[3]?.docId).toBe("iter1-doc2");
+      expect(orderedDocs.map((d) => d.globalSequenceNumber)).toEqual([
+        0, 1, 2, 3,
+      ]);
+    });
 
     it("should maintain stable ordering for documents with same sequence number", () => {
       // This edge case shouldn't happen in practice, but we should handle it gracefully
@@ -222,16 +226,16 @@ describe("Document Ordering Atoms", () => {
           globalSequenceNumber: 1, // Same sequence number
           timestamp: "2023-01-02T00:00:00Z",
         },
-      ]
+      ];
 
-      store.set(analyzedDocsSummaryAtom, docsWithDuplicateSequence)
+      store.set(analyzedDocsSummaryAtom, docsWithDuplicateSequence);
 
-      const orderedDocs = store.get(orderedDocumentsAtom)
+      const orderedDocs = store.get(orderedDocumentsAtom);
 
-      expect(orderedDocs).toHaveLength(2)
+      expect(orderedDocs).toHaveLength(2);
       // Should maintain array order when sequence numbers are identical
-      expect(orderedDocs[0]?.docId).toBe("doc-first")
-      expect(orderedDocs[1]?.docId).toBe("doc-second")
-    })
-  })
-})
+      expect(orderedDocs[0]?.docId).toBe("doc-first");
+      expect(orderedDocs[1]?.docId).toBe("doc-second");
+    });
+  });
+});

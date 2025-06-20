@@ -1,34 +1,34 @@
-import { render, screen, within } from "@testing-library/react"
-import { Provider, createStore } from "jotai"
-import type React from "react"
-import type { ReactNode } from "react"
-import { beforeEach, describe, expect, it } from "vitest"
+import { render, screen, within } from "@testing-library/react";
+import { Provider, createStore } from "jotai";
+import type React from "react";
+import type { ReactNode } from "react";
+import { beforeEach, describe, expect, it } from "vitest";
 
-import { ReportDrafter } from "@/components/domain/report-generation/report-drafter"
-import { SynthesisReporting } from "@/components/domain/report-generation/synthesis-reporting"
+import { ReportDrafter } from "@/components/domain/report-generation/report-drafter";
+import { SynthesisReporting } from "@/components/domain/report-generation/synthesis-reporting";
 import {
   finalReportContentAtom,
   synthesisDetailsAtom,
-} from "@/lib/state/researchAtoms"
+} from "@/lib/state/researchAtoms";
 import type {
   ClientFinalReport,
   ClientSynthesis,
-} from "@/lib/state/researchAtoms"
+} from "@/lib/state/researchAtoms";
 
 describe("Phase 4 Completion Validation", () => {
-  let store: ReturnType<typeof createStore>
+  let store: ReturnType<typeof createStore>;
 
   beforeEach(() => {
-    store = createStore()
-  })
+    store = createStore();
+  });
 
   const JotaiProvider = ({ children }: { children: ReactNode }) => (
     <Provider store={store}>{children}</Provider>
-  )
+  );
 
   const renderWithProvider = (component: React.ReactElement) => {
-    return render(<JotaiProvider>{component}</JotaiProvider>)
-  }
+    return render(<JotaiProvider>{component}</JotaiProvider>);
+  };
 
   describe("SynthesisReporting Component Integration", () => {
     it("successfully integrates with synthesisDetailsAtom for data display", () => {
@@ -56,29 +56,29 @@ describe("Phase 4 Completion Validation", () => {
         emergingQuestions: [],
         reasoningSummary:
           "The analysis reveals significant judicial precedent for strict interpretation of force majeure clauses.",
-      }
+      };
 
-      store.set(synthesisDetailsAtom, mockSynthesis)
+      store.set(synthesisDetailsAtom, mockSynthesis);
 
-      renderWithProvider(<SynthesisReporting />)
+      renderWithProvider(<SynthesisReporting />);
 
       // Verify atom integration - should display topics from atom
-      expect(screen.getByText("Force Majeure Clauses")).toBeInTheDocument()
-      expect(screen.getByText("Contract Interpretation")).toBeInTheDocument()
+      expect(screen.getByText("Force Majeure Clauses")).toBeInTheDocument();
+      expect(screen.getByText("Contract Interpretation")).toBeInTheDocument();
 
       // Verify confidence levels are properly mapped
-      expect(screen.getByText("High (85%)")).toBeInTheDocument()
-      expect(screen.getByText("High (92%)")).toBeInTheDocument()
+      expect(screen.getByText("High (85%)")).toBeInTheDocument();
+      expect(screen.getByText("High (92%)")).toBeInTheDocument();
 
       // Verify synthesis snippets are displayed
       expect(
         screen.getByText(
           /Courts require specific language for pandemic coverage/
         )
-      ).toBeInTheDocument()
+      ).toBeInTheDocument();
       expect(
         screen.getByText(/Strict interpretation of force majeure language/)
-      ).toBeInTheDocument()
+      ).toBeInTheDocument();
 
       // Note: reasoningSummary might be displayed in a modal or different section
       // For now, just verify that the basic topic data integration is working
@@ -86,8 +86,8 @@ describe("Phase 4 Completion Validation", () => {
       // Verify unanswered aspects are shown
       expect(
         screen.getByText(/State-specific variations in interpretation/)
-      ).toBeInTheDocument()
-    })
+      ).toBeInTheDocument();
+    });
 
     it("handles empty synthesis data gracefully", () => {
       const emptySynthesis: ClientSynthesis = {
@@ -95,18 +95,18 @@ describe("Phase 4 Completion Validation", () => {
         unansweredAspects: [],
         emergingQuestions: [],
         reasoningSummary: "",
-      }
+      };
 
-      store.set(synthesisDetailsAtom, emptySynthesis)
+      store.set(synthesisDetailsAtom, emptySynthesis);
 
-      renderWithProvider(<SynthesisReporting />)
+      renderWithProvider(<SynthesisReporting />);
 
       // Should still render the component structure
-      expect(screen.getByText("Synthesis & Reporting")).toBeInTheDocument()
-      expect(screen.getByText("Synthesized Topics")).toBeInTheDocument()
-      expect(screen.getByText("Unanswered Aspects:")).toBeInTheDocument()
-    })
-  })
+      expect(screen.getByText("Synthesis & Reporting")).toBeInTheDocument();
+      expect(screen.getByText("Synthesized Topics")).toBeInTheDocument();
+      expect(screen.getByText("Unanswered Aspects:")).toBeInTheDocument();
+    });
+  });
 
   describe("ReportDrafter Component Integration", () => {
     it("successfully integrates with finalReportContentAtom for report display", () => {
@@ -138,54 +138,56 @@ describe("Phase 4 Completion Validation", () => {
           "State law variations not fully covered",
         ],
         appendixDocIds: ["DOC-001", "DOC-002", "DOC-003"],
-      }
+      };
 
-      store.set(finalReportContentAtom, mockReport)
+      store.set(finalReportContentAtom, mockReport);
 
-      renderWithProvider(<ReportDrafter />)
+      renderWithProvider(<ReportDrafter />);
 
       // Verify title integration
       expect(
         screen.getByDisplayValue("COVID-19 Force Majeure Analysis")
-      ).toBeInTheDocument()
+      ).toBeInTheDocument();
 
       // Verify document structure shows all sections with proper completion status
-      const docStructure = screen.getByText("Document Structure").closest("div")
-      expect(docStructure).not.toBeNull()
+      const docStructure = screen
+        .getByText("Document Structure")
+        .closest("div");
+      expect(docStructure).not.toBeNull();
       if (!docStructure) {
         throw new Error(
           "Test setup failed: 'Document Structure' div not found."
-        )
+        );
       }
       expect(
         within(docStructure).getByText("Executive Summary")
-      ).toBeInTheDocument()
-      expect(within(docStructure).getByText("Background")).toBeInTheDocument()
+      ).toBeInTheDocument();
+      expect(within(docStructure).getByText("Background")).toBeInTheDocument();
       expect(
         within(docStructure).getByText("Legal Analysis")
-      ).toBeInTheDocument()
+      ).toBeInTheDocument();
       expect(
         within(docStructure).getByText("Recommendations")
-      ).toBeInTheDocument()
-      expect(within(docStructure).getByText("Conclusion")).toBeInTheDocument()
+      ).toBeInTheDocument();
+      expect(within(docStructure).getByText("Conclusion")).toBeInTheDocument();
 
       // Verify content display
       expect(
         screen.getByText(/This comprehensive analysis examines the application/)
-      ).toBeInTheDocument()
+      ).toBeInTheDocument();
       expect(
         screen.getByText(/Force majeure clauses have gained prominence/)
-      ).toBeInTheDocument()
+      ).toBeInTheDocument();
       expect(
         screen.getByText(/Courts have applied a strict interpretation standard/)
-      ).toBeInTheDocument()
+      ).toBeInTheDocument();
       expect(
         screen.getByText(/Parties should include explicit pandemic language/)
-      ).toBeInTheDocument()
+      ).toBeInTheDocument();
       expect(
         screen.getByText(/The legal landscape continues to evolve/)
-      ).toBeInTheDocument()
-    })
+      ).toBeInTheDocument();
+    });
 
     it("properly tracks section completion status based on content", () => {
       const partialReport: ClientFinalReport = {
@@ -208,46 +210,48 @@ describe("Phase 4 Completion Validation", () => {
         conclusion: "", // Incomplete
         limitations: [],
         appendixDocIds: [],
-      }
+      };
 
-      store.set(finalReportContentAtom, partialReport)
+      store.set(finalReportContentAtom, partialReport);
 
-      renderWithProvider(<ReportDrafter />)
+      renderWithProvider(<ReportDrafter />);
 
-      const docStructure = screen.getByText("Document Structure").closest("div")
-      expect(docStructure).not.toBeNull()
+      const docStructure = screen
+        .getByText("Document Structure")
+        .closest("div");
+      expect(docStructure).not.toBeNull();
       if (!docStructure) {
         throw new Error(
           "Test setup failed: 'Document Structure' div not found."
-        )
+        );
       }
 
       // Complete sections should have completion styling
       const executiveSummarySection = within(docStructure)
         .getByText("Executive Summary")
-        .closest('div[class*="p-2"]')
+        .closest('div[class*="p-2"]');
       const backgroundSection = within(docStructure)
         .getByText("Background")
-        .closest('div[class*="p-2"]')
+        .closest('div[class*="p-2"]');
       const recommendationsSection = within(docStructure)
         .getByText("Recommendations")
-        .closest('div[class*="p-2"]')
+        .closest('div[class*="p-2"]');
 
       // Incomplete sections should not have completion styling
       const legalAnalysisSection = within(docStructure)
         .getByText("Legal Analysis")
-        .closest('div[class*="p-2"]')
+        .closest('div[class*="p-2"]');
       const conclusionSection = within(docStructure)
         .getByText("Conclusion")
-        .closest('div[class*="p-2"]')
+        .closest('div[class*="p-2"]');
 
-      expect(executiveSummarySection).toHaveClass("bg-[#f1f5f9]")
-      expect(backgroundSection).toHaveClass("bg-[#f1f5f9]")
-      expect(recommendationsSection).toHaveClass("bg-[#f1f5f9]")
-      expect(legalAnalysisSection).not.toHaveClass("bg-[#f1f5f9]")
-      expect(conclusionSection).not.toHaveClass("bg-[#f1f5f9]")
-    })
-  })
+      expect(executiveSummarySection).toHaveClass("bg-[#f1f5f9]");
+      expect(backgroundSection).toHaveClass("bg-[#f1f5f9]");
+      expect(recommendationsSection).toHaveClass("bg-[#f1f5f9]");
+      expect(legalAnalysisSection).not.toHaveClass("bg-[#f1f5f9]");
+      expect(conclusionSection).not.toHaveClass("bg-[#f1f5f9]");
+    });
+  });
 
   describe("Phase 4 Integration Completeness", () => {
     it("validates all required atom integrations are functional", () => {
@@ -264,7 +268,7 @@ describe("Phase 4 Completion Validation", () => {
         unansweredAspects: ["Test aspect"],
         emergingQuestions: [],
         reasoningSummary: "Test assessment",
-      }
+      };
 
       const reportData: ClientFinalReport = {
         title: "Integration Test Report",
@@ -278,31 +282,31 @@ describe("Phase 4 Completion Validation", () => {
         conclusion: "Test conclusion",
         limitations: [],
         appendixDocIds: [],
-      }
+      };
 
       // Set both atoms
-      store.set(synthesisDetailsAtom, synthesisData)
-      store.set(finalReportContentAtom, reportData)
+      store.set(synthesisDetailsAtom, synthesisData);
+      store.set(finalReportContentAtom, reportData);
 
       // Render both components
       const { unmount: unmountSynthesis } = renderWithProvider(
         <SynthesisReporting />
-      )
-      expect(screen.getByText("Test Topic")).toBeInTheDocument()
-      expect(screen.getByText("Test finding summary")).toBeInTheDocument()
-      unmountSynthesis()
+      );
+      expect(screen.getByText("Test Topic")).toBeInTheDocument();
+      expect(screen.getByText("Test finding summary")).toBeInTheDocument();
+      unmountSynthesis();
 
-      const { unmount: unmountReport } = renderWithProvider(<ReportDrafter />)
+      const { unmount: unmountReport } = renderWithProvider(<ReportDrafter />);
       expect(
         screen.getByDisplayValue("Integration Test Report")
-      ).toBeInTheDocument()
-      expect(screen.getByText(/Test summary/)).toBeInTheDocument()
-      unmountReport()
+      ).toBeInTheDocument();
+      expect(screen.getByText(/Test summary/)).toBeInTheDocument();
+      unmountReport();
 
       // Verify atoms maintain their state
-      expect(store.get(synthesisDetailsAtom)).toEqual(synthesisData)
-      expect(store.get(finalReportContentAtom)).toEqual(reportData)
-    })
+      expect(store.get(synthesisDetailsAtom)).toEqual(synthesisData);
+      expect(store.get(finalReportContentAtom)).toEqual(reportData);
+    });
 
     it("confirms components respond to atom state changes", () => {
       // Initial state
@@ -318,13 +322,13 @@ describe("Phase 4 Completion Validation", () => {
         unansweredAspects: [],
         emergingQuestions: [],
         reasoningSummary: "Initial assessment",
-      }
+      };
 
-      store.set(synthesisDetailsAtom, initialSynthesis)
+      store.set(synthesisDetailsAtom, initialSynthesis);
 
-      const { rerender } = renderWithProvider(<SynthesisReporting />)
-      expect(screen.getByText("Initial Topic")).toBeInTheDocument()
-      expect(screen.getByText("Low (50%)")).toBeInTheDocument()
+      const { rerender } = renderWithProvider(<SynthesisReporting />);
+      expect(screen.getByText("Initial Topic")).toBeInTheDocument();
+      expect(screen.getByText("Low (50%)")).toBeInTheDocument();
 
       // Update state
       const updatedSynthesis: ClientSynthesis = {
@@ -339,20 +343,20 @@ describe("Phase 4 Completion Validation", () => {
         unansweredAspects: ["New aspect"],
         emergingQuestions: [],
         reasoningSummary: "Updated assessment",
-      }
+      };
 
-      store.set(synthesisDetailsAtom, updatedSynthesis)
+      store.set(synthesisDetailsAtom, updatedSynthesis);
       rerender(
         <JotaiProvider>
           <SynthesisReporting />
         </JotaiProvider>
-      )
+      );
 
       // Verify component reflects changes
-      expect(screen.getByText("Updated Topic")).toBeInTheDocument()
-      expect(screen.getByText("High (90%)")).toBeInTheDocument()
-      expect(screen.getByText("Updated finding summary")).toBeInTheDocument()
-      expect(screen.getByText("New aspect")).toBeInTheDocument()
-    })
-  })
-})
+      expect(screen.getByText("Updated Topic")).toBeInTheDocument();
+      expect(screen.getByText("High (90%)")).toBeInTheDocument();
+      expect(screen.getByText("Updated finding summary")).toBeInTheDocument();
+      expect(screen.getByText("New aspect")).toBeInTheDocument();
+    });
+  });
+});
