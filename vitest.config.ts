@@ -1,7 +1,7 @@
-import path from "node:path"
-import react from "@vitejs/plugin-react"
-import { config } from "dotenv"
-import { defineConfig } from "vitest/config"
+import path from "node:path";
+import react from "@vitejs/plugin-react";
+import { config } from "dotenv";
+import { defineConfig } from "vitest/config";
 
 // biome-ignore lint/style/noDefaultExport: Vitest requires default export for config
 export default defineConfig({
@@ -60,16 +60,16 @@ export default defineConfig({
 
     // Smart Reporting - Concise by default, verbose when needed
     reporters: (() => {
-      const isVerbose = process.env.VITEST_VERBOSE === "true"
-      const isCI = process.env.CI === "true"
+      const isVerbose = process.env.VITEST_VERBOSE === "true";
+      const isCI = process.env.CI === "true";
 
       if (isCI) {
         return isVerbose
           ? ["verbose", "junit", "json"]
-          : ["basic", "junit", "json"]
+          : ["basic", "junit", "json"];
       }
 
-      return isVerbose ? ["verbose", "html"] : ["dot", "html"]
+      return isVerbose ? ["verbose", "html"] : ["dot", "html"];
     })(),
     outputFile: {
       junit: "./test-results/junit.xml",
@@ -190,4 +190,4 @@ export default defineConfig({
     __DEV__: JSON.stringify(!process.env.CI),
     __TEST__: JSON.stringify(true),
   },
-})
+});

@@ -1,4 +1,4 @@
-import type { UserConfig } from "@commitlint/types"
+import type { UserConfig } from "@commitlint/types";
 
 const config: UserConfig = {
   extends: ["@commitlint/config-conventional"],
@@ -61,7 +61,7 @@ const config: UserConfig = {
   },
   helpUrl:
     "https://github.com/conventional-changelog/commitlint/#what-is-commitlint",
-}
+};
 
 // biome-ignore lint/style/noDefaultExport: Commitlint requires default export for config
-export default config
+export default config;

@@ -11,3 +11,4 @@ docs/sprints/3-future/**
 .repomixignore
 repomix.config.json
 **/todo.md
+tests/fixtures/test-data
