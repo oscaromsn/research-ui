@@ -1,5 +1,5 @@
 interface EvidenceAnalysisHeaderProps {
-  className?: string
+  className?: string;
 }
 
 export function EvidenceAnalysisHeader({
@@ -42,5 +42,5 @@ export function EvidenceAnalysisHeader({
         </div>
       </div>
     </div>
-  )
+  );
 }

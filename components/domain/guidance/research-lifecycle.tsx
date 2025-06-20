@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useAtomValue } from "jotai"
+import { useAtomValue } from "jotai";
 import {
   Brain,
   CheckSquare,
@@ -9,30 +9,30 @@ import {
   Loader2,
   Pen,
   Search,
-} from "lucide-react"
-import { useMemo } from "react"
-import type { ReactElement } from "react"
+} from "lucide-react";
+import { useMemo } from "react";
+import type { ReactElement } from "react";
 
-import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator"
-import { researchStatusAtom } from "@/lib/state/researchAtoms"
+import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
+import { researchStatusAtom } from "@/lib/state/researchAtoms";
 
 // Stage styling constants
 const STAGE_STYLES = {
   active: "bg-[#3a7bb7] text-white",
   completed: "bg-green-500 dark:bg-green-600 text-white",
   pending: "bg-[#242a3d] text-[#6b7280]",
-} as const
+} as const;
 
 const TEXT_STYLES = {
   active: "text-[#3a7bb7] font-medium",
   completed: "text-green-500 dark:text-green-400",
   pending: "text-[#6b7280]",
-} as const
+} as const;
 
 const CONNECTOR_STYLES = {
   completed: "bg-green-500 dark:bg-green-600",
   pending: "bg-[#242a3d]",
-} as const
+} as const;
 
 // Mapping from orchestrator stages to lifecycle display stages
 const STAGE_MAPPING: Record<ResearchStage | "IDLE", string> = {
@@ -48,22 +48,22 @@ const STAGE_MAPPING: Record<ResearchStage | "IDLE", string> = {
   ERROR: "Ideate",
   HUMAN_REVIEW_REQUESTED: "Review",
   ITERATION_PAUSED: "Review",
-}
+};
 
-type StageStatus = "completed" | "active" | "pending"
+type StageStatus = "completed" | "active" | "pending";
 
 interface StageInfo {
-  name: string
-  icon: ReactElement
-  status: StageStatus
+  name: string;
+  icon: ReactElement;
+  status: StageStatus;
 }
 
 const researchStageToLifecycleName = (stage: ResearchStage | null): string => {
   if (!stage) {
-    return "Ideate"
+    return "Ideate";
   }
-  return STAGE_MAPPING[stage] || "Ideate"
-}
+  return STAGE_MAPPING[stage] || "Ideate";
+};
 
 const getStageStatus = (
   stageIndex: number,
@@ -72,31 +72,31 @@ const getStageStatus = (
   isLoading: boolean
 ): StageStatus => {
   if (researchStage === "COMPLETED") {
-    return "completed"
+    return "completed";
   }
 
-  const isActiveStage = stageIndex === activeStageIndex
-  const isCompletedStage = stageIndex < activeStageIndex
+  const isActiveStage = stageIndex === activeStageIndex;
+  const isCompletedStage = stageIndex < activeStageIndex;
   const hasError =
     researchStage === "ERROR" ||
     researchStage === "HUMAN_REVIEW_REQUESTED" ||
-    researchStage === "ITERATION_PAUSED"
+    researchStage === "ITERATION_PAUSED";
 
   if (hasError || isLoading) {
     if (isCompletedStage) {
-      return "completed"
+      return "completed";
     }
     if (isActiveStage) {
-      return "active"
+      return "active";
     }
-    return "pending"
+    return "pending";
   }
 
-  return "pending"
-}
+  return "pending";
+};
 
 export function ResearchLifecycle() {
-  const status = useAtomValue(researchStatusAtom)
+  const status = useAtomValue(researchStatusAtom);
 
   const lifecycleStageMap: Record<
     string,
@@ -111,19 +111,19 @@ export function ResearchLifecycle() {
       Draft: { name: "Draft", icon: <Pen size={16} /> },
     }),
     []
-  )
+  );
 
   const stages: StageInfo[] = useMemo(() => {
-    const activeLifecycleStageName = researchStageToLifecycleName(status.stage)
-    const lifecycleStageOrder = Object.keys(lifecycleStageMap)
+    const activeLifecycleStageName = researchStageToLifecycleName(status.stage);
+    const lifecycleStageOrder = Object.keys(lifecycleStageMap);
     const activeStageIndex = lifecycleStageOrder.indexOf(
       activeLifecycleStageName
-    )
+    );
 
     return lifecycleStageOrder.map((stageName, stageIndex) => {
-      const stageInfo = lifecycleStageMap[stageName]
+      const stageInfo = lifecycleStageMap[stageName];
       if (!stageInfo) {
-        throw new Error(`Stage info not found for stage: ${stageName}`)
+        throw new Error(`Stage info not found for stage: ${stageName}`);
       }
 
       return {
@@ -135,21 +135,21 @@ export function ResearchLifecycle() {
           status.stage,
           status.isLoading
         ),
-      }
-    })
-  }, [status.stage, status.isLoading, lifecycleStageMap])
+      };
+    });
+  }, [status.stage, status.isLoading, lifecycleStageMap]);
 
   return (
     <div className="flex items-center">
       <div className="flex items-center">
         {stages.map((stage, index) => {
-          const isLastStage = index === stages.length - 1
-          const nextStage = stages[index + 1]
-          const showLoader = stage.status === "active" && status.isLoading
+          const isLastStage = index === stages.length - 1;
+          const nextStage = stages[index + 1];
+          const showLoader = stage.status === "active" && status.isLoading;
           const connectorStyle =
             stage.status === "pending" && nextStage?.status === "pending"
               ? CONNECTOR_STYLES.pending
-              : CONNECTOR_STYLES.completed
+              : CONNECTOR_STYLES.completed;
 
           return (
             <div
@@ -188,9 +188,9 @@ export function ResearchLifecycle() {
                 {stage.name}
               </span>
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

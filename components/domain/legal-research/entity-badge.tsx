@@ -1,8 +1,8 @@
-import type { ClientLegalEntity } from "@/lib/state/researchAtoms"
+import type { ClientLegalEntity } from "@/lib/state/researchAtoms";
 
 interface EntityBadgeProps {
-  entity: ClientLegalEntity
-  className?: string
+  entity: ClientLegalEntity;
+  className?: string;
 }
 
 export function getEntityStyle(type: string): string {
@@ -21,12 +21,12 @@ export function getEntityStyle(type: string): string {
     Jurisdiction:
       "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
     default: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
-  }
-  return styles[type as keyof typeof styles] || styles.default
+  };
+  return styles[type as keyof typeof styles] || styles.default;
 }
 
 export function EntityBadge({ entity, className = "" }: EntityBadgeProps) {
-  const entityStyle = getEntityStyle(entity.type)
+  const entityStyle = getEntityStyle(entity.type);
 
   return (
     <span
@@ -35,5 +35,5 @@ export function EntityBadge({ entity, className = "" }: EntityBadgeProps) {
     >
       {entity.name}
     </span>
-  )
+  );
 }

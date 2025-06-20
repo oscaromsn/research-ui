@@ -1,12 +1,12 @@
-import { AlertCircle, Brain, Loader2 } from "lucide-react"
+import { AlertCircle, Brain, Loader2 } from "lucide-react";
 
-import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms"
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 
-import { EntityBadge } from "./entity-badge"
+import { EntityBadge } from "./entity-badge";
 
 interface DocumentDetailsProps {
-  selectedDocument: ClientAnalyzedDoc | undefined
-  onViewAnalysis: () => void
+  selectedDocument: ClientAnalyzedDoc | undefined;
+  onViewAnalysis: () => void;
 }
 
 export function DocumentDetails({
@@ -160,5 +160,5 @@ export function DocumentDetails({
         </div>
       </div>
     </div>
-  )
+  );
 }

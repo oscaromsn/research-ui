@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { Modal } from "@/components/ui/modal"
-import type { ClientAnalysisReasoning } from "@/lib/state/researchAtoms"
+import { Modal } from "@/components/ui/modal";
+import type { ClientAnalysisReasoning } from "@/lib/state/researchAtoms";
 
 interface AnalysisReasoningModalProps {
-  isOpen: boolean
-  onCloseAction: () => void
-  reasoning?: ClientAnalysisReasoning
-  documentTitle?: string
+  isOpen: boolean;
+  onCloseAction: () => void;
+  reasoning?: ClientAnalysisReasoning;
+  documentTitle?: string;
 }
 
 export function AnalysisReasoningModal({
@@ -96,5 +96,5 @@ export function AnalysisReasoningModal({
         </div>
       </div>
     </Modal>
-  )
+  );
 }

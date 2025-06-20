@@ -1,17 +1,17 @@
-import { Gavel, Scroll } from "lucide-react"
+import { Gavel, Scroll } from "lucide-react";
 
-import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms"
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 
 import {
   DocumentStatusIndicator,
   getStatusIndicator,
-} from "./document-status-indicator"
+} from "./document-status-indicator";
 
 interface DocumentListItemProps {
-  doc: ClientAnalyzedDoc
-  isSelected: boolean
-  onDocumentClick: (doc: ClientAnalyzedDoc) => void
-  onDocumentKeyUp: (doc: ClientAnalyzedDoc, event: React.KeyboardEvent) => void
+  doc: ClientAnalyzedDoc;
+  isSelected: boolean;
+  onDocumentClick: (doc: ClientAnalyzedDoc) => void;
+  onDocumentKeyUp: (doc: ClientAnalyzedDoc, event: React.KeyboardEvent) => void;
 }
 
 export function DocumentListItem({
@@ -20,8 +20,8 @@ export function DocumentListItem({
   onDocumentClick,
   onDocumentKeyUp,
 }: DocumentListItemProps) {
-  const documentType = doc.title?.includes("§") ? "statute" : "case"
-  const statusIndicator = getStatusIndicator(doc.status)
+  const documentType = doc.title?.includes("§") ? "statute" : "case";
+  const statusIndicator = getStatusIndicator(doc.status);
 
   return (
     <button
@@ -33,7 +33,7 @@ export function DocumentListItem({
           : `${statusIndicator.bgColor} ${statusIndicator.borderColor} hover:bg-[#f8fafc] dark:hover:bg-[#212941]`
       }`}
       onClick={() => onDocumentClick(doc)}
-      onKeyUp={e => onDocumentKeyUp(doc, e)}
+      onKeyUp={(e) => onDocumentKeyUp(doc, e)}
       disabled={doc.status === "error"}
     >
       <div className="flex items-start justify-between">
@@ -86,5 +86,5 @@ export function DocumentListItem({
         </div>
       </div>
     </button>
-  )
+  );
 }

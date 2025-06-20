@@ -1,19 +1,19 @@
-import { AlertTriangle, CheckCircle, Clock } from "lucide-react"
+import { AlertTriangle, CheckCircle, Clock } from "lucide-react";
 
-import type { DetailedReasoning } from "@/baml_client/types"
-import { Modal } from "@/components/ui/modal"
-import type { ClientSynthesis } from "@/lib/state/researchAtoms"
+import type { DetailedReasoning } from "@/baml_client/types";
+import { Modal } from "@/components/ui/modal";
+import type { ClientSynthesis } from "@/lib/state/researchAtoms";
 
 interface SynthesisReasoningModalProps {
-  isOpen: boolean
-  onClose: () => void
-  synthesisData?: ClientSynthesis
-  reasoning?: DetailedReasoning
+  isOpen: boolean;
+  onClose: () => void;
+  synthesisData?: ClientSynthesis;
+  reasoning?: DetailedReasoning;
   sourcesUsed?: Array<{
-    docId: string
-    title?: string
-    confidence: number
-  }>
+    docId: string;
+    title?: string;
+    confidence: number;
+  }>;
 }
 
 export function SynthesisReasoningModal({
@@ -25,7 +25,7 @@ export function SynthesisReasoningModal({
 }: SynthesisReasoningModalProps) {
   const getReasoningSteps = () => {
     if (!reasoning) {
-      return []
+      return [];
     }
 
     const steps = [
@@ -43,14 +43,14 @@ export function SynthesisReasoningModal({
           "Considered relevant legal principles",
         details: reasoning.consider_relevant_legal_principles?.items_considered,
       },
-    ]
+    ];
 
     if (reasoning.formulate_search_queries_strategy?.summary) {
       steps.push({
         status: "complete" as const,
         text: reasoning.formulate_search_queries_strategy.summary,
         details: reasoning.formulate_search_queries_strategy.items_considered,
-      })
+      });
     }
 
     if (reasoning.specify_expected_information_strategy?.summary) {
@@ -59,7 +59,7 @@ export function SynthesisReasoningModal({
         text: reasoning.specify_expected_information_strategy.summary,
         details:
           reasoning.specify_expected_information_strategy.items_considered,
-      })
+      });
     }
 
     if (reasoning.ensure_comprehensive_coverage_strategy?.summary) {
@@ -68,13 +68,13 @@ export function SynthesisReasoningModal({
         text: reasoning.ensure_comprehensive_coverage_strategy.summary,
         details:
           reasoning.ensure_comprehensive_coverage_strategy.items_considered,
-      })
+      });
     }
 
-    return steps
-  }
+    return steps;
+  };
 
-  const reasoningSteps = getReasoningSteps()
+  const reasoningSteps = getReasoningSteps();
 
   return (
     <Modal
@@ -229,5 +229,5 @@ export function SynthesisReasoningModal({
         </div>
       </div>
     </Modal>
-  )
+  );
 }

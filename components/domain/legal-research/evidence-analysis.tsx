@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { DocumentDetails } from "./document-details"
-import { DocumentList } from "./document-list"
-import { EvidenceAnalysisHeader } from "./evidence-analysis-header"
-import { useEvidenceAnalysis } from "./hooks/useEvidenceAnalysis"
-import { AnalysisReasoningModal } from "./modals/analysis-reasoning-modal"
-import { CaseModal } from "./modals/case-modal"
+import { DocumentDetails } from "./document-details";
+import { DocumentList } from "./document-list";
+import { EvidenceAnalysisHeader } from "./evidence-analysis-header";
+import { useEvidenceAnalysis } from "./hooks/useEvidenceAnalysis";
+import { AnalysisReasoningModal } from "./modals/analysis-reasoning-modal";
+import { CaseModal } from "./modals/case-modal";
 
 export function EvidenceAnalysis() {
   const {
@@ -19,7 +19,7 @@ export function EvidenceAnalysis() {
     handleViewAnalysis,
     handleCloseCase,
     handleCloseReasoningModal,
-  } = useEvidenceAnalysis()
+  } = useEvidenceAnalysis();
 
   const caseModalProps = selectedCase
     ? {
@@ -28,7 +28,7 @@ export function EvidenceAnalysis() {
           onViewAnalysis: handleViewAnalysis,
         }),
       }
-    : {}
+    : {};
 
   const reasoningModalProps = selectedDocument
     ? {
@@ -39,7 +39,7 @@ export function EvidenceAnalysis() {
           documentTitle: selectedDocument.title,
         }),
       }
-    : {}
+    : {};
 
   return (
     <div className="flex w-full flex-col overflow-y-auto border-[#e1e5eb] border-r bg-white md:w-1/3 dark:border-[#2a3148] dark:bg-[#1a1f2e]">
@@ -65,5 +65,5 @@ export function EvidenceAnalysis() {
         {...reasoningModalProps}
       />
     </div>
-  )
+  );
 }

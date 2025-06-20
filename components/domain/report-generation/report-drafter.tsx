@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { useAtomValue, useSetAtom } from "jotai"
-import { Download, FileText, Save, Share2 } from "lucide-react"
-import { useState } from "react"
+import { useAtomValue, useSetAtom } from "jotai";
+import { Download, FileText, Save, Share2 } from "lucide-react";
+import { useState } from "react";
 
-import { finalReportContentAtom } from "@/lib/state/researchAtoms"
+import { finalReportContentAtom } from "@/lib/state/researchAtoms";
 
 export function ReportDrafter() {
-  const report = useAtomValue(finalReportContentAtom)
-  const setReport = useSetAtom(finalReportContentAtom)
+  const report = useAtomValue(finalReportContentAtom);
+  const setReport = useSetAtom(finalReportContentAtom);
   const [editableTitle, setEditableTitle] = useState(
     report.title || "Untitled Report"
-  )
+  );
 
   // Define default sections that we expect in reports
   const defaultSections = [
@@ -20,26 +20,26 @@ export function ReportDrafter() {
     "Legal Analysis",
     "Recommendations",
     "Conclusion",
-  ]
+  ];
 
   const handleTitleChange = (newTitle: string) => {
-    setEditableTitle(newTitle)
-    setReport(prev => ({ ...prev, title: newTitle }))
-  }
+    setEditableTitle(newTitle);
+    setReport((prev) => ({ ...prev, title: newTitle }));
+  };
 
   const getSectionCompletion = (sectionTitle: string): boolean => {
     // Check if section exists in report and has content
-    const section = report.sections.find(s => s.title === sectionTitle)
+    const section = report.sections.find((s) => s.title === sectionTitle);
     if (sectionTitle === "Executive Summary") {
       return Boolean(
         report.executiveSummary && report.executiveSummary.trim().length > 0
-      )
+      );
     }
     if (sectionTitle === "Conclusion") {
-      return Boolean(report.conclusion && report.conclusion.trim().length > 0)
+      return Boolean(report.conclusion && report.conclusion.trim().length > 0);
     }
-    return Boolean(section?.content && section.content.trim().length > 0)
-  }
+    return Boolean(section?.content && section.content.trim().length > 0);
+  };
 
   return (
     <div className="space-y-4">
@@ -48,7 +48,7 @@ export function ReportDrafter() {
           <input
             type="text"
             value={editableTitle}
-            onChange={e => handleTitleChange(e.target.value)}
+            onChange={(e) => handleTitleChange(e.target.value)}
             className="border-none bg-transparent font-semibold text-[#1a1f2e] text-lg focus:outline-none dark:text-white"
           />
         </div>
@@ -79,8 +79,8 @@ export function ReportDrafter() {
             Document Structure
           </h3>
           <div className="space-y-2">
-            {defaultSections.map(sectionTitle => {
-              const isComplete = getSectionCompletion(sectionTitle)
+            {defaultSections.map((sectionTitle) => {
+              const isComplete = getSectionCompletion(sectionTitle);
               return (
                 <div
                   key={`section-${sectionTitle}`}
@@ -95,7 +95,7 @@ export function ReportDrafter() {
                     {sectionTitle}
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         </div>
@@ -116,7 +116,7 @@ export function ReportDrafter() {
 
             {report.sections
               .filter(
-                section =>
+                (section) =>
                   section.title !== "Executive Summary" &&
                   section.title !== "Conclusion"
               )
@@ -161,5 +161,5 @@ export function ReportDrafter() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,10 +1,18 @@
-import { Bell, Globe, LogOut, Moon, Settings, Shield, User } from "lucide-react"
+import {
+  Bell,
+  Globe,
+  LogOut,
+  Moon,
+  Settings,
+  Shield,
+  User,
+} from "lucide-react";
 
-import { Modal } from "@/components/ui/modal"
+import { Modal } from "@/components/ui/modal";
 
 interface SettingsModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
@@ -49,7 +57,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               label: "Privacy & Security",
               badge: null,
             },
-          ].map(item => (
+          ].map((item) => (
             <button
               type="button"
               key={`preference-${item.label}`}
@@ -90,5 +98,5 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         </div>
       </div>
     </Modal>
-  )
+  );
 }

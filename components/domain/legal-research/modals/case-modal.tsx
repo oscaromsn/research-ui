@@ -1,13 +1,13 @@
-import { BookOpen, Brain, Link, Scale } from "lucide-react"
+import { BookOpen, Brain, Link, Scale } from "lucide-react";
 
-import { Modal } from "@/components/ui/modal"
-import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms"
+import { Modal } from "@/components/ui/modal";
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 
 interface CaseModalProps {
-  isOpen: boolean
-  onClose: () => void
-  documentData?: ClientAnalyzedDoc
-  onViewAnalysis?: () => void
+  isOpen: boolean;
+  onClose: () => void;
+  documentData?: ClientAnalyzedDoc;
+  onViewAnalysis?: () => void;
 }
 export function CaseModal({
   isOpen,
@@ -17,38 +17,38 @@ export function CaseModal({
 }: CaseModalProps) {
   const formatDate = (dateString?: string) => {
     if (!dateString) {
-      return "Date not available"
+      return "Date not available";
     }
     try {
-      return new Date(dateString).toLocaleDateString()
+      return new Date(dateString).toLocaleDateString();
     } catch {
-      return dateString
+      return dateString;
     }
-  }
+  };
 
   const getDocumentType = (title?: string) => {
     if (!title) {
-      return "Document"
+      return "Document";
     }
-    const titleLower = title.toLowerCase()
+    const titleLower = title.toLowerCase();
     if (titleLower.includes("case") || titleLower.includes("v.")) {
-      return "Case"
+      return "Case";
     }
     if (titleLower.includes("statute")) {
-      return "Statute"
+      return "Statute";
     }
     if (titleLower.includes("regulation")) {
-      return "Regulation"
+      return "Regulation";
     }
-    return "Document"
-  }
+    return "Document";
+  };
 
   const getJurisdiction = () => {
     const jurisdictionEntity = documentData?.extractedEntities?.find(
-      entity => entity.type === "Jurisdiction"
-    )
-    return jurisdictionEntity?.name || "Jurisdiction not specified"
-  }
+      (entity) => entity.type === "Jurisdiction"
+    );
+    return jurisdictionEntity?.name || "Jurisdiction not specified";
+  };
 
   return (
     <Modal
@@ -82,7 +82,7 @@ export function CaseModal({
                   Key Arguments & Reasoning
                 </h4>
                 <ul className="list-disc space-y-2 pl-4 text-[#4a5568] text-sm dark:text-[#a0aec0]">
-                  {documentData.keyArguments.map(argument => (
+                  {documentData.keyArguments.map((argument) => (
                     <li key={argument}>{argument}</li>
                   ))}
                 </ul>
@@ -96,7 +96,7 @@ export function CaseModal({
                   Key Quotes
                 </h4>
                 <div className="space-y-2">
-                  {documentData.extractedQuotes.map(quote => (
+                  {documentData.extractedQuotes.map((quote) => (
                     <blockquote
                       key={quote}
                       className="border-[#3a7bb7] border-l-2 pl-3 text-[#4a5568] text-sm italic dark:text-[#a0aec0]"
@@ -127,7 +127,7 @@ export function CaseModal({
                   Counter Arguments & Nuances
                 </h4>
                 <ul className="list-disc space-y-2 pl-4 text-[#4a5568] text-sm dark:text-[#a0aec0]">
-                  {documentData.counterArguments.map(counterArg => (
+                  {documentData.counterArguments.map((counterArg) => (
                     <li key={counterArg}>{counterArg}</li>
                   ))}
                 </ul>
@@ -159,5 +159,5 @@ export function CaseModal({
         </div>
       </div>
     </Modal>
-  )
+  );
 }

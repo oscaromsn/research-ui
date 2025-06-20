@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useAtomValue } from "jotai"
+import { useAtomValue } from "jotai";
 import {
   AlertTriangle,
   Brain,
@@ -9,33 +9,33 @@ import {
   FileText,
   Pause,
   Play,
-} from "lucide-react"
-import { useState } from "react"
-import TextareaAutosize from "react-textarea-autosize"
+} from "lucide-react";
+import { useState } from "react";
+import TextareaAutosize from "react-textarea-autosize";
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import { Switch } from "@/components/ui/switch"
-import { useResearchAgent } from "@/lib/hooks/useResearchAgent"
+} from "@/components/ui/collapsible";
+import { Switch } from "@/components/ui/switch";
+import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
   generatedQueriesAtom,
   researchAssessmentAtom,
   researchLogAtom,
   researchSessionAtom,
-} from "@/lib/state/researchAtoms"
+} from "@/lib/state/researchAtoms";
 
 interface ResearchLogSectionProps {
-  researchLogs: string[]
+  researchLogs: string[];
 }
 
 function ResearchLogSection({ researchLogs }: ResearchLogSectionProps) {
-  const [isLogExpanded, setIsLogExpanded] = useState(true)
+  const [isLogExpanded, setIsLogExpanded] = useState(true);
 
   if (researchLogs.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -74,17 +74,17 @@ function ResearchLogSection({ researchLogs }: ResearchLogSectionProps) {
         </CollapsibleContent>
       </Collapsible>
     </div>
-  )
+  );
 }
 
 interface ResearchControlsSectionProps {
-  agent: ReturnType<typeof useResearchAgent>
-  legalQuestion: string
-  onLegalQuestionChange: (value: string) => void
-  onStartResearch: () => void
-  onAbortResearch: () => void
-  onPauseResearch: () => void
-  onResumeResearch: () => void
+  agent: ReturnType<typeof useResearchAgent>;
+  legalQuestion: string;
+  onLegalQuestionChange: (value: string) => void;
+  onStartResearch: () => void;
+  onAbortResearch: () => void;
+  onPauseResearch: () => void;
+  onResumeResearch: () => void;
 }
 
 function ResearchControlsSection({
@@ -118,7 +118,7 @@ function ResearchControlsSection({
       <TextareaAutosize
         placeholder="Enter Legal Question or Research Topic"
         value={legalQuestion}
-        onChange={e => onLegalQuestionChange(e.target.value)}
+        onChange={(e) => onLegalQuestionChange(e.target.value)}
         disabled={agent.isLoading}
         minRows={1}
         maxRows={6}
@@ -150,16 +150,16 @@ function ResearchControlsSection({
         </div>
       )}
     </>
-  )
+  );
 }
 
 interface ResearchControlButtonsProps {
-  agent: ReturnType<typeof useResearchAgent>
-  legalQuestion: string
-  onStartResearch: () => void
-  onAbortResearch: () => void
-  onPauseResearch: () => void
-  onResumeResearch: () => void
+  agent: ReturnType<typeof useResearchAgent>;
+  legalQuestion: string;
+  onStartResearch: () => void;
+  onAbortResearch: () => void;
+  onPauseResearch: () => void;
+  onResumeResearch: () => void;
 }
 
 function ResearchControlButtons({
@@ -180,7 +180,7 @@ function ResearchControlButtons({
       >
         Start Research
       </button>
-    )
+    );
   }
 
   if (agent.canResume && !agent.isLoading) {
@@ -193,7 +193,7 @@ function ResearchControlButtons({
         <Play size={16} className="mr-1" />
         Resume Research
       </button>
-    )
+    );
   }
 
   if (agent.isLoading) {
@@ -225,21 +225,21 @@ function ResearchControlButtons({
           </button>
         </div>
       </div>
-    )
+    );
   }
 
-  return null
+  return null;
 }
 
 interface QueryItem {
-  query_string: string
-  expected_information_summary?: string
-  timestamp?: string
+  query_string: string;
+  expected_information_summary?: string;
+  timestamp?: string;
 }
 
 interface GeneratedQueriesSectionProps {
-  queries: QueryItem[]
-  totalQueries: number
+  queries: QueryItem[];
+  totalQueries: number;
 }
 
 function GeneratedQueriesSection({
@@ -247,7 +247,7 @@ function GeneratedQueriesSection({
   totalQueries,
 }: GeneratedQueriesSectionProps) {
   if (queries.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -290,27 +290,27 @@ function GeneratedQueriesSection({
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 interface AssessmentData {
-  isSufficient: boolean
-  assessmentSummary: string
-  identifiedGaps?: string[]
+  isSufficient: boolean;
+  assessmentSummary: string;
+  identifiedGaps?: string[];
   suggestedRefinementQueries?: Array<{
-    query_string: string
-    expected_information_summary?: string
-  }>
-  nextAction: string
-  reasoningSummary?: string
+    query_string: string;
+    expected_information_summary?: string;
+  }>;
+  nextAction: string;
+  reasoningSummary?: string;
 }
 
 interface AssessmentSectionProps {
-  assessment: AssessmentData
+  assessment: AssessmentData;
 }
 
 function AssessmentSection({ assessment }: AssessmentSectionProps) {
-  const [isAssessmentExpanded, setIsAssessmentExpanded] = useState(false)
+  const [isAssessmentExpanded, setIsAssessmentExpanded] = useState(false);
 
   return (
     <div className="mb-4">
@@ -357,19 +357,19 @@ function AssessmentSection({ assessment }: AssessmentSectionProps) {
         {isAssessmentExpanded && <AssessmentDetails assessment={assessment} />}
       </div>
     </div>
-  )
+  );
 }
 
 interface AssessmentDetailsProps {
   assessment: {
-    identifiedGaps?: string[]
+    identifiedGaps?: string[];
     suggestedRefinementQueries?: Array<{
-      query_string: string
-      expected_information_summary?: string
-    }>
-    nextAction: string
-    reasoningSummary?: string
-  }
+      query_string: string;
+      expected_information_summary?: string;
+    }>;
+    nextAction: string;
+    reasoningSummary?: string;
+  };
 }
 
 function AssessmentDetails({ assessment }: AssessmentDetailsProps) {
@@ -446,47 +446,47 @@ function AssessmentDetails({ assessment }: AssessmentDetailsProps) {
         )}
       </div>
     </div>
-  )
+  );
 }
 
 export function GuidanceStrategy() {
-  const [legalQuestion, setLegalQuestion] = useState("")
-  const agent = useResearchAgent()
-  const generatedQueries = useAtomValue(generatedQueriesAtom)
-  const researchLogs = useAtomValue(researchLogAtom)
-  const assessment = useAtomValue(researchAssessmentAtom)
-  const researchSession = useAtomValue(researchSessionAtom)
+  const [legalQuestion, setLegalQuestion] = useState("");
+  const agent = useResearchAgent();
+  const generatedQueries = useAtomValue(generatedQueriesAtom);
+  const researchLogs = useAtomValue(researchLogAtom);
+  const assessment = useAtomValue(researchAssessmentAtom);
+  const researchSession = useAtomValue(researchSessionAtom);
 
   // Use accumulated queries if available, otherwise fall back to current session
   const allQueries =
     researchSession.accumulatedQueries.length > 0
       ? researchSession.accumulatedQueries
-      : generatedQueries
+      : generatedQueries;
 
   // Sort queries by timestamp (most recent first)
   const sortedQueries = [...allQueries].sort((a, b) => {
-    const aTime = a.timestamp ? new Date(a.timestamp).getTime() : 0
-    const bTime = b.timestamp ? new Date(b.timestamp).getTime() : 0
-    return bTime - aTime
-  })
+    const aTime = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+    const bTime = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+    return bTime - aTime;
+  });
 
   const handleStartResearch = () => {
     if (legalQuestion.trim()) {
-      agent.startResearch(legalQuestion)
+      agent.startResearch(legalQuestion);
     }
-  }
+  };
 
   const handleAbortResearch = () => {
-    agent.abortResearch()
-  }
+    agent.abortResearch();
+  };
 
   const handlePauseResearch = () => {
-    agent.pauseResearch()
-  }
+    agent.pauseResearch();
+  };
 
   const handleResumeResearch = () => {
-    agent.resumeResearch()
-  }
+    agent.resumeResearch();
+  };
 
   return (
     <div className="w-full overflow-y-auto border-[#e1e5eb] border-r bg-[#f8f9fa] p-4 md:w-1/3 dark:border-[#2a3148] dark:bg-[#171c2c]">
@@ -516,5 +516,5 @@ export function GuidanceStrategy() {
         totalQueries={researchSession.accumulatedQueries.length}
       />
     </div>
-  )
+  );
 }

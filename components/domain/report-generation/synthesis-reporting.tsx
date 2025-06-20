@@ -1,47 +1,47 @@
-"use client"
+"use client";
 
-import { useAtomValue } from "jotai"
-import { Brain, ChevronRight } from "lucide-react"
-import { useState } from "react"
+import { useAtomValue } from "jotai";
+import { Brain, ChevronRight } from "lucide-react";
+import { useState } from "react";
 
 import {
   researchSessionAtom,
   synthesisDetailsAtom,
-} from "@/lib/state/researchAtoms"
+} from "@/lib/state/researchAtoms";
 
-import { SynthesisReasoningModal } from "./modals/synthesis-reasoning-modal"
-import { ReportDrafter } from "./report-drafter"
+import { SynthesisReasoningModal } from "./modals/synthesis-reasoning-modal";
+import { ReportDrafter } from "./report-drafter";
 export function SynthesisReporting() {
-  const [activeTab, setActiveTab] = useState("synthesis")
-  const [showSynthesisReasoning, setShowSynthesisReasoning] = useState(false)
-  const synthesis = useAtomValue(synthesisDetailsAtom)
-  const researchSession = useAtomValue(researchSessionAtom)
+  const [activeTab, setActiveTab] = useState("synthesis");
+  const [showSynthesisReasoning, setShowSynthesisReasoning] = useState(false);
+  const synthesis = useAtomValue(synthesisDetailsAtom);
+  const researchSession = useAtomValue(researchSessionAtom);
 
   // Use accumulated topics if available, otherwise fall back to current session
   const allTopics =
     researchSession.accumulatedTopics.length > 0
       ? researchSession.accumulatedTopics
-      : synthesis.topics
+      : synthesis.topics;
 
   // Sort topics by timestamp (most recent first)
   const sortedTopics = [...allTopics].sort((a, b) => {
-    const aTime = a.timestamp ? new Date(a.timestamp).getTime() : 0
-    const bTime = b.timestamp ? new Date(b.timestamp).getTime() : 0
-    return bTime - aTime
-  })
+    const aTime = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+    const bTime = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+    return bTime - aTime;
+  });
 
   const getConfidenceLabel = (confidence?: number): string => {
     if (!confidence) {
-      return "Unknown"
+      return "Unknown";
     }
     if (confidence >= 80) {
-      return `High (${confidence}%)`
+      return `High (${confidence}%)`;
     }
     if (confidence >= 60) {
-      return `Medium (${confidence}%)`
+      return `Medium (${confidence}%)`;
     }
-    return `Low (${confidence}%)`
-  }
+    return `Low (${confidence}%)`;
+  };
   return (
     <div className="w-full overflow-y-auto bg-[#f8f9fa] p-4 md:w-1/3 dark:bg-[#171c2c]">
       <div className="mb-4">
@@ -180,8 +180,8 @@ export function SynthesisReporting() {
         onClose={() => setShowSynthesisReasoning(false)}
         synthesisData={synthesis}
         sourcesUsed={sortedTopics.flatMap(
-          topic =>
-            topic.docIds?.map(docId => ({
+          (topic) =>
+            topic.docIds?.map((docId) => ({
               docId,
               title: topic.title,
               confidence: (topic.confidence || 0) / 100,
@@ -189,5 +189,5 @@ export function SynthesisReporting() {
         )}
       />
     </div>
-  )
+  );
 }
