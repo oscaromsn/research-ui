@@ -13,27 +13,27 @@
 export function smartTruncate(text: string, maxLength: number): string {
   // Return original text if it's within the limit
   if (!text || text.length <= maxLength) {
-    return text
+    return text;
   }
 
   // If maxLength is too small to accommodate ellipsis, just truncate
   if (maxLength <= 3) {
-    return text.substring(0, maxLength)
+    return text.substring(0, maxLength);
   }
 
   // Reserve space for ellipsis
-  const maxContentLength = maxLength - 3
+  const maxContentLength = maxLength - 3;
 
   // Find the last space before maxContentLength
-  const lastSpaceIndex = text.lastIndexOf(" ", maxContentLength)
+  const lastSpaceIndex = text.lastIndexOf(" ", maxContentLength);
 
   // If no space found within range, truncate at maxContentLength
   if (lastSpaceIndex === -1 || lastSpaceIndex === 0) {
-    return `${text.substring(0, maxContentLength)}...`
+    return `${text.substring(0, maxContentLength)}...`;
   }
 
   // Truncate at the last space and add ellipsis
-  return `${text.substring(0, lastSpaceIndex)}...`
+  return `${text.substring(0, lastSpaceIndex)}...`;
 }
 
 /**
@@ -44,7 +44,7 @@ export function smartTruncate(text: string, maxLength: number): string {
  * @returns Truncated text suitable for summary display
  */
 export function truncateForSummary(text: string): string {
-  return smartTruncate(text, 300)
+  return smartTruncate(text, 300);
 }
 
 /**
@@ -54,7 +54,7 @@ export function truncateForSummary(text: string): string {
  * @returns Truncated text suitable for title display
  */
 export function truncateForTitle(text: string): string {
-  return smartTruncate(text, 70)
+  return smartTruncate(text, 70);
 }
 
 /**
@@ -64,7 +64,7 @@ export function truncateForTitle(text: string): string {
  * @returns Truncated text suitable for brief display
  */
 export function truncateForBrief(text: string): string {
-  return smartTruncate(text, 50)
+  return smartTruncate(text, 50);
 }
 
 /**
@@ -74,5 +74,5 @@ export function truncateForBrief(text: string): string {
  * @returns Truncated text suitable for detailed descriptions
  */
 export function truncateForReasoning(text: string): string {
-  return smartTruncate(text, 500)
+  return smartTruncate(text, 500);
 }

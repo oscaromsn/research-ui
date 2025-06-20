@@ -1,6 +1,6 @@
-import { z } from "zod"
+import { z } from "zod";
 
-import { env } from "./schemas/env"
+import { env } from "./schemas/env";
 
 /**
  * Application configuration with Zod validation
@@ -12,7 +12,7 @@ const featureFlagsSchema = z.object({
   enableBetaFeatures: z.boolean().default(false),
   enableAnalytics: z.boolean().default(true),
   maxUploadSizeMB: z.number().positive().default(10),
-})
+});
 
 // API configuration schema with validation
 const apiConfigSchema = z.object({
@@ -20,21 +20,21 @@ const apiConfigSchema = z.object({
   timeout: z.number().int().positive().default(30000),
   retries: z.number().int().nonnegative().default(3),
   version: z.string().default("v1"),
-})
+});
 
 // UI configuration schema with validation
 const uiConfigSchema = z.object({
   theme: z.enum(["light", "dark", "system"]).default("system"),
   animationsEnabled: z.boolean().default(true),
   defaultPageSize: z.number().int().positive().default(10),
-})
+});
 
 /**
  * Environment-specific configuration values
  */
 const getEnvironmentConfig = () => {
   // Current environment from server env vars
-  const environment = env.NODE_ENV
+  const environment = env.NODE_ENV;
 
   // Define base configurations that apply to all environments
   const baseConfig = {
@@ -55,7 +55,7 @@ const getEnvironmentConfig = () => {
       animationsEnabled: true,
       defaultPageSize: 10,
     },
-  }
+  };
 
   // Override with environment-specific values
   switch (environment) {
@@ -67,7 +67,7 @@ const getEnvironmentConfig = () => {
           baseUrl: "https://dev-api.example.com",
         },
         features: { ...baseConfig.features, enableBetaFeatures: true },
-      }
+      };
     case "test":
       return {
         ...baseConfig,
@@ -80,16 +80,16 @@ const getEnvironmentConfig = () => {
           enableAnalytics: false,
           maxUploadSizeMB: 2,
         },
-      }
+      };
     case "production":
-      return baseConfig
+      return baseConfig;
     default:
-      return baseConfig
+      return baseConfig;
   }
-}
+};
 
 // Get environment-specific config
-const envConfig = getEnvironmentConfig()
+const envConfig = getEnvironmentConfig();
 
 // Validate each section with its schema
 export const config = {
@@ -97,7 +97,7 @@ export const config = {
   features: featureFlagsSchema.parse(envConfig.features),
   ui: uiConfigSchema.parse(envConfig.ui),
   environment: env.NODE_ENV,
-}
+};
 
 // Export the type for use in the application
-export type AppConfig = typeof config
+export type AppConfig = typeof config;

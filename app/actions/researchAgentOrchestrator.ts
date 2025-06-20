@@ -1,7 +1,7 @@
-"use server"
+"use server";
 
-import { b } from "@/baml_client"
-import type { partial_types } from "@/baml_client"
+import { b } from "@/baml_client";
+import type { partial_types } from "@/baml_client";
 import type {
   AnalyzedDocument,
   FinalLegalReport,
@@ -10,26 +10,26 @@ import type {
   ResearchAssessment,
   SearchQueryItem,
   SearchResultItem,
-} from "@/baml_client/types"
+} from "@/baml_client/types";
 
 // Extended SearchResultItem with ordering metadata
 interface OrderedSearchResultItem extends SearchResultItem {
-  globalSequenceNumber: number // Unique across entire research session
-  iterationIndex: number // Which research iteration
-  fetchBatchIndex: number // Which query batch within iteration
-  fetchOrderIndex: number // Order within the batch
-  searchQueryId: string // Which query produced this result
-  fetchTimestamp: string // ISO timestamp for debugging
+  globalSequenceNumber: number; // Unique across entire research session
+  iterationIndex: number; // Which research iteration
+  fetchBatchIndex: number; // Which query batch within iteration
+  fetchOrderIndex: number; // Order within the batch
+  searchQueryId: string; // Which query produced this result
+  fetchTimestamp: string; // ISO timestamp for debugging
 }
-import { executeExaSearch } from "@/lib/utils/exaSearchUtil"
+import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
 import {
   smartTruncate,
   truncateForBrief,
   truncateForReasoning,
   truncateForSummary,
   truncateForTitle,
-} from "@/lib/utils/textTruncation"
-import type { BamlStream } from "@boundaryml/baml"
+} from "@/lib/utils/textTruncation";
+import type { BamlStream } from "@boundaryml/baml";
 
 // Research pipeline stage enum
 export type ResearchStage =
@@ -44,48 +44,48 @@ export type ResearchStage =
   | "ITERATION_PAUSED"
   | "HUMAN_REVIEW_REQUESTED"
   | "COMPLETED"
-  | "ERROR"
+  | "ERROR";
 
 // Stream communication protocol
 export interface ResearchUpdate {
-  type: "PROGRESS" | "DATA" | "ERROR" | "STATUS_CHANGE" | "LOG"
-  stage: ResearchStage
-  message?: string
-  data?: unknown
-  isFinalForStage?: boolean
-  currentProcessedDoc?: number
-  totalDocsToProcess?: number
-  fieldName?: string
-  isFieldComplete?: boolean
+  type: "PROGRESS" | "DATA" | "ERROR" | "STATUS_CHANGE" | "LOG";
+  stage: ResearchStage;
+  message?: string;
+  data?: unknown;
+  isFinalForStage?: boolean;
+  currentProcessedDoc?: number;
+  totalDocsToProcess?: number;
+  fieldName?: string;
+  isFieldComplete?: boolean;
 }
 
 // Stream creation utility
 function createStream(): {
-  stream: ReadableStream<Uint8Array>
-  writer: WritableStreamDefaultWriter<Uint8Array>
-  encoder: TextEncoder
-  closeStream: () => Promise<void>
+  stream: ReadableStream<Uint8Array>;
+  writer: WritableStreamDefaultWriter<Uint8Array>;
+  encoder: TextEncoder;
+  closeStream: () => Promise<void>;
 } {
-  const encoder = new TextEncoder()
-  const transformStream = new TransformStream()
-  const writer = transformStream.writable.getWriter()
+  const encoder = new TextEncoder();
+  const transformStream = new TransformStream();
+  const writer = transformStream.writable.getWriter();
 
   const closeStream = async () => {
     if (writer && !writer.closed) {
       try {
-        await writer.close()
+        await writer.close();
       } catch (e) {
-        console.error("Error closing stream writer:", e)
+        console.error("Error closing stream writer:", e);
       }
     }
-  }
+  };
 
   return {
     stream: transformStream.readable,
     writer,
     encoder,
     closeStream,
-  }
+  };
 }
 
 // Update streaming utility
@@ -95,10 +95,10 @@ async function sendUpdate(
   update: ResearchUpdate
 ): Promise<void> {
   try {
-    const jsonString = JSON.stringify(update)
-    await writer.write(encoder.encode(`${jsonString}\n`))
+    const jsonString = JSON.stringify(update);
+    await writer.write(encoder.encode(`${jsonString}\n`));
   } catch (e) {
-    console.error("Stream write error in sendUpdate:", e, "Update:", update)
+    console.error("Stream write error in sendUpdate:", e, "Update:", update);
   }
 }
 
@@ -107,35 +107,35 @@ async function fetchDocumentsFromQueries(
   queries: SearchQueryItem[],
   context: StageContext
 ): Promise<OrderedSearchResultItem[]> {
-  const MAX_QUERIES_TO_EXECUTE = 3 // Start conservative for initial implementation
-  const RESULTS_PER_QUERY = 2 // Limit results per query to manage API usage
-  const allFetchedResults: OrderedSearchResultItem[] = []
+  const MAX_QUERIES_TO_EXECUTE = 3; // Start conservative for initial implementation
+  const RESULTS_PER_QUERY = 2; // Limit results per query to manage API usage
+  const allFetchedResults: OrderedSearchResultItem[] = [];
 
   console.log(
     `Orchestrator: Starting live document fetch for ${queries.length} queries`
-  )
+  );
 
-  const executedQueries = queries.slice(0, MAX_QUERIES_TO_EXECUTE)
+  const executedQueries = queries.slice(0, MAX_QUERIES_TO_EXECUTE);
 
   for (let queryIndex = 0; queryIndex < executedQueries.length; queryIndex++) {
-    const query = executedQueries[queryIndex]
+    const query = executedQueries[queryIndex];
     if (!query) {
-      continue
+      continue;
     }
 
     try {
       console.log(
         `Orchestrator: Executing live search for query: "${query.query_string}"`
-      )
-      const results = await executeExaSearch(query, RESULTS_PER_QUERY, true, 2)
+      );
+      const results = await executeExaSearch(query, RESULTS_PER_QUERY, true, 2);
 
       // Guard against executeExaSearch returning undefined (should never happen but adds safety)
       if (!results || !Array.isArray(results)) {
         console.error(
           `Orchestrator: executeExaSearch returned invalid results for query "${query.query_string}":`,
           results
-        )
-        continue
+        );
+        continue;
       }
 
       // Enrich results with ordering metadata
@@ -149,26 +149,28 @@ async function fetchDocumentsFromQueries(
           searchQueryId: query.query_string,
           fetchTimestamp: new Date().toISOString(),
         })
-      )
+      );
 
-      allFetchedResults.push(...enrichedResults)
+      allFetchedResults.push(...enrichedResults);
       console.log(
         `Orchestrator: Query "${query.query_string}" yielded ${results.length} results.`
-      )
+      );
     } catch (searchError: unknown) {
       const errorMessage =
-        searchError instanceof Error ? searchError.message : String(searchError)
+        searchError instanceof Error
+          ? searchError.message
+          : String(searchError);
       console.error(
         `Orchestrator: Error during live search for query "${query.query_string}":`,
         errorMessage
-      )
+      );
 
       // Handle rate limiting specifically - consider stopping further searches
       if (errorMessage.includes("Rate limit exceeded")) {
         console.warn(
           "Orchestrator: Rate limit reached for Exa API. Stopping further search queries for this session."
-        )
-        break // Stop executing more queries if we hit rate limits
+        );
+        break; // Stop executing more queries if we hit rate limits
       }
 
       // For other errors, continue with remaining queries
@@ -178,66 +180,66 @@ async function fetchDocumentsFromQueries(
 
   // De-duplicate results based on URL (which is used as the ID)
   // When duplicates are found, keep the one with the lower globalSequenceNumber (first occurrence)
-  const uniqueDocIds = new Set<string>()
-  const searchResultItems = allFetchedResults.filter(item => {
+  const uniqueDocIds = new Set<string>();
+  const searchResultItems = allFetchedResults.filter((item) => {
     if (!uniqueDocIds.has(item.id)) {
-      uniqueDocIds.add(item.id)
-      return true
+      uniqueDocIds.add(item.id);
+      return true;
     }
-    return false
-  })
+    return false;
+  });
 
   console.log(
     `Orchestrator: Total unique documents fetched: ${searchResultItems.length}`
-  )
-  return searchResultItems
+  );
+  return searchResultItems;
 }
 
 // Auto mode configuration interface
 interface AutoModeConfig {
-  isEnabled: boolean
-  maxIterations: number
-  currentIteration: number
+  isEnabled: boolean;
+  maxIterations: number;
+  currentIteration: number;
 }
 
 interface StageContext {
-  writer: WritableStreamDefaultWriter<Uint8Array>
-  encoder: TextEncoder
-  timeoutController: AbortController
-  legalQuestion: string
+  writer: WritableStreamDefaultWriter<Uint8Array>;
+  encoder: TextEncoder;
+  timeoutController: AbortController;
+  legalQuestion: string;
   previouslyAnalyzedDocs: Array<{
-    docId: string
-    title?: string
-    url?: string
-    timestamp?: string
-    status: string
-  }>
-  globalDocumentCounter: { value: number } // Mutable counter for sequence numbers
-  currentIteration: number // Current research iteration index
+    docId: string;
+    title?: string;
+    url?: string;
+    timestamp?: string;
+    status: string;
+  }>;
+  globalDocumentCounter: { value: number }; // Mutable counter for sequence numbers
+  currentIteration: number; // Current research iteration index
 }
 
 async function generateQueriesStage(
   context: StageContext
 ): Promise<LegalQueryAnalysis> {
-  const { writer, encoder, timeoutController, legalQuestion } = context
+  const { writer, encoder, timeoutController, legalQuestion } = context;
 
   await sendUpdate(writer, encoder, {
     type: "STATUS_CHANGE",
     stage: "GENERATING_QUERIES",
     message: "Generating initial search queries...",
-  })
+  });
 
   if (timeoutController.signal.aborted) {
-    throw new Error("Orchestrator timeout during query generation")
+    throw new Error("Orchestrator timeout during query generation");
   }
 
-  const queryAnalysis = await b.GenerateLegalSearchQueries(legalQuestion)
+  const queryAnalysis = await b.GenerateLegalSearchQueries(legalQuestion);
 
   await sendUpdate(writer, encoder, {
     type: "DATA",
     stage: "GENERATING_QUERIES",
     data: {
-      queries: queryAnalysis.search_queries.map(q => ({
+      queries: queryAnalysis.search_queries.map((q) => ({
         query_string: q.query_string,
         expected_information_summary: smartTruncate(
           q.expected_information.join(" "),
@@ -254,29 +256,29 @@ async function generateQueriesStage(
     },
     message: `${queryAnalysis.search_queries.length} initial queries generated.`,
     isFinalForStage: true,
-  })
+  });
 
-  return queryAnalysis
+  return queryAnalysis;
 }
 
 async function fetchDocumentsStage(
   context: StageContext,
   queries: SearchQueryItem[]
 ): Promise<OrderedSearchResultItem[]> {
-  const { writer, encoder, timeoutController } = context
+  const { writer, encoder, timeoutController } = context;
 
   await sendUpdate(writer, encoder, {
     type: "STATUS_CHANGE",
     stage: "FETCHING_DOCUMENTS",
     message: "Retrieving documents from live search APIs...",
-  })
+  });
 
   if (timeoutController.signal.aborted) {
-    throw new Error("Orchestrator timeout during document fetching")
+    throw new Error("Orchestrator timeout during document fetching");
   }
 
   try {
-    const searchResultItems = await fetchDocumentsFromQueries(queries, context)
+    const searchResultItems = await fetchDocumentsFromQueries(queries, context);
 
     if (searchResultItems.length === 0) {
       await sendUpdate(writer, encoder, {
@@ -284,18 +286,18 @@ async function fetchDocumentsStage(
         stage: "FETCHING_DOCUMENTS",
         message: "No documents found for any of the executed search queries.",
         isFinalForStage: true,
-      })
-      throw new Error("No documents found")
+      });
+      throw new Error("No documents found");
     }
 
     // Send individual document updates as they are fetched
     for (let i = 0; i < searchResultItems.length; i++) {
-      const item = searchResultItems[i]
+      const item = searchResultItems[i];
       if (!item) {
-        continue
+        continue;
       }
 
-      const timestamp = new Date().toISOString()
+      const timestamp = new Date().toISOString();
 
       await sendUpdate(writer, encoder, {
         type: "DATA",
@@ -317,7 +319,7 @@ async function fetchDocumentsStage(
         },
         currentProcessedDoc: i + 1,
         totalDocsToProcess: searchResultItems.length,
-      })
+      });
     }
 
     // Send final summary update for backward compatibility
@@ -326,25 +328,25 @@ async function fetchDocumentsStage(
       stage: "FETCHING_DOCUMENTS",
       data: {
         count: searchResultItems.length,
-        titles: searchResultItems.map(r =>
+        titles: searchResultItems.map((r) =>
           r.title ? truncateForTitle(r.title) : "Untitled"
         ),
-        sources: searchResultItems.map(r => r.source_name),
+        sources: searchResultItems.map((r) => r.source_name),
       },
       message: `${searchResultItems.length} unique documents retrieved.`,
       isFinalForStage: true,
-    })
+    });
 
-    return searchResultItems
+    return searchResultItems;
   } catch (searchError: unknown) {
     const errorMessage =
-      searchError instanceof Error ? searchError.message : String(searchError)
+      searchError instanceof Error ? searchError.message : String(searchError);
     await sendUpdate(writer, encoder, {
       type: "ERROR",
       stage: "FETCHING_DOCUMENTS",
       message: `Failed to retrieve documents: ${errorMessage}`,
-    })
-    throw searchError
+    });
+    throw searchError;
   }
 }
 
@@ -360,7 +362,7 @@ async function sendAnalysisProgressUpdate(
     message: `Analyzing document ${index + 1}/${totalCount}: ${doc.title ? truncateForBrief(doc.title) : "Untitled"}`,
     currentProcessedDoc: index,
     totalDocsToProcess: totalCount,
-  })
+  });
 }
 
 async function sendAnalysisStartUpdate(
@@ -377,7 +379,7 @@ async function sendAnalysisStartUpdate(
       status: "analyzing",
     },
     message: `Started analysis for: ${doc.title ? truncateForBrief(doc.title) : "Untitled"}`,
-  })
+  });
 }
 
 async function sendAnalysisSuccessUpdate(
@@ -400,7 +402,7 @@ async function sendAnalysisSuccessUpdate(
       summarySnippet: truncateForSummary(analysis.summary),
       keyArguments: analysis.key_arguments_and_reasoning,
       extractedEntities:
-        analysis.extracted_entities?.map(entity => ({
+        analysis.extracted_entities?.map((entity) => ({
           name: entity.name,
           type: entity.type,
           details: entity.details,
@@ -420,7 +422,7 @@ async function sendAnalysisSuccessUpdate(
     message: `Analysis complete for: ${doc.title ? truncateForBrief(doc.title) : "Untitled"}. Relevance: ${analysis.relevance_score}/10`,
     currentProcessedDoc: index + 1,
     totalDocsToProcess: totalCount,
-  })
+  });
 }
 
 async function sendAnalysisErrorUpdate(
@@ -443,13 +445,13 @@ async function sendAnalysisErrorUpdate(
     message: `Failed to analyze: ${doc.title ? truncateForBrief(doc.title) : "Untitled"}. Error: ${errorMessage}`,
     currentProcessedDoc: index + 1,
     totalDocsToProcess: totalCount,
-  })
+  });
 
   await sendUpdate(context.writer, context.encoder, {
     type: "LOG",
     stage: "ANALYZING_DOCUMENTS",
     message: `Skipping document due to analysis error: ${errorMessage}`,
-  })
+  });
 }
 
 async function processDocument(
@@ -459,28 +461,34 @@ async function processDocument(
   totalCount: number
 ): Promise<AnalyzedDocument | null> {
   if (context.timeoutController.signal.aborted) {
-    throw new Error("Orchestrator timeout during document analysis iteration")
+    throw new Error("Orchestrator timeout during document analysis iteration");
   }
 
-  await sendAnalysisProgressUpdate(context, doc, index, totalCount)
-  await sendAnalysisStartUpdate(context, doc)
+  await sendAnalysisProgressUpdate(context, doc, index, totalCount);
+  await sendAnalysisStartUpdate(context, doc);
 
   try {
     const analysis: AnalyzedDocument = await b.AnalyzeSingleDocument(
       doc,
       context.legalQuestion
-    )
+    );
 
-    await sendAnalysisSuccessUpdate(context, doc, analysis, index, totalCount)
-    return analysis
+    await sendAnalysisSuccessUpdate(context, doc, analysis, index, totalCount);
+    return analysis;
   } catch (analysisError: unknown) {
     const errorMessage =
       analysisError instanceof Error
         ? analysisError.message
-        : String(analysisError)
+        : String(analysisError);
 
-    await sendAnalysisErrorUpdate(context, doc, errorMessage, index, totalCount)
-    return null
+    await sendAnalysisErrorUpdate(
+      context,
+      doc,
+      errorMessage,
+      index,
+      totalCount
+    );
+    return null;
   }
 }
 
@@ -488,30 +496,31 @@ async function analyzeDocumentsStage(
   context: StageContext,
   searchResultItems: OrderedSearchResultItem[]
 ): Promise<AnalyzedDocument[]> {
-  const { writer, encoder, timeoutController, previouslyAnalyzedDocs } = context
+  const { writer, encoder, timeoutController, previouslyAnalyzedDocs } =
+    context;
 
   // Filter out documents that have already been analyzed
   const alreadyAnalyzedDocIds = new Set(
     previouslyAnalyzedDocs
-      .filter(doc => doc.status === "analyzed")
-      .map(doc => doc.docId)
-  )
+      .filter((doc) => doc.status === "analyzed")
+      .map((doc) => doc.docId)
+  );
 
   const documentsToAnalyze = searchResultItems.filter(
-    doc => !alreadyAnalyzedDocIds.has(doc.id)
-  )
+    (doc) => !alreadyAnalyzedDocIds.has(doc.id)
+  );
 
   // Sort documents by the order they appear in searchResultItems (which maintains fetch order)
   // This ensures analysis happens in the same order as documents appear in the UI
   const sortedDocumentsToAnalyze = [...documentsToAnalyze].sort((a, b) => {
-    const aIndex = searchResultItems.findIndex(item => item.id === a.id)
-    const bIndex = searchResultItems.findIndex(item => item.id === b.id)
-    return aIndex - bIndex // Maintain original fetch order
-  })
+    const aIndex = searchResultItems.findIndex((item) => item.id === a.id);
+    const bIndex = searchResultItems.findIndex((item) => item.id === b.id);
+    return aIndex - bIndex; // Maintain original fetch order
+  });
 
   console.log(
     `Orchestrator: Document analysis stage - Total fetched: ${searchResultItems.length}, Already analyzed: ${alreadyAnalyzedDocIds.size}, To analyze: ${documentsToAnalyze.length}`
-  )
+  );
 
   await sendUpdate(writer, encoder, {
     type: "STATUS_CHANGE",
@@ -522,13 +531,13 @@ async function analyzeDocumentsStage(
         : `Starting analysis of ${documentsToAnalyze.length} new documents (${alreadyAnalyzedDocIds.size} already analyzed)...`,
     totalDocsToProcess: documentsToAnalyze.length,
     currentProcessedDoc: 0,
-  })
+  });
 
   if (timeoutController.signal.aborted) {
-    throw new Error("Orchestrator timeout during document analysis")
+    throw new Error("Orchestrator timeout during document analysis");
   }
 
-  const analyzedDocs: AnalyzedDocument[] = []
+  const analyzedDocs: AnalyzedDocument[] = [];
 
   // If no new documents to analyze, return empty array
   if (sortedDocumentsToAnalyze.length === 0) {
@@ -539,35 +548,35 @@ async function analyzeDocumentsStage(
       isFinalForStage: true,
       totalDocsToProcess: 0,
       currentProcessedDoc: 0,
-    })
-    return analyzedDocs
+    });
+    return analyzedDocs;
   }
 
   for (let i = 0; i < sortedDocumentsToAnalyze.length; i++) {
-    const doc = sortedDocumentsToAnalyze[i]
+    const doc = sortedDocumentsToAnalyze[i];
     if (!doc) {
-      continue
+      continue;
     }
 
     console.log(
       `Orchestrator: Analyzing document ${i + 1}/${sortedDocumentsToAnalyze.length}: ${doc.title || "Untitled"} (ID: ${doc.id})`
-    )
+    );
 
     const analysis = await processDocument(
       context,
       doc,
       i,
       sortedDocumentsToAnalyze.length
-    )
+    );
     if (analysis) {
-      analyzedDocs.push(analysis)
+      analyzedDocs.push(analysis);
       console.log(
         `Orchestrator: Successfully analyzed document: ${doc.title || "Untitled"}`
-      )
+      );
     } else {
       console.log(
         `Orchestrator: Failed to analyze document: ${doc.title || "Untitled"}`
-      )
+      );
     }
   }
 
@@ -578,16 +587,16 @@ async function analyzeDocumentsStage(
     isFinalForStage: true,
     totalDocsToProcess: sortedDocumentsToAnalyze.length,
     currentProcessedDoc: sortedDocumentsToAnalyze.length,
-  })
+  });
 
-  return analyzedDocs
+  return analyzedDocs;
 }
 
 async function synthesizeFindingsStage(
   context: StageContext,
   analyzedDocs: AnalyzedDocument[]
 ): Promise<OverallSynthesis> {
-  const { writer, encoder, timeoutController, legalQuestion } = context
+  const { writer, encoder, timeoutController, legalQuestion } = context;
 
   if (analyzedDocs.length === 0) {
     await sendUpdate(writer, encoder, {
@@ -595,27 +604,27 @@ async function synthesizeFindingsStage(
       stage: "SYNTHESIZING_FINDINGS",
       message: "Cannot synthesize findings - no documents were analyzed.",
       isFinalForStage: true,
-    })
-    throw new Error("No analyzed documents for synthesis")
+    });
+    throw new Error("No analyzed documents for synthesis");
   }
 
   await sendUpdate(writer, encoder, {
     type: "STATUS_CHANGE",
     stage: "SYNTHESIZING_FINDINGS",
     message: "Synthesizing findings from analyzed documents...",
-  })
+  });
 
   if (timeoutController.signal.aborted) {
-    throw new Error("Orchestrator timeout during findings synthesis")
+    throw new Error("Orchestrator timeout during findings synthesis");
   }
 
-  const synthesis = await b.SynthesizeAllFindings(analyzedDocs, legalQuestion)
+  const synthesis = await b.SynthesizeAllFindings(analyzedDocs, legalQuestion);
 
   await sendUpdate(writer, encoder, {
     type: "DATA",
     stage: "SYNTHESIZING_FINDINGS",
     data: {
-      topics: synthesis.key_synthesized_topics.map(t => ({
+      topics: synthesis.key_synthesized_topics.map((t) => ({
         title: t.topic_title,
         synthesisSnippet: smartTruncate(t.synthesis, 250),
         confidence: t.confidence_score,
@@ -630,9 +639,9 @@ async function synthesizeFindingsStage(
     },
     message: "Overall synthesis complete.",
     isFinalForStage: true,
-  })
+  });
 
-  return synthesis
+  return synthesis;
 }
 
 async function assessResearchStage(
@@ -640,23 +649,23 @@ async function assessResearchStage(
   queryAnalysis: LegalQueryAnalysis,
   synthesis: OverallSynthesis
 ): Promise<ResearchAssessment> {
-  const { writer, encoder, timeoutController, legalQuestion } = context
+  const { writer, encoder, timeoutController, legalQuestion } = context;
 
   await sendUpdate(writer, encoder, {
     type: "STATUS_CHANGE",
     stage: "ASSESSING_RESEARCH",
     message: "Assessing research sufficiency and planning next steps...",
-  })
+  });
 
   if (timeoutController.signal.aborted) {
-    throw new Error("Orchestrator timeout during research assessment")
+    throw new Error("Orchestrator timeout during research assessment");
   }
 
   const assessment = await b.AssessResearchAndPlanNextSteps(
     legalQuestion,
     queryAnalysis,
     synthesis
-  )
+  );
 
   await sendUpdate(writer, encoder, {
     type: "DATA",
@@ -669,7 +678,7 @@ async function assessResearchStage(
       suggestedRefinementQueries:
         assessment.next_action === "REFINE_QUERIES" ||
         assessment.next_action === "NEW_QUERIES"
-          ? assessment.suggested_queries_for_refinement?.map(q => ({
+          ? assessment.suggested_queries_for_refinement?.map((q) => ({
               query_string: q.query_string,
               expected_information_summary:
                 q.expected_information?.join("; ") || undefined,
@@ -678,9 +687,9 @@ async function assessResearchStage(
     },
     message: `Assessment complete. Next action: ${assessment.next_action}.`,
     isFinalForStage: true,
-  })
+  });
 
-  return assessment
+  return assessment;
 }
 
 async function handleExecutiveSummaryStream(
@@ -701,7 +710,7 @@ async function handleExecutiveSummaryStream(
       message: "Streaming executive summary...",
       fieldName: "executiveSummary",
       isFieldComplete: false,
-    })
+    });
   }
 }
 
@@ -711,7 +720,7 @@ async function handleSectionsStream(
   report: Record<string, unknown>
 ): Promise<void> {
   if (report.sections && Array.isArray(report.sections)) {
-    ;(
+    (
       report.sections as Array<{ section_title: string; content: string }>
     ).forEach((section, index) => {
       if (section?.content) {
@@ -728,9 +737,9 @@ async function handleSectionsStream(
           message: `Streaming content for section: ${section.section_title}`,
           fieldName: `section_${index}_content`,
           isFieldComplete: false,
-        })
+        });
       }
-    })
+    });
   }
 }
 
@@ -747,7 +756,7 @@ async function handleConclusionStream(
       message: "Streaming conclusion...",
       fieldName: "conclusion",
       isFieldComplete: false,
-    })
+    });
   }
 }
 
@@ -762,7 +771,7 @@ async function sendFinalReportUpdate(
     data: {
       title: finalReportObject.report_title,
       executiveSummary: finalReportObject.executive_summary,
-      sections: finalReportObject.sections.map(s => ({
+      sections: finalReportObject.sections.map((s) => ({
         title: s.section_title,
         content: s.content,
       })),
@@ -772,7 +781,7 @@ async function sendFinalReportUpdate(
     },
     message: "Final report completed.",
     isFinalForStage: true,
-  })
+  });
 }
 
 async function handleStreamingReport(
@@ -780,27 +789,27 @@ async function handleStreamingReport(
   encoder: TextEncoder,
   reportStream: BamlStream<partial_types.FinalLegalReport, FinalLegalReport>
 ): Promise<void> {
-  let finalReportAccumulator: Record<string, unknown> = {}
+  let finalReportAccumulator: Record<string, unknown> = {};
 
   for await (const partialReport of reportStream) {
     if (partialReport && typeof partialReport === "object") {
-      finalReportAccumulator = { ...finalReportAccumulator, ...partialReport }
-      const report = partialReport as unknown as Record<string, unknown>
+      finalReportAccumulator = { ...finalReportAccumulator, ...partialReport };
+      const report = partialReport as unknown as Record<string, unknown>;
 
       await handleExecutiveSummaryStream(
         writer,
         encoder,
         report,
         finalReportAccumulator
-      )
-      await handleSectionsStream(writer, encoder, report)
-      await handleConclusionStream(writer, encoder, report)
+      );
+      await handleSectionsStream(writer, encoder, report);
+      await handleConclusionStream(writer, encoder, report);
     }
   }
 
   const finalReportObject: FinalLegalReport =
-    await reportStream.getFinalResponse()
-  await sendFinalReportUpdate(writer, encoder, finalReportObject)
+    await reportStream.getFinalResponse();
+  await sendFinalReportUpdate(writer, encoder, finalReportObject);
 }
 
 async function handleNonStreamingReport(
@@ -814,7 +823,7 @@ async function handleNonStreamingReport(
     legalQuestion,
     synthesis,
     [queryAnalysis]
-  )
+  );
 
   await sendUpdate(writer, encoder, {
     type: "DATA",
@@ -822,7 +831,7 @@ async function handleNonStreamingReport(
     data: {
       title: finalReport.report_title,
       executiveSummary: finalReport.executive_summary,
-      sections: finalReport.sections.map(s => ({
+      sections: finalReport.sections.map((s) => ({
         title: s.section_title,
         content: s.content,
       })),
@@ -832,7 +841,7 @@ async function handleNonStreamingReport(
     },
     message: "Final report generation complete (non-streaming).",
     isFinalForStage: true,
-  })
+  });
 }
 
 async function generateReportStage(
@@ -840,16 +849,16 @@ async function generateReportStage(
   synthesis: OverallSynthesis,
   queryAnalysis: LegalQueryAnalysis
 ): Promise<void> {
-  const { writer, encoder, timeoutController, legalQuestion } = context
+  const { writer, encoder, timeoutController, legalQuestion } = context;
 
   await sendUpdate(writer, encoder, {
     type: "STATUS_CHANGE",
     stage: "GENERATING_REPORT",
     message: "Generating final legal report...",
-  })
+  });
 
   if (timeoutController.signal.aborted) {
-    throw new Error("Orchestrator timeout during report generation")
+    throw new Error("Orchestrator timeout during report generation");
   }
 
   try {
@@ -857,20 +866,20 @@ async function generateReportStage(
       legalQuestion,
       synthesis,
       [queryAnalysis]
-    )
-    await handleStreamingReport(writer, encoder, reportStream)
+    );
+    await handleStreamingReport(writer, encoder, reportStream);
   } catch (streamError) {
     console.log(
       "Streaming failed, falling back to regular generation:",
       streamError
-    )
+    );
     await handleNonStreamingReport(
       writer,
       encoder,
       legalQuestion,
       synthesis,
       queryAnalysis
-    )
+    );
   }
 }
 
@@ -878,7 +887,7 @@ async function executePipeline(
   context: StageContext,
   autoModeConfig?: AutoModeConfig
 ): Promise<void> {
-  const { writer, encoder, legalQuestion } = context
+  const { writer, encoder, legalQuestion } = context;
 
   // Handle empty legal question gracefully
   if (!legalQuestion || legalQuestion.trim().length === 0) {
@@ -886,15 +895,15 @@ async function executePipeline(
       type: "STATUS_CHANGE",
       stage: "COMPLETED",
       message: "Research process completed. No legal question provided.",
-    })
-    return
+    });
+    return;
   }
 
-  let currentIteration = autoModeConfig?.currentIteration || 0
-  const maxIterations = autoModeConfig?.maxIterations || 5
+  let currentIteration = autoModeConfig?.currentIteration || 0;
+  const maxIterations = autoModeConfig?.maxIterations || 5;
 
   // Update context with current iteration
-  context.currentIteration = currentIteration
+  context.currentIteration = currentIteration;
 
   // Check if we've already reached max iterations before starting
   if (autoModeConfig?.isEnabled && currentIteration >= maxIterations) {
@@ -902,38 +911,38 @@ async function executePipeline(
       type: "STATUS_CHANGE",
       stage: "ITERATION_PAUSED",
       message: `Auto mode: Max iterations (${maxIterations}) reached. Manual review required.`,
-    })
-    return
+    });
+    return;
   }
 
-  const queryAnalysis = await generateQueriesStage(context)
+  const queryAnalysis = await generateQueriesStage(context);
   const searchResultItems = await fetchDocumentsStage(
     context,
     queryAnalysis.search_queries
-  )
-  const analyzedDocs = await analyzeDocumentsStage(context, searchResultItems)
-  const synthesis = await synthesizeFindingsStage(context, analyzedDocs)
+  );
+  const analyzedDocs = await analyzeDocumentsStage(context, searchResultItems);
+  const synthesis = await synthesizeFindingsStage(context, analyzedDocs);
   const assessment = await assessResearchStage(
     context,
     queryAnalysis,
     synthesis
-  )
+  );
 
   if (assessment.next_action === "GENERATE_REPORT") {
-    await generateReportStage(context, synthesis, queryAnalysis)
+    await generateReportStage(context, synthesis, queryAnalysis);
   } else {
     // Increment iteration count after completing one iteration
-    currentIteration += 1
-    context.currentIteration = currentIteration
+    currentIteration += 1;
+    context.currentIteration = currentIteration;
 
     // Check if we've reached max iterations after this iteration
     const hasReachedMaxIterations =
-      autoModeConfig?.isEnabled && currentIteration >= maxIterations
+      autoModeConfig?.isEnabled && currentIteration >= maxIterations;
 
     const stage =
       assessment.next_action === "REQUEST_HUMAN_REVIEW"
         ? "HUMAN_REVIEW_REQUESTED"
-        : "ITERATION_PAUSED"
+        : "ITERATION_PAUSED";
 
     await sendUpdate(writer, encoder, {
       type: "STATUS_CHANGE",
@@ -943,7 +952,7 @@ async function executePipeline(
           ? `Auto mode: Max iterations (${maxIterations}) reached. Manual review required.`
           : `Auto mode: Iteration ${currentIteration} of ${maxIterations} completed. Continuing research...`
         : `Research paused. Suggested next action: ${assessment.next_action}. Summary: ${assessment.assessment_summary}`,
-    })
+    });
 
     // If we haven't reached max iterations and we're in auto mode, continue with next iteration
     if (autoModeConfig?.isEnabled && !hasReachedMaxIterations) {
@@ -951,42 +960,42 @@ async function executePipeline(
       const updatedAutoModeConfig = {
         ...autoModeConfig,
         currentIteration,
-      }
+      };
 
       // Recursively continue with the next iteration
-      await executePipeline(context, updatedAutoModeConfig)
-      return
+      await executePipeline(context, updatedAutoModeConfig);
+      return;
     }
 
-    return
+    return;
   }
 
   await sendUpdate(writer, encoder, {
     type: "STATUS_CHANGE",
     stage: "COMPLETED",
     message: "Research process successfully completed.",
-  })
+  });
 }
 
 export async function conductResearch(
   legalQuestion: string,
   autoModeConfig?: AutoModeConfig,
   previouslyAnalyzedDocs?: Array<{
-    docId: string
-    title?: string
-    url?: string
-    timestamp?: string
-    status: string
+    docId: string;
+    title?: string;
+    url?: string;
+    timestamp?: string;
+    status: string;
   }>
 ): Promise<ReadableStream<Uint8Array>> {
-  const { stream, writer, encoder, closeStream } = createStream()
+  const { stream, writer, encoder, closeStream } = createStream();
 
-  const ORCHESTRATOR_TIMEOUT_MS = 420000
-  const timeoutController = new AbortController()
+  const ORCHESTRATOR_TIMEOUT_MS = 420000;
+  const timeoutController = new AbortController();
   const timeoutId = setTimeout(
     () => timeoutController.abort(),
     ORCHESTRATOR_TIMEOUT_MS
-  )
+  );
 
   const context: StageContext = {
     writer,
@@ -996,29 +1005,29 @@ export async function conductResearch(
     previouslyAnalyzedDocs: previouslyAnalyzedDocs || [],
     globalDocumentCounter: { value: 0 }, // Initialize counter at 0
     currentIteration: 0, // Start at iteration 0
-  }
-  ;(async () => {
+  };
+  (async () => {
     try {
       if (timeoutController.signal.aborted) {
         throw new Error(
           "Orchestrator timeout: Process exceeded maximum time limit"
-        )
+        );
       }
 
       await sendUpdate(writer, encoder, {
         type: "STATUS_CHANGE",
         stage: "INITIALIZING",
         message: "Research process initializing...",
-      })
+      });
 
-      await executePipeline(context, autoModeConfig)
+      await executePipeline(context, autoModeConfig);
     } catch (error: unknown) {
       const isTimeoutError =
-        error instanceof Error && error.message.includes("timeout")
+        error instanceof Error && error.message.includes("timeout");
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "An unknown orchestrator error occurred."
+          : "An unknown orchestrator error occurred.";
 
       await sendUpdate(writer, encoder, {
         type: "ERROR",
@@ -1026,12 +1035,12 @@ export async function conductResearch(
         message: isTimeoutError
           ? `${errorMessage} The operation took longer than expected.`
           : errorMessage,
-      })
+      });
     } finally {
-      clearTimeout(timeoutId)
-      await closeStream()
+      clearTimeout(timeoutId);
+      await closeStream();
     }
-  })()
+  })();
 
-  return stream
+  return stream;
 }

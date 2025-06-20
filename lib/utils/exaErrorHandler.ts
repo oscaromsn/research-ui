@@ -11,15 +11,15 @@ import {
   isExaParsingError,
   isExaRateLimitError,
   isExaServerError,
-} from "./exaSearchErrors"
+} from "./exaSearchErrors";
 
 /**
  * Result of error handling analysis
  */
 export interface ExaErrorHandlingResult {
-  shouldRetry: boolean
-  retryDelay?: number | undefined
-  maxRetries?: number | undefined
+  shouldRetry: boolean;
+  retryDelay?: number | undefined;
+  maxRetries?: number | undefined;
   errorCategory:
     | "config"
     | "auth"
@@ -28,27 +28,27 @@ export interface ExaErrorHandlingResult {
     | "client"
     | "network"
     | "parsing"
-    | "unknown"
-  userMessage: string
-  technicalDetails?: string | undefined
-  isRecoverable: boolean
-  suggestedAction?: string | undefined
+    | "unknown";
+  userMessage: string;
+  technicalDetails?: string | undefined;
+  isRecoverable: boolean;
+  suggestedAction?: string | undefined;
 }
 
 /**
  * Configuration for retry behavior
  */
 export interface RetryConfig {
-  maxRetries: number
-  maxDelay: number
-  backoffMultiplier: number
+  maxRetries: number;
+  maxDelay: number;
+  backoffMultiplier: number;
 }
 
 const DEFAULT_RETRY_CONFIG: RetryConfig = {
   maxRetries: 3,
   maxDelay: 30000, // 30 seconds
   backoffMultiplier: 2,
-}
+};
 
 function handleConfigError(error: { message: string }): ExaErrorHandlingResult {
   return {
@@ -58,14 +58,14 @@ function handleConfigError(error: { message: string }): ExaErrorHandlingResult {
     technicalDetails: error.message,
     isRecoverable: false,
     suggestedAction: "Check API key configuration and retry the research.",
-  }
+  };
 }
 
 function handleAuthError(
   error: { message: string; isRecoverable: () => boolean },
   attempt: number
 ): ExaErrorHandlingResult {
-  const isRecoverable = error.isRecoverable()
+  const isRecoverable = error.isRecoverable();
   return {
     shouldRetry: !isRecoverable && attempt <= 1,
     retryDelay: isRecoverable ? 1000 : undefined,
@@ -79,13 +79,13 @@ function handleAuthError(
     suggestedAction: isRecoverable
       ? "The system will retry automatically."
       : "Check API key validity and permissions.",
-  }
+  };
 }
 
 function handleRateLimitError(
   error: {
-    message: string
-    getSuggestedRetryDelay: (attempt: number) => number
+    message: string;
+    getSuggestedRetryDelay: (attempt: number) => number;
   },
   attempt: number,
   retryConfig: RetryConfig
@@ -93,8 +93,8 @@ function handleRateLimitError(
   const delay = Math.min(
     error.getSuggestedRetryDelay(attempt),
     retryConfig.maxDelay
-  )
-  const shouldRetry = attempt <= retryConfig.maxRetries
+  );
+  const shouldRetry = attempt <= retryConfig.maxRetries;
 
   return {
     shouldRetry,
@@ -109,14 +109,14 @@ function handleRateLimitError(
     suggestedAction: shouldRetry
       ? `Automatic retry in ${Math.ceil(delay / 1000)} seconds.`
       : "Wait a few minutes before retrying the search.",
-  }
+  };
 }
 
 function handleServerError(
   error: {
-    message: string
-    isTemporary: boolean
-    getSuggestedRetryDelay: (attempt: number) => number
+    message: string;
+    isTemporary: boolean;
+    getSuggestedRetryDelay: (attempt: number) => number;
   },
   attempt: number,
   retryConfig: RetryConfig
@@ -124,8 +124,8 @@ function handleServerError(
   const delay = Math.min(
     error.getSuggestedRetryDelay(attempt),
     retryConfig.maxDelay
-  )
-  const shouldRetry = error.isTemporary && attempt <= retryConfig.maxRetries
+  );
+  const shouldRetry = error.isTemporary && attempt <= retryConfig.maxRetries;
 
   return {
     shouldRetry,
@@ -140,14 +140,14 @@ function handleServerError(
     suggestedAction: shouldRetry
       ? "The system will retry automatically."
       : "Please try your search again in a few minutes.",
-  }
+  };
 }
 
 function handleClientError(
   error: { message: string; isRetryable: () => boolean },
   attempt: number
 ): ExaErrorHandlingResult {
-  const shouldRetry = error.isRetryable() && attempt <= 1
+  const shouldRetry = error.isRetryable() && attempt <= 1;
 
   return {
     shouldRetry,
@@ -162,13 +162,13 @@ function handleClientError(
     suggestedAction: shouldRetry
       ? "The system will retry automatically."
       : "Please check your search parameters and try again.",
-  }
+  };
 }
 
 function handleNetworkError(
   error: {
-    message: string
-    getSuggestedRetryDelay: (attempt: number) => number
+    message: string;
+    getSuggestedRetryDelay: (attempt: number) => number;
   },
   attempt: number,
   retryConfig: RetryConfig
@@ -176,8 +176,8 @@ function handleNetworkError(
   const delay = Math.min(
     error.getSuggestedRetryDelay(attempt),
     retryConfig.maxDelay
-  )
-  const shouldRetry = attempt <= retryConfig.maxRetries
+  );
+  const shouldRetry = attempt <= retryConfig.maxRetries;
 
   return {
     shouldRetry,
@@ -192,14 +192,14 @@ function handleNetworkError(
     suggestedAction: shouldRetry
       ? "The system will retry automatically."
       : "Please check your internet connection and try again.",
-  }
+  };
 }
 
 function handleParsingError(
   error: { message: string },
   attempt: number
 ): ExaErrorHandlingResult {
-  const shouldRetry = attempt <= 1
+  const shouldRetry = attempt <= 1;
 
   return {
     shouldRetry,
@@ -214,7 +214,7 @@ function handleParsingError(
     suggestedAction: shouldRetry
       ? "The system will retry automatically."
       : "Please try your search again later.",
-  }
+  };
 }
 
 function handleUnknownError(error: unknown): ExaErrorHandlingResult {
@@ -228,7 +228,7 @@ function handleUnknownError(error: unknown): ExaErrorHandlingResult {
     technicalDetails: error instanceof Error ? error.message : String(error),
     isRecoverable: true,
     suggestedAction: "Please try your search again.",
-  }
+  };
 }
 
 /**
@@ -239,37 +239,37 @@ export function analyzeExaError(
   attempt = 1,
   config: Partial<RetryConfig> = {}
 ): ExaErrorHandlingResult {
-  const retryConfig = { ...DEFAULT_RETRY_CONFIG, ...config }
+  const retryConfig = { ...DEFAULT_RETRY_CONFIG, ...config };
 
   if (isExaConfigError(error)) {
-    return handleConfigError(error)
+    return handleConfigError(error);
   }
 
   if (isExaAuthError(error)) {
-    return handleAuthError(error, attempt)
+    return handleAuthError(error, attempt);
   }
 
   if (isExaRateLimitError(error)) {
-    return handleRateLimitError(error, attempt, retryConfig)
+    return handleRateLimitError(error, attempt, retryConfig);
   }
 
   if (isExaServerError(error)) {
-    return handleServerError(error, attempt, retryConfig)
+    return handleServerError(error, attempt, retryConfig);
   }
 
   if (isExaClientError(error)) {
-    return handleClientError(error, attempt)
+    return handleClientError(error, attempt);
   }
 
   if (isExaNetworkError(error)) {
-    return handleNetworkError(error, attempt, retryConfig)
+    return handleNetworkError(error, attempt, retryConfig);
   }
 
   if (isExaParsingError(error)) {
-    return handleParsingError(error, attempt)
+    return handleParsingError(error, attempt);
   }
 
-  return handleUnknownError(error)
+  return handleUnknownError(error);
 }
 
 /**
@@ -279,18 +279,18 @@ export async function executeWithRetry<T>(
   searchOperation: () => Promise<T>,
   config: Partial<RetryConfig> = {}
 ): Promise<T> {
-  const retryConfig = { ...DEFAULT_RETRY_CONFIG, ...config }
-  let attempt = 1
-  let lastError: unknown
+  const retryConfig = { ...DEFAULT_RETRY_CONFIG, ...config };
+  let attempt = 1;
+  let lastError: unknown;
 
   while (attempt <= retryConfig.maxRetries + 1) {
     // +1 for initial attempt
     try {
-      return await searchOperation()
+      return await searchOperation();
     } catch (error) {
-      lastError = error
+      lastError = error;
 
-      const analysis = analyzeExaError(error, attempt, retryConfig)
+      const analysis = analyzeExaError(error, attempt, retryConfig);
 
       // Log the error analysis for debugging
       console.warn(`Search attempt ${attempt} failed:`, {
@@ -298,24 +298,26 @@ export async function executeWithRetry<T>(
         shouldRetry: analysis.shouldRetry,
         retryDelay: analysis.retryDelay,
         userMessage: analysis.userMessage,
-      })
+      });
 
       if (!analysis.shouldRetry || attempt > retryConfig.maxRetries) {
         // Don't retry or max retries reached
-        break
+        break;
       }
 
       // Wait before retrying
       if (analysis.retryDelay) {
-        await new Promise(resolve => setTimeout(resolve, analysis.retryDelay))
+        await new Promise((resolve) =>
+          setTimeout(resolve, analysis.retryDelay)
+        );
       }
 
-      attempt++
+      attempt++;
     }
   }
 
   // All retries exhausted, throw the last error
-  throw lastError
+  throw lastError;
 }
 
 /**
@@ -325,44 +327,44 @@ export function createUserErrorMessage(
   error: unknown,
   attempt = 1
 ): {
-  message: string
-  shouldContinue: boolean
-  retryAfter?: number | undefined
+  message: string;
+  shouldContinue: boolean;
+  retryAfter?: number | undefined;
 } {
-  const analysis = analyzeExaError(error, attempt)
+  const analysis = analyzeExaError(error, attempt);
 
   return {
     message: analysis.userMessage,
     shouldContinue: analysis.isRecoverable && !analysis.shouldRetry,
     retryAfter: analysis.retryDelay,
-  }
+  };
 }
 
 /**
  * Determines if a search error should abort the entire research process
  */
 export function shouldAbortResearch(error: unknown): boolean {
-  const analysis = analyzeExaError(error, 1)
+  const analysis = analyzeExaError(error, 1);
 
   // Abort research for non-recoverable configuration and auth errors
   if (analysis.errorCategory === "config" && !analysis.isRecoverable) {
-    return true
+    return true;
   }
 
   if (analysis.errorCategory === "auth" && !analysis.isRecoverable) {
-    return true
+    return true;
   }
 
   // Continue research for other error types (they can be retried or worked around)
-  return false
+  return false;
 }
 
 /**
  * Get a simplified error category for logging and metrics
  */
 export function getErrorCategory(error: unknown): string {
-  const analysis = analyzeExaError(error, 1)
-  return analysis.errorCategory
+  const analysis = analyzeExaError(error, 1);
+  return analysis.errorCategory;
 }
 
 /**
@@ -370,7 +372,7 @@ export function getErrorCategory(error: unknown): string {
  */
 export function isQuotaRelatedError(error: unknown): boolean {
   if (isExaRateLimitError(error)) {
-    return error.rateLimitType === "quota"
+    return error.rateLimitType === "quota";
   }
-  return false
+  return false;
 }
