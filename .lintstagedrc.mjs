@@ -20,7 +20,8 @@ const config = {
   "**/*.{json,jsonc}": ["biome format --write --no-errors-on-unmatched"],
 
   // Configuration files - format only for consistency
-  "{*.config.ts,*.config.mjs,commitlint.config.ts,setupTests.ts,vitest.config.ts,vitest.config.no-api.ts,playwright.config.ts,postcss.config.mjs}": ["biome format --write --no-errors-on-unmatched"],
+  "{*.config.ts,*.config.mjs,commitlint.config.ts,setupTests.ts,vitest.config.ts,vitest.config.no-api.ts,playwright.config.ts,postcss.config.mjs}":
+    ["biome format --write --no-errors-on-unmatched"],
 
   // Package.json changes - run install
   "package.json": [() => "bun install --frozen-lockfile"],
@@ -35,10 +36,12 @@ const config = {
   ],
 
   // Mock files - format only for consistency
-  "__mocks__/**/*.{ts,tsx,js,jsx}": ["biome format --write --no-errors-on-unmatched"],
+  "__mocks__/**/*.{ts,tsx,js,jsx}": [
+    "biome format --write --no-errors-on-unmatched",
+  ],
 
   // Setup test files - format only for consistency
   "setupTests.ts": ["biome format --write --no-errors-on-unmatched"],
 };
 
-export default config;
+export { config };

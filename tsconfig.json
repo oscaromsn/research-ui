@@ -1,17 +1,10 @@
 {
   "compilerOptions": {
     // Environment setup
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "target": "ES2022",
     "module": "esnext",
-    "types": [
-      "node",
-      "vitest/globals"
-    ],
+    "types": ["node", "vitest/globals"],
     "jsx": "preserve",
     "allowJs": true,
     "checkJs": false,
@@ -60,44 +53,19 @@
     // Path mapping
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@components/*": [
-        "components/*"
-      ],
-      "@ui/*": [
-        "components/ui/*"
-      ],
-      "@domain/*": [
-        "components/domain/*"
-      ],
-      "@layout/*": [
-        "components/layout/*"
-      ],
-      "@lib/*": [
-        "lib/*"
-      ],
-      "@state/*": [
-        "lib/state/*"
-      ],
-      "@atoms/*": [
-        "lib/state/atoms/*"
-      ],
-      "@utils/*": [
-        "lib/utils/*"
-      ],
-      "@api/*": [
-        "lib/api/*"
-      ],
-      "@types/*": [
-        "types/*"
-      ]
+      "@/*": ["./*"],
+      "@components/*": ["components/*"],
+      "@ui/*": ["components/ui/*"],
+      "@domain/*": ["components/domain/*"],
+      "@layout/*": ["components/layout/*"],
+      "@lib/*": ["lib/*"],
+      "@state/*": ["lib/state/*"],
+      "@atoms/*": ["lib/state/atoms/*"],
+      "@utils/*": ["lib/utils/*"],
+      "@api/*": ["lib/api/*"],
+      "@types/*": ["types/*"]
     },
-    "typeRoots": [
-      "./node_modules/@types",
-      "./types"
-    ],
+    "typeRoots": ["./node_modules/@types", "./types"],
     "plugins": [
       {
         "name": "next"
