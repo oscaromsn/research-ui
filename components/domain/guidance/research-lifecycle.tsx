@@ -10,8 +10,8 @@ import {
   Pen,
   Search,
 } from "lucide-react";
-import { useMemo } from "react";
 import type { ReactElement } from "react";
+import { useMemo } from "react";
 
 import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
 import { researchStatusAtom } from "@/lib/state/researchAtoms";
