@@ -6,12 +6,11 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import type {
   ResearchStage,
   ResearchUpdate,
 } from "@/app/actions/researchAgentOrchestrator";
+import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 
 // Unmock axios for integration tests that need real HTTP requests
 vi.unmock("axios");

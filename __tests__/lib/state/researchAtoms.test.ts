@@ -4,19 +4,19 @@ import { createStore } from "jotai";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
+  analyzedDocsSummaryAtom,
   type ClientAnalyzedDoc,
   type ClientFinalReport,
   // Types
   type ClientSearchQuery,
   type ClientSynthesis,
-  type ResearchStatus,
-  analyzedDocsSummaryAtom,
   currentResearchStageAtom,
   executiveSummaryDisplayAtom,
   finalReportContentAtom,
   generatedQueriesAtom,
   // Derived atoms
   isResearchLoadingAtom,
+  type ResearchStatus,
   reportSectionsDisplayAtom,
   researchErrorAtom,
   researchLogAtom,

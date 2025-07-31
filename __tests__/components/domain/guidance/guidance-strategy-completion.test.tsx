@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { Provider, createStore } from "jotai";
+import { createStore, Provider } from "jotai";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 

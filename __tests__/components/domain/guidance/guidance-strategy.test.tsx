@@ -1,18 +1,18 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Provider, createStore } from "jotai";
+import { createStore, Provider } from "jotai";
 import type React from "react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GuidanceStrategy } from "@/components/domain/guidance/guidance-strategy";
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
+import type { ClientResearchAssessment } from "@/lib/state/researchAtoms";
 import {
   generatedQueriesAtom,
   researchAssessmentAtom,
   researchLogAtom,
 } from "@/lib/state/researchAtoms";
-import type { ClientResearchAssessment } from "@/lib/state/researchAtoms";
 
 // Mock the useResearchAgent hook
 vi.mock("@/lib/hooks/useResearchAgent", () => ({

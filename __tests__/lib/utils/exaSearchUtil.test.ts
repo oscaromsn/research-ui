@@ -11,6 +11,7 @@ type MockAxiosError = Error & {
   };
   code?: string;
 };
+
 import {
   ExaConfigError,
   isExaAuthError,

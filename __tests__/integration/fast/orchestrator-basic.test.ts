@@ -6,10 +6,10 @@
  * For real API tests, see integration tests with API key requirements
  */
 
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator";
 import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the executeExaSearch function to avoid real search API calls during
 // testing

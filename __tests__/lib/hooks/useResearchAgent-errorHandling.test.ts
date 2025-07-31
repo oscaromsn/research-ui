@@ -1,11 +1,10 @@
 import { createStore } from "jotai";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 import {
   analyzedDocsSummaryAtom,
   researchSessionAtom,
 } from "@/lib/state/researchAtoms";
-import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 
 describe("useResearchAgent - Error Handling", () => {
   let store: ReturnType<typeof createStore>;

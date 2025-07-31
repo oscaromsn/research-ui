@@ -4,9 +4,8 @@
  */
 
 import { beforeAll, beforeEach, expect, vi } from "vitest";
-
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator";
+import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import type { FinalLegalReport } from "@/baml_client/types";
 
 import {

@@ -5,14 +5,14 @@
  * functionality to ensure consistent document ordering in the UI.
  */
 
+import { createStore } from "jotai";
+import { beforeEach, describe, expect, it } from "vitest";
 import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 import {
   analyzedDocsSummaryAtom,
   orderedDocumentsAtom,
   researchSessionAtom,
 } from "@/lib/state/researchAtoms";
-import { createStore } from "jotai";
-import { beforeEach, describe, expect, it } from "vitest";
 
 describe("Document Ordering Atoms", () => {
   let store: ReturnType<typeof createStore>;

@@ -1,11 +1,10 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { Provider, createStore } from "jotai";
-import { createElement } from "react";
+import { createStore, Provider } from "jotai";
 import type { ReactNode } from "react";
+import { createElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
+import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
   analyzedDocsSummaryAtom,

@@ -1,18 +1,18 @@
 import { render, screen, within } from "@testing-library/react";
-import { Provider, createStore } from "jotai";
+import { createStore, Provider } from "jotai";
 import type React from "react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { ReportDrafter } from "@/components/domain/report-generation/report-drafter";
 import { SynthesisReporting } from "@/components/domain/report-generation/synthesis-reporting";
-import {
-  finalReportContentAtom,
-  synthesisDetailsAtom,
-} from "@/lib/state/researchAtoms";
 import type {
   ClientFinalReport,
   ClientSynthesis,
+} from "@/lib/state/researchAtoms";
+import {
+  finalReportContentAtom,
+  synthesisDetailsAtom,
 } from "@/lib/state/researchAtoms";
 
 describe("Phase 4 Completion Validation", () => {

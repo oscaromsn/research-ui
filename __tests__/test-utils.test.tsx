@@ -2,11 +2,11 @@ import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import {
-  MockIntersectionObserver,
-  MockResizeObserver,
   createMockAnalyzedDocument,
   createMockLegalEntity,
   createMockSearchQuery,
+  MockIntersectionObserver,
+  MockResizeObserver,
   renderWithProviders,
 } from "./test-utils";
 

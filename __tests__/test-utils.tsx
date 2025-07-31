@@ -1,5 +1,5 @@
 import { type RenderOptions, render } from "@testing-library/react";
-import { Provider, createStore } from "jotai";
+import { createStore, Provider } from "jotai";
 import type React from "react";
 import type { ReactElement } from "react";
 import { vi } from "vitest";

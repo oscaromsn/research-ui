@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import {
   smartTruncate,
   truncateForBrief,
@@ -5,7 +6,6 @@ import {
   truncateForSummary,
   truncateForTitle,
 } from "@/lib/utils/textTruncation";
-import { describe, expect, test } from "vitest";
 
 describe("smartTruncate", () => {
   test("returns original text when shorter than maxLength", () => {
