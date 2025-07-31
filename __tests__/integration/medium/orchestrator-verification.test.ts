@@ -1,4 +1,4 @@
-/// <reference types="../../types/test-globals" />
+/// <reference types="../../../types/test-globals" />
 
 /**
  * Verification test for Phase 1 completion criteria
