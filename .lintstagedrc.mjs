@@ -12,23 +12,17 @@ const config = {
     "biome format --write --no-errors-on-unmatched",
     // Only run tests if SKIP_RELATED_TESTS is not true
     (filenames) => {
-      if (process.env.SKIP_RELATED_TESTS === 'true') {
-        console.log('⏭️  Skipping related tests (SKIP_RELATED_TESTS=true)');
+      if (process.env.SKIP_RELATED_TESTS === "true") {
         return [];
       }
-      return `vitest related --run --bail=1 --testTimeout=5000 --exclude='**/*integration*' --exclude='**/*e2e*' --reporter=basic ${filenames.join(' ')}`;
+      return `vitest related --run --bail=1 --testTimeout=5000 --exclude='**/*integration*' --exclude='**/*e2e*' --reporter=basic ${filenames.join(" ")}`;
     },
   ],
 
   // BAML files - conditionally generate client
-  "baml_src/**/*.baml": [
-    (filenames) => {
-      console.log(`🤖 BAML files changed: ${filenames.join(', ')}`);
-      return "bun baml:generate";
-    }
-  ],
+  "baml_src/**/*.baml": ["bun baml:generate"],
 
-  // JSON files - format only for consistency  
+  // JSON files - format only for consistency
   "**/*.{json,jsonc}": ["biome format --write --no-errors-on-unmatched"],
 
   // Configuration files - format only for consistency
@@ -36,30 +30,19 @@ const config = {
     ["biome format --write --no-errors-on-unmatched"],
 
   // Package.json changes - run install with better error handling
-  "package.json": [
-    (filenames) => {
-      console.log('📦 Package.json changed - updating dependencies...');
-      return "bun install --frozen-lockfile";
-    }
-  ],
+  "package.json": ["bun install --frozen-lockfile"],
 
   // TypeScript configuration changes - run typecheck
-  "{tsconfig.json,biome.json,next.config.ts}": [
-    (filenames) => {
-      console.log(`⚙️  Configuration files changed: ${filenames.join(', ')}`);
-      return "bun typecheck";
-    }
-  ],
+  "{tsconfig.json,biome.json,next.config.ts}": ["bun typecheck"],
 
   // Test files - format and conditionally test
   "**/*.{test,spec}.{ts,tsx,js,jsx}": [
     "biome format --write --no-errors-on-unmatched",
     (filenames) => {
-      if (process.env.SKIP_RELATED_TESTS === 'true') {
-        console.log('⏭️  Skipping test file validation (SKIP_RELATED_TESTS=true)');
+      if (process.env.SKIP_RELATED_TESTS === "true") {
         return [];
       }
-      return `vitest related --run --bail=1 --testTimeout=5000 --exclude='**/*integration*' --exclude='**/*e2e*' --reporter=basic ${filenames.join(' ')}`;
+      return `vitest related --run --bail=1 --testTimeout=5000 --exclude='**/*integration*' --exclude='**/*e2e*' --reporter=basic ${filenames.join(" ")}`;
     },
   ],
 
@@ -72,4 +55,4 @@ const config = {
   "setupTests.ts": ["biome format --write --no-errors-on-unmatched"],
 };
 
-export default config;
+export { config as default };
