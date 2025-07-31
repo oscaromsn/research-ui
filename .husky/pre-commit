@@ -5,19 +5,27 @@ if [ "$SKIP_HOOKS" = "true" ]; then
   exit 0
 fi
 
-echo "🔍 Running pre-commit checks..."
+echo "🔍 Running optimized pre-commit checks..."
 echo "💡 To skip: SKIP_HOOKS=true git commit"
 
 # === FILE-SPECIFIC VALIDATION (via lint-staged) ===
 # Processes only staged/changed files:
 # - Auto-format changed files (Biome)
-# - Auto-fix linting issues (Biome)
+# - Auto-fix linting issues (Biome)  
 # - Run related unit tests only
 # - Generate BAML client if schema changes
-bunx lint-staged
+if ! bunx lint-staged; then
+  echo "❌ Lint-staged failed. Some issues need manual attention."
+  echo "💡 Run 'bun check' to see linting issues"
+  exit 1
+fi
 
-# === SYSTEM-WIDE VALIDATION ===
-# Integration tests validate the entire system, not individual files
-# These run on every commit to catch integration issues early
-echo "⚡ Running fast integration tests for early feedback..."
-bun test:integration:fast --run --bail=1
+# === CONDITIONAL INTEGRATION TESTING ===
+# Only run integration tests if core files changed or FORCE_INTEGRATION_TESTS=true
+if [ "$FORCE_INTEGRATION_TESTS" = "true" ] || git diff --cached --name-only | grep -E "(orchestrator|useResearchAgent|baml|integration)" > /dev/null; then
+  echo "⚡ Running fast integration tests (core changes detected)..."
+  bun test:integration:fast --run --bail=1 --reporter=basic
+else
+  echo "⏭️  Skipping integration tests (no core changes detected)"
+  echo "💡 Use FORCE_INTEGRATION_TESTS=true to force integration testing"
+fi

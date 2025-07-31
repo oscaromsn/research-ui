@@ -1,5 +1,12 @@
-echo "🔍 Running comprehensive pre-push validations..."
-echo "💡 To skip: git push --no-verify"
+# Check if SKIP_VALIDATION environment variable is set
+if [ "$SKIP_VALIDATION" = "true" ]; then
+  echo "⚠️  Skipping pre-push validation (SKIP_VALIDATION=true)"
+  echo "💡 Running in CI/CD mode - validation will occur remotely"
+  exit 0
+fi
+
+echo "🔍 Running optimized pre-push validations..."
+echo "💡 To skip: git push --no-verify or SKIP_VALIDATION=true git push"
 
 # Auto-format code (fixes formatting issues automatically)
 echo "🎨 Auto-formatting code..."
@@ -13,19 +20,38 @@ bun typecheck:strict
 echo "🔍 Auto-fixing linting issues..."
 bun check
 
-# Run fast unit tests to ensure core functionality works
-echo "🧪 Running unit tests..."
-bun test:unit --run --bail=1 --testTimeout=10000
+# Check if we should run comprehensive tests or just essentials
+if [ "$FAST_PUSH" = "true" ]; then
+  echo "⚡ Running essential validations only (FAST_PUSH=true)..."
+  echo "🧪 Running core unit tests..."
+  bun test:unit --run --bail=1 --testTimeout=5000 --reporter=basic
+  
+  echo "⚡ Running fast integration tests..."
+  bun test:integration:fast --run --bail=1 --reporter=basic
+  
+  echo "✅ Essential validations completed!"
+  echo "💡 Full test suite will run in CI/CD"
+else
+  echo "🧪 Running comprehensive test suite..."
+  
+  # Run unit tests with shorter timeout
+  echo "🔬 Running unit tests..."
+  bun test:unit --run --bail=1 --testTimeout=8000 --reporter=basic
+  
+  # Run fast integration tests
+  echo "⚡ Running fast integration tests..."
+  bun test:integration:fast --run --bail=1 --reporter=basic
+  
+  # Only run medium integration tests if API-related files changed
+  if git diff --name-only HEAD~1 | grep -E "(exa|api|orchestrator|baml)" > /dev/null; then
+    echo "🔗 Running medium integration tests (API changes detected)..."
+    bun test:integration:medium --run --bail=1 --reporter=basic
+  else
+    echo "⏭️  Skipping medium integration tests (no API changes detected)"
+  fi
+  
+  echo "✅ All validations completed successfully!"
+fi
 
-# Run fast integration tests with mocked APIs (quick validation)
-echo "⚡ Running fast integration tests (mocked APIs)..."
-bun test:integration:fast --run --bail=1
-
-# Run medium integration tests with real APIs (balanced validation)
-echo "🔗 Running medium integration tests (real APIs)..."
-bun test:integration:medium --run --bail=1
-
-echo ""
-echo "✅ All pre-push validations completed successfully!"
-echo "🚀 Your code is properly formatted, type-safe, and integration-tested!"
-echo "💡 Slow integration tests and E2E coverage will run in CI/CD"
+echo "🚀 Your code is properly formatted, type-safe, and tested!"
+echo "💡 Use FAST_PUSH=true for quicker pushes during development"

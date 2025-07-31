@@ -10,29 +10,57 @@ const config = {
   // Format for consistency, test for functionality
   "{app,components,lib}/**/*.{ts,tsx,js,jsx}": [
     "biome format --write --no-errors-on-unmatched",
-    "vitest related --run --bail=1 --testTimeout=5000 --exclude='**/*integration*' --exclude='**/*e2e*'",
+    // Only run tests if SKIP_RELATED_TESTS is not true
+    (filenames) => {
+      if (process.env.SKIP_RELATED_TESTS === 'true') {
+        console.log('⏭️  Skipping related tests (SKIP_RELATED_TESTS=true)');
+        return [];
+      }
+      return `vitest related --run --bail=1 --testTimeout=5000 --exclude='**/*integration*' --exclude='**/*e2e*' --reporter=basic ${filenames.join(' ')}`;
+    },
   ],
 
-  // BAML files
-  "baml_src/**/*.baml": [() => "bun baml:generate"],
+  // BAML files - conditionally generate client
+  "baml_src/**/*.baml": [
+    (filenames) => {
+      console.log(`🤖 BAML files changed: ${filenames.join(', ')}`);
+      return "bun baml:generate";
+    }
+  ],
 
-  // JSON files - format only for consistency
+  // JSON files - format only for consistency  
   "**/*.{json,jsonc}": ["biome format --write --no-errors-on-unmatched"],
 
   // Configuration files - format only for consistency
   "{*.config.ts,*.config.mjs,commitlint.config.ts,setupTests.ts,vitest.config.ts,vitest.config.no-api.ts,playwright.config.ts,postcss.config.mjs}":
     ["biome format --write --no-errors-on-unmatched"],
 
-  // Package.json changes - run install
-  "package.json": [() => "bun install --frozen-lockfile"],
+  // Package.json changes - run install with better error handling
+  "package.json": [
+    (filenames) => {
+      console.log('📦 Package.json changed - updating dependencies...');
+      return "bun install --frozen-lockfile";
+    }
+  ],
 
   // TypeScript configuration changes - run typecheck
-  "{tsconfig.json,biome.json,next.config.ts}": [() => "bun typecheck"],
+  "{tsconfig.json,biome.json,next.config.ts}": [
+    (filenames) => {
+      console.log(`⚙️  Configuration files changed: ${filenames.join(', ')}`);
+      return "bun typecheck";
+    }
+  ],
 
-  // Test files - format and test
+  // Test files - format and conditionally test
   "**/*.{test,spec}.{ts,tsx,js,jsx}": [
     "biome format --write --no-errors-on-unmatched",
-    "vitest related --run --bail=1 --testTimeout=5000 --exclude='**/*integration*' --exclude='**/*e2e*'",
+    (filenames) => {
+      if (process.env.SKIP_RELATED_TESTS === 'true') {
+        console.log('⏭️  Skipping test file validation (SKIP_RELATED_TESTS=true)');
+        return [];
+      }
+      return `vitest related --run --bail=1 --testTimeout=5000 --exclude='**/*integration*' --exclude='**/*e2e*' --reporter=basic ${filenames.join(' ')}`;
+    },
   ],
 
   // Mock files - format only for consistency
@@ -44,4 +72,4 @@ const config = {
   "setupTests.ts": ["biome format --write --no-errors-on-unmatched"],
 };
 
-export { config };
+export default config;

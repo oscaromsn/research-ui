@@ -22,7 +22,7 @@ $ pnpm add @boundaryml/baml
 
 import { b } from '../index';
 import type { Check, Checked  } from "../types";
-import type { Image, Audio } from "@boundaryml/baml";
+import type { Image, Audio, Pdf, Video } from "@boundaryml/baml";
 
 import type {  AnalyzedDocument,  DetailedReasoning,  FinalLegalReport,  LegalEntity,  LegalQueryAnalysis,  LegalReportSection,  NextActionType,  OverallSynthesis,  ReasoningStep,  ResearchAssessment,  SearchQueryItem,  SearchResultItem,  SynthesizedTopic } from "../types"
 
