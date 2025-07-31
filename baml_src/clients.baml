@@ -10,10 +10,11 @@ client<llm> QueryGeneration {
 }
 
 client<llm> DocumentAnalysis {
-  provider openai
+  provider "openai-generic"
   options {
-    model "gpt-4.1-mini"
-    api_key env.OPENAI_API_KEY
+    base_url "https://api.cerebras.ai/v1"
+    model "llama-4-scout-17b-16e-instruct"
+    api_key env.CEREBRAS_API_KEY
   }
 }
 
