@@ -1,6 +1,6 @@
-import { JotaiProvider } from "@/components/providers/jotai-provider";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { JotaiProvider } from "@/components/providers/jotai-provider";
 
 import "./globals.css";
 

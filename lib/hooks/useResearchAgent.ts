@@ -2,12 +2,18 @@
 
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useState } from "react";
-
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import type {
   ResearchStage,
   ResearchUpdate,
 } from "@/app/actions/researchAgentOrchestrator";
+import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
+import type {
+  ClientAnalyzedDoc,
+  ClientFinalReport,
+  ClientResearchAssessment,
+  ClientSynthesis,
+  ResearchStatus,
+} from "@/lib/state/researchAtoms";
 import {
   analyzedDocsSummaryAtom,
   autoModeStateAtom,
@@ -19,13 +25,6 @@ import {
   researchStatusAtom,
   resetResearchStateAtom,
   synthesisDetailsAtom,
-} from "@/lib/state/researchAtoms";
-import type {
-  ClientAnalyzedDoc,
-  ClientFinalReport,
-  ClientResearchAssessment,
-  ClientSynthesis,
-  ResearchStatus,
 } from "@/lib/state/researchAtoms";
 
 interface QueryData {

@@ -7,10 +7,10 @@
  * Base class for all Exa API errors
  */
 export abstract class ExaError extends Error {
-  public readonly status?: number;
-  public readonly response?: unknown;
-  public readonly requestId?: string;
-  public readonly query?: string;
+  readonly status?: number;
+  readonly response?: unknown;
+  readonly requestId?: string;
+  readonly query?: string;
 
   constructor(
     message: string,
@@ -68,8 +68,8 @@ export abstract class ExaError extends Error {
  * Orchestrator can implement exponential backoff retry logic
  */
 export class ExaRateLimitError extends ExaError {
-  public readonly retryAfter?: number;
-  public readonly rateLimitType?: "requests" | "quota" | "concurrent";
+  readonly retryAfter?: number;
+  readonly rateLimitType?: "requests" | "quota" | "concurrent";
 
   constructor(
     message: string,
@@ -108,7 +108,7 @@ export class ExaRateLimitError extends ExaError {
  * Usually indicates invalid API key or insufficient permissions
  */
 export class ExaAuthError extends ExaError {
-  public readonly authType:
+  readonly authType:
     | "invalid_key"
     | "insufficient_permissions"
     | "expired_key"
@@ -147,7 +147,7 @@ export class ExaAuthError extends ExaError {
  * These are typically temporary and can be retried
  */
 export class ExaServerError extends ExaError {
-  public readonly isTemporary: boolean;
+  readonly isTemporary: boolean;
 
   constructor(
     message: string,
@@ -179,8 +179,8 @@ export class ExaServerError extends ExaError {
  * These typically indicate problems with the request format/content
  */
 export class ExaClientError extends ExaError {
-  public readonly errorCode?: string;
-  public readonly validationErrors?: Array<{
+  readonly errorCode?: string;
+  readonly validationErrors?: Array<{
     field: string;
     message: string;
     value?: unknown;
@@ -225,8 +225,8 @@ export class ExaClientError extends ExaError {
  * These can often be retried with backoff
  */
 export class ExaNetworkError extends ExaError {
-  public readonly isTimeout: boolean;
-  public readonly isConnectionError: boolean;
+  readonly isTimeout: boolean;
+  readonly isConnectionError: boolean;
 
   constructor(
     message: string,
@@ -261,7 +261,7 @@ export class ExaNetworkError extends ExaError {
  * Indicates missing or invalid configuration (API key, etc.)
  */
 export class ExaConfigError extends ExaError {
-  public readonly configType:
+  readonly configType:
     | "missing_api_key"
     | "invalid_base_url"
     | "invalid_timeout"
@@ -295,8 +295,8 @@ export class ExaConfigError extends ExaError {
  * When the API returns data that doesn't match expected format
  */
 export class ExaParsingError extends ExaError {
-  public readonly expectedFormat?: string;
-  public readonly actualFormat?: string;
+  readonly expectedFormat?: string;
+  readonly actualFormat?: string;
 
   constructor(
     message: string,

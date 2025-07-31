@@ -1,7 +1,7 @@
 "use server";
 
-import { b } from "@/baml_client";
 import type { partial_types } from "@/baml_client";
+import { b } from "@/baml_client";
 import type {
   AnalyzedDocument,
   FinalLegalReport,
@@ -21,6 +21,8 @@ interface OrderedSearchResultItem extends SearchResultItem {
   searchQueryId: string; // Which query produced this result
   fetchTimestamp: string; // ISO timestamp for debugging
 }
+
+import type { BamlStream } from "@boundaryml/baml";
 import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
 import {
   smartTruncate,
@@ -29,7 +31,6 @@ import {
   truncateForSummary,
   truncateForTitle,
 } from "@/lib/utils/textTruncation";
-import type { BamlStream } from "@boundaryml/baml";
 
 // Research pipeline stage enum
 export type ResearchStage =
