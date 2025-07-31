@@ -25,19 +25,19 @@ const createMockReasoningStep = (summary: string): ReasoningStep => ({
 
 const createMockDetailedReasoning = (): DetailedReasoning => ({
   analyze_legal_question: createMockReasoningStep(
-    "Analyzed the legal question comprehensively",
+    "Analyzed the legal question comprehensively"
   ),
   consider_relevant_legal_principles: createMockReasoningStep(
-    "Considered relevant legal principles",
+    "Considered relevant legal principles"
   ),
   formulate_search_queries_strategy: createMockReasoningStep(
-    "Formulated effective search strategy",
+    "Formulated effective search strategy"
   ),
   specify_expected_information_strategy: createMockReasoningStep(
-    "Specified expected information",
+    "Specified expected information"
   ),
   ensure_comprehensive_coverage_strategy: createMockReasoningStep(
-    "Ensured comprehensive coverage",
+    "Ensured comprehensive coverage"
   ),
 });
 
@@ -198,5 +198,4 @@ export const b = {
   },
 };
 
-// Export default for default imports
-export default b;
+// b is already exported above as export const
