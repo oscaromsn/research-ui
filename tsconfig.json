@@ -17,6 +17,8 @@
     "noEmit": true,
     "verbatimModuleSyntax": true,
     "removeComments": true,
+    // Monorepo compatibility
+    "composite": true,
     // Strict type checking
     "strict": true,
     "skipLibCheck": true,
@@ -60,7 +62,6 @@
       "@layout/*": ["components/layout/*"],
       "@lib/*": ["lib/*"],
       "@state/*": ["lib/state/*"],
-      "@atoms/*": ["lib/state/atoms/*"],
       "@utils/*": ["lib/utils/*"],
       "@api/*": ["lib/api/*"],
       "@types/*": ["types/*"]
@@ -72,11 +73,6 @@
       }
     ]
   },
-  "plugins": [
-    {
-      "name": "next"
-    }
-  ],
   "include": [
     "**/*.ts",
     "**/*.tsx",
