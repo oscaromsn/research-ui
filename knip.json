@@ -15,28 +15,17 @@
     "unlisted": "warn",
     "unresolved": "error"
   },
-  "entry": [
-    "*.config.{js,mjs,ts}",
-    "__tests__/**",
-    "app/actions/**/*.ts",
-    "app/layout.tsx!",
-    "app/page.tsx!",
-    "e2e/**/*.ts!",
-    "next.config.ts!",
-    "setupTests.ts!"
+  "entry": ["vitest.config.no-api.ts"],
+  "project": [
+    "app/**/*.{ts,tsx}!",
+    "components/**/*.{ts,tsx}!",
+    "lib/**/*.{ts,tsx}!",
+    "baml_src/**/*.baml!",
+    "__tests__/**/*.{ts,tsx}",
+    "__mocks__/**/*.ts",
+    "e2e/**/*.ts"
   ],
-  "project": ["**/*.{ts,tsx,js,jsx}"],
-  "ignore": [
-    ".claude/**",
-    ".next/**",
-    "baml_client/**",
-    "coverage/**",
-    "node_modules/**",
-    "public/**",
-    "__tests/utils/**",
-    "types/test-globals.d.ts",
-    "vitest.config.no-api.ts"
-  ],
+  "ignore": [],
   "ignoreDependencies": [
     "@next/env",
     "postcss",
@@ -44,20 +33,12 @@
     "tw-animate-css"
   ],
   "ignoreExportsUsedInFile": {
+    "class": false,
+    "enum": false,
+    "function": false,
     "interface": false,
+    "member": false,
     "type": false
   },
-  "includeEntryExports": true,
-  "paths": {
-    "@/*": ["./*"],
-    "@components/*": ["./components/*"],
-    "@ui/*": ["./components/ui/*"],
-    "@domain/*": ["./components/domain/*"],
-    "@layout/*": ["./components/layout/*"],
-    "@lib/*": ["./lib/*"],
-    "@state/*": ["./lib/state/*"],
-    "@utils/*": ["./lib/utils/*"],
-    "@api/*": ["./lib/api/*"],
-    "@types/*": ["./types/*"]
-  }
+  "includeEntryExports": true
 }
