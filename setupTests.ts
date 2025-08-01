@@ -385,8 +385,11 @@ const setupDOM = () => {
 
     // Copy all dom.window properties to global
     Object.keys(dom.window).forEach((property) => {
-      if (typeof global[property] === "undefined") {
-        global[property] = dom.window[property];
+      const globalRecord = global as Record<string, unknown>;
+      if (typeof globalRecord[property] === "undefined") {
+        globalRecord[property] = (dom.window as Record<string, unknown>)[
+          property
+        ];
       }
     });
   }
