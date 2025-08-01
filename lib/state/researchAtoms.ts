@@ -43,6 +43,7 @@ export interface ClientLegalEntity {
     | "LegalConcept"
     | "Jurisdiction";
   details?: string;
+  confidence?: number; // 0-1 confidence score for entity extraction
 }
 
 /**

@@ -1,11 +1,17 @@
 import type { ClientLegalEntity } from "@/lib/state/researchAtoms";
+import { cn } from "@/lib/utils";
 
 interface EntityBadgeProps {
   entity: ClientLegalEntity;
+  size?: "sm" | "md" | "lg";
+  interactive?: boolean;
+  showConfidence?: boolean;
+  onClick?: (entity: ClientLegalEntity) => void;
   className?: string;
 }
 
-export function getEntityStyle(type: string): string {
+// Internal function for entity styling - no longer exported to fix knip warning
+function getEntityStyle(type: string): string {
   const styles = {
     Case: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
     Statute:
@@ -25,15 +31,68 @@ export function getEntityStyle(type: string): string {
   return styles[type as keyof typeof styles] || styles.default;
 }
 
-export function EntityBadge({ entity, className = "" }: EntityBadgeProps) {
+export function EntityBadge({
+  entity,
+  size = "md",
+  interactive = true,
+  showConfidence = false,
+  onClick,
+  className = "",
+}: EntityBadgeProps) {
   const entityStyle = getEntityStyle(entity.type);
+
+  const sizeClasses = {
+    sm: "px-1.5 py-0.5 text-xs",
+    md: "px-2 py-1 text-sm",
+    lg: "px-3 py-1.5 text-base",
+  };
+
+  const handleClick = () => {
+    if (interactive && onClick) {
+      onClick(entity);
+    }
+  };
+
+  if (interactive) {
+    return (
+      <button
+        type="button"
+        className={cn(
+          "inline-flex items-center rounded-full border-0 font-medium transition-opacity",
+          entityStyle,
+          sizeClasses[size],
+          "cursor-pointer hover:opacity-80",
+          className
+        )}
+        title={entity.details}
+        onClick={handleClick}
+      >
+        <span>{entity.name}</span>
+        {showConfidence && entity.confidence && (
+          <span className="ml-1 text-xs opacity-75">
+            {Math.round(entity.confidence * 100)}%
+          </span>
+        )}
+      </button>
+    );
+  }
 
   return (
     <span
-      className={`rounded px-1.5 py-0.5 text-[10px] ${entityStyle} ${className}`}
+      className={cn(
+        "inline-flex items-center rounded-full font-medium",
+        entityStyle,
+        sizeClasses[size],
+        className
+      )}
       title={entity.details}
     >
-      {entity.name}
+      <span>{entity.name}</span>
+      {showConfidence && entity.confidence && (
+        <span className="ml-1 text-xs opacity-75">
+          {Math.round(entity.confidence * 100)}%
+        </span>
+      )}
     </span>
   );
 }
