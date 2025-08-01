@@ -21,6 +21,8 @@ describe("Phase 4 Completion Validation", () => {
 
   beforeEach(() => {
     store = createStore();
+    // Clear any residual DOM state
+    document.body.innerHTML = "";
   });
 
   const JotaiProvider = ({ children }: { children: ReactNode }) => (
