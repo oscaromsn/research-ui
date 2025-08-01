@@ -11,6 +11,13 @@ export function renderWithProviders(
   ui: ReactElement,
   options?: Omit<RenderOptions, "wrapper">
 ) {
+  // Ensure DOM environment is available before rendering
+  if (typeof document === "undefined") {
+    throw new Error(
+      "DOM environment not available for renderWithProviders. Check vitest configuration."
+    );
+  }
+
   const AllProviders = ({ children }: { children: React.ReactNode }) => {
     const testStore = createStore();
     return <Provider store={testStore}>{children}</Provider>;

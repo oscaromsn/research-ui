@@ -3,12 +3,11 @@ import react from "@vitejs/plugin-react";
 import { config } from "dotenv";
 import { defineConfig } from "vitest/config";
 
-// biome-ignore lint/style/noDefaultExport: Vitest requires default export for config
 export default defineConfig({
   plugins: [react()],
   test: {
-    // Environment & Performance
-    environment: "happy-dom",
+    // Environment & Performance - try jsdom instead of happy-dom
+    environment: "jsdom",
     globals: true,
     passWithNoTests: true, // Don't fail when no tests exist yet
     watch: true, // Enable watch by default for TDD workflow
@@ -17,6 +16,17 @@ export default defineConfig({
     mockReset: true, // Reset mocks before each test
     clearMocks: true, // Clear mock calls before each test
     restoreMocks: true, // Restore original implementations after each test
+
+    // Enhanced Mock Support
+    unstubEnvs: true, // Allow environment variable modifications
+    unstubGlobals: true, // Allow global modifications
+
+    // DOM Environment Configuration for jsdom
+    environmentOptions: {
+      jsdom: {
+        resources: "usable",
+      },
+    },
 
     // Type Checking
     typecheck: {
@@ -145,15 +155,7 @@ export default defineConfig({
       },
     },
 
-    // Concurrent execution for faster feedback
-    pool: "threads",
-    poolOptions: {
-      threads: {
-        // Use reasonable concurrency
-        minThreads: 1,
-        maxThreads: process.env.CI ? 2 : 3,
-      },
-    },
+    // Pool configuration moved to top for DOM environment setup
 
     // Force exit after tests complete to prevent hanging
     forceRerunTriggers: ["**/setupTests.ts", "**/vitest.config.ts"],

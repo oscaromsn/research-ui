@@ -364,6 +364,12 @@ beforeAll(() => {
   setupConsole();
   setupStderrFiltering();
 
+  // Ensure DOM environment is available - critical for React component tests
+  if (typeof document === "undefined") {
+    // This should not happen with happy-dom, but provide fallback
+    console.warn("DOM environment not available in setupTests.ts");
+  }
+
   // Set up global mocks
   global.ResizeObserver = EnhancedResizeObserverMock as typeof ResizeObserver;
   global.IntersectionObserver =
@@ -414,9 +420,15 @@ beforeEach(() => {
   // Clear mocks but preserve implementations
   vi.clearAllMocks();
 
-  // Reset DOM state
-  document.body.innerHTML = "";
-  document.head.innerHTML = "";
+  // Reset DOM state - ensure DOM is available
+  if (typeof document !== "undefined") {
+    document.body.innerHTML = "";
+    document.head.innerHTML = "";
+  } else {
+    console.warn(
+      "DOM not available in beforeEach - this may cause React component tests to fail"
+    );
+  }
 
   // Reset URL
   if (typeof window !== "undefined") {
