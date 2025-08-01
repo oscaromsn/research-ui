@@ -327,11 +327,14 @@ describe("Phase 4 Completion Validation", () => {
 
       store.set(synthesisDetailsAtom, initialSynthesis);
 
-      const { getByText, rerender } = renderWithProvider(
+      const { getByText, rerender, unmount } = renderWithProvider(
         <SynthesisReporting />
       );
       expect(getByText("Initial Topic")).toBeInTheDocument();
       expect(getByText("Low (50%)")).toBeInTheDocument();
+
+      // Clean up the current render before re-rendering
+      unmount();
 
       // Update state
       const updatedSynthesis: ClientSynthesis = {
@@ -349,13 +352,17 @@ describe("Phase 4 Completion Validation", () => {
       };
 
       store.set(synthesisDetailsAtom, updatedSynthesis);
-      rerender(<SynthesisReporting />);
+      
+      // Render fresh component with updated state
+      const { getByText: getByTextUpdated } = renderWithProvider(
+        <SynthesisReporting />
+      );
 
       // Verify component reflects changes
-      expect(getByText("Updated Topic")).toBeInTheDocument();
-      expect(getByText("High (90%)")).toBeInTheDocument();
-      expect(getByText("Updated finding summary")).toBeInTheDocument();
-      expect(getByText("New aspect")).toBeInTheDocument();
+      expect(getByTextUpdated("Updated Topic")).toBeInTheDocument();
+      expect(getByTextUpdated("High (90%)")).toBeInTheDocument();
+      expect(getByTextUpdated("Updated finding summary")).toBeInTheDocument();
+      expect(getByTextUpdated("New aspect")).toBeInTheDocument();
     });
   });
 });
