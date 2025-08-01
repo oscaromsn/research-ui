@@ -413,6 +413,14 @@ beforeAll(() => {
     getEntriesByName: vi.fn(() => []),
     getEntriesByType: vi.fn(() => []),
   };
+
+  // Mock Next.js font imports to prevent test failures
+  vi.mock("next/font/google", () => ({
+    Inter: vi.fn(() => ({
+      className: "mock-inter-font",
+      style: { fontFamily: "'Inter', sans-serif" },
+    })),
+  }));
 });
 
 // ===== TEST LIFECYCLE =====
