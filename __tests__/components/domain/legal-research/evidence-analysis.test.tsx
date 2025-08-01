@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import "../../../dom-setup";
+import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createStore, Provider } from "jotai";
 import type React from "react";
@@ -104,51 +105,47 @@ describe("EvidenceAnalysis Component Integration", () => {
   ];
 
   it("renders the component with initial state", () => {
-    renderWithProvider(<EvidenceAnalysis />);
+    const { getByText } = renderWithProvider(<EvidenceAnalysis />);
 
-    expect(screen.getByText("Evidence & Analysis")).toBeInTheDocument();
+    expect(getByText("Evidence & Analysis")).toBeInTheDocument();
   });
 
   it("displays analyzed documents from atom state", () => {
     store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
 
-    renderWithProvider(<EvidenceAnalysis />);
+    const { getByText, getAllByText } = renderWithProvider(
+      <EvidenceAnalysis />
+    );
 
     // Check that all documents are displayed
     expect(
-      screen.getByText("Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)")
+      getByText("Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)")
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
+      getByText(
         "Richards Corp. v. Global Enterprises, 567 F.3d 890 (9th Cir. 2022)"
       )
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("California Civil Code § 1511")
-    ).toBeInTheDocument();
+    expect(getByText("California Civil Code § 1511")).toBeInTheDocument();
 
     // Check that summaries are displayed (using getAllByText since they appear in both list and detail)
     expect(
-      screen.getAllByText(
-        /COVID-19 related restrictions constituted force majeure/
-      )
+      getAllByText(/COVID-19 related restrictions constituted force majeure/)
     ).toHaveLength(2);
     expect(
-      screen.getByText(
-        /doctrine of impossibility requires more than mere hardship/
-      )
+      getByText(/doctrine of impossibility requires more than mere hardship/)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Performance of an obligation is excused/)
+      getByText(/Performance of an obligation is excused/)
     ).toBeInTheDocument();
   });
 
   it("handles document selection through selectedAnalyzedDocIdAtom", async () => {
     store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
 
-    renderWithProvider(<EvidenceAnalysis />);
+    const { getByText } = renderWithProvider(<EvidenceAnalysis />);
 
-    const doc1Element = screen.getByText(
+    const doc1Element = getByText(
       "Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)"
     );
 
@@ -166,16 +163,16 @@ describe("EvidenceAnalysis Component Integration", () => {
     store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
     store.set(selectedAnalyzedDocIdAtom, "doc-1");
 
-    renderWithProvider(<EvidenceAnalysis />);
+    const { getByText, getAllByText } = renderWithProvider(
+      <EvidenceAnalysis />
+    );
 
     // Check that relevance score is displayed
-    expect(screen.getByText("9/10")).toBeInTheDocument();
+    expect(getByText("9/10")).toBeInTheDocument();
 
     // Check that the summary from the selected document is displayed
     expect(
-      screen.getAllByText(
-        /COVID-19 related restrictions constituted force majeure/
-      )
+      getAllByText(/COVID-19 related restrictions constituted force majeure/)
     ).toHaveLength(2);
   });
 
@@ -183,10 +180,10 @@ describe("EvidenceAnalysis Component Integration", () => {
     store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
     store.set(selectedAnalyzedDocIdAtom, "doc-1");
 
-    renderWithProvider(<EvidenceAnalysis />);
+    const { getByText } = renderWithProvider(<EvidenceAnalysis />);
 
     // Click on a different document
-    const doc2Element = screen.getByText(
+    const doc2Element = getByText(
       "Richards Corp. v. Global Enterprises, 567 F.3d 890 (9th Cir. 2022)"
     );
     await userEvent.click(
@@ -202,13 +199,11 @@ describe("EvidenceAnalysis Component Integration", () => {
     store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
     store.set(selectedAnalyzedDocIdAtom, "doc-2");
 
-    renderWithProvider(<EvidenceAnalysis />);
+    const { getByText } = renderWithProvider(<EvidenceAnalysis />);
 
-    const doc2Container = screen
-      .getByText(
-        "Richards Corp. v. Global Enterprises, 567 F.3d 890 (9th Cir. 2022)"
-      )
-      .closest("button");
+    const doc2Container = getByText(
+      "Richards Corp. v. Global Enterprises, 567 F.3d 890 (9th Cir. 2022)"
+    ).closest("button");
 
     // Check that the selected document has highlighting classes
     expect(doc2Container).toHaveClass(
@@ -221,9 +216,9 @@ describe("EvidenceAnalysis Component Integration", () => {
   it("opens case modal when document is clicked and modal is supported", async () => {
     store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
 
-    renderWithProvider(<EvidenceAnalysis />);
+    const { getByText } = renderWithProvider(<EvidenceAnalysis />);
 
-    const doc1Element = screen.getByText(
+    const doc1Element = getByText(
       "Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)"
     );
     await userEvent.click(
@@ -272,18 +267,18 @@ describe("EvidenceAnalysis Component Integration", () => {
   it("handles empty document list gracefully", () => {
     store.set(analyzedDocsSummaryAtom, []);
 
-    renderWithProvider(<EvidenceAnalysis />);
+    const { getByText } = renderWithProvider(<EvidenceAnalysis />);
 
-    expect(screen.getByText("Evidence & Analysis")).toBeInTheDocument();
+    expect(getByText("Evidence & Analysis")).toBeInTheDocument();
     // Should not crash and should show empty state appropriately
   });
 
   it("handles keyboard navigation for document selection", async () => {
     store.set(analyzedDocsSummaryAtom, mockAnalyzedDocs);
 
-    renderWithProvider(<EvidenceAnalysis />);
+    const { getByText } = renderWithProvider(<EvidenceAnalysis />);
 
-    const doc1Element = screen.getByText(
+    const doc1Element = getByText(
       "Smith v. Jones, 345 F.Supp. 2d 123 (N.D. Cal. 2023)"
     );
     const clickableElement =

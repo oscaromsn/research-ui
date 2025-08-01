@@ -1,4 +1,5 @@
-import { act, render, screen, within } from "@testing-library/react";
+import "../../../dom-setup";
+import { act, render, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createStore, Provider } from "jotai";
 import type React from "react";
@@ -55,29 +56,29 @@ describe("ReportDrafter Component Integration", () => {
   };
 
   it("renders the component with initial state", () => {
-    renderWithProvider(<ReportDrafter />);
+    const { getByText, getAllByRole } = renderWithProvider(<ReportDrafter />);
 
-    expect(screen.getByText("Document Structure")).toBeInTheDocument();
+    expect(getByText("Document Structure")).toBeInTheDocument();
     // Should show action buttons
-    expect(screen.getAllByRole("button")).toHaveLength(3); // Save, Download, Share
+    expect(getAllByRole("button")).toHaveLength(3); // Save, Download, Share
   });
 
   it("displays report title from atom state", () => {
     store.set(finalReportContentAtom, mockReportData);
 
-    renderWithProvider(<ReportDrafter />);
+    const { getByDisplayValue } = renderWithProvider(<ReportDrafter />);
 
     expect(
-      screen.getByDisplayValue("Force Majeure Analysis in COVID-19 Context")
+      getByDisplayValue("Force Majeure Analysis in COVID-19 Context")
     ).toBeInTheDocument();
   });
 
   it("allows editing the report title", async () => {
     store.set(finalReportContentAtom, mockReportData);
 
-    renderWithProvider(<ReportDrafter />);
+    const { getByDisplayValue } = renderWithProvider(<ReportDrafter />);
 
-    const titleInput = screen.getByDisplayValue(
+    const titleInput = getByDisplayValue(
       "Force Majeure Analysis in COVID-19 Context"
     );
 
@@ -92,10 +93,10 @@ describe("ReportDrafter Component Integration", () => {
   it("displays executive summary from atom state", () => {
     store.set(finalReportContentAtom, mockReportData);
 
-    renderWithProvider(<ReportDrafter />);
+    const { getByText } = renderWithProvider(<ReportDrafter />);
 
     expect(
-      screen.getByText(
+      getByText(
         /This report analyzes the legal framework surrounding force majeure clauses/
       )
     ).toBeInTheDocument();
@@ -104,10 +105,10 @@ describe("ReportDrafter Component Integration", () => {
   it("displays report sections from atom state", () => {
     store.set(finalReportContentAtom, mockReportData);
 
-    renderWithProvider(<ReportDrafter />);
+    const { getByText } = renderWithProvider(<ReportDrafter />);
 
     // Check section titles in document structure (use more specific selectors)
-    const docStructure = screen.getByText("Document Structure").closest("div");
+    const docStructure = getByText("Document Structure").closest("div");
     if (!docStructure) {
       throw new Error("Document Structure container not found");
     }
@@ -124,12 +125,12 @@ describe("ReportDrafter Component Integration", () => {
 
     // Check section content in main area
     expect(
-      screen.getByText(
+      getByText(
         /The analysis reveals that courts have taken varying approaches/
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
+      getByText(
         /Under traditional contract law, force majeure clauses excuse performance/
       )
     ).toBeInTheDocument();
@@ -138,10 +139,10 @@ describe("ReportDrafter Component Integration", () => {
   it("displays conclusion from atom state", () => {
     store.set(finalReportContentAtom, mockReportData);
 
-    renderWithProvider(<ReportDrafter />);
+    const { getByText } = renderWithProvider(<ReportDrafter />);
 
     expect(
-      screen.getByText(
+      getByText(
         /The legal landscape surrounding force majeure during COVID-19 continues to evolve/
       )
     ).toBeInTheDocument();
@@ -194,10 +195,10 @@ describe("ReportDrafter Component Integration", () => {
 
     store.set(finalReportContentAtom, partialReport);
 
-    renderWithProvider(<ReportDrafter />);
+    const { getByText } = renderWithProvider(<ReportDrafter />);
 
     // Check that completed sections have different styling than incomplete ones
-    const docStructure = screen.getByText("Document Structure").closest("div");
+    const docStructure = getByText("Document Structure").closest("div");
     if (!docStructure) {
       throw new Error("Document Structure container not found");
     }
@@ -228,11 +229,11 @@ describe("ReportDrafter Component Integration", () => {
 
     store.set(finalReportContentAtom, emptyReport);
 
-    renderWithProvider(<ReportDrafter />);
+    const { getByText, getByRole } = renderWithProvider(<ReportDrafter />);
 
-    expect(screen.getByText("Document Structure")).toBeInTheDocument();
+    expect(getByText("Document Structure")).toBeInTheDocument();
     // Should show default title input or placeholder
-    const titleInput = screen.getByRole("textbox");
+    const titleInput = getByRole("textbox");
     expect(titleInput).toBeInTheDocument();
   });
 
@@ -254,11 +255,11 @@ describe("ReportDrafter Component Integration", () => {
 
     store.set(finalReportContentAtom, partialReport);
 
-    const { rerender } = renderWithProvider(<ReportDrafter />);
+    const { rerender, getByText } = renderWithProvider(<ReportDrafter />);
 
     // Check initial partial content
-    expect(screen.getByText(/This report examines/)).toBeInTheDocument();
-    expect(screen.getByText(/Legal precedents show/)).toBeInTheDocument();
+    expect(getByText(/This report examines/)).toBeInTheDocument();
+    expect(getByText(/Legal precedents show/)).toBeInTheDocument();
 
     // Update with more complete content
     const updatedReport: ClientFinalReport = {
@@ -288,30 +289,30 @@ describe("ReportDrafter Component Integration", () => {
 
     // Check updated content
     expect(
-      screen.getByText(
+      getByText(
         /comprehensive legal principles governing contract interpretation/
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
+      getByText(
         /clear patterns in judicial interpretation of force majeure clauses/
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
+      getByText(
         /contract law continues to evolve in response to unprecedented global events/
       )
     ).toBeInTheDocument();
   });
 
   it("displays action buttons (save, download, share)", () => {
-    renderWithProvider(<ReportDrafter />);
+    const { getAllByRole } = renderWithProvider(<ReportDrafter />);
 
-    const buttons = screen.getAllByRole("button");
+    const buttons = getAllByRole("button");
     expect(buttons.length).toBeGreaterThanOrEqual(3);
 
     // Check that buttons have appropriate hover classes
-    const buttonWithHoverClass = buttons.filter((btn) =>
+    const buttonWithHoverClass = buttons.filter((btn: HTMLElement) =>
       btn.className.includes("hover:bg-[#f1f5f9]")
     );
     expect(buttonWithHoverClass.length).toBeGreaterThanOrEqual(3);
@@ -342,10 +343,10 @@ describe("ReportDrafter Component Integration", () => {
 
     store.set(finalReportContentAtom, reportWithMixedSections);
 
-    renderWithProvider(<ReportDrafter />);
+    const { getByText } = renderWithProvider(<ReportDrafter />);
 
     // Use document structure area specifically to avoid conflicts with content area
-    const docStructure = screen.getByText("Document Structure").closest("div");
+    const docStructure = getByText("Document Structure").closest("div");
     if (!docStructure) {
       throw new Error("Document Structure container not found");
     }

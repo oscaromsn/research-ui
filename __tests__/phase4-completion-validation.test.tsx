@@ -1,4 +1,5 @@
-import { render, screen, within } from "@testing-library/react";
+import "./dom-setup";
+import { render, within } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import type React from "react";
 import type { ReactNode } from "react";
@@ -60,24 +61,22 @@ describe("Phase 4 Completion Validation", () => {
 
       store.set(synthesisDetailsAtom, mockSynthesis);
 
-      renderWithProvider(<SynthesisReporting />);
+      const { getByText } = renderWithProvider(<SynthesisReporting />);
 
       // Verify atom integration - should display topics from atom
-      expect(screen.getByText("Force Majeure Clauses")).toBeInTheDocument();
-      expect(screen.getByText("Contract Interpretation")).toBeInTheDocument();
+      expect(getByText("Force Majeure Clauses")).toBeInTheDocument();
+      expect(getByText("Contract Interpretation")).toBeInTheDocument();
 
       // Verify confidence levels are properly mapped
-      expect(screen.getByText("High (85%)")).toBeInTheDocument();
-      expect(screen.getByText("High (92%)")).toBeInTheDocument();
+      expect(getByText("High (85%)")).toBeInTheDocument();
+      expect(getByText("High (92%)")).toBeInTheDocument();
 
       // Verify synthesis snippets are displayed
       expect(
-        screen.getByText(
-          /Courts require specific language for pandemic coverage/
-        )
+        getByText(/Courts require specific language for pandemic coverage/)
       ).toBeInTheDocument();
       expect(
-        screen.getByText(/Strict interpretation of force majeure language/)
+        getByText(/Strict interpretation of force majeure language/)
       ).toBeInTheDocument();
 
       // Note: reasoningSummary might be displayed in a modal or different section
@@ -85,7 +84,7 @@ describe("Phase 4 Completion Validation", () => {
 
       // Verify unanswered aspects are shown
       expect(
-        screen.getByText(/State-specific variations in interpretation/)
+        getByText(/State-specific variations in interpretation/)
       ).toBeInTheDocument();
     });
 
@@ -99,12 +98,12 @@ describe("Phase 4 Completion Validation", () => {
 
       store.set(synthesisDetailsAtom, emptySynthesis);
 
-      renderWithProvider(<SynthesisReporting />);
+      const { getByText } = renderWithProvider(<SynthesisReporting />);
 
       // Should still render the component structure
-      expect(screen.getByText("Synthesis & Reporting")).toBeInTheDocument();
-      expect(screen.getByText("Synthesized Topics")).toBeInTheDocument();
-      expect(screen.getByText("Unanswered Aspects:")).toBeInTheDocument();
+      expect(getByText("Synthesis & Reporting")).toBeInTheDocument();
+      expect(getByText("Synthesized Topics")).toBeInTheDocument();
+      expect(getByText("Unanswered Aspects:")).toBeInTheDocument();
     });
   });
 
@@ -142,17 +141,17 @@ describe("Phase 4 Completion Validation", () => {
 
       store.set(finalReportContentAtom, mockReport);
 
-      renderWithProvider(<ReportDrafter />);
+      const { getByText, getByDisplayValue } = renderWithProvider(
+        <ReportDrafter />
+      );
 
       // Verify title integration
       expect(
-        screen.getByDisplayValue("COVID-19 Force Majeure Analysis")
+        getByDisplayValue("COVID-19 Force Majeure Analysis")
       ).toBeInTheDocument();
 
       // Verify document structure shows all sections with proper completion status
-      const docStructure = screen
-        .getByText("Document Structure")
-        .closest("div");
+      const docStructure = getByText("Document Structure").closest("div");
       expect(docStructure).not.toBeNull();
       if (!docStructure) {
         throw new Error(
@@ -173,19 +172,19 @@ describe("Phase 4 Completion Validation", () => {
 
       // Verify content display
       expect(
-        screen.getByText(/This comprehensive analysis examines the application/)
+        getByText(/This comprehensive analysis examines the application/)
       ).toBeInTheDocument();
       expect(
-        screen.getByText(/Force majeure clauses have gained prominence/)
+        getByText(/Force majeure clauses have gained prominence/)
       ).toBeInTheDocument();
       expect(
-        screen.getByText(/Courts have applied a strict interpretation standard/)
+        getByText(/Courts have applied a strict interpretation standard/)
       ).toBeInTheDocument();
       expect(
-        screen.getByText(/Parties should include explicit pandemic language/)
+        getByText(/Parties should include explicit pandemic language/)
       ).toBeInTheDocument();
       expect(
-        screen.getByText(/The legal landscape continues to evolve/)
+        getByText(/The legal landscape continues to evolve/)
       ).toBeInTheDocument();
     });
 
@@ -214,11 +213,9 @@ describe("Phase 4 Completion Validation", () => {
 
       store.set(finalReportContentAtom, partialReport);
 
-      renderWithProvider(<ReportDrafter />);
+      const { getByText } = renderWithProvider(<ReportDrafter />);
 
-      const docStructure = screen
-        .getByText("Document Structure")
-        .closest("div");
+      const docStructure = getByText("Document Structure").closest("div");
       expect(docStructure).not.toBeNull();
       if (!docStructure) {
         throw new Error(
@@ -289,18 +286,20 @@ describe("Phase 4 Completion Validation", () => {
       store.set(finalReportContentAtom, reportData);
 
       // Render both components
-      const { unmount: unmountSynthesis } = renderWithProvider(
+      const { getByText, unmount: unmountSynthesis } = renderWithProvider(
         <SynthesisReporting />
       );
-      expect(screen.getByText("Test Topic")).toBeInTheDocument();
-      expect(screen.getByText("Test finding summary")).toBeInTheDocument();
+      expect(getByText("Test Topic")).toBeInTheDocument();
+      expect(getByText("Test finding summary")).toBeInTheDocument();
       unmountSynthesis();
 
-      const { unmount: unmountReport } = renderWithProvider(<ReportDrafter />);
-      expect(
-        screen.getByDisplayValue("Integration Test Report")
-      ).toBeInTheDocument();
-      expect(screen.getByText(/Test summary/)).toBeInTheDocument();
+      const {
+        getByText: getByTextReport,
+        getByDisplayValue,
+        unmount: unmountReport,
+      } = renderWithProvider(<ReportDrafter />);
+      expect(getByDisplayValue("Integration Test Report")).toBeInTheDocument();
+      expect(getByTextReport(/Test summary/)).toBeInTheDocument();
       unmountReport();
 
       // Verify atoms maintain their state
@@ -326,9 +325,11 @@ describe("Phase 4 Completion Validation", () => {
 
       store.set(synthesisDetailsAtom, initialSynthesis);
 
-      const { rerender } = renderWithProvider(<SynthesisReporting />);
-      expect(screen.getByText("Initial Topic")).toBeInTheDocument();
-      expect(screen.getByText("Low (50%)")).toBeInTheDocument();
+      const { getByText, rerender } = renderWithProvider(
+        <SynthesisReporting />
+      );
+      expect(getByText("Initial Topic")).toBeInTheDocument();
+      expect(getByText("Low (50%)")).toBeInTheDocument();
 
       // Update state
       const updatedSynthesis: ClientSynthesis = {
@@ -346,17 +347,13 @@ describe("Phase 4 Completion Validation", () => {
       };
 
       store.set(synthesisDetailsAtom, updatedSynthesis);
-      rerender(
-        <JotaiProvider>
-          <SynthesisReporting />
-        </JotaiProvider>
-      );
+      rerender(<SynthesisReporting />);
 
       // Verify component reflects changes
-      expect(screen.getByText("Updated Topic")).toBeInTheDocument();
-      expect(screen.getByText("High (90%)")).toBeInTheDocument();
-      expect(screen.getByText("Updated finding summary")).toBeInTheDocument();
-      expect(screen.getByText("New aspect")).toBeInTheDocument();
+      expect(getByText("Updated Topic")).toBeInTheDocument();
+      expect(getByText("High (90%)")).toBeInTheDocument();
+      expect(getByText("Updated finding summary")).toBeInTheDocument();
+      expect(getByText("New aspect")).toBeInTheDocument();
     });
   });
 });
