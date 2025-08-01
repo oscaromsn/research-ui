@@ -216,6 +216,191 @@ bun run test:e2e          # End-to-end tests
 bun run test:coverage     # Coverage analysis
 ```
 
+## React Component Testing with Bun
+
+### DOM Environment Setup
+
+**Critical**: Bun's test runner requires manual DOM initialization for React component tests.
+
+#### Standard Component Test Pattern
+
+```typescript
+// STEP 1: Import DOM setup FIRST (before Testing Library)
+import "../../../dom-setup"; // Adjust path based on test location
+
+// STEP 2: Import Testing Library WITHOUT screen, include cleanup
+import { render, fireEvent, cleanup } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
+// STEP 3: Import vitest with afterEach
+import { describe, expect, it, vi, afterEach } from "vitest";
+
+// STEP 4: Import your component
+import { MyComponent } from "@/components/MyComponent";
+
+describe("MyComponent", () => {
+  // STEP 5: ALWAYS add cleanup after each test
+  afterEach(() => {
+    cleanup();
+    document.body.innerHTML = "";
+  });
+
+  it("should render correctly", () => {
+    // STEP 6: Destructure needed queries from render result
+    const { getByText, getByRole, container } = render(
+      <MyComponent prop="value" />
+    );
+
+    // STEP 7: Use destructured queries instead of screen
+    expect(getByText("Expected Text")).toBeInTheDocument();
+    
+    // Direct element access when needed
+    const element = container.firstChild as HTMLElement;
+    expect(element).toHaveClass("expected-class");
+  });
+
+  it("should handle user interactions", async () => {
+    const handleClick = vi.fn();
+    const { getByText } = render(
+      <MyComponent onClick={handleClick} />
+    );
+
+    const button = getByText("Click me");
+    await userEvent.click(button);
+
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+});
+```
+
+### DOM Setup Import Paths
+
+**Critical**: Import path must be correct based on test file location:
+
+```typescript
+// For files in __tests__/components/ui/
+import "../../dom-setup";
+
+// For files in __tests__/components/layout/
+import "../../dom-setup";
+
+// For files in __tests__/components/domain/*/
+import "../../../dom-setup";
+
+// For files in __tests__/components/domain/*/*/
+import "../../../../dom-setup";
+```
+
+### Bun-Specific Compatibility Rules
+
+#### ❌ Avoid These Patterns (Broken with Bun)
+```typescript
+// DON'T: Use screen utility
+import { render, screen } from "@testing-library/react";
+const button = screen.getByText("Click me");
+
+// DON'T: Use jest-dom matchers
+expect(element).toHaveAttribute("title", "value");
+expect(element).toBeDisabled();
+
+// DON'T: Module-level vi.mock
+vi.mock("@/components/MyComponent", () => ({ ... }));
+```
+
+#### ✅ Use These Patterns (Works with Bun)
+```typescript
+// DO: Destructure queries from render
+import { render } from "@testing-library/react";
+const { getByText } = render(<Component />);
+const button = getByText("Click me");
+
+// DO: Use basic DOM assertions
+expect(element.getAttribute("title")).toBe("value");
+expect(element.hasAttribute("disabled")).toBe(true);
+
+// DO: Mock in beforeEach or test scope
+beforeEach(() => {
+  vi.mocked(mockFunction).mockReturnValue(mockValue);
+});
+```
+
+### Common Testing Patterns
+
+#### Testing CSS Classes and Styling
+```typescript
+it("should apply correct classes", () => {
+  const { container } = render(<Component variant="primary" />);
+  const element = container.firstChild as HTMLElement;
+  
+  expect(element).toHaveClass("bg-primary", "text-white");
+  expect(element.classList.contains("disabled")).toBe(false);
+});
+```
+
+#### Testing Conditional Rendering
+```typescript
+it("should handle conditional rendering", () => {
+  const { queryByText, rerender } = render(<Component show={false} />);
+  
+  expect(queryByText("Hidden Content")).not.toBeInTheDocument();
+  
+  rerender(<Component show={true} />);
+  expect(queryByText("Hidden Content")).toBeInTheDocument();
+});
+```
+
+#### Testing Form Elements
+```typescript
+it("should handle form input", async () => {
+  const { getByRole } = render(<Input placeholder="Enter text" />);
+  const input = getByRole("textbox");
+  
+  await userEvent.type(input, "Hello World");
+  expect(input.value).toBe("Hello World");
+});
+```
+
+#### Testing Props and Variants
+```typescript
+it("should handle different props", () => {
+  const { rerender, getByText } = render(
+    <Button variant="primary">Primary</Button>
+  );
+
+  let button = getByText("Primary");
+  expect(button).toHaveClass("bg-primary");
+
+  rerender(<Button variant="secondary">Secondary</Button>);
+  button = getByText("Secondary");
+  expect(button).toHaveClass("bg-secondary");
+});
+```
+
+### Performance Considerations
+
+- **DOM Setup Time**: ~50ms per test file
+- **Test Execution**: 2-3 seconds for 33 component tests
+- **Memory Usage**: Minimal with proper cleanup
+- **Scaling**: Linear with test count
+
+### Quick Reference Template
+
+Copy `__tests__/COMPONENT_TEST_TEMPLATE.tsx` for new component tests.
+
+### Troubleshooting
+
+#### "document is not defined"
+- Ensure `dom-setup` is imported FIRST
+- Check import path is correct
+
+#### "Found multiple elements"
+- Add proper `afterEach` cleanup
+- Clear `document.body.innerHTML`
+
+#### "toHaveAttribute is not a function"
+- Use `element.getAttribute()` instead
+- Use `element.hasAttribute()` for boolean checks
+
 ### Bundle Analysis
 
 #### Performance Monitoring

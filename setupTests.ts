@@ -2,6 +2,7 @@ import path from "node:path";
 import { configure } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { config } from "dotenv";
+import { JSDOM } from "jsdom";
 import { afterAll, afterEach, beforeAll, beforeEach, vi } from "vitest";
 
 // ===== ENVIRONMENT SETUP =====
@@ -359,15 +360,49 @@ const setupStderrFiltering = () => {
   };
 };
 
+// ===== JSDOM INITIALIZATION =====
+// Initialize jsdom manually since bun's test runner may not be setting it up properly
+const setupDOM = () => {
+  if (typeof document === "undefined") {
+    const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
+      url: "http://localhost:3000",
+      pretendToBeVisual: true,
+      resources: "usable",
+    });
+
+    // Set up global DOM environment
+    global.window = dom.window as unknown as Window & typeof globalThis;
+    global.document = dom.window.document;
+    global.navigator = dom.window.navigator;
+    global.location = dom.window.location;
+    global.history = dom.window.history;
+    global.HTMLElement = dom.window.HTMLElement;
+    global.HTMLDivElement = dom.window.HTMLDivElement;
+    global.HTMLButtonElement = dom.window.HTMLButtonElement;
+    global.HTMLSpanElement = dom.window.HTMLSpanElement;
+    global.Element = dom.window.Element;
+    global.Node = dom.window.Node;
+
+    // Copy all dom.window properties to global
+    Object.keys(dom.window).forEach((property) => {
+      if (typeof global[property] === "undefined") {
+        global[property] = dom.window[property];
+      }
+    });
+  }
+};
+
 // ===== SETUP HOOKS =====
 beforeAll(() => {
+  setupDOM(); // Initialize DOM first
   setupConsole();
   setupStderrFiltering();
 
-  // Ensure DOM environment is available - critical for React component tests
+  // Verify DOM environment is now available
   if (typeof document === "undefined") {
-    // This should not happen with happy-dom, but provide fallback
-    console.warn("DOM environment not available in setupTests.ts");
+    throw new Error(
+      "Failed to initialize DOM environment for React component tests"
+    );
   }
 
   // Set up global mocks
@@ -414,13 +449,8 @@ beforeAll(() => {
     getEntriesByType: vi.fn(() => []),
   };
 
-  // Mock Next.js font imports to prevent test failures
-  vi.mock("next/font/google", () => ({
-    Inter: vi.fn(() => ({
-      className: "mock-inter-font",
-      style: { fontFamily: "'Inter', sans-serif" },
-    })),
-  }));
+  // Note: vi.mock is not supported in bun test runner
+  // Mock Next.js font imports handled in __mocks__ directory instead
 });
 
 // ===== TEST LIFECYCLE =====

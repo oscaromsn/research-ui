@@ -6,8 +6,9 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [react()],
   test: {
-    // Environment & Performance - try jsdom instead of happy-dom
+    // Environment & Performance - Force jsdom with explicit pool config
     environment: "jsdom",
+    pool: "forks", // Use forks pool for better jsdom isolation
     globals: true,
     passWithNoTests: true, // Don't fail when no tests exist yet
     watch: true, // Enable watch by default for TDD workflow
