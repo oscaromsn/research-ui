@@ -309,6 +309,12 @@ export function useResearchAgent(): UseResearchAgentReturn {
               ...(docData.errorMessage !== undefined && {
                 errorMessage: docData.errorMessage,
               }),
+              ...(docData.progress !== undefined && {
+                progress: docData.progress,
+              }),
+              ...(docData.estimatedTime !== undefined && {
+                estimatedTime: docData.estimatedTime,
+              }),
               ...(docData.iterationIndex !== undefined && {
                 iterationIndex: docData.iterationIndex,
               }),
@@ -383,6 +389,12 @@ export function useResearchAgent(): UseResearchAgentReturn {
               }),
               ...(docData.errorMessage !== undefined && {
                 errorMessage: docData.errorMessage,
+              }),
+              ...(docData.progress !== undefined && {
+                progress: docData.progress,
+              }),
+              ...(docData.estimatedTime !== undefined && {
+                estimatedTime: docData.estimatedTime,
               }),
               ...(docData.iterationIndex !== undefined && {
                 iterationIndex: docData.iterationIndex,

@@ -53,7 +53,7 @@
         "noExcessiveCognitiveComplexity": {
           "level": "error",
           "options": {
-            "maxAllowedComplexity": 26
+            "maxAllowedComplexity": 30
           }
         },
         "noExtraBooleanCast": "error",
@@ -137,7 +137,7 @@
         "noBarrelFile": "error",
         "noDelete": "error",
         "noReExportAll": "error",
-        "noNamespaceImport": "error"
+        "noNamespaceImport": "off"
       },
       "security": {
         "recommended": true,

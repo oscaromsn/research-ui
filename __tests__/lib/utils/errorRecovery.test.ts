@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SearchQueryItem, SearchResultItem } from "@/baml_client/types";
 import {
   createRetryContext,
@@ -73,6 +73,25 @@ describe("SearchCircuitBreaker", () => {
       mockStrategy2,
       mockStrategy3,
     ]);
+
+    // Mock console methods to reduce test noise
+    vi.spyOn(console, "log").mockImplementation(() => {
+      /* Suppress console output in tests */
+    });
+    vi.spyOn(console, "warn").mockImplementation(() => {
+      /* Suppress console output in tests */
+    });
+    vi.spyOn(console, "error").mockImplementation(() => {
+      /* Suppress console output in tests */
+    });
+    vi.spyOn(console, "debug").mockImplementation(() => {
+      /* Suppress console output in tests */
+    });
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe("executeWithRecovery", () => {
@@ -170,26 +189,35 @@ describe("SearchCircuitBreaker", () => {
       const originalError = new Error("network timeout"); // Use an error that the first strategy can handle
       const mockOperation = vi.fn().mockRejectedValue(originalError);
 
-      // Make all strategies fail
-      (mockStrategy1.recover as any).mockRejectedValue(
-        new Error("Recovery 1 failed")
-      );
-      (mockStrategy2.recover as any).mockRejectedValue(
-        new Error("Recovery 2 failed")
-      );
-      (mockStrategy3.recover as any).mockRejectedValue(
-        new Error("Recovery 3 failed")
-      );
+      // Create a fresh circuit breaker with strategies that will all fail
+      const failingStrategy1: RecoveryStrategy = {
+        name: "FailingStrategy1",
+        priority: 1,
+        canRecover: vi.fn(() => true),
+        recover: vi.fn().mockRejectedValue(new Error("Recovery 1 failed")),
+      };
+
+      const failingStrategy2: RecoveryStrategy = {
+        name: "FailingStrategy2",
+        priority: 2,
+        canRecover: vi.fn(() => true),
+        recover: vi.fn().mockRejectedValue(new Error("Recovery 2 failed")),
+      };
+
+      const failingCircuitBreaker = new SearchCircuitBreaker([
+        failingStrategy1,
+        failingStrategy2,
+      ]);
 
       const context = createSearchContext([mockQuery]);
 
       await expect(
-        circuitBreaker.executeWithRecovery(mockOperation, context)
+        failingCircuitBreaker.executeWithRecovery(mockOperation, context)
       ).rejects.toThrow("network timeout");
 
-      // All applicable strategies should have been called
-      expect(mockStrategy1.recover).toHaveBeenCalled();
-      expect(mockStrategy3.recover).toHaveBeenCalled();
+      // All strategies should have been called
+      expect(failingStrategy1.recover).toHaveBeenCalled();
+      expect(failingStrategy2.recover).toHaveBeenCalled();
     });
 
     it("should throw original error if no strategies can recover", async () => {

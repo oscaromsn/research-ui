@@ -67,6 +67,23 @@ export interface ResearchUpdate {
   totalDocsToProcess?: number;
   fieldName?: string;
   isFieldComplete?: boolean;
+  // Enhanced status indicator metadata
+  progress?: number; // 0-100 percentage for progress bars
+  estimatedTime?: string; // Human-readable estimated completion time
+  stageProgress?: {
+    current: number;
+    total: number;
+    percentage: number;
+    estimatedTimeRemaining?: string;
+  };
+  // Document-level action handlers
+  documentActions?: {
+    docId: string;
+    canRetry?: boolean;
+    canSkip?: boolean;
+    retryReason?: string;
+    skipReason?: string;
+  };
 }
 
 // Stream creation utility
@@ -95,6 +112,62 @@ function createStream(): {
     writer,
     encoder,
     closeStream,
+  };
+}
+
+// Progress calculation utilities
+function calculateProgress(current: number, total: number): number {
+  if (total === 0) {
+    return 0;
+  }
+  return Math.min(100, Math.round((current / total) * 100));
+}
+
+function estimateTimeRemaining(
+  current: number,
+  total: number,
+  startTime: number
+): string {
+  if (current === 0 || total === 0) {
+    return "";
+  }
+
+  const elapsed = Date.now() - startTime;
+  const averageTimePerItem = elapsed / current;
+  const remaining = (total - current) * averageTimePerItem;
+
+  const remainingMinutes = Math.ceil(remaining / (1000 * 60));
+
+  if (remainingMinutes < 1) {
+    return "~30 seconds remaining";
+  }
+  if (remainingMinutes === 1) {
+    return "~1 minute remaining";
+  }
+  if (remainingMinutes <= 5) {
+    return `~${remainingMinutes} minutes remaining`;
+  }
+  if (remainingMinutes <= 10) {
+    return "~10 minutes remaining";
+  }
+  return `~${Math.ceil(remainingMinutes / 5) * 5} minutes remaining`;
+}
+
+function createStageProgress(
+  current: number,
+  total: number,
+  startTime?: number
+): ResearchUpdate["stageProgress"] {
+  const percentage = calculateProgress(current, total);
+  const timeRemaining = startTime
+    ? estimateTimeRemaining(current, total, startTime)
+    : undefined;
+
+  return {
+    current,
+    total,
+    percentage,
+    ...(timeRemaining && { estimatedTimeRemaining: timeRemaining }),
   };
 }
 
@@ -326,6 +399,9 @@ interface StageContext {
   }>;
   globalDocumentCounter: { value: number }; // Mutable counter for sequence numbers
   currentIteration: number; // Current research iteration index
+  // Enhanced progress tracking
+  stageStartTimes: Map<ResearchStage, number>; // Track when each stage starts
+  documentStartTimes: Map<string, number>; // Track when each document analysis starts
 }
 
 async function generateQueriesStage(
@@ -466,19 +542,44 @@ async function sendAnalysisProgressUpdate(
   index: number,
   totalCount: number
 ): Promise<void> {
-  await sendUpdate(context.writer, context.encoder, {
+  const analyzeStageStartTime = context.stageStartTimes.get(
+    "ANALYZING_DOCUMENTS"
+  );
+  const progress = calculateProgress(index, totalCount);
+  const stageProgress = createStageProgress(
+    index,
+    totalCount,
+    analyzeStageStartTime
+  );
+
+  const updateData: ResearchUpdate = {
     type: "PROGRESS",
     stage: "ANALYZING_DOCUMENTS",
     message: `Analyzing document ${index + 1}/${totalCount}: ${doc.title ? truncateForBrief(doc.title) : "Untitled"}`,
     currentProcessedDoc: index,
     totalDocsToProcess: totalCount,
-  });
+    progress,
+  };
+
+  if (stageProgress?.estimatedTimeRemaining) {
+    updateData.estimatedTime = stageProgress.estimatedTimeRemaining;
+  }
+
+  if (stageProgress) {
+    updateData.stageProgress = stageProgress;
+  }
+
+  await sendUpdate(context.writer, context.encoder, updateData);
 }
 
 async function sendAnalysisStartUpdate(
   context: StageContext,
   doc: SearchResultItem
 ): Promise<void> {
+  // Track when this document analysis starts
+  const startTime = Date.now();
+  context.documentStartTimes.set(doc.id, startTime);
+
   await sendUpdate(context.writer, context.encoder, {
     type: "DATA",
     stage: "ANALYZING_DOCUMENTS",
@@ -487,6 +588,8 @@ async function sendAnalysisStartUpdate(
       title: doc.title,
       url: doc.url,
       status: "analyzing",
+      progress: 0, // Just starting
+      estimatedTime: "Analyzing...",
     },
     message: `Started analysis for: ${doc.title ? truncateForBrief(doc.title) : "Untitled"}`,
   });
@@ -549,18 +652,26 @@ async function sendAnalysisErrorUpdate(
       docId: doc.id,
       title: doc.title,
       url: doc.url,
-      status: "error",
+      status: "failed",
       errorMessage: `Analysis failed: ${errorMessage}`,
     },
     message: `Failed to analyze: ${doc.title ? truncateForBrief(doc.title) : "Untitled"}. Error: ${errorMessage}`,
     currentProcessedDoc: index + 1,
     totalDocsToProcess: totalCount,
+    // Include document-specific action handlers
+    documentActions: {
+      docId: doc.id,
+      canRetry: true,
+      canSkip: true,
+      retryReason: "Retry document analysis with fresh API call",
+      skipReason: "Skip this document and continue with next",
+    },
   });
 
   await sendUpdate(context.writer, context.encoder, {
     type: "LOG",
     stage: "ANALYZING_DOCUMENTS",
-    message: `Skipping document due to analysis error: ${errorMessage}`,
+    message: `Document analysis failed - user can retry or skip: ${errorMessage}`,
   });
 }
 
@@ -608,6 +719,9 @@ async function analyzeDocumentsStage(
 ): Promise<AnalyzedDocument[]> {
   const { writer, encoder, timeoutController, previouslyAnalyzedDocs } =
     context;
+
+  // Track stage start time for progress estimation
+  context.stageStartTimes.set("ANALYZING_DOCUMENTS", Date.now());
 
   // Filter out documents that have already been analyzed
   const alreadyAnalyzedDocIds = new Set(
@@ -1114,6 +1228,9 @@ export async function conductResearch(
     previouslyAnalyzedDocs: previouslyAnalyzedDocs || [],
     globalDocumentCounter: { value: 0 }, // Initialize counter at 0
     currentIteration: 0, // Start at iteration 0
+    // Initialize timing maps for progress tracking
+    stageStartTimes: new Map<ResearchStage, number>(),
+    documentStartTimes: new Map<string, number>(),
   };
   (async () => {
     try {
