@@ -68,3 +68,6 @@ dependency-report.html
 /test-results/
 repomix-output.xml
 docs/todo.md
+
+# baml
+baml_client
