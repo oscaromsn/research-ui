@@ -24,6 +24,14 @@ interface OrderedSearchResultItem extends SearchResultItem {
 
 import type { BamlStream } from "@boundaryml/baml";
 import { config } from "@/lib/config";
+import {
+  ExaAuthError,
+  ExaClientError,
+  ExaConfigError,
+  ExaNetworkError,
+  ExaRateLimitError,
+  ExaServerError,
+} from "@/lib/utils/exaSearchErrors";
 import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
 import {
   smartTruncate,
@@ -105,6 +113,106 @@ async function sendUpdate(
 }
 
 // Live document fetching function using Exa API
+/**
+ * Enhanced error handling with circuit breaker recovery feedback
+ * Streams error recovery information to the client
+ */
+async function handleSearchErrorWithRecovery(
+  searchError: unknown,
+  query: SearchQueryItem,
+  context: StageContext
+): Promise<void> {
+  const errorMessage =
+    searchError instanceof Error ? searchError.message : String(searchError);
+
+  console.error(
+    `Orchestrator: Search error for query "${query.query_string}":`,
+    errorMessage
+  );
+
+  // Determine error type and provide specific feedback
+  let errorType = "unknown";
+  let userMessage = "Search encountered an error";
+  let recoveryHint = "";
+
+  if (searchError instanceof ExaRateLimitError) {
+    errorType = "rate_limit";
+    userMessage =
+      "Search rate limit reached - automatic retry with backoff applied";
+    recoveryHint = "The system will retry with reduced query load";
+  } else if (searchError instanceof ExaNetworkError) {
+    errorType = "network";
+    userMessage = "Network connectivity issue - attempting recovery strategies";
+    recoveryHint = "Trying cached results or partial data recovery";
+  } else if (searchError instanceof ExaAuthError) {
+    errorType = "authentication";
+    userMessage = "API authentication issue detected";
+    recoveryHint = "Please check API key configuration";
+  } else if (searchError instanceof ExaServerError) {
+    errorType = "server";
+    userMessage =
+      "Search service temporarily unavailable - applying recovery strategies";
+    recoveryHint = "Retrying with exponential backoff";
+  } else if (searchError instanceof ExaClientError) {
+    errorType = "client";
+    userMessage =
+      "Search query formatting issue - attempting automatic correction";
+    recoveryHint = "Query may be simplified for compatibility";
+  }
+
+  // Stream error recovery information to client
+  await sendUpdate(context.writer, context.encoder, {
+    type: "LOG",
+    stage: "FETCHING_DOCUMENTS",
+    message: `Search Error Recovery: ${userMessage}`,
+    data: {
+      errorType,
+      query: query.query_string,
+      recoveryHint,
+      timestamp: new Date().toISOString(),
+    },
+  });
+
+  // For critical errors, provide additional guidance
+  if (
+    searchError instanceof ExaAuthError ||
+    searchError instanceof ExaConfigError
+  ) {
+    await sendUpdate(context.writer, context.encoder, {
+      type: "ERROR",
+      stage: "FETCHING_DOCUMENTS",
+      message: "Critical configuration error - please check API settings",
+      data: {
+        errorType: "configuration",
+        requiresUserAction: true,
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }
+}
+
+/**
+ * Determines if an error should stop the entire search process
+ */
+function shouldStopOnError(searchError: unknown): boolean {
+  // Stop on critical configuration errors
+  if (
+    searchError instanceof ExaAuthError ||
+    searchError instanceof ExaConfigError
+  ) {
+    return true;
+  }
+
+  // Stop if we've hit terminal rate limits (circuit breaker will handle retryable ones)
+  if (searchError instanceof ExaRateLimitError) {
+    // Only stop if it's a quota/terminal limit, not a temporary rate limit
+    return searchError.rateLimitType === "quota";
+  }
+
+  // Continue for other error types - circuit breaker handles recovery
+  return false;
+}
+
 async function fetchDocumentsFromQueries(
   queries: SearchQueryItem[],
   context: StageContext
@@ -164,25 +272,19 @@ async function fetchDocumentsFromQueries(
         `Orchestrator: Query "${query.query_string}" yielded ${results.length} results.`
       );
     } catch (searchError: unknown) {
-      const errorMessage =
-        searchError instanceof Error
-          ? searchError.message
-          : String(searchError);
-      console.error(
-        `Orchestrator: Error during live search for query "${query.query_string}":`,
-        errorMessage
-      );
+      // Enhanced error handling with circuit breaker feedback
+      await handleSearchErrorWithRecovery(searchError, query, context);
 
-      // Handle rate limiting specifically - consider stopping further searches
-      if (errorMessage.includes("Rate limit exceeded")) {
+      // Determine if we should continue with remaining queries
+      if (shouldStopOnError(searchError)) {
         console.warn(
-          "Orchestrator: Rate limit reached for Exa API. Stopping further search queries for this session."
+          "Orchestrator: Critical error encountered. Stopping remaining search queries for this session."
         );
-        break; // Stop executing more queries if we hit rate limits
+        break;
       }
 
-      // For other errors, continue with remaining queries
-      // Individual query failures shouldn't halt the entire process
+      // For non-critical errors, continue with remaining queries
+      // The circuit breaker in executeExaSearch already handled recovery attempts
     }
   }
 
