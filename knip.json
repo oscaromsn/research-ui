@@ -1,26 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignore": [
-    ".claude/**",
-    ".next/**",
-    ".zed/**",
-    "__tests__/**",
-    "baml_client/**",
-    "build/**",
-    "coverage/**",
-    "dist/**",
-    "node_modules/**",
-    "public/**",
-    "types/test-globals.d.ts",
-    "vitest.config.no-api.ts"
-  ],
-  "ignoreDependencies": [
-    "@next/env",
-    "postcss",
-    "tailwindcss",
-    "tw-animate-css",
-    "zod"
-  ],
   "rules": {
     "binaries": "warn",
     "classMembers": "warn",
@@ -36,5 +15,71 @@
     "unlisted": "warn",
     "unresolved": "error"
   },
-  "includeEntryExports": true
+  "entry": [
+    "*.config.{js,mjs,ts}",
+    "__tests__/**",
+    "app/actions/**/*.ts",
+    "app/layout.tsx!",
+    "app/page.tsx!",
+    "e2e/**/*.ts!",
+    "next.config.ts!",
+    "setupTests.ts!"
+  ],
+  "project": [
+    "**/*.{ts,tsx,js,jsx}"
+  ],
+  "ignore": [
+    ".claude/**",
+    ".next/**",
+    "baml_client/**",
+    "coverage/**",
+    "node_modules/**",
+    "public/**",
+    "__tests/utils/**",
+    "types/test-globals.d.ts",
+    "vitest.config.no-api.ts"
+  ],
+  "ignoreDependencies": [
+    "@next/env",
+    "postcss",
+    "tailwindcss",
+    "tw-animate-css"
+  ],
+  "ignoreExportsUsedInFile": {
+    "interface": false,
+    "type": false
+  },
+  "includeEntryExports": true,
+  "paths": {
+    "@/*": [
+      "./*"
+    ],
+    "@components/*": [
+      "./components/*"
+    ],
+    "@ui/*": [
+      "./components/ui/*"
+    ],
+    "@domain/*": [
+      "./components/domain/*"
+    ],
+    "@layout/*": [
+      "./components/layout/*"
+    ],
+    "@lib/*": [
+      "./lib/*"
+    ],
+    "@state/*": [
+      "./lib/state/*"
+    ],
+    "@utils/*": [
+      "./lib/utils/*"
+    ],
+    "@api/*": [
+      "./lib/api/*"
+    ],
+    "@types/*": [
+      "./types/*"
+    ]
+  }
 }
