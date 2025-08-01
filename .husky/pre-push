@@ -1,4 +1,0 @@
-echo "⚠️  Pre-push hooks are currently disabled"
-echo "💡 All validation will occur in CI/CD pipeline"
-echo "🚀 Push completed - validation happens remotely"
-exit 0
