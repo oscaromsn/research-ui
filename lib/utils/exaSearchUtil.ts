@@ -15,6 +15,9 @@ import type {
   SearchQueryItem,
 } from "@/baml_client/types";
 
+// Import validated environment
+import { env } from "@/lib/schemas/env";
+
 // Import custom error types
 import {
   ExaAuthError,
@@ -334,7 +337,8 @@ function extractValidationErrors(responseData: unknown):
  * @returns A promise that resolves to an array of BamlSearchResultItem.
  */
 function validateApiKey(): string {
-  const EXA_API_KEY = process.env.EXA_API_KEY;
+  // Use validated environment instead of direct process.env access
+  const EXA_API_KEY = env.EXA_API_KEY;
 
   if (!EXA_API_KEY || EXA_API_KEY.trim() === "") {
     throw new ExaConfigError("EXA_API_KEY environment variable is not set", {

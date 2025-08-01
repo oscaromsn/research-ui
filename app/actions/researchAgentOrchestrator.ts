@@ -23,6 +23,7 @@ interface OrderedSearchResultItem extends SearchResultItem {
 }
 
 import type { BamlStream } from "@boundaryml/baml";
+import { config } from "@/lib/config";
 import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
 import {
   smartTruncate,
@@ -108,12 +109,13 @@ async function fetchDocumentsFromQueries(
   queries: SearchQueryItem[],
   context: StageContext
 ): Promise<OrderedSearchResultItem[]> {
-  const MAX_QUERIES_TO_EXECUTE = 3; // Start conservative for initial implementation
-  const RESULTS_PER_QUERY = 2; // Limit results per query to manage API usage
+  // Use configuration values instead of magic numbers
+  const MAX_QUERIES_TO_EXECUTE = config.research.maxQueriesPerIteration;
+  const RESULTS_PER_QUERY = config.research.maxDocumentsPerQuery;
   const allFetchedResults: OrderedSearchResultItem[] = [];
 
   console.log(
-    `Orchestrator: Starting live document fetch for ${queries.length} queries`
+    `Orchestrator: Starting live document fetch for ${queries.length} queries (max: ${MAX_QUERIES_TO_EXECUTE}, results per query: ${RESULTS_PER_QUERY})`
   );
 
   const executedQueries = queries.slice(0, MAX_QUERIES_TO_EXECUTE);
@@ -128,7 +130,12 @@ async function fetchDocumentsFromQueries(
       console.log(
         `Orchestrator: Executing live search for query: "${query.query_string}"`
       );
-      const results = await executeExaSearch(query, RESULTS_PER_QUERY, true, 2);
+      const results = await executeExaSearch(
+        query,
+        RESULTS_PER_QUERY,
+        true,
+        config.research.maxRetries
+      );
 
       // Guard against executeExaSearch returning undefined (should never happen but adds safety)
       if (!results || !Array.isArray(results)) {
@@ -991,11 +998,10 @@ export async function conductResearch(
 ): Promise<ReadableStream<Uint8Array>> {
   const { stream, writer, encoder, closeStream } = createStream();
 
-  const ORCHESTRATOR_TIMEOUT_MS = 420000;
   const timeoutController = new AbortController();
   const timeoutId = setTimeout(
     () => timeoutController.abort(),
-    ORCHESTRATOR_TIMEOUT_MS
+    config.research.analysisTimeoutMs
   );
 
   const context: StageContext = {
