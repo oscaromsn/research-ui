@@ -25,9 +25,7 @@
     "next.config.ts!",
     "setupTests.ts!"
   ],
-  "project": [
-    "**/*.{ts,tsx,js,jsx}"
-  ],
+  "project": ["**/*.{ts,tsx,js,jsx}"],
   "ignore": [
     ".claude/**",
     ".next/**",
@@ -51,35 +49,15 @@
   },
   "includeEntryExports": true,
   "paths": {
-    "@/*": [
-      "./*"
-    ],
-    "@components/*": [
-      "./components/*"
-    ],
-    "@ui/*": [
-      "./components/ui/*"
-    ],
-    "@domain/*": [
-      "./components/domain/*"
-    ],
-    "@layout/*": [
-      "./components/layout/*"
-    ],
-    "@lib/*": [
-      "./lib/*"
-    ],
-    "@state/*": [
-      "./lib/state/*"
-    ],
-    "@utils/*": [
-      "./lib/utils/*"
-    ],
-    "@api/*": [
-      "./lib/api/*"
-    ],
-    "@types/*": [
-      "./types/*"
-    ]
+    "@/*": ["./*"],
+    "@components/*": ["./components/*"],
+    "@ui/*": ["./components/ui/*"],
+    "@domain/*": ["./components/domain/*"],
+    "@layout/*": ["./components/layout/*"],
+    "@lib/*": ["./lib/*"],
+    "@state/*": ["./lib/state/*"],
+    "@utils/*": ["./lib/utils/*"],
+    "@api/*": ["./lib/api/*"],
+    "@types/*": ["./types/*"]
   }
 }

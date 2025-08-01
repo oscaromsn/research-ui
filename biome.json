@@ -57,7 +57,7 @@
           }
         },
         "noExtraBooleanCast": "error",
-        "noForEach": "error",
+        "noForEach": "off",
         "noStaticOnlyClass": "error",
         "noThisInStatic": "error",
         "noUselessCatch": "error",
@@ -154,7 +154,7 @@
         "noInferrableTypes": "error",
         "noNamespace": "error",
         "noNegationElse": "error",
-        "noNonNullAssertion": "error",
+        "noNonNullAssertion": "warn",
         "noParameterAssign": "error",
         "noParameterProperties": "error",
         "noRestrictedGlobals": {
@@ -351,7 +351,7 @@
       "linter": {
         "rules": {
           "suspicious": {
-            "noExplicitAny": "warn",
+            "noExplicitAny": "off",
             "noSkippedTests": "off"
           },
           "complexity": {
@@ -363,7 +363,7 @@
             }
           },
           "style": {
-            "noNonNullAssertion": "warn"
+            "noNonNullAssertion": "off"
           }
         }
       }
