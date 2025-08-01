@@ -11,9 +11,14 @@ const serverEnvSchema = z.object({
   // Node environment
   NODE_ENV: z.enum(["development", "test", "production"]),
 
-  // Add your required server environment variables here
-  // DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
-  // API_KEY: z.string().min(1, "API_KEY is required"),
+  // Required API keys for legal research functionality
+  CEREBRAS_API_KEY: z.string().min(1, "CEREBRAS_API_KEY is required"),
+  EXA_API_KEY: z.string().min(1, "EXA_API_KEY is required"),
+
+  // Optional API keys for extended functionality
+  GOOGLE_API_KEY: z.string().optional(),
+  OPENAI_API_KEY: z.string().optional(),
+  ANTHROPIC_API_KEY: z.string().optional(),
 });
 
 /**
@@ -36,11 +41,27 @@ function validateEnv() {
   const clientEnv = clientEnvSchema.safeParse(process.env);
 
   if (!serverEnv.success) {
+    // Extract missing or invalid fields for a clear error message
+    const errors = serverEnv.error.errors;
+    const missingFields = errors
+      .filter(
+        (error) => error.code === "too_small" || error.code === "invalid_type"
+      )
+      .map((error) => error.path.join("."));
+    const invalidEnumFields = errors
+      .filter((error) => error.code === "invalid_enum_value")
+      .map((error) => error.path.join("."));
+
+    const allInvalidFields = [...missingFields, ...invalidEnumFields];
+
     console.error(
       "❌ Invalid server environment variables:",
       JSON.stringify(serverEnv.error.format(), null, 2)
     );
-    throw new Error("Invalid server environment variables");
+
+    throw new Error(
+      `Missing or invalid environment variables: ${allInvalidFields.join(", ")}`
+    );
   }
 
   if (!clientEnv.success) {
