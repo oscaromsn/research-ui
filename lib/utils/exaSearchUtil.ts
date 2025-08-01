@@ -12,14 +12,24 @@ import type {
 } from "@/baml_client/types";
 
 // Import validated environment
-import { env } from "@/lib/schemas/env";
+import { env } from "@/lib/schemas";
 // Import error recovery system
 import { createSearchContext, SearchCircuitBreaker } from "./errorRecovery";
+// Import enhanced error handler
+import {
+  analyzeExaError,
+  executeWithRetry,
+  shouldAbortResearch,
+} from "./exaErrorHandler";
 // Import custom error types
 import {
+  ExaAuthError,
+  ExaClientError,
   ExaConfigError,
   ExaNetworkError,
   ExaParsingError,
+  ExaRateLimitError,
+  ExaServerError,
 } from "./exaSearchErrors";
 import { defaultRecoveryStrategies } from "./recoveryStrategies";
 
@@ -181,8 +191,52 @@ async function makeExaApiRequest(
       dataType: typeof response?.data,
     });
 
+    // Handle different HTTP status codes with appropriate Exa error types
+    if (response.status >= 400) {
+      throw createExaErrorFromResponse(response, requestBody.query);
+    }
+
     return response;
   } catch (requestError) {
+    // Handle network/connection errors
+    if (axios.isAxiosError(requestError)) {
+      if (
+        requestError.code === "ECONNABORTED" ||
+        requestError.code === "ETIMEDOUT"
+      ) {
+        throw new ExaNetworkError(
+          `Request timeout after 30 seconds for query: "${requestBody.query}"`,
+          {
+            query: requestBody.query,
+            isTimeout: true,
+            cause: requestError,
+          }
+        );
+      }
+
+      if (
+        requestError.code === "ECONNREFUSED" ||
+        requestError.code === "ENOTFOUND"
+      ) {
+        throw new ExaNetworkError(
+          `Connection failed to Exa API for query: "${requestBody.query}"`,
+          {
+            query: requestBody.query,
+            isConnectionError: true,
+            cause: requestError,
+          }
+        );
+      }
+
+      // If it's an HTTP error response, handle it
+      if (requestError.response) {
+        throw createExaErrorFromResponse(
+          requestError.response,
+          requestBody.query
+        );
+      }
+    }
+
     console.error("Axios request failed:", {
       message:
         requestError instanceof Error
@@ -193,7 +247,129 @@ async function makeExaApiRequest(
       syscall: (requestError as unknown as { syscall?: string })?.syscall,
       stack: requestError instanceof Error ? requestError.stack : undefined,
     });
-    throw requestError;
+
+    // Wrap unknown errors as network errors
+    throw new ExaNetworkError(
+      `Unexpected network error for query: "${requestBody.query}"`,
+      {
+        query: requestBody.query,
+        cause:
+          requestError instanceof Error
+            ? requestError
+            : new Error(String(requestError)),
+      }
+    );
+  }
+}
+
+/**
+ * Creates appropriate Exa error types based on HTTP response status and content
+ */
+function createExaErrorFromResponse(
+  response: AxiosResponse,
+  query: string
+): Error {
+  const status = response.status;
+  const data = response.data;
+  const message =
+    typeof data === "object" && data?.message
+      ? data.message
+      : `HTTP ${status} error`;
+
+  switch (status) {
+    case 401:
+      return new ExaAuthError(`Authentication failed: ${message}`, {
+        status,
+        response: data,
+        query,
+        authType: message.toLowerCase().includes("invalid")
+          ? "invalid_key"
+          : "unknown",
+      });
+
+    case 403:
+      return new ExaAuthError(`Access forbidden: ${message}`, {
+        status,
+        response: data,
+        query,
+        authType: "insufficient_permissions",
+      });
+
+    case 429: {
+      const retryAfterHeader = response.headers["retry-after"];
+      const retryAfter = retryAfterHeader
+        ? Number.parseInt(retryAfterHeader, 10)
+        : undefined;
+      const rateLimitType = message.toLowerCase().includes("quota")
+        ? "quota"
+        : "requests";
+      const rateLimitOptions: Record<string, unknown> = {
+        status,
+        response: data,
+        rateLimitType,
+      };
+
+      if (typeof query === "string") {
+        rateLimitOptions.query = query;
+      }
+
+      if (retryAfter !== undefined) {
+        rateLimitOptions.retryAfter = retryAfter;
+      }
+
+      return new ExaRateLimitError(
+        `Rate limit exceeded: ${message}`,
+        rateLimitOptions
+      );
+    }
+
+    case 400:
+    case 422:
+      return new ExaClientError(`Invalid request: ${message}`, {
+        status,
+        response: data,
+        query,
+        errorCode:
+          typeof data === "object" && data?.code ? data.code : undefined,
+      });
+
+    case 408:
+      return new ExaClientError(`Request timeout: ${message}`, {
+        status,
+        response: data,
+        query,
+        errorCode: "timeout",
+      });
+
+    case 500:
+    case 502:
+    case 503:
+    case 504:
+      return new ExaServerError(`Server error: ${message}`, {
+        status,
+        response: data,
+        query,
+        isTemporary: status === 503 || status === 502 || status === 504,
+      });
+
+    default:
+      // Unknown HTTP error - treat as server error if 5xx, client error if 4xx
+      if (status >= 500) {
+        return new ExaServerError(`Unknown server error: ${message}`, {
+          status,
+          response: data,
+          query,
+          isTemporary: true,
+        });
+      }
+      if (status >= 400) {
+        return new ExaClientError(`Unknown client error: ${message}`, {
+          status,
+          response: data,
+          query,
+        });
+      }
+      return new Error(`Unexpected HTTP status ${status}: ${message}`);
   }
 }
 
@@ -301,8 +477,8 @@ function mapExaResultToBaml(
 }
 
 /**
- * Direct search execution without circuit breaker recovery
- * Used internally by recovery strategies for retries
+ * Direct search execution with circuit breaker error handling
+ * Uses the enhanced error handler for sophisticated retry logic
  */
 async function executeExaSearchDirect(
   bamlSearchQuery: SearchQueryItem,
@@ -311,37 +487,49 @@ async function executeExaSearchDirect(
   numHighlightSentences = 3
 ): Promise<BamlSearchResultItem[]> {
   const apiKey = validateApiKey();
-  const requestBody = buildRequestBody(
-    bamlSearchQuery,
-    numResults,
-    fetchFullText,
-    numHighlightSentences
-  );
 
-  const response = await makeExaApiRequest(requestBody, apiKey);
-  const exaResults = validateApiResponse(
-    response,
-    bamlSearchQuery.query_string
-  );
-  const retrievalDate = new Date().toISOString();
+  // Use circuit breaker with enhanced error handling
+  return await executeWithRetry(
+    async () => {
+      const requestBody = buildRequestBody(
+        bamlSearchQuery,
+        numResults,
+        fetchFullText,
+        numHighlightSentences
+      );
 
-  const bamlResults: BamlSearchResultItem[] = exaResults.map((exaRes, index) =>
-    mapExaResultToBaml(
-      exaRes,
-      index,
-      retrievalDate,
-      bamlSearchQuery,
-      response.data.autopromptString ?? undefined
-    )
-  );
+      const response = await makeExaApiRequest(requestBody, apiKey);
+      const exaResults = validateApiResponse(
+        response,
+        bamlSearchQuery.query_string
+      );
+      const retrievalDate = new Date().toISOString();
 
-  console.log(`Exa search yielded ${bamlResults.length} results.`);
-  return bamlResults;
+      const bamlResults: BamlSearchResultItem[] = exaResults.map(
+        (exaRes, index) =>
+          mapExaResultToBaml(
+            exaRes,
+            index,
+            retrievalDate,
+            bamlSearchQuery,
+            response.data.autopromptString ?? undefined
+          )
+      );
+
+      console.log(`Exa search yielded ${bamlResults.length} results.`);
+      return bamlResults;
+    },
+    {
+      maxRetries: 3,
+      maxDelay: 30000,
+      backoffMultiplier: 2,
+    }
+  );
 }
 
 /**
  * Main search function with circuit breaker error recovery
- * This replaces the original implementation with sophisticated error handling
+ * Combines enhanced error analysis with recovery strategies
  */
 export async function executeExaSearch(
   bamlSearchQuery: SearchQueryItem,
@@ -349,18 +537,48 @@ export async function executeExaSearch(
   fetchFullText = true,
   numHighlightSentences = 3
 ): Promise<BamlSearchResultItem[]> {
-  // Create search context for error recovery
-  const context = createSearchContext([bamlSearchQuery]);
+  try {
+    // Direct execution with built-in circuit breaker retry logic
+    return await executeExaSearchDirect(
+      bamlSearchQuery,
+      numResults,
+      fetchFullText,
+      numHighlightSentences
+    );
+  } catch (error) {
+    // Analyze error to determine if research should be aborted
+    const errorAnalysis = analyzeExaError(error);
 
-  // Use circuit breaker to execute search with automatic error recovery
-  return await searchCircuitBreaker.executeWithRecovery(
-    () =>
-      executeExaSearchDirect(
-        bamlSearchQuery,
-        numResults,
-        fetchFullText,
-        numHighlightSentences
-      ),
-    context
-  );
+    console.warn("Search failed with analysis:", {
+      category: errorAnalysis.errorCategory,
+      shouldRetry: errorAnalysis.shouldRetry,
+      isRecoverable: errorAnalysis.isRecoverable,
+      userMessage: errorAnalysis.userMessage,
+      shouldAbort: shouldAbortResearch(error),
+    });
+
+    // If error is non-recoverable (config/auth), don't try recovery strategies
+    if (shouldAbortResearch(error)) {
+      console.error(
+        "Aborting research due to non-recoverable error:",
+        errorAnalysis.userMessage
+      );
+      throw error;
+    }
+
+    // For recoverable errors, try the recovery strategies as fallback
+    console.log("Attempting recovery strategies as fallback...");
+    const context = createSearchContext([bamlSearchQuery]);
+
+    return await searchCircuitBreaker.executeWithRecovery(
+      () =>
+        executeExaSearchDirect(
+          bamlSearchQuery,
+          numResults,
+          fetchFullText,
+          numHighlightSentences
+        ),
+      context
+    );
+  }
 }
