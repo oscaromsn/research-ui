@@ -63,5 +63,4 @@ const config: UserConfig = {
     "https://github.com/conventional-changelog/commitlint/#what-is-commitlint",
 };
 
-// biome-ignore lint/style/noDefaultExport: Commitlint requires default export for config
 export default config;

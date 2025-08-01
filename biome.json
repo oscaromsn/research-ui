@@ -403,6 +403,25 @@
           }
         }
       }
+    },
+    {
+      "includes": [
+        "**/*.config.{ts,js,mjs,cjs}",
+        "**/vitest.config.ts",
+        "**/postcss.config.mjs",
+        "**/tailwind.config.ts",
+        "**/next.config.mjs",
+        "**/.lintstagedrc.mjs",
+        "**/commitlint.config.ts",
+        "**/playwright.config.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off"
+          }
+        }
+      }
     }
   ]
 }

@@ -1,16 +1,16 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "ignore": [
-    "node_modules/**",
+    ".claude/**",
     ".next/**",
+    ".zed/**",
+    "__tests__/**",
+    "baml_client/**",
+    "build/**",
     "coverage/**",
     "dist/**",
-    "build/**",
-    "baml_client/**",
+    "node_modules/**",
     "public/**",
-    ".claude/**",
-    ".zed/**",
-    "__tests__/examples/**/*.example.ts",
     "types/test-globals.d.ts",
     "vitest.config.no-api.ts"
   ],
@@ -23,6 +23,7 @@
   ],
   "rules": {
     "binaries": "warn",
+    "classMembers": "warn",
     "dependencies": "error",
     "devDependencies": "warn",
     "duplicates": "error",
@@ -30,11 +31,10 @@
     "exports": "warn",
     "files": "error",
     "nsExports": "warn",
-    "classMembers": "warn",
-    "types": "warn",
     "nsTypes": "warn",
+    "types": "warn",
     "unlisted": "warn",
     "unresolved": "error"
   },
-  "includeEntryExports": false
+  "includeEntryExports": true
 }
