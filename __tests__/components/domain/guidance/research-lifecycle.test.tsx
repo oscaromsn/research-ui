@@ -23,14 +23,14 @@ describe("ResearchLifecycle Component Integration", () => {
   };
 
   it("renders all lifecycle stages", () => {
-    renderWithProvider(<ResearchLifecycle />);
+    const { getByText } = renderWithProvider(<ResearchLifecycle />);
 
-    expect(screen.getByText("Ideate")).toBeInTheDocument();
-    expect(screen.getByText("Plan")).toBeInTheDocument();
-    expect(screen.getByText("Research")).toBeInTheDocument();
-    expect(screen.getByText("Analyze")).toBeInTheDocument();
-    expect(screen.getByText("Review")).toBeInTheDocument();
-    expect(screen.getByText("Draft")).toBeInTheDocument();
+    expect(getByText("Ideate")).toBeInTheDocument();
+    expect(getByText("Plan")).toBeInTheDocument();
+    expect(getByText("Research")).toBeInTheDocument();
+    expect(getByText("Analyze")).toBeInTheDocument();
+    expect(getByText("Review")).toBeInTheDocument();
+    expect(getByText("Draft")).toBeInTheDocument();
   });
 
   it("shows INITIALIZING stage as Ideate active", () => {

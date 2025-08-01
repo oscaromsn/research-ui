@@ -215,9 +215,9 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
       store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-      renderWithProvider(<EvidenceAnalysis />);
+      const { getByText } = renderWithProvider(<EvidenceAnalysis />);
 
-      const entityElement = screen.getByText("Smith v. Jones");
+      const entityElement = getByText("Smith v. Jones");
       expect(entityElement).toHaveAttribute(
         "title",
         "345 F.Supp. 2d 123 (N.D. Cal. 2023)"
@@ -228,12 +228,12 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
       store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-      renderWithProvider(<EvidenceAnalysis />);
+      const { getByText } = renderWithProvider(<EvidenceAnalysis />);
 
       // Check that entities have different styling classes based on type
-      const caseEntity = screen.getByText("Smith v. Jones");
-      const personEntity = screen.getByText("John Smith");
-      const conceptEntity = screen.getByText("Force Majeure");
+      const caseEntity = getByText("Smith v. Jones");
+      const personEntity = getByText("John Smith");
+      const conceptEntity = getByText("Force Majeure");
 
       // Should have different color schemes
       expect(caseEntity).toHaveClass("bg-blue-100");
@@ -314,9 +314,9 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
       store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-      renderWithProvider(<EvidenceAnalysis />);
+      const { getByText } = renderWithProvider(<EvidenceAnalysis />);
 
-      const reasoningButton = screen.getByText(/View Analysis Reasoning/);
+      const reasoningButton = getByText(/View Analysis Reasoning/);
       await userEvent.click(reasoningButton);
 
       expect(
@@ -333,9 +333,9 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
       store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-      renderWithProvider(<EvidenceAnalysis />);
+      const { getByText } = renderWithProvider(<EvidenceAnalysis />);
 
-      const reasoningButton = screen.getByText(/View Analysis Reasoning/);
+      const reasoningButton = getByText(/View Analysis Reasoning/);
       await userEvent.click(reasoningButton);
 
       expect(screen.getByTestId("legal-question-summary")).toHaveTextContent(
@@ -352,9 +352,9 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
       store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-      renderWithProvider(<EvidenceAnalysis />);
+      const { getByText } = renderWithProvider(<EvidenceAnalysis />);
 
-      const reasoningButton = screen.getByText(/View Analysis Reasoning/);
+      const reasoningButton = getByText(/View Analysis Reasoning/);
       await userEvent.click(reasoningButton);
 
       expect(

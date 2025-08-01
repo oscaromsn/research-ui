@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createStore, Provider } from "jotai";
 import type React from "react";
@@ -91,18 +91,20 @@ describe("SynthesisReporting Component Integration", () => {
   };
 
   it("renders the component with initial state", () => {
-    renderWithProvider(<SynthesisReporting />);
+    const { getByText } = renderWithProvider(<SynthesisReporting />);
 
-    expect(screen.getByText("Synthesis & Reporting")).toBeInTheDocument();
-    expect(screen.getByText("Synthesis Studio")).toBeInTheDocument();
-    expect(screen.getByText("Report Drafter")).toBeInTheDocument();
+    expect(getByText("Synthesis & Reporting")).toBeInTheDocument();
+    expect(getByText("Synthesis Studio")).toBeInTheDocument();
+    expect(getByText("Report Drafter")).toBeInTheDocument();
   });
 
   it("displays tabs and switches between them", async () => {
-    renderWithProvider(<SynthesisReporting />);
+    const { getByText, getByTestId } = renderWithProvider(
+      <SynthesisReporting />
+    );
 
-    const synthesisTab = screen.getByText("Synthesis Studio");
-    const reportTab = screen.getByText("Report Drafter");
+    const synthesisTab = getByText("Synthesis Studio");
+    const reportTab = getByText("Report Drafter");
 
     // Initially on synthesis tab
     expect(synthesisTab).toHaveClass(
@@ -119,7 +121,7 @@ describe("SynthesisReporting Component Integration", () => {
     // Switch to report tab
     await userEvent.click(reportTab);
 
-    expect(screen.getByTestId("report-drafter")).toBeInTheDocument();
+    expect(getByTestId("report-drafter")).toBeInTheDocument();
     expect(reportTab).toHaveClass(
       "border-b-2",
       "border-[#3a7bb7]",
@@ -129,7 +131,7 @@ describe("SynthesisReporting Component Integration", () => {
     // Switch back to synthesis tab
     await userEvent.click(synthesisTab);
 
-    expect(screen.getByText("Synthesized Topics")).toBeInTheDocument();
+    expect(getByText("Synthesized Topics")).toBeInTheDocument();
     expect(synthesisTab).toHaveClass(
       "border-b-2",
       "border-[#3a7bb7]",
@@ -140,49 +142,47 @@ describe("SynthesisReporting Component Integration", () => {
   it("displays synthesized topics from atom state", () => {
     store.set(synthesisDetailsAtom, mockSynthesisData);
 
-    renderWithProvider(<SynthesisReporting />);
+    const { getByText } = renderWithProvider(<SynthesisReporting />);
 
     // Check that topics are displayed
     expect(
-      screen.getByText("Establishing 'Duty of Care' in Negligence Claims")
+      getByText("Establishing 'Duty of Care' in Negligence Claims")
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("Contract Interpretation Standards")
-    ).toBeInTheDocument();
+    expect(getByText("Contract Interpretation Standards")).toBeInTheDocument();
 
     // Check that synthesis snippets are displayed
     expect(
-      screen.getByText(
+      getByText(
         /Pre-existing duty of care considerations include foreseeability/
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
+      getByText(
         /Courts apply objective standards when interpreting contractual terms/
       )
     ).toBeInTheDocument();
 
     // Check that document IDs are displayed
-    expect(screen.getByText("[DocID-001]")).toBeInTheDocument();
-    expect(screen.getByText("[DocID-003]")).toBeInTheDocument();
-    expect(screen.getByText("[DocID-002]")).toBeInTheDocument();
-    expect(screen.getByText("[DocID-004]")).toBeInTheDocument();
+    expect(getByText("[DocID-001]")).toBeInTheDocument();
+    expect(getByText("[DocID-003]")).toBeInTheDocument();
+    expect(getByText("[DocID-002]")).toBeInTheDocument();
+    expect(getByText("[DocID-004]")).toBeInTheDocument();
 
     // Check confidence displays
-    expect(screen.getByText("High (85%)")).toBeInTheDocument(); // For 85% confidence
+    expect(getByText("High (85%)")).toBeInTheDocument(); // For 85% confidence
   });
 
   it("displays unanswered aspects from atom state", () => {
     store.set(synthesisDetailsAtom, mockSynthesisData);
 
-    renderWithProvider(<SynthesisReporting />);
+    const { getByText } = renderWithProvider(<SynthesisReporting />);
 
-    expect(screen.getByText("Unanswered Aspects:")).toBeInTheDocument();
+    expect(getByText("Unanswered Aspects:")).toBeInTheDocument();
     expect(
-      screen.getByText("Defining the threshold of causal connection")
+      getByText("Defining the threshold of causal connection")
     ).toBeInTheDocument();
     expect(
-      screen.getByText("State-by-state variations in force majeure standards")
+      getByText("State-by-state variations in force majeure standards")
     ).toBeInTheDocument();
   });
 
@@ -214,33 +214,34 @@ describe("SynthesisReporting Component Integration", () => {
   it("opens synthesis reasoning modal when button is clicked", async () => {
     store.set(synthesisDetailsAtom, mockSynthesisData);
 
-    renderWithProvider(<SynthesisReporting />);
+    const { getByText, getByTestId } = renderWithProvider(
+      <SynthesisReporting />
+    );
 
-    const reasoningButton = screen.getByText("View Synthesis Reasoning");
+    const reasoningButton = getByText("View Synthesis Reasoning");
     await userEvent.click(reasoningButton);
 
-    expect(screen.getByTestId("synthesis-reasoning-modal")).toBeInTheDocument();
-    expect(screen.getByText("Synthesis Reasoning Details")).toBeInTheDocument();
+    expect(getByTestId("synthesis-reasoning-modal")).toBeInTheDocument();
+    expect(getByText("Synthesis Reasoning Details")).toBeInTheDocument();
   });
 
   it("closes synthesis reasoning modal when close button is clicked", async () => {
     store.set(synthesisDetailsAtom, mockSynthesisData);
 
-    renderWithProvider(<SynthesisReporting />);
+    const { getByText, getByTestId, queryByTestId, getByLabelText } =
+      renderWithProvider(<SynthesisReporting />);
 
     // Open modal
-    const reasoningButton = screen.getByText("View Synthesis Reasoning");
+    const reasoningButton = getByText("View Synthesis Reasoning");
     await userEvent.click(reasoningButton);
 
-    expect(screen.getByTestId("synthesis-reasoning-modal")).toBeInTheDocument();
+    expect(getByTestId("synthesis-reasoning-modal")).toBeInTheDocument();
 
     // Close modal
-    const closeButton = screen.getByLabelText("close");
+    const closeButton = getByLabelText("close");
     await userEvent.click(closeButton);
 
-    expect(
-      screen.queryByTestId("synthesis-reasoning-modal")
-    ).not.toBeInTheDocument();
+    expect(queryByTestId("synthesis-reasoning-modal")).not.toBeInTheDocument();
   });
 
   it("displays confidence levels correctly", () => {
@@ -272,10 +273,10 @@ describe("SynthesisReporting Component Integration", () => {
 
     store.set(synthesisDetailsAtom, confidenceTestData);
 
-    renderWithProvider(<SynthesisReporting />);
+    const { getByText } = renderWithProvider(<SynthesisReporting />);
 
     // Should show appropriate confidence labels
-    expect(screen.getByText("High (90%)")).toBeInTheDocument(); // For 90%
+    expect(getByText("High (90%)")).toBeInTheDocument(); // For 90%
     // Medium and Low confidence might be displayed differently or not at all in current UI
   });
 
@@ -289,11 +290,11 @@ describe("SynthesisReporting Component Integration", () => {
 
     store.set(synthesisDetailsAtom, emptySynthesis);
 
-    renderWithProvider(<SynthesisReporting />);
+    const { getByText } = renderWithProvider(<SynthesisReporting />);
 
-    expect(screen.getByText("Synthesis & Reporting")).toBeInTheDocument();
-    expect(screen.getByText("Synthesized Topics")).toBeInTheDocument();
-    expect(screen.getByText("Unanswered Aspects:")).toBeInTheDocument();
+    expect(getByText("Synthesis & Reporting")).toBeInTheDocument();
+    expect(getByText("Synthesized Topics")).toBeInTheDocument();
+    expect(getByText("Unanswered Aspects:")).toBeInTheDocument();
     // Should not crash and should show empty state appropriately
   });
 
@@ -315,10 +316,10 @@ describe("SynthesisReporting Component Integration", () => {
 
     store.set(synthesisDetailsAtom, partialSynthesis);
 
-    const { rerender } = renderWithProvider(<SynthesisReporting />);
+    const { getByText, rerender } = renderWithProvider(<SynthesisReporting />);
 
     // Check initial partial content
-    expect(screen.getByText(/Initial analysis shows/)).toBeInTheDocument();
+    expect(getByText(/Initial analysis shows/)).toBeInTheDocument();
 
     // Update with more complete synthesis
     const updatedSynthesis: ClientSynthesis = {
@@ -339,17 +340,11 @@ describe("SynthesisReporting Component Integration", () => {
     };
 
     store.set(synthesisDetailsAtom, updatedSynthesis);
-    rerender(
-      <JotaiProvider>
-        <SynthesisReporting />
-      </JotaiProvider>
-    );
+    rerender(<SynthesisReporting />);
 
     // Check updated content
     expect(
-      screen.getByText(
-        /contract interpretation follows well-established precedents/
-      )
+      getByText(/contract interpretation follows well-established precedents/)
     ).toBeInTheDocument();
     // emergingQuestions are not displayed in the current UI design, so we don't test for them
   });
@@ -372,9 +367,9 @@ describe("SynthesisReporting Component Integration", () => {
 
     store.set(synthesisDetailsAtom, dataWithReasoning);
 
-    renderWithProvider(<SynthesisReporting />);
+    const { getByText } = renderWithProvider(<SynthesisReporting />);
 
     // The reasoning summary should be available when modal opens
-    expect(screen.getByText("View Synthesis Reasoning")).toBeInTheDocument();
+    expect(getByText("View Synthesis Reasoning")).toBeInTheDocument();
   });
 });

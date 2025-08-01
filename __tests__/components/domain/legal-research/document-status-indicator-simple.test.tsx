@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import "../../../dom-setup";
+import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
   DocumentStatusIndicator,
@@ -153,15 +154,15 @@ describe("Enhanced Document Status Indicator", () => {
 
   describe("DocumentStatusIndicator Component", () => {
     it("should render basic status without enhancements", () => {
-      render(
+      const { getByText } = render(
         <DocumentStatusIndicator status="fetched" className="test-class" />
       );
 
-      expect(screen.getByText(/Retrieved/)).toBeInTheDocument();
+      expect(getByText(/Retrieved/)).toBeInTheDocument();
     });
 
     it("should render progress when provided", () => {
-      render(
+      const { getByText } = render(
         <DocumentStatusIndicator
           status="analyzing"
           progress={75}
@@ -169,14 +170,14 @@ describe("Enhanced Document Status Indicator", () => {
         />
       );
 
-      expect(screen.getByText(/~1 minute remaining/)).toBeInTheDocument();
+      expect(getByText(/~1 minute remaining/)).toBeInTheDocument();
     });
 
     it("should render action buttons when actions are available", () => {
       const mockRetry = vi.fn();
       const mockSkip = vi.fn();
 
-      render(
+      const { getByText } = render(
         <DocumentStatusIndicator
           status="failed"
           onRetry={mockRetry}
@@ -185,8 +186,8 @@ describe("Enhanced Document Status Indicator", () => {
         />
       );
 
-      const retryButton = screen.getByText("Retry");
-      const skipButton = screen.getByText("Skip");
+      const retryButton = getByText("Retry");
+      const skipButton = getByText("Skip");
 
       expect(retryButton).toBeInTheDocument();
       expect(skipButton).toBeInTheDocument();
@@ -199,23 +200,21 @@ describe("Enhanced Document Status Indicator", () => {
     });
 
     it("should toggle details visibility", () => {
-      render(
+      const { getByText } = render(
         <DocumentStatusIndicator
           status="analyzing"
           details="Detailed analysis information"
         />
       );
 
-      const trigger = screen.getByText("Show details");
+      const trigger = getByText("Show details");
       expect(trigger).toBeInTheDocument();
 
       fireEvent.click(trigger);
 
       // Details should be visible after clicking
-      expect(screen.getByText("Hide details")).toBeInTheDocument();
-      expect(
-        screen.getByText("Detailed analysis information")
-      ).toBeInTheDocument();
+      expect(getByText("Hide details")).toBeInTheDocument();
+      expect(getByText("Detailed analysis information")).toBeInTheDocument();
     });
 
     it("should handle all status types", () => {
@@ -243,38 +242,40 @@ describe("Enhanced Document Status Indicator", () => {
     });
 
     it("should handle missing optional props gracefully", () => {
-      render(<DocumentStatusIndicator status="analyzing" />);
+      const { getByText } = render(
+        <DocumentStatusIndicator status="analyzing" />
+      );
 
       // Should render without errors when optional props are not provided
-      expect(screen.getByText(/Analyzing/)).toBeInTheDocument();
+      expect(getByText(/Analyzing/)).toBeInTheDocument();
     });
 
     it("should use custom details over status details", () => {
-      render(
+      const { getByText } = render(
         <DocumentStatusIndicator
           status="analyzing"
           details="Custom details override"
         />
       );
 
-      const showDetailsButton = screen.getByText("Show details");
+      const showDetailsButton = getByText("Show details");
       fireEvent.click(showDetailsButton);
 
-      expect(screen.getByText("Custom details override")).toBeInTheDocument();
+      expect(getByText("Custom details override")).toBeInTheDocument();
     });
 
     it("should handle error message in failed status", () => {
-      render(
+      const { getByText } = render(
         <DocumentStatusIndicator
           status="failed"
           errorMessage="Custom error message"
         />
       );
 
-      const showDetailsButton = screen.getByText("Show details");
+      const showDetailsButton = getByText("Show details");
       fireEvent.click(showDetailsButton);
 
-      expect(screen.getByText("Custom error message")).toBeInTheDocument();
+      expect(getByText("Custom error message")).toBeInTheDocument();
     });
   });
 });

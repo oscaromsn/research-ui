@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import "../../../dom-setup";
+import { render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -52,15 +53,15 @@ describe("GuidanceStrategy - Research Completion", () => {
         currentMessage: "Research process successfully completed.",
       });
 
-      render(
+      const { getByText, queryByText } = render(
         <JotaiProvider>
           <GuidanceStrategy />
         </JotaiProvider>
       );
 
-      expect(screen.getByText("Start Research")).toBeInTheDocument();
-      expect(screen.queryByText("Pause")).not.toBeInTheDocument();
-      expect(screen.queryByText("Abort")).not.toBeInTheDocument();
+      expect(getByText("Start Research")).toBeInTheDocument();
+      expect(queryByText("Pause")).not.toBeInTheDocument();
+      expect(queryByText("Abort")).not.toBeInTheDocument();
     });
 
     it("should show Start Research button when research has error", () => {
@@ -71,15 +72,15 @@ describe("GuidanceStrategy - Research Completion", () => {
         error: "Research failed",
       });
 
-      render(
+      const { getByText, queryByText } = render(
         <JotaiProvider>
           <GuidanceStrategy />
         </JotaiProvider>
       );
 
-      expect(screen.getByText("Start Research")).toBeInTheDocument();
-      expect(screen.queryByText("Pause")).not.toBeInTheDocument();
-      expect(screen.queryByText("Abort")).not.toBeInTheDocument();
+      expect(getByText("Start Research")).toBeInTheDocument();
+      expect(queryByText("Pause")).not.toBeInTheDocument();
+      expect(queryByText("Abort")).not.toBeInTheDocument();
     });
 
     it("should show processing controls during active research", () => {
@@ -90,15 +91,15 @@ describe("GuidanceStrategy - Research Completion", () => {
         currentMessage: "Analyzing document 1/5",
       });
 
-      render(
+      const { getByText, queryByText } = render(
         <JotaiProvider>
           <GuidanceStrategy />
         </JotaiProvider>
       );
 
-      expect(screen.getByText("Pause")).toBeInTheDocument();
-      expect(screen.getByText("Abort")).toBeInTheDocument();
-      expect(screen.queryByText("Start Research")).not.toBeInTheDocument();
+      expect(getByText("Pause")).toBeInTheDocument();
+      expect(getByText("Abort")).toBeInTheDocument();
+      expect(queryByText("Start Research")).not.toBeInTheDocument();
     });
 
     it("should show resume button when research can be resumed", () => {
@@ -109,21 +110,21 @@ describe("GuidanceStrategy - Research Completion", () => {
         isPaused: true,
       });
 
-      render(
+      const { getByText, queryByText } = render(
         <JotaiProvider>
           <GuidanceStrategy />
         </JotaiProvider>
       );
 
-      expect(screen.getByText("Resume Research")).toBeInTheDocument();
-      expect(screen.queryByText("Start Research")).not.toBeInTheDocument();
-      expect(screen.queryByText("Pause")).not.toBeInTheDocument();
-      expect(screen.queryByText("Abort")).not.toBeInTheDocument();
+      expect(getByText("Resume Research")).toBeInTheDocument();
+      expect(queryByText("Start Research")).not.toBeInTheDocument();
+      expect(queryByText("Pause")).not.toBeInTheDocument();
+      expect(queryByText("Abort")).not.toBeInTheDocument();
     });
 
     it("should handle transition from loading to completed state", () => {
       // Start with loading state
-      const { rerender } = render(
+      const { getByText, queryByText, rerender } = render(
         <JotaiProvider>
           <GuidanceStrategy />
         </JotaiProvider>
@@ -143,8 +144,8 @@ describe("GuidanceStrategy - Research Completion", () => {
         </JotaiProvider>
       );
 
-      expect(screen.getByText("Pause")).toBeInTheDocument();
-      expect(screen.getByText("Abort")).toBeInTheDocument();
+      expect(getByText("Pause")).toBeInTheDocument();
+      expect(getByText("Abort")).toBeInTheDocument();
 
       // Then completed
       mockedUseResearchAgent.mockReturnValue({
@@ -160,9 +161,9 @@ describe("GuidanceStrategy - Research Completion", () => {
         </JotaiProvider>
       );
 
-      expect(screen.getByText("Start Research")).toBeInTheDocument();
-      expect(screen.queryByText("Pause")).not.toBeInTheDocument();
-      expect(screen.queryByText("Abort")).not.toBeInTheDocument();
+      expect(getByText("Start Research")).toBeInTheDocument();
+      expect(queryByText("Pause")).not.toBeInTheDocument();
+      expect(queryByText("Abort")).not.toBeInTheDocument();
     });
   });
 });

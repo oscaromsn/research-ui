@@ -1,3 +1,4 @@
+import "../../../../dom-setup";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
@@ -109,7 +110,7 @@ describe("CaseModal Component", () => {
   it("calls onClose when close button is clicked", async () => {
     const onCloseMock = vi.fn();
 
-    render(
+    const { getByTestId } = render(
       <CaseModal
         isOpen={true}
         onClose={onCloseMock}
@@ -118,7 +119,7 @@ describe("CaseModal Component", () => {
     );
 
     // Click the close button
-    await userEvent.click(screen.getByTestId("modal-close-button"));
+    await userEvent.click(getByTestId("modal-close-button"));
 
     // Check that onClose was called
     expect(onCloseMock).toHaveBeenCalledTimes(1);

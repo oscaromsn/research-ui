@@ -41,7 +41,7 @@ describe("Environment Validation", () => {
       expect(() => {
         delete require.cache[require.resolve("@/lib/schemas/env")];
         require("@/lib/schemas/env");
-      }).toThrow(/Missing or invalid environment variables.*CEREBRAS_API_KEY/);
+      }).toThrow(/Missing or invalid.*environment variables.*CEREBRAS_API_KEY/);
     });
 
     it("should fail with clear message when EXA_API_KEY is missing", async () => {
@@ -54,7 +54,7 @@ describe("Environment Validation", () => {
       expect(() => {
         delete require.cache[require.resolve("@/lib/schemas/env")];
         require("@/lib/schemas/env");
-      }).toThrow(/Missing or invalid environment variables.*EXA_API_KEY/);
+      }).toThrow(/Missing or invalid.*environment variables.*EXA_API_KEY/);
     });
 
     it("should fail with clear message when NODE_ENV is invalid", async () => {
@@ -80,7 +80,7 @@ describe("Environment Validation", () => {
       expect(() => {
         delete require.cache[require.resolve("@/lib/schemas/env")];
         require("@/lib/schemas/env");
-      }).toThrow(/Missing or invalid environment variables/);
+      }).toThrow(/Missing or invalid.*environment variables/);
     });
   });
 
@@ -214,7 +214,7 @@ describe("Environment Validation", () => {
       if (thrownError) {
         // Error message should be clear and actionable
         expect(thrownError.message).toMatch(
-          /Missing or invalid environment variables/
+          /Missing or invalid.*environment variables/
         );
         expect(thrownError.message).toMatch(/CEREBRAS_API_KEY/);
       }

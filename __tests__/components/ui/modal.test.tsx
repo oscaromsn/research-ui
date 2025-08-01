@@ -1,66 +1,72 @@
-import { render, screen } from "@testing-library/react";
+import "../../dom-setup";
+import { cleanup, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { Modal } from "@/components/ui/modal";
 
 describe("Modal Component", () => {
+  afterEach(() => {
+    cleanup();
+    document.body.innerHTML = "";
+  });
+
   it("renders when isOpen is true", () => {
-    render(
+    const { getByText, getByRole } = render(
       <Modal isOpen={true} onClose={vi.fn()} title="Test Modal">
         <div>Modal Content</div>
       </Modal>
     );
 
     // Check title
-    expect(screen.getByText("Test Modal")).toBeInTheDocument();
+    expect(getByText("Test Modal")).toBeInTheDocument();
 
     // Check content
-    expect(screen.getByText("Modal Content")).toBeInTheDocument();
+    expect(getByText("Modal Content")).toBeInTheDocument();
 
     // Check close button (X icon)
-    expect(screen.getByRole("button")).toBeInTheDocument();
+    expect(getByRole("button")).toBeInTheDocument();
   });
 
   it("does not render when isOpen is false", () => {
-    render(
+    const { queryByText } = render(
       <Modal isOpen={false} onClose={vi.fn()} title="Test Modal">
         <div>Modal Content</div>
       </Modal>
     );
 
     // Modal shouldn't render anything when closed
-    expect(screen.queryByText("Test Modal")).not.toBeInTheDocument();
-    expect(screen.queryByText("Modal Content")).not.toBeInTheDocument();
+    expect(queryByText("Test Modal")).not.toBeInTheDocument();
+    expect(queryByText("Modal Content")).not.toBeInTheDocument();
   });
 
   it("calls onClose when the close button is clicked", async () => {
     const onCloseMock = vi.fn();
 
-    render(
+    const { getByRole } = render(
       <Modal isOpen={true} onClose={onCloseMock} title="Test Modal">
         <div>Modal Content</div>
       </Modal>
     );
 
     // Click the close button
-    await userEvent.click(screen.getByRole("button"));
+    await userEvent.click(getByRole("button"));
 
     // Check that onClose was called
     expect(onCloseMock).toHaveBeenCalledTimes(1);
   });
 
   it("renders with correct size classes", () => {
-    const { rerender } = render(
+    const { rerender, getByText } = render(
       <Modal isOpen={true} onClose={vi.fn()} title="Test Modal" size="md">
         <div>Modal Content</div>
       </Modal>
     );
 
     // Check default size
-    expect(
-      screen.getByText("Modal Content").parentElement?.parentElement
-    ).toHaveClass("max-w-md");
+    expect(getByText("Modal Content").parentElement?.parentElement).toHaveClass(
+      "max-w-md"
+    );
 
     // Rerender with large size
     rerender(
@@ -68,9 +74,9 @@ describe("Modal Component", () => {
         <div>Modal Content</div>
       </Modal>
     );
-    expect(
-      screen.getByText("Modal Content").parentElement?.parentElement
-    ).toHaveClass("max-w-lg");
+    expect(getByText("Modal Content").parentElement?.parentElement).toHaveClass(
+      "max-w-lg"
+    );
 
     // Rerender with extra large size
     rerender(
@@ -78,13 +84,13 @@ describe("Modal Component", () => {
         <div>Modal Content</div>
       </Modal>
     );
-    expect(
-      screen.getByText("Modal Content").parentElement?.parentElement
-    ).toHaveClass("max-w-xl");
+    expect(getByText("Modal Content").parentElement?.parentElement).toHaveClass(
+      "max-w-xl"
+    );
   });
 
   it("renders with modal overlay", () => {
-    render(
+    const { getByText } = render(
       <Modal isOpen={true} onClose={vi.fn()} title="Test Modal">
         <div>Modal Content</div>
       </Modal>
@@ -92,8 +98,7 @@ describe("Modal Component", () => {
 
     // Check for the modal overlay (background with appropriate classes)
     const overlay =
-      screen.getByText("Modal Content").parentElement?.parentElement
-        ?.parentElement;
+      getByText("Modal Content").parentElement?.parentElement?.parentElement;
     expect(overlay).toHaveClass("fixed");
     expect(overlay).toHaveClass("inset-0");
     expect(overlay).toHaveClass("bg-black/50");
