@@ -1,46 +1,54 @@
 import { z } from "zod";
-
-import { env } from "./schemas/env";
+import { createSchema, env, number, string } from "./schemas";
 
 /**
- * Application configuration with Zod validation
+ * Application configuration with enhanced Zod validation
+ * Uses common schema utilities for consistency and better error handling
  */
 
 // Research parameters schema - replaces magic numbers in orchestrator
-const researchConfigSchema = z.object({
-  maxQueriesPerIteration: z.number().int().positive().default(3),
-  maxDocumentsPerQuery: z.number().int().positive().default(5),
-  searchTimeoutMs: z.number().int().positive().default(30000),
-  maxRetries: z.number().int().nonnegative().default(2),
-  analysisTimeoutMs: z.number().int().positive().default(45000),
-});
+const researchConfigSchema = createSchema(
+  z.object({
+    maxQueriesPerIteration: number.positive.int().default(3),
+    maxDocumentsPerQuery: number.positive.int().default(5),
+    searchTimeoutMs: number.positive.int().default(30000),
+    maxRetries: number.nonNegative.int().default(2),
+    analysisTimeoutMs: number.positive.int().default(45000),
+  })
+);
 
 // Feature flags schema with validation
-const featureFlagsSchema = z.object({
-  enableDetailedLogging: z.boolean().default(false),
-  enableProgressIndicators: z.boolean().default(true),
-  enableAdvancedRetry: z.boolean().default(false),
-  // Keep existing feature flags
-  enableNewUI: z.boolean().default(false),
-  enableBetaFeatures: z.boolean().default(false),
-  enableAnalytics: z.boolean().default(true),
-  maxUploadSizeMB: z.number().positive().default(10),
-});
+const featureFlagsSchema = createSchema(
+  z.object({
+    enableDetailedLogging: z.boolean().default(false),
+    enableProgressIndicators: z.boolean().default(true),
+    enableAdvancedRetry: z.boolean().default(false),
+    // Keep existing feature flags
+    enableNewUI: z.boolean().default(false),
+    enableBetaFeatures: z.boolean().default(false),
+    enableAnalytics: z.boolean().default(true),
+    maxUploadSizeMB: number.positive.default(10),
+  })
+);
 
 // API configuration schema with validation
-const apiConfigSchema = z.object({
-  baseUrl: z.string().url("API base URL must be a valid URL"),
-  timeout: z.number().int().positive().default(30000),
-  retries: z.number().int().nonnegative().default(3),
-  version: z.string().default("v1"),
-});
+const apiConfigSchema = createSchema(
+  z.object({
+    baseUrl: string.url.describe("API base URL must be a valid URL"),
+    timeout: number.positive.int().default(30000),
+    retries: number.nonNegative.int().default(3),
+    version: string.nonEmpty.default("v1"),
+  })
+);
 
 // UI configuration schema with validation
-const uiConfigSchema = z.object({
-  theme: z.enum(["light", "dark", "system"]).default("system"),
-  animationsEnabled: z.boolean().default(true),
-  defaultPageSize: z.number().int().positive().default(10),
-});
+const uiConfigSchema = createSchema(
+  z.object({
+    theme: z.enum(["light", "dark", "system"]).default("system"),
+    animationsEnabled: z.boolean().default(true),
+    defaultPageSize: number.positive.int().default(10),
+  })
+);
 
 /**
  * Environment-specific configuration values
@@ -132,12 +140,18 @@ const getEnvironmentConfig = () => {
 // Get environment-specific config
 const envConfig = getEnvironmentConfig();
 
-// Validate each section with its schema
+// Validate each section with enhanced schema methods and better error messages
 export const config = {
-  research: researchConfigSchema.parse(envConfig.research),
-  features: featureFlagsSchema.parse(envConfig.features),
-  api: apiConfigSchema.parse(envConfig.api),
-  ui: uiConfigSchema.parse(envConfig.ui),
+  research: researchConfigSchema.parse(
+    envConfig.research,
+    "Invalid research configuration"
+  ),
+  features: featureFlagsSchema.parse(
+    envConfig.features,
+    "Invalid feature flags configuration"
+  ),
+  api: apiConfigSchema.parse(envConfig.api, "Invalid API configuration"),
+  ui: uiConfigSchema.parse(envConfig.ui, "Invalid UI configuration"),
   environment: env.NODE_ENV,
 };
 

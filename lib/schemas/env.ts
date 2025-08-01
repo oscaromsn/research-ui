@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { string } from "./common";
+import { createSchema, parse } from "./utils";
 
 /**
  * Server-side environment variables schema
@@ -7,75 +9,77 @@ import { z } from "zod";
  * This approach ensures your application fails fast if required
  * environment variables are missing or invalid.
  */
-const serverEnvSchema = z.object({
-  // Node environment
-  NODE_ENV: z.enum(["development", "test", "production"]),
+const serverEnvSchema = createSchema(
+  z.object({
+    // Node environment
+    NODE_ENV: z.enum(["development", "test", "production"]),
 
-  // Required API keys for legal research functionality
-  CEREBRAS_API_KEY: z.string().min(1, "CEREBRAS_API_KEY is required"),
-  EXA_API_KEY: z.string().min(1, "EXA_API_KEY is required"),
+    // Required API keys for legal research functionality
+    CEREBRAS_API_KEY: string.nonEmpty.describe("CEREBRAS_API_KEY is required"),
+    EXA_API_KEY: string.nonEmpty.describe("EXA_API_KEY is required"),
 
-  // Optional API keys for extended functionality
-  GOOGLE_API_KEY: z.string().optional(),
-  OPENAI_API_KEY: z.string().optional(),
-  ANTHROPIC_API_KEY: z.string().optional(),
-});
+    // Optional API keys for extended functionality
+    GOOGLE_API_KEY: string.nonEmpty.optional(),
+    OPENAI_API_KEY: string.nonEmpty.optional(),
+    ANTHROPIC_API_KEY: string.nonEmpty.optional(),
+
+    // Optional configuration with defaults
+    MAX_SEARCH_QUERIES: string.numeric
+      .optional()
+      .default("5")
+      .transform(Number),
+    MAX_DOCUMENTS_PER_QUERY: string.numeric
+      .optional()
+      .default("10")
+      .transform(Number),
+    SEARCH_TIMEOUT_MS: string.numeric
+      .optional()
+      .default("30000")
+      .transform(Number),
+  })
+);
 
 /**
  * Client-side (public) environment variables schema
  * These variables will be exposed to the browser and should NOT contain secrets
  * All client-side env vars must start with NEXT_PUBLIC_
  */
-export const clientEnvSchema = z.object({
-  // Add your public environment variables here
-  // NEXT_PUBLIC_API_URL: z.string().url("NEXT_PUBLIC_API_URL must be a valid URL"),
-  // NEXT_PUBLIC_APP_VERSION: z.string().optional(),
-});
+export const clientEnvSchema = createSchema(
+  z.object({
+    // Add your public environment variables here when needed
+    // NEXT_PUBLIC_API_URL: string.url.describe("NEXT_PUBLIC_API_URL must be a valid URL"),
+    // NEXT_PUBLIC_APP_VERSION: z.string().optional(),
+  })
+);
 
 // Process environment variable validation
 function validateEnv() {
-  // For server-side env vars
-  const serverEnv = serverEnvSchema.safeParse(process.env);
-
-  // For client-side env vars
-  const clientEnv = clientEnvSchema.safeParse(process.env);
-
-  if (!serverEnv.success) {
-    // Extract missing or invalid fields for a clear error message
-    const errors = serverEnv.error.errors;
-    const missingFields = errors
-      .filter(
-        (error) => error.code === "too_small" || error.code === "invalid_type"
-      )
-      .map((error) => error.path.join("."));
-    const invalidEnumFields = errors
-      .filter((error) => error.code === "invalid_enum_value")
-      .map((error) => error.path.join("."));
-
-    const allInvalidFields = [...missingFields, ...invalidEnumFields];
-
-    console.error(
-      "❌ Invalid server environment variables:",
-      JSON.stringify(serverEnv.error.format(), null, 2)
+  try {
+    // For server-side env vars - use enhanced error handling
+    const serverEnv = parse(
+      serverEnvSchema.schema,
+      process.env,
+      "Missing or invalid server environment variables"
     );
 
-    throw new Error(
-      `Missing or invalid environment variables: ${allInvalidFields.join(", ")}`
+    // For client-side env vars
+    const clientEnv = parse(
+      clientEnvSchema.schema,
+      process.env,
+      "Invalid client environment variables"
     );
+
+    return {
+      server: serverEnv,
+      client: clientEnv,
+    };
+  } catch (error) {
+    // Enhanced error logging for better debugging
+    if (error instanceof Error && error.name === "ValidationError") {
+      console.error("❌ Environment validation failed:", error.message);
+    }
+    throw error;
   }
-
-  if (!clientEnv.success) {
-    console.error(
-      "❌ Invalid client environment variables:",
-      JSON.stringify(clientEnv.error.format(), null, 2)
-    );
-    throw new Error("Invalid client environment variables");
-  }
-
-  return {
-    server: serverEnv.data,
-    client: clientEnv.data,
-  };
 }
 
 const validatedEnv = validateEnv();
@@ -95,5 +99,5 @@ export const publicEnv = validatedEnv.client;
 /**
  * Type definitions for environment variables
  */
-export type ServerEnv = z.infer<typeof serverEnvSchema>;
-export type ClientEnv = z.infer<typeof clientEnvSchema>;
+export type ServerEnv = z.infer<typeof serverEnvSchema.schema>;
+export type ClientEnv = z.infer<typeof clientEnvSchema.schema>;
