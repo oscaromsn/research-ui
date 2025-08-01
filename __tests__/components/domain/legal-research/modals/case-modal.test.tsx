@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { CaseModal } from "@/components/domain/legal-research/modals/case-modal";
 import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 
-// Mock the Modal component
+// Mock the Modal component using vitest mock syntax
 vi.mock("@/components/ui/modal", () => ({
   Modal: ({
     isOpen,

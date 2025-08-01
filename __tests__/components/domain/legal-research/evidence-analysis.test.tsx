@@ -5,39 +5,47 @@ import type React from "react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock Next.js navigation
+// Mock Next.js navigation - create mock factory functions
+const mockRouter = {
+  push: vi.fn(),
+  replace: vi.fn(),
+  back: vi.fn(),
+  forward: vi.fn(),
+  refresh: vi.fn(),
+  prefetch: vi.fn(),
+};
+
+const mockUseRouter = vi.fn(() => mockRouter);
+const mockUsePathname = vi.fn(() => "/");
+const mockUseSearchParams = vi.fn(() => new URLSearchParams());
+const mockUseParams = vi.fn(() => ({}));
+
 vi.mock("next/navigation", () => ({
-  useRouter: vi.fn(() => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-    refresh: vi.fn(),
-    prefetch: vi.fn(),
-  })),
-  usePathname: vi.fn(() => "/"),
-  useSearchParams: vi.fn(() => new URLSearchParams()),
-  useParams: vi.fn(() => ({})),
+  useRouter: mockUseRouter,
+  usePathname: mockUsePathname,
+  useSearchParams: mockUseSearchParams,
+  useParams: mockUseParams,
 }));
 
-// Mock Lucide React icons
+// Mock Lucide React icons using vitest mock syntax
 vi.mock("lucide-react", async (importOriginal) => {
   const actual = (await importOriginal()) as Record<string, unknown>;
+  const createIconMock = (name: string) => () => name;
   return {
     ...actual,
     // Mock all icon components as simple functions returning their name
-    AlertCircle: () => "AlertCircle",
-    Brain: () => "Brain",
-    Gavel: () => "Gavel",
-    Loader2: () => "Loader2",
-    Scroll: () => "Scroll",
-    ChevronDown: () => "ChevronDown",
-    ChevronUp: () => "ChevronUp",
-    Eye: () => "Eye",
-    FileText: () => "FileText",
-    X: () => "X",
-    BookOpen: () => "BookOpen",
-    Scale: () => "Scale",
+    AlertCircle: createIconMock("AlertCircle"),
+    Brain: createIconMock("Brain"),
+    Gavel: createIconMock("Gavel"),
+    Loader2: createIconMock("Loader2"),
+    Scroll: createIconMock("Scroll"),
+    ChevronDown: createIconMock("ChevronDown"),
+    ChevronUp: createIconMock("ChevronUp"),
+    Eye: createIconMock("Eye"),
+    FileText: createIconMock("FileText"),
+    X: createIconMock("X"),
+    BookOpen: createIconMock("BookOpen"),
+    Scale: createIconMock("Scale"),
     // Add any other icons that might be used
   };
 });

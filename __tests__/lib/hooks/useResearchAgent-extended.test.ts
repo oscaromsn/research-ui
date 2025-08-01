@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { createElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator";
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import type {
   ClientAnalysisReasoning,
@@ -16,12 +15,15 @@ import {
   researchStatusAtom,
 } from "@/lib/state/researchAtoms";
 
-// Mock the server action
+// Mock the server action using vitest mock syntax
 vi.mock("@/app/actions/researchAgentOrchestrator", () => ({
   conductResearch: vi.fn(),
 }));
 
-const mockedConductResearch = vi.mocked(conductResearch);
+// Import the mocked function after the mock declaration
+import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
+
+const mockedConductResearch = conductResearch as ReturnType<typeof vi.fn>;
 
 describe("useResearchAgent Hook - Extended Data Handling", () => {
   let store: ReturnType<typeof createStore>;

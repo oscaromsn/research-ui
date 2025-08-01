@@ -4,14 +4,16 @@ import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GuidanceStrategy } from "@/components/domain/guidance/guidance-strategy";
-import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 
-// Mock the research agent hook
+// Mock the research agent hook using vitest mock syntax
 vi.mock("@/lib/hooks/useResearchAgent", () => ({
   useResearchAgent: vi.fn(),
 }));
 
-const mockedUseResearchAgent = vi.mocked(useResearchAgent);
+// Import the mocked function after the mock declaration
+import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
+
+const mockedUseResearchAgent = useResearchAgent as ReturnType<typeof vi.fn>;
 
 describe("GuidanceStrategy - Research Completion", () => {
   let store: ReturnType<typeof createStore>;

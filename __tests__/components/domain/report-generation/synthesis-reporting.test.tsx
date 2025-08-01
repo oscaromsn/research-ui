@@ -9,7 +9,7 @@ import { SynthesisReporting } from "@/components/domain/report-generation/synthe
 import type { ClientSynthesis } from "@/lib/state/researchAtoms";
 import { synthesisDetailsAtom } from "@/lib/state/researchAtoms";
 
-// Mock the SynthesisReasoningModal component
+// Mock the SynthesisReasoningModal component using vitest mock syntax
 vi.mock(
   "@/components/domain/report-generation/modals/synthesis-reasoning-modal",
   () => ({
@@ -35,7 +35,7 @@ vi.mock(
   })
 );
 
-// Mock the ReportDrafter component
+// Mock the ReportDrafter component using vitest mock syntax
 vi.mock("@/components/domain/report-generation/report-drafter", () => ({
   ReportDrafter: () => (
     <div data-testid="report-drafter">

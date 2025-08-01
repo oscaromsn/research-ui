@@ -1,9 +1,16 @@
+// Mock the server action using vitest mock syntax
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("@/app/actions/researchAgentOrchestrator", () => ({
+  conductResearch: vi.fn(),
+}));
+
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import type { ReactNode } from "react";
 import { createElement } from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
+// Import the mocked function after the mock declaration
 import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
@@ -15,12 +22,7 @@ import {
   synthesisDetailsAtom,
 } from "@/lib/state/researchAtoms";
 
-// Mock the server action
-vi.mock("@/app/actions/researchAgentOrchestrator", () => ({
-  conductResearch: vi.fn(),
-}));
-
-const mockedConductResearch = vi.mocked(conductResearch);
+const mockedConductResearch = conductResearch as ReturnType<typeof vi.fn>;
 
 describe("useResearchAgent Hook", () => {
   let store: ReturnType<typeof createStore>;
@@ -34,7 +36,8 @@ describe("useResearchAgent Hook", () => {
   });
 
   afterEach(async () => {
-    vi.clearAllTimers();
+    // Clear timers - use available vitest functions
+    vi.restoreAllMocks();
     // Ensure all async operations complete
     await global.testUtils?.flushPromises?.();
   });
@@ -183,12 +186,10 @@ describe("useResearchAgent Hook", () => {
       await waitFor(() => {
         const status = store.get(researchStatusAtom);
         expect(status.stage).toBe("INITIALIZING");
+        expect(status.isLoading).toBe(true);
+        expect(status.error).toBe(null);
+        expect(status.message).toBe("Initializing research...");
       });
-
-      const status = store.get(researchStatusAtom);
-      expect(status.isLoading).toBe(true);
-      expect(status.error).toBe(null);
-      expect(status.message).toBe("Initializing research...");
     });
 
     it("should call conductResearch server action with legal question", async () => {

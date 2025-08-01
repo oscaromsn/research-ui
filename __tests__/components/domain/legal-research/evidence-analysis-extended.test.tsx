@@ -18,7 +18,7 @@ import {
   selectedAnalyzedDocIdAtom,
 } from "@/lib/state/researchAtoms";
 
-// Mock the CaseModal component
+// Mock the CaseModal component using vitest mock syntax
 vi.mock("@/components/domain/legal-research/modals/case-modal", () => ({
   CaseModal: ({
     isOpen,
@@ -50,7 +50,7 @@ vi.mock("@/components/domain/legal-research/modals/case-modal", () => ({
   },
 }));
 
-// Mock the AnalysisReasoningModal component
+// Mock the AnalysisReasoningModal component using vitest mock syntax
 vi.mock(
   "@/components/domain/legal-research/modals/analysis-reasoning-modal",
   () => ({
