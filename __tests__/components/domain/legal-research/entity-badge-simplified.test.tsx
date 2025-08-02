@@ -1,5 +1,5 @@
 // IMPORTANT: DOM setup must be imported FIRST, before Testing Library
-import "../../../dom-setup";
+// DOM setup handled by setupTests.ts via vitest.config.ts
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EntityBadge } from "@/components/domain/legal-research/entity-badge";

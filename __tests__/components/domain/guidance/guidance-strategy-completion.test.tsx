@@ -1,4 +1,4 @@
-import "../../../dom-setup";
+// DOM setup handled by setupTests.ts via vitest.config.ts
 import { render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import type { ReactNode } from "react";

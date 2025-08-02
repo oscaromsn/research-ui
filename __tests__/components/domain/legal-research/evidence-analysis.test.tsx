@@ -1,4 +1,4 @@
-import "../../../dom-setup";
+// DOM setup handled by setupTests.ts via vitest.config.ts
 import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createStore, Provider } from "jotai";
@@ -203,7 +203,7 @@ describe("EvidenceAnalysis Component Integration", () => {
 
     const doc2Container = getByText(
       "Richards Corp. v. Global Enterprises, 567 F.3d 890 (9th Cir. 2022)"
-    ).closest("button");
+    ).closest('[role="button"]');
 
     // Check that the selected document has highlighting classes
     expect(doc2Container).toHaveClass(

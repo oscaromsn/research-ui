@@ -1,4 +1,4 @@
-import "./dom-setup";
+// DOM setup handled by setupTests.ts via vitest.config.ts
 import { render, within } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import type React from "react";
@@ -327,9 +327,7 @@ describe("Phase 4 Completion Validation", () => {
 
       store.set(synthesisDetailsAtom, initialSynthesis);
 
-      const { getByText, rerender, unmount } = renderWithProvider(
-        <SynthesisReporting />
-      );
+      const { getByText, unmount } = renderWithProvider(<SynthesisReporting />);
       expect(getByText("Initial Topic")).toBeInTheDocument();
       expect(getByText("Low (50%)")).toBeInTheDocument();
 
@@ -352,7 +350,7 @@ describe("Phase 4 Completion Validation", () => {
       };
 
       store.set(synthesisDetailsAtom, updatedSynthesis);
-      
+
       // Render fresh component with updated state
       const { getByText: getByTextUpdated } = renderWithProvider(
         <SynthesisReporting />

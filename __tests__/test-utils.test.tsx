@@ -1,4 +1,4 @@
-import "./dom-setup";
+// DOM setup handled by setupTests.ts via vitest.config.ts
 import { describe, expect, it } from "vitest";
 
 import {

@@ -1,4 +1,4 @@
-import "../../dom-setup";
+// DOM setup handled by setupTests.ts via vitest.config.ts
 import { cleanup, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
