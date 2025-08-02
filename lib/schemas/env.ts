@@ -59,14 +59,14 @@ function validateEnv() {
     const serverEnv = parse(
       serverEnvSchema.schema,
       process.env,
-      "Missing or invalid server environment variables"
+      "Missing or invalid environment variables"
     );
 
     // For client-side env vars
     const clientEnv = parse(
       clientEnvSchema.schema,
       process.env,
-      "Invalid client environment variables"
+      "Missing or invalid environment variables"
     );
 
     return {
