@@ -39,6 +39,11 @@ export function deleteTestEnv(key: string): void {
 export function restoreTestEnv(originalEnv: NodeJS.ProcessEnv): void {
   const env = process.env as TestProcessEnv;
 
+  // Guard against undefined originalEnv
+  if (!originalEnv) {
+    return;
+  }
+
   // Clear all current environment variables that weren't in original
   for (const key in process.env) {
     if (!(key in originalEnv)) {

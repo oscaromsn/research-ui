@@ -26,17 +26,41 @@ describe("Environment Variable Replacement Validation", () => {
   let originalEnv: NodeJS.ProcessEnv;
 
   beforeEach(() => {
+    // Capture original environment state
     originalEnv = captureTestEnv();
+    
+    // Clear all relevant module caches to ensure fresh imports
+    clearModuleCache();
   });
 
   afterEach(() => {
+    // Clear module cache first to prevent cached validation state
+    clearModuleCache();
+    
     // Restore original environment variables
     restoreTestEnv(originalEnv);
-
-    // Clear module cache to force re-evaluation
-    delete require.cache[require.resolve("@/lib/utils/exaSearchUtil")];
-    delete require.cache[require.resolve("@/lib/schemas/env")];
   });
+
+  // Helper function for comprehensive module cache clearing
+  function clearModuleCache() {
+    const modulesToClear = [
+      "@/lib/utils/exaSearchUtil",
+      "@/lib/schemas/env", 
+      "@/lib/schemas/index",
+      "@/lib/schemas/utils",
+      "@/lib/schemas/common",
+      "@/lib/config",
+      "@/lib/hooks/useResearchAgent"
+    ];
+
+    modulesToClear.forEach(moduleId => {
+      try {
+        delete require.cache[require.resolve(moduleId)];
+      } catch (error) {
+        // Module may not exist or be resolvable, ignore
+      }
+    });
+  }
 
   describe("ExaSearch Utility Environment Integration", () => {
     it("should use validated env instead of direct process.env access", () => {
@@ -46,7 +70,7 @@ describe("Environment Variable Replacement Validation", () => {
       setTestEnv("EXA_API_KEY", "test-exa-key");
 
       // Act - Import the utility (should use validated env)
-      delete require.cache[require.resolve("@/lib/utils/exaSearchUtil")];
+      clearModuleCache();
       const exaSearchUtil = require("@/lib/utils/exaSearchUtil");
 
       // Assert - Should be able to access utility without direct env access
@@ -63,7 +87,7 @@ describe("Environment Variable Replacement Validation", () => {
       // Act & Assert - Should fail when trying to load the module
       // because it depends on validated env which will throw
       expect(() => {
-        delete require.cache[require.resolve("@/lib/utils/exaSearchUtil")];
+        clearModuleCache();
         require("@/lib/utils/exaSearchUtil");
       }).toThrow(/Missing or invalid environment variables.*EXA_API_KEY/);
     });
@@ -75,7 +99,7 @@ describe("Environment Variable Replacement Validation", () => {
       setTestEnv("EXA_API_KEY", "valid-exa-api-key");
 
       // Act - Load utility with validated environment
-      delete require.cache[require.resolve("@/lib/utils/exaSearchUtil")];
+      clearModuleCache();
       const exaSearchUtil = require("@/lib/utils/exaSearchUtil");
 
       // Assert - Should have access to utility functions without throwing
@@ -94,7 +118,7 @@ describe("Environment Variable Replacement Validation", () => {
       setTestEnv("EXA_API_KEY", "test-key");
 
       // Act - Import modules that use debugging configuration
-      delete require.cache[require.resolve("@/lib/hooks/useResearchAgent")];
+      clearModuleCache();
       const useResearchAgent = require("@/lib/hooks/useResearchAgent");
 
       // Assert - Should be able to access the hook without direct env access
@@ -112,7 +136,7 @@ describe("Environment Variable Replacement Validation", () => {
 
       // Act & Assert - Should not throw when debugging vars are missing
       expect(() => {
-        delete require.cache[require.resolve("@/lib/hooks/useResearchAgent")];
+        clearModuleCache();
         require("@/lib/hooks/useResearchAgent");
       }).not.toThrow();
     });
@@ -127,7 +151,7 @@ describe("Environment Variable Replacement Validation", () => {
       setTestEnv("OPENAI_API_KEY", "dev-openai-key");
 
       // Act - Get validated environment
-      delete require.cache[require.resolve("@/lib/schemas/env")];
+      clearModuleCache();
       const { env } = require("@/lib/schemas/env");
 
       // Assert - Should have typed access to all environment variables
@@ -152,7 +176,7 @@ describe("Environment Variable Replacement Validation", () => {
       deleteTestEnv("ANTHROPIC_API_KEY");
 
       // Act - Get validated environment
-      delete require.cache[require.resolve("@/lib/schemas/env")];
+      clearModuleCache();
       const { env } = require("@/lib/schemas/env");
 
       // Assert - Required variables should be present, optional should be undefined
@@ -175,8 +199,7 @@ describe("Environment Variable Replacement Validation", () => {
       // Act - Measure validation time
       const startTime = Date.now();
 
-      delete require.cache[require.resolve("@/lib/schemas/env")];
-      delete require.cache[require.resolve("@/lib/utils/exaSearchUtil")];
+      clearModuleCache();
 
       require("@/lib/schemas/env");
       require("@/lib/utils/exaSearchUtil");
@@ -198,7 +221,7 @@ describe("Environment Variable Replacement Validation", () => {
       const startTime = Date.now();
 
       expect(() => {
-        delete require.cache[require.resolve("@/lib/schemas/env")];
+        clearModuleCache();
         require("@/lib/schemas/env");
       }).toThrow();
 
@@ -219,7 +242,7 @@ describe("Environment Variable Replacement Validation", () => {
 
       // Act & Assert - Should provide specific error about missing variable
       expect(() => {
-        delete require.cache[require.resolve("@/lib/schemas/env")];
+        clearModuleCache();
         require("@/lib/schemas/env");
       }).toThrow(/Missing or invalid environment variables.*EXA_API_KEY/);
     });
@@ -232,7 +255,7 @@ describe("Environment Variable Replacement Validation", () => {
 
       // Act & Assert - Should provide specific error about invalid enum value
       expect(() => {
-        delete require.cache[require.resolve("@/lib/schemas/env")];
+        clearModuleCache();
         require("@/lib/schemas/env");
       }).toThrow(/Missing or invalid environment variables.*NODE_ENV/);
     });
@@ -246,8 +269,7 @@ describe("Environment Variable Replacement Validation", () => {
       setTestEnv("EXA_API_KEY", "dev-key");
 
       // Act - Load both env and config
-      delete require.cache[require.resolve("@/lib/schemas/env")];
-      delete require.cache[require.resolve("@/lib/config")];
+      clearModuleCache();
 
       const { env } = require("@/lib/schemas/env");
       const { config } = require("@/lib/config");
@@ -266,7 +288,7 @@ describe("Environment Variable Replacement Validation", () => {
 
       // Act & Assert - Configuration should fail when environment is invalid
       expect(() => {
-        delete require.cache[require.resolve("@/lib/config")];
+        clearModuleCache();
         require("@/lib/config");
       }).toThrow(/Missing or invalid environment variables/);
     });
