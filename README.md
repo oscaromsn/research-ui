@@ -131,6 +131,26 @@ A brief overview of key directories:
 This pattern ensures that complex AI logic remains server-side, while the client
 receives structured, streamable updates for a responsive UI.
 
+### Testing Architecture: Conflict-Free Development
+
+JurisConsulta employs a **unified testing architecture** that eliminates the common "test-TypeScript conflict cycle" where fixing tests breaks TypeScript compilation and vice versa.
+
+#### Core Architectural Principles
+
+1. **Single Source of Truth Configuration**: One unified TypeScript configuration (`tsconfig.json`) prevents competing setups
+2. **Type-Preserving Mock Architecture**: Mocks maintain TypeScript type information throughout test execution
+3. **Unified DOM Environment**: Single Vitest-managed DOM setup eliminates initialization conflicts
+4. **Path Resolution Consistency**: Synchronized path mappings across all tools (Vitest, TypeScript, Next.js)
+
+#### Key Benefits
+
+- **No More Conflict Cycles**: Changes in tests don't break TypeScript and vice versa
+- **Type Safety Preserved**: Full TypeScript support throughout test execution
+- **Consistent Development**: Same patterns work across all test scenarios
+- **Fast Feedback**: Both compilation and testing provide immediate, harmonious feedback
+
+For detailed patterns and implementation guidance, see [docs/tooling/TESTING.md](./docs/tooling/TESTING.md).
+
 ## Getting Started
 
 ### Prerequisites

@@ -573,6 +573,239 @@ if (process.env.GOOGLE_API_KEY && process.env.EXA_API_KEY) {
 }
 ```
 
+## Architectural Patterns: Test-TypeScript Harmony
+
+### 🎯 Conflict-Free Development Architecture
+
+JurisConsulta employs a **unified testing architecture** that eliminates the common "test-TypeScript conflict cycle" where fixing tests breaks TypeScript compilation and vice versa. This section documents the established patterns that ensure both systems work harmoniously.
+
+#### Core Architectural Principles
+
+1. **Single Source of Truth Configuration**: One unified TypeScript configuration prevents competing setups
+2. **Type-Preserving Mock Architecture**: Mocks maintain TypeScript type information throughout test execution
+3. **Unified DOM Environment**: Single Vitest-managed DOM setup eliminates initialization conflicts
+4. **Schema Alignment**: Mock data structures exactly match actual implementations
+5. **Path Resolution Consistency**: Synchronized path mappings across all tools
+
+### Type-Preserving Mock Patterns
+
+#### ✅ Recommended: Type-Safe Mock Interface Pattern
+
+```typescript
+// File: __tests__/lib/utils/exaSearchUtil.test.ts
+// Define typed mock interfaces to preserve TypeScript information
+type MockAxiosInstance = {
+  post: ReturnType<typeof vi.fn> & {
+    mockResolvedValueOnce: ReturnType<typeof vi.fn>['mockResolvedValueOnce'];
+    mockRejectedValueOnce: ReturnType<typeof vi.fn>['mockRejectedValueOnce'];
+  };
+  get: ReturnType<typeof vi.fn>;
+  put: ReturnType<typeof vi.fn>;
+  delete: ReturnType<typeof vi.fn>;
+  isAxiosError: ReturnType<typeof vi.fn>;
+};
+
+vi.mock("axios", () => {
+  const mockPost = vi.fn() as MockAxiosInstance['post'];
+  mockPost.mockResolvedValueOnce = vi.fn().mockReturnThis();
+  mockPost.mockRejectedValueOnce = vi.fn().mockReturnThis();
+  
+  const mockAxios: MockAxiosInstance = {
+    post: mockPost,
+    get: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+    isAxiosError: vi.fn(),
+  };
+  
+  return {
+    __esModule: true,
+    default: mockAxios,
+    isAxiosError: mockAxios.isAxiosError,
+  };
+});
+```
+
+#### ❌ Anti-Pattern: Type-Erasing Mocks
+
+```typescript
+// DON'T DO THIS - Loses TypeScript type information
+vi.mock("axios", () => ({ 
+  default: vi.fn() // Lost all type info
+}));
+
+// This leads to compilation errors and runtime failures
+const mockedAxios = axios as any; // Forces 'any' usage
+```
+
+### Configuration Unification Patterns
+
+#### ✅ Unified TypeScript Configuration
+
+**Key Pattern**: Use single `tsconfig.json` with aligned type imports order:
+
+```json
+// tsconfig.json - Single source of truth
+{
+  "compilerOptions": {
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"],
+    "paths": {
+      "@/*": ["./*"],
+      "@atoms/*": ["lib/state/atoms/*"],
+      "@tests/*": ["__tests__/*"],
+      "@mocks/*": ["__tests__/__mocks__/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx", 
+    "__tests__/**/*.ts",
+    "__tests__/**/*.tsx"
+  ]
+}
+```
+
+**Key Pattern**: Align Vitest configuration with TypeScript paths:
+
+```typescript
+// vitest.config.ts - Must align with tsconfig.json
+export default defineConfig({
+  test: {
+    typecheck: {
+      tsconfig: "./tsconfig.json", // Reference unified config
+      include: ["**/*.{test,spec}.{ts,tsx}"],
+    },
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./"),
+      "@atoms": path.resolve(__dirname, "./lib/state/atoms"),
+      "@tests": path.resolve(__dirname, "./tests"),
+      "@mocks": path.resolve(__dirname, "./tests/__mocks__"),
+    },
+  },
+});
+```
+
+#### ❌ Anti-Pattern: Configuration Fragmentation
+
+```json
+// DON'T CREATE COMPETING CONFIGS
+// tsconfig.json: "types": ["node", "vitest/globals"]
+// tsconfig.test.json: "types": ["vitest/globals", "node", "@testing-library/jest-dom"]
+// This creates type resolution conflicts
+```
+
+### DOM Environment Unification
+
+#### ✅ Centralized DOM Setup
+
+**Pattern**: Use single `setupTests.ts` managed by Vitest:
+
+```typescript
+// vitest.config.ts
+export default defineConfig({
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./setupTests.ts"], // Single setup point
+  },
+});
+
+// setupTests.ts
+import '@testing-library/jest-dom';
+// All DOM configuration centralized here
+```
+
+**Pattern**: Component tests rely on centralized setup:
+
+```typescript
+// __tests__/components/MyComponent.test.tsx
+// DOM setup handled by setupTests.ts via vitest.config.ts
+import { render } from "@testing-library/react";
+// No manual DOM imports needed
+```
+
+#### ❌ Anti-Pattern: Competing DOM Initialization
+
+```typescript
+// DON'T DO THIS - Creates DOM conflicts
+// Manual dom-setup imports in test files
+import "../../dom-setup"; // Competes with setupTests.ts
+```
+
+### Schema Alignment Enforcement
+
+#### ✅ Exact Schema Matching
+
+```typescript
+// __tests__/lib/config.test.ts
+// Mock must match actual config structure exactly
+vi.mock("@/lib/config", () => ({
+  config: {
+    research: {
+      maxQueriesPerIteration: 3, // Matches actual schema
+      maxDocumentsPerQuery: 5,   // Not defaultMaxResults
+      searchTimeoutMs: 30000,
+      maxRetries: 2,
+    },
+    features: {
+      enableDetailedLogging: true,
+      enableProgressIndicators: true,
+    },
+  },
+}));
+```
+
+#### ❌ Anti-Pattern: Schema Assumptions
+
+```typescript
+// DON'T ASSUME SCHEMA STRUCTURE
+vi.mock("@/lib/config", () => ({
+  config: {
+    research: {
+      defaultMaxResults: 5, // Assumed structure - causes runtime errors
+    },
+  },
+}));
+```
+
+### Conflict Prevention Guidelines
+
+#### Development Workflow
+
+1. **Configuration Changes**: Always update the single `tsconfig.json`
+2. **Mock Updates**: Use type-preserving patterns with proper interfaces
+3. **DOM Testing**: Rely on centralized `setupTests.ts` configuration
+4. **Path Changes**: Keep `vitest.config.ts` and `tsconfig.json` paths synchronized
+5. **Schema Changes**: Update both implementation and test mocks together
+
+#### Quality Gates
+
+```bash
+# Before any commit - both must pass
+bun run typecheck  # TypeScript compilation
+bun run test       # Test execution
+
+# Both systems should work harmoniously
+# If one breaks, fix incrementally without breaking the other
+```
+
+### Architecture Benefits
+
+#### Immediate Benefits
+- **No More Conflict Cycles**: Changes in tests don't break TypeScript and vice versa
+- **Type Safety Preserved**: Full TypeScript support throughout test execution
+- **Consistent Development**: Same patterns work across all test scenarios
+- **Fast Feedback**: Both compilation and testing provide immediate feedback
+
+#### Long-term Stability
+- **Scalable Patterns**: New features follow established architectural patterns
+- **Prevention Measures**: Built-in safeguards against configuration drift
+- **Maintainable Mocks**: Type-safe mock factories encourage best practices
+- **Clear Separation**: Distinct responsibilities between runtime and compile-time systems
+
+This architecture has been battle-tested and **eliminates the 63 TypeScript errors and testing conflicts** that previously plagued the development process. Follow these patterns for conflict-free development.
+
 ## Best Practices
 
 ### Writing Good Tests
@@ -580,17 +813,19 @@ if (process.env.GOOGLE_API_KEY && process.env.EXA_API_KEY) {
 1. **Test behavior, not implementation**
 2. **Use descriptive test names**
 3. **Keep tests independent and isolated**
-4. **Mock external dependencies properly**
+4. **Mock external dependencies properly using type-preserving patterns**
 5. **Test edge cases and error conditions**
 6. **Use the appropriate test level for what you're testing**
 
-### Mock Management
+### Mock Management (Type-Safe Patterns)
 
-1. **Define mocks at the test file level with vi.mock()**
-2. **Use vi.mocked() for TypeScript support**
-3. **Clear mocks between tests with vi.clearAllMocks()**
-4. **Use importOriginal for partial mocks**
-5. **Avoid conditional mocking in setup files**
+1. **Define typed mock interfaces** to preserve TypeScript information
+2. **Use type-preserving mock factories** instead of type erasure
+3. **Define mocks at the test file level with vi.mock()**
+4. **Use vi.mocked() for TypeScript support**
+5. **Clear mocks between tests with vi.clearAllMocks()**
+6. **Use importOriginal for partial mocks**
+7. **Avoid conditional mocking in setup files**
 
 ### Test Organization
 

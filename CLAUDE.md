@@ -195,7 +195,57 @@ You always read the full planning files relevant for your taks at hand, while Uu
 3. **UI Error Display**: Components should read `researchStatusAtom.error` and display user-friendly error messages.
 4. **Zod**: Primarily for environment variable validation. BAML handles typing for LLM I/O.
 
-## Testing Standards (PRD 6)
+## Testing Architecture: Conflict-Free Development
+
+### 🎯 Unified Testing Architecture
+
+JurisConsulta employs a **battle-tested architecture** that eliminates the "test-TypeScript conflict cycle" where fixing tests breaks TypeScript and vice versa.
+
+#### Core Architectural Principles
+
+1. **Single Source of Truth Configuration**: Unified `tsconfig.json` prevents competing setups
+2. **Type-Preserving Mock Architecture**: Mocks maintain TypeScript type information throughout test execution
+3. **Unified DOM Environment**: Centralized Vitest-managed DOM setup eliminates initialization conflicts
+4. **Path Resolution Consistency**: Synchronized path mappings across all tools
+
+#### Type-Safe Mock Patterns
+
+```typescript
+// ✅ Recommended: Type-Preserving Mock Interface
+type MockAxiosInstance = {
+  post: ReturnType<typeof vi.fn> & {
+    mockResolvedValueOnce: ReturnType<typeof vi.fn>['mockResolvedValueOnce'];
+  };
+};
+
+vi.mock("axios", () => {
+  const mockAxios: MockAxiosInstance = {
+    post: vi.fn() as MockAxiosInstance['post'],
+    get: vi.fn(),
+    isAxiosError: vi.fn(),
+  };
+  return { __esModule: true, default: mockAxios };
+});
+
+// ❌ Anti-Pattern: Type-Erasing Mocks
+vi.mock("axios", () => ({ default: vi.fn() })); // Loses type info
+```
+
+#### Unified Configuration Pattern
+
+```json
+// tsconfig.json - Single source of truth
+{
+  "compilerOptions": {
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"],
+    "paths": {
+      "@/*": ["./*"],      
+      "@atoms/*": ["lib/state/atoms/*"],
+      "@tests/*": ["__tests__/*"]
+    }
+  }
+}
+```
 
 ### Testing Process Workflow
 
@@ -210,35 +260,39 @@ You always read the full planning files relevant for your taks at hand, while Uu
      - "Foo::" -i "Bar::" will run all tests in the functions "Foo" and "Bar"
 
 2. **Server-Side Orchestrator Tests (Vitest):**
-   - Unit test `conductResearch`. Mock the BAML client (`b`) to simulate BAML function responses (including streams). Assert that the correct sequence of `ResearchUpdate` objects is produced on its output stream.
+   - Unit test `conductResearch`. Mock the BAML client (`b`) using type-preserving patterns. Assert that the correct sequence of `ResearchUpdate` objects is produced on its output stream.
 
-3. **Client-Side Hook Tests (Vitest + RTL - PRD 6.2):**
-   - Unit test `useResearchAgent`. Mock the `conductResearch` Server Action. Provide mock streams of `ResearchUpdate` objects and assert that Jotai atoms are updated correctly. Test `startResearch` and `abortResearch`.
+3. **Client-Side Hook Tests (Vitest + RTL):**
+   - Unit test `useResearchAgent`. Mock the `conductResearch` Server Action using type-safe interfaces. Provide mock streams of `ResearchUpdate` objects and assert that Jotai atoms are updated correctly.
 
-4. **Component Tests (RTL - PRD 6.3):**
-   - Test UI components that consume Jotai atoms. Provide mock atom states and verify rendering. Test user interactions that trigger `agent.startResearch()`.
+4. **Component Tests (RTL):**
+   - Test UI components that consume Jotai atoms. Use centralized DOM setup via `setupTests.ts`. Provide mock atom states and verify rendering using type-safe patterns.
 
 5. **E2E Testing using Playwright:** Crucial for verifying the full streaming experience and pipeline flow when a feature is fully implemented.
 
-### Commands for Verification
+### Commands for Verification (Harmonious Execution)
 
 ```bash
-# Regenerate BAML client after baml_src changes
-bun baml:generate
+# Both systems must pass together - no conflicts
+bun run typecheck    # TypeScript compilation ✅
+bun run test         # Test execution ✅
 
-# Type checking
-bun typecheck
-
-# Linting & Formatting
-bun check
-
-# Build (ensures app compiles)
-bun run build
-
-# Run tests
-bun run test
-bun test:coverage
+# Additional validation
+bun baml:generate    # Regenerate BAML client after baml_src changes
+bun check           # Linting & Formatting  
+bun run build       # Build (ensures app compiles)
+bun test:coverage   # Test coverage analysis
 ```
+
+### Conflict Prevention Guidelines
+
+1. **Configuration Changes**: Always update the single `tsconfig.json`
+2. **Mock Implementation**: Use type-preserving patterns with proper interfaces
+3. **DOM Testing**: Rely on centralized `setupTests.ts` configuration
+4. **Path Updates**: Keep `vitest.config.ts` and `tsconfig.json` paths synchronized
+5. **Schema Changes**: Update both implementation and test mocks together
+
+For detailed patterns and troubleshooting, see [docs/tooling/TESTING.md](./docs/tooling/TESTING.md).
 
 ## Development Workflow (TDD Preferred)
 

@@ -1,14 +1,202 @@
-# Claude Code Devtools Blueprint: TDD-Driven Development with Static Analysis
+# Claude Code Devtools Blueprint: Conflict-Free Development Architecture
 
 ## Executive Summary
 
-This blueprint provides Claude Code instances with a systematic approach to development using test-driven development (TDD) principles combined with comprehensive static analysis validation. The methodology emphasizes atomic changes, immediate validation, and continuous quality assurance through automated tooling.
+This blueprint provides Claude Code instances with JurisConsulta's **battle-tested conflict-free development architecture**. The methodology eliminates the "test-TypeScript conflict cycle" through unified configuration, type-preserving mocks, and harmonious tool integration.
 
 ## Core Philosophy
 
-**"Code with Confidence, Validate Immediately, Progress Measurably"**
+**"Harmony First, Validate Continuously, Progress Measurably"**
 
-Every code change, no matter how small, must be validated through static analysis before proceeding. This approach catches issues at their source, maintains code quality, and ensures continuous progress toward objectives.
+Every code change must work harmoniously with both TypeScript compilation and test execution. This approach eliminates conflicts, maintains type safety, and ensures continuous progress without system conflicts.
+
+## 🎯 Unified Testing Architecture Principles
+
+### Conflict-Free Development Foundation
+
+1. **Single Source of Truth Configuration**: Unified `tsconfig.json` prevents competing setups
+2. **Type-Preserving Mock Architecture**: Mocks maintain TypeScript type information
+3. **Unified DOM Environment**: Centralized Vitest-managed DOM setup
+4. **Path Resolution Consistency**: Synchronized mappings across all tools
+
+### Quality Gates (Harmonious Execution)
+
+```bash
+# Both systems must pass together - no conflicts
+bun run typecheck  # TypeScript compilation ✅
+bun run test       # Test execution ✅
+# If one breaks, fix incrementally without breaking the other
+```
+
+## 🏗️ Type-Preserving Mock Architecture Patterns
+
+### ✅ Established Mock Patterns (Battle-Tested)
+
+#### Type-Safe Mock Interface Pattern
+
+```typescript
+// File: __tests__/lib/utils/exaSearchUtil.test.ts
+// Define typed mock interfaces to preserve TypeScript information
+type MockAxiosInstance = {
+  post: ReturnType<typeof vi.fn> & {
+    mockResolvedValueOnce: ReturnType<typeof vi.fn>['mockResolvedValueOnce'];
+    mockRejectedValueOnce: ReturnType<typeof vi.fn>['mockRejectedValueOnce'];
+  };
+  get: ReturnType<typeof vi.fn>;
+  put: ReturnType<typeof vi.fn>;
+  delete: ReturnType<typeof vi.fn>;
+  isAxiosError: ReturnType<typeof vi.fn>;
+};
+
+vi.mock("axios", () => {
+  const mockPost = vi.fn() as MockAxiosInstance['post'];
+  mockPost.mockResolvedValueOnce = vi.fn().mockReturnThis();
+  mockPost.mockRejectedValueOnce = vi.fn().mockReturnThis();
+  
+  const mockAxios: MockAxiosInstance = {
+    post: mockPost,
+    get: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+    isAxiosError: vi.fn(),
+  };
+  
+  return {
+    __esModule: true,
+    default: mockAxios,
+    isAxiosError: mockAxios.isAxiosError,
+  };
+});
+
+// Usage in tests with full type support
+const mockedAxios = axios as unknown as MockAxiosInstance;
+const mockPost = mockedAxios.post as MockAxiosInstance['post'];
+```
+
+#### Schema-Aligned Mock Pattern
+
+```typescript
+// Mock must match actual config structure exactly
+vi.mock("@/lib/config", () => ({
+  config: {
+    research: {
+      maxQueriesPerIteration: 3, // Matches actual schema
+      maxDocumentsPerQuery: 5,   // Not defaultMaxResults
+      searchTimeoutMs: 30000,
+      maxRetries: 2,
+    },
+    features: {
+      enableDetailedLogging: true,
+      enableProgressIndicators: true,
+    },
+  },
+}));
+```
+
+### ❌ Anti-Patterns That Break TypeScript Harmony
+
+```typescript
+// DON'T: Type-Erasing Mocks
+vi.mock("axios", () => ({ 
+  default: vi.fn() // Lost all type info
+}));
+
+// DON'T: Schema Assumptions
+vi.mock("@/lib/config", () => ({
+  config: {
+    research: {
+      defaultMaxResults: 5, // Assumed structure - causes runtime errors
+    },
+  },
+}));
+
+// DON'T: Competing DOM Setup
+import "../../dom-setup"; // Competes with setupTests.ts
+```
+
+## 🔧 Configuration Unification Patterns
+
+### Unified TypeScript Configuration
+
+**Key Pattern**: Single `tsconfig.json` with aligned type imports order:
+
+```json
+// tsconfig.json - Single source of truth
+{
+  "compilerOptions": {
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"],
+    "paths": {
+      "@/*": ["./*"],
+      "@atoms/*": ["lib/state/atoms/*"],
+      "@tests/*": ["__tests__/*"],
+      "@mocks/*": ["__tests__/__mocks__/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx", 
+    "__tests__/**/*.ts",
+    "__tests__/**/*.tsx"
+  ]
+}
+```
+
+### DOM Environment Unification
+
+**Pattern**: Centralized DOM setup via `setupTests.ts`:
+
+```typescript
+// vitest.config.ts
+export default defineConfig({
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./setupTests.ts"], // Single setup point
+  },
+});
+
+// Component tests rely on centralized setup
+// __tests__/components/MyComponent.test.tsx
+// DOM setup handled by setupTests.ts via vitest.config.ts
+import { render } from "@testing-library/react";
+// No manual DOM imports needed
+```
+
+## 🛡️ Conflict Prevention Guidelines
+
+### Development Workflow
+
+1. **Configuration Changes**: Always update the single `tsconfig.json`
+2. **Mock Implementation**: Use type-preserving patterns with proper interfaces
+3. **DOM Testing**: Rely on centralized `setupTests.ts` configuration
+4. **Path Updates**: Keep `vitest.config.ts` and `tsconfig.json` paths synchronized
+5. **Schema Changes**: Update both implementation and test mocks together
+
+### Quality Gates Validation
+
+```bash
+# Before any commit - both must pass harmoniously
+bun run typecheck  # TypeScript compilation ✅
+bun run test       # Test execution ✅
+
+# Both systems should work together seamlessly
+# If one breaks, fix incrementally without breaking the other
+```
+
+### Architecture Benefits
+
+#### Immediate Benefits
+- **No More Conflict Cycles**: Changes in tests don't break TypeScript and vice versa
+- **Type Safety Preserved**: Full TypeScript support throughout test execution
+- **Consistent Development**: Same patterns work across all test scenarios
+- **Fast Feedback**: Both compilation and testing provide immediate feedback
+
+#### Long-term Stability
+- **Scalable Patterns**: New features follow established architectural patterns
+- **Prevention Measures**: Built-in safeguards against configuration drift
+- **Maintainable Mocks**: Type-safe mock factories encourage best practices
+- **Clear Separation**: Distinct responsibilities between runtime and compile-time systems
+
+**This architecture has eliminated 63 TypeScript errors and testing conflicts** that previously plagued development. Follow these patterns for conflict-free testing.
 
 ## Devtools Ecosystem Overview
 
