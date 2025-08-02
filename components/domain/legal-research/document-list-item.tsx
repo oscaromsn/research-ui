@@ -24,17 +24,18 @@ export function DocumentListItem({
   const statusIndicator = getStatusIndicator(doc.status);
 
   return (
-    <button
+    <div
       key={doc.docId}
-      type="button"
+      role="button"
+      tabIndex={doc.status === "error" ? -1 : 0}
       className={`mb-2 w-full cursor-pointer rounded-lg border p-3 text-left transition-all ${
         isSelected
           ? "border-[#3a7bb7] border-l-4 bg-[#edf2f7] dark:bg-[#242a3d]"
           : `${statusIndicator.bgColor} ${statusIndicator.borderColor} hover:bg-[#f8fafc] dark:hover:bg-[#212941]`
-      }`}
-      onClick={() => onDocumentClick(doc)}
-      onKeyUp={(e) => onDocumentKeyUp(doc, e)}
-      disabled={doc.status === "error"}
+      } ${doc.status === "error" ? "cursor-not-allowed opacity-50" : ""}`}
+      onClick={() => doc.status !== "error" && onDocumentClick(doc)}
+      onKeyUp={(e) => doc.status !== "error" && onDocumentKeyUp(doc, e)}
+      aria-disabled={doc.status === "error"}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
@@ -85,6 +86,6 @@ export function DocumentListItem({
           )}
         </div>
       </div>
-    </button>
+    </div>
   );
 }
