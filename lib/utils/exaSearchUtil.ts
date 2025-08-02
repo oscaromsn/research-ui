@@ -248,15 +248,28 @@ async function makeExaApiRequest(
       stack: requestError instanceof Error ? requestError.stack : undefined,
     });
 
-    // Wrap unknown errors as network errors
-    throw new ExaNetworkError(
-      `Unexpected network error for query: "${requestBody.query}"`,
+    // Handle unknown errors appropriately
+    if (requestError instanceof Error) {
+      // For Error objects, treat as network errors and check for timeout
+      const errorMessage = requestError.message;
+      const isTimeout = errorMessage.toLowerCase().includes("timeout");
+
+      throw new ExaNetworkError(
+        `Unexpected network error for query: "${requestBody.query}"`,
+        {
+          query: requestBody.query,
+          isTimeout,
+          cause: requestError,
+        }
+      );
+    }
+    // For non-Error objects, treat as parsing errors (unexpected data structure)
+    throw new ExaParsingError(
+      `Unexpected error during Exa search for query: "${requestBody.query}"`,
       {
-        query: requestBody.query,
-        cause:
-          requestError instanceof Error
-            ? requestError
-            : new Error(String(requestError)),
+        response: requestError,
+        expectedFormat: "Error object",
+        actualFormat: typeof requestError,
       }
     );
   }
@@ -331,6 +344,10 @@ function createExaErrorFromResponse(
         query,
         errorCode:
           typeof data === "object" && data?.code ? data.code : undefined,
+        validationErrors:
+          typeof data === "object" && Array.isArray(data?.errors)
+            ? data.errors
+            : undefined,
       });
 
     case 408:
