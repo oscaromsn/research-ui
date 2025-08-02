@@ -27,6 +27,7 @@
     "// OUTPUT: Default = concise (dots), :verbose = detailed, :file = single file with verbose": "",
     "// USAGE: 'bun run test' (concise) | 'bun run test:verbose' (detailed) | 'bun test:file path' (single)": "",
     "test": "npx vitest run --exclude='**/*integration*'",
+    "test:batched": "node scripts/test-batched.js",
     "test:verbose": "VITEST_VERBOSE=true npx vitest run --exclude='**/*integration*'",
     "test:watch": "npx vitest --exclude='**/*integration*'",
     "test:watch:verbose": "VITEST_VERBOSE=true npx vitest --exclude='**/*integration*'",

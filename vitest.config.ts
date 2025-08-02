@@ -31,7 +31,7 @@ export default defineConfig({
 
     // Type Checking
     typecheck: {
-      tsconfig: "./tsconfig.test.json",
+      tsconfig: "./tsconfig.json",
       include: ["**/*.{test,spec}.{ts,tsx}"],
       // Run type checking in parallel for faster feedback
       checker: "tsc",
@@ -45,6 +45,7 @@ export default defineConfig({
       "dist/**",
       ".git/**",
       "e2e/**",
+      "__tests__/e2e/**", // Exclude E2E tests from Vitest
       "playwright-tests/**",
       "**/*.d.ts",
       "coverage/**",

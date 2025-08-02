@@ -4,7 +4,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "target": "ES2022",
     "module": "esnext",
-    "types": ["node", "vitest/globals"],
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"],
     "jsx": "preserve",
     "allowJs": true,
     "checkJs": false,
@@ -55,16 +55,20 @@
     // Path mapping
     "baseUrl": ".",
     "paths": {
+      "~/*": ["./*"],
       "@/*": ["./*"],
       "@components/*": ["components/*"],
       "@ui/*": ["components/ui/*"],
       "@domain/*": ["components/domain/*"],
       "@layout/*": ["components/layout/*"],
+      "@atoms/*": ["lib/state/atoms/*"],
       "@lib/*": ["lib/*"],
       "@state/*": ["lib/state/*"],
       "@utils/*": ["lib/utils/*"],
       "@api/*": ["lib/api/*"],
-      "@types/*": ["types/*"]
+      "@types/*": ["types/*"],
+      "@tests/*": ["__tests__/*"],
+      "@mocks/*": ["__tests__/__mocks__/*"]
     },
     "typeRoots": ["./node_modules/@types", "./types"],
     "plugins": [
@@ -81,11 +85,11 @@
     "vitest.config.ts",
     "**/*.mjs",
     "setupTests.ts",
-    "types/**/*.d.ts"
+    "types/**/*.d.ts",
+    "__tests__/**/*.ts",
+    "__tests__/**/*.tsx"
   ],
   "exclude": [
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
     ".next",
     "build",
     "coverage",
