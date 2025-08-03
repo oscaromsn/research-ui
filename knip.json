@@ -22,8 +22,7 @@
     "lib/**/*.{ts,tsx}!",
     "baml_src/**/*.baml!",
     "__tests__/**/*.{ts,tsx}",
-    "__mocks__/**/*.ts",
-    "e2e/**/*.ts"
+    "__mocks__/**/*.ts"
   ],
   "ignore": [],
   "ignoreDependencies": [

@@ -352,9 +352,11 @@
         "rules": {
           "suspicious": {
             "noExplicitAny": "off",
+            "noEmptyBlockStatements": "off",
             "noSkippedTests": "off"
           },
           "complexity": {
+            "noUselessCatch": "off",
             "noExcessiveCognitiveComplexity": {
               "level": "warn",
               "options": {
