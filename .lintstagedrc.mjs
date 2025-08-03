@@ -26,7 +26,7 @@ const config = {
   "**/*.{json,jsonc}": ["biome format --write --no-errors-on-unmatched"],
 
   // Configuration files - format only for consistency
-  "{*.config.ts,*.config.mjs,commitlint.config.ts,setupTests.ts,vitest.config.ts,vitest.config.no-api.ts,playwright.config.ts,postcss.config.mjs}":
+  "{*.config.ts,*.config.mjs,commitlint.config.ts,setupTests.ts,vitest.config.ts,playwright.config.ts,postcss.config.mjs}":
     ["biome format --write --no-errors-on-unmatched"],
 
   // Package.json changes - run install with better error handling
