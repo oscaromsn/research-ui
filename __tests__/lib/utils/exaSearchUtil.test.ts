@@ -185,7 +185,7 @@ describe("executeExaSearch", () => {
     // Check config - use the actual API key value from environment
     expect(config?.headers).toEqual({
       "Content-Type": "application/json",
-      "x-api-key": "5365f598-e938-4e42-af3d-e358bf5b9486",
+      "x-api-key": process.env.EXA_API_KEY,
     });
   });
 
