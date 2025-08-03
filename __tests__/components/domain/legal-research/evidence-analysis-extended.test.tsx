@@ -215,11 +215,18 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
       store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-      const { getByText } = renderWithProvider(<EvidenceAnalysis />);
+      const { container } = renderWithProvider(<EvidenceAnalysis />);
 
-      const entityElement = getByText("Smith v. Jones");
-      expect(entityElement).toHaveAttribute(
-        "title",
+      // The entity should be rendered as a button with title attribute
+      const entityButtons = container.querySelectorAll("button[title]");
+
+      // Find the Smith v. Jones entity button
+      const smithButton = Array.from(entityButtons).find((button) =>
+        button.textContent?.includes("Smith v. Jones")
+      );
+
+      expect(smithButton).toBeDefined();
+      expect(smithButton?.getAttribute("title")).toBe(
         "345 F.Supp. 2d 123 (N.D. Cal. 2023)"
       );
     });
@@ -228,17 +235,25 @@ describe("EvidenceAnalysis Component - Extended Features", () => {
       store.set(analyzedDocsSummaryAtom, [mockExtendedDoc]);
       store.set(selectedAnalyzedDocIdAtom, "doc-extended");
 
-      const { getByText } = renderWithProvider(<EvidenceAnalysis />);
+      const { container } = renderWithProvider(<EvidenceAnalysis />);
 
-      // Check that entities have different styling classes based on type
-      const caseEntity = getByText("Smith v. Jones");
-      const personEntity = getByText("John Smith");
-      const conceptEntity = getByText("Force Majeure");
+      // Find entity buttons by their text content
+      const entityButtons = container.querySelectorAll("button[title]");
 
-      // Should have different color schemes
-      expect(caseEntity).toHaveClass("bg-blue-100");
-      expect(personEntity).toHaveClass("bg-yellow-100");
-      expect(conceptEntity).toHaveClass("bg-gray-100");
+      const caseEntity = Array.from(entityButtons).find((button) =>
+        button.textContent?.includes("Smith v. Jones")
+      );
+      const personEntity = Array.from(entityButtons).find((button) =>
+        button.textContent?.includes("John Smith")
+      );
+      const conceptEntity = Array.from(entityButtons).find((button) =>
+        button.textContent?.includes("Force Majeure")
+      );
+
+      // Should have different color schemes based on entity type
+      expect(caseEntity?.classList.contains("bg-blue-100")).toBe(true);
+      expect(personEntity?.classList.contains("bg-yellow-100")).toBe(true);
+      expect(conceptEntity?.classList.contains("bg-gray-100")).toBe(true);
     });
 
     it("shows placeholder when no entities extracted", () => {
