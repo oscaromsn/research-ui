@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createStore, Provider } from "jotai";
 import type React from "react";
@@ -298,7 +298,7 @@ describe("SynthesisReporting Component Integration", () => {
     // Should not crash and should show empty state appropriately
   });
 
-  it("shows progressive synthesis updates", () => {
+  it("shows progressive synthesis updates", async () => {
     // Initial state with partial synthesis
     const partialSynthesis: ClientSynthesis = {
       topics: [
@@ -316,7 +316,7 @@ describe("SynthesisReporting Component Integration", () => {
 
     store.set(synthesisDetailsAtom, partialSynthesis);
 
-    const { getByText, rerender } = renderWithProvider(<SynthesisReporting />);
+    const { getByText } = renderWithProvider(<SynthesisReporting />);
 
     // Check initial partial content
     expect(getByText(/Initial analysis shows/)).toBeInTheDocument();
@@ -340,12 +340,13 @@ describe("SynthesisReporting Component Integration", () => {
     };
 
     store.set(synthesisDetailsAtom, updatedSynthesis);
-    rerender(<SynthesisReporting />);
 
-    // Check updated content
-    expect(
-      getByText(/contract interpretation follows well-established precedents/)
-    ).toBeInTheDocument();
+    // Wait for the component to naturally re-render due to Jotai atom update
+    await waitFor(() => {
+      expect(
+        getByText(/contract interpretation follows well-established precedents/)
+      ).toBeInTheDocument();
+    });
     // emergingQuestions are not displayed in the current UI design, so we don't test for them
   });
 
