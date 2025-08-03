@@ -24,6 +24,7 @@ export function DocumentListItem({
   const statusIndicator = getStatusIndicator(doc.status);
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: DocumentStatusIndicator contains nested buttons preventing semantic button usage
     <div
       key={doc.docId}
       role="button"
@@ -35,6 +36,7 @@ export function DocumentListItem({
       } ${doc.status === "error" ? "cursor-not-allowed opacity-50" : ""}`}
       onClick={() => doc.status !== "error" && onDocumentClick(doc)}
       onKeyUp={(e) => doc.status !== "error" && onDocumentKeyUp(doc, e)}
+      aria-label={`Select document: ${doc.title || "Untitled Document"}`}
       aria-disabled={doc.status === "error"}
     >
       <div className="flex items-start justify-between">
