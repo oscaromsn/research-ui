@@ -6,6 +6,7 @@ import { EvidenceAnalysisHeader } from "./evidence-analysis-header";
 import { useEvidenceAnalysis } from "./hooks/useEvidenceAnalysis";
 import { AnalysisReasoningModal } from "./modals/analysis-reasoning-modal";
 import { CaseModal } from "./modals/case-modal";
+import { SystemStatusPanel } from "./system-status-panel";
 
 export function EvidenceAnalysis() {
   const {
@@ -44,6 +45,9 @@ export function EvidenceAnalysis() {
   return (
     <div className="flex w-full flex-col overflow-y-auto border-[#e1e5eb] border-r bg-white md:w-1/3 dark:border-[#2a3148] dark:bg-[#1a1f2e]">
       <EvidenceAnalysisHeader />
+      <div className="px-4">
+        <SystemStatusPanel />
+      </div>
       <DocumentList
         documents={sortedDocuments}
         selectedDocId={selectedDocId}

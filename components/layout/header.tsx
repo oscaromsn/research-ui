@@ -2,6 +2,7 @@
 
 import { SettingsModal } from "@domain/guidance/modals/settings-modal";
 import { ResearchLifecycle } from "@domain/guidance/research-lifecycle";
+import { ConnectionStatusIndicator } from "@domain/legal-research/connection-status-indicator";
 import { Play, Save, User } from "lucide-react";
 import { useState } from "react";
 export function Header() {
@@ -23,6 +24,7 @@ export function Header() {
       </div>
       <ResearchLifecycle />
       <div className="flex items-center space-x-3">
+        <ConnectionStatusIndicator showLabel={true} size="sm" />
         <button type="button" className="rounded-full p-1.5 hover:bg-[#242a3d]">
           <Play size={18} />
         </button>
