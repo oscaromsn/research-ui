@@ -189,6 +189,56 @@ export interface AutoModeState {
   originalQuestion: string; // Original legal question for context
 }
 
+/**
+ * Connection state management for resilient EventSource connections.
+ * Tracks connection attempts, failures, and provides user feedback.
+ */
+export interface ConnectionState {
+  isConnected: boolean;
+  isConnecting: boolean;
+  connectionAttempts: number;
+  lastConnectionTime: number | null;
+  lastErrorTime: number | null;
+  lastError: string | null;
+  retryAttempt: number; // Current retry attempt (0 = initial, 1-3 = retries)
+  maxRetryAttempts: number;
+  nextRetryDelay: number | null; // ms until next retry
+  connectionStats: {
+    totalAttempts: number;
+    successfulConnections: number;
+    failedConnections: number;
+  };
+}
+
+/**
+ * System health status for BAML services and rate limiting.
+ * Provides user-visible warnings for system issues.
+ */
+export interface SystemHealthState {
+  isHealthy: boolean;
+  lastHealthCheck: number | null;
+  circuitBreakerStatus: {
+    state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+    failures: number;
+    lastFailureTime: number | null;
+  };
+  rateLimitingStatus: {
+    isRateLimited: boolean;
+    activeRequests: number;
+    queuedRequests: number;
+    maxConcurrent: number;
+    lastRateLimitTime: number | null;
+  };
+  warnings: Array<{
+    id: string;
+    type: 'RATE_LIMIT' | 'CIRCUIT_BREAKER' | 'CONNECTION' | 'API_ERROR';
+    message: string;
+    timestamp: number;
+    severity: 'low' | 'medium' | 'high';
+    canRetry: boolean;
+  }>;
+}
+
 // --- Core Jotai Atoms ---
 
 // FR3.1.1: researchStatusAtom
@@ -275,6 +325,43 @@ export const autoModeStateAtom = atom<AutoModeState>({
   maxIterations: 5, // Default maximum iterations
   currentIteration: 0,
   originalQuestion: "",
+});
+
+// Connection state atom for resilient EventSource management
+export const connectionStateAtom = atom<ConnectionState>({
+  isConnected: false,
+  isConnecting: false,
+  connectionAttempts: 0,
+  lastConnectionTime: null,
+  lastErrorTime: null,
+  lastError: null,
+  retryAttempt: 0,
+  maxRetryAttempts: 3,
+  nextRetryDelay: null,
+  connectionStats: {
+    totalAttempts: 0,
+    successfulConnections: 0,
+    failedConnections: 0,
+  },
+});
+
+// System health state atom for BAML services and rate limiting
+export const systemHealthAtom = atom<SystemHealthState>({
+  isHealthy: true,
+  lastHealthCheck: null,
+  circuitBreakerStatus: {
+    state: 'CLOSED',
+    failures: 0,
+    lastFailureTime: null,
+  },
+  rateLimitingStatus: {
+    isRateLimited: false,
+    activeRequests: 0,
+    queuedRequests: 0,
+    maxConcurrent: 2,
+    lastRateLimitTime: null,
+  },
+  warnings: [],
 });
 
 // Research session state for pause/resume functionality
@@ -382,6 +469,32 @@ export const resetResearchStateAtom = atom(null, (get, set, _value) => {
     accumulatedQueries: [],
     accumulatedDocuments: [],
     accumulatedTopics: [],
+  });
+
+  // Reset connection state
+  set(connectionStateAtom, {
+    isConnected: false,
+    isConnecting: false,
+    connectionAttempts: 0,
+    lastConnectionTime: null,
+    lastErrorTime: null,
+    lastError: null,
+    retryAttempt: 0,
+    maxRetryAttempts: 3,
+    nextRetryDelay: null,
+    connectionStats: {
+      totalAttempts: 0,
+      successfulConnections: 0,
+      failedConnections: 0,
+    },
+  });
+
+  // Reset system health but keep current warnings for user awareness
+  const currentHealth = get(systemHealthAtom);
+  set(systemHealthAtom, {
+    ...currentHealth,
+    isHealthy: true,
+    // Keep existing warnings so user can see what happened
   });
 });
 
