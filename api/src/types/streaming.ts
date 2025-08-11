@@ -4,24 +4,24 @@
  */
 
 import type {
-  LegalQueryAnalysis,
-  SearchResultItem,
   AnalyzedDocument,
+  FinalLegalReport,
+  LegalQueryAnalysis,
   OverallSynthesis,
   ResearchAssessment,
-  FinalLegalReport,
+  SearchResultItem,
 } from "../../baml_client/types";
 
 /**
  * The type of update being sent via SSE
  */
 export type ResearchUpdateType =
-  | "STATUS_CHANGE"   // Pipeline stage changes
-  | "DATA"           // Actual research data (queries, documents, etc.)
-  | "LOG"            // Informational logging
-  | "ERROR"          // Error occurred
-  | "PROGRESS"       // Progress updates (percentages, counts)
-  | "STREAM_CHUNK";  // Text streaming chunks (for report generation)
+  | "STATUS_CHANGE" // Pipeline stage changes
+  | "DATA" // Actual research data (queries, documents, etc.)
+  | "LOG" // Informational logging
+  | "ERROR" // Error occurred
+  | "PROGRESS" // Progress updates (percentages, counts)
+  | "STREAM_CHUNK"; // Text streaming chunks (for report generation)
 
 /**
  * The current stage of the research pipeline
@@ -44,7 +44,7 @@ export interface ResearchUpdateData {
   // Query generation data
   queryAnalysis?: LegalQueryAnalysis;
   generatedQueries?: LegalQueryAnalysis["search_queries"];
-  
+
   // Document fetching data
   fetchedDocuments?: SearchResultItem[];
   documentBatch?: {
@@ -53,7 +53,7 @@ export interface ResearchUpdateData {
     batchIndex: number;
     totalBatches: number;
   };
-  
+
   // Document analysis data
   analyzedDocuments?: AnalyzedDocument[];
   documentAnalysis?: {
@@ -62,7 +62,7 @@ export interface ResearchUpdateData {
     index: number;
     total: number;
   };
-  
+
   // Synthesis data
   synthesis?: OverallSynthesis;
   synthesizedTopic?: {
@@ -70,10 +70,10 @@ export interface ResearchUpdateData {
     index: number;
     total: number;
   };
-  
+
   // Assessment data
   assessment?: ResearchAssessment;
-  
+
   // Report generation data
   finalReport?: FinalLegalReport;
   reportSection?: {
@@ -81,7 +81,7 @@ export interface ResearchUpdateData {
     index: number;
     total: number;
   };
-  
+
   // Progress data
   progress?: {
     current: number;
@@ -89,7 +89,7 @@ export interface ResearchUpdateData {
     percentage: number;
     operation?: string;
   };
-  
+
   // Error data
   error?: {
     message: string;
@@ -97,14 +97,14 @@ export interface ResearchUpdateData {
     stage?: ResearchPipelineStage;
     recoverable?: boolean;
   };
-  
+
   // Stream chunk data (for real-time text generation)
   streamChunk?: {
     content: string;
     section?: string;
     isComplete?: boolean;
   };
-  
+
   // Generic metadata
   metadata?: {
     timestamp: string;
@@ -121,19 +121,19 @@ export interface ResearchUpdateData {
 export interface ResearchUpdate {
   /** Current stage of the research pipeline */
   stage: ResearchPipelineStage;
-  
+
   /** Type of update being sent */
   type: ResearchUpdateType;
-  
+
   /** Human-readable message describing the update */
   message: string;
-  
+
   /** Structured data payload (client-friendly, summarized) */
   data?: ResearchUpdateData;
-  
+
   /** Unique identifier for this update */
   id?: string;
-  
+
   /** Timestamp when update was generated */
   timestamp: string;
 }
@@ -155,16 +155,16 @@ export interface SSEConnectionState {
 export interface SSEStreamConfig {
   /** Keep-alive interval in milliseconds */
   keepAliveInterval?: number;
-  
+
   /** Maximum connection time in milliseconds */
   maxConnectionTime?: number;
-  
+
   /** Enable detailed progress updates */
   enableProgressUpdates?: boolean;
-  
+
   /** Enable stream chunk updates for real-time text */
   enableStreamChunks?: boolean;
-  
+
   /** Custom headers for SSE response */
   customHeaders?: Record<string, string>;
 }

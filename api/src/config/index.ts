@@ -16,7 +16,9 @@ const researchConfigSchema = z.object({
 
 // Environment configuration
 const environmentConfigSchema = z.object({
-  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  NODE_ENV: z
+    .enum(["development", "test", "production"])
+    .default("development"),
   EXA_API_KEY: z.string().optional(),
   GOOGLE_API_KEY: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
@@ -35,7 +37,7 @@ const getEnvironmentConfig = () => {
   const baseConfig = {
     research: {
       maxQueriesPerIteration: 3,
-      maxDocumentsPerQuery: 5, 
+      maxDocumentsPerQuery: 5,
       searchTimeoutMs: 30000,
       maxRetries: 2,
       analysisTimeoutMs: 45000,
@@ -94,21 +96,26 @@ export const config = {
 export type ApiConfig = typeof config;
 
 // Helper function to get API keys safely
-export function getApiKey(service: keyof typeof config.env): string | undefined {
+export function getApiKey(
+  service: keyof typeof config.env
+): string | undefined {
   return config.env[service];
 }
 
 // Helper function to check if required API keys are available
-export function validateRequiredApiKeys(): { isValid: boolean; missing: string[] } {
+export function validateRequiredApiKeys(): {
+  isValid: boolean;
+  missing: string[];
+} {
   const required = ["EXA_API_KEY"];
   const missing: string[] = [];
-  
+
   for (const key of required) {
     if (!process.env[key]) {
       missing.push(key);
     }
   }
-  
+
   return {
     isValid: missing.length === 0,
     missing,

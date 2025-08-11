@@ -5,7 +5,7 @@
 
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import type { HealthCheckResponse } from "../../packages/shared-types/src/index";
 import { researchRoutes } from "./routes/research";
 
@@ -13,7 +13,7 @@ import { researchRoutes } from "./routes/research";
  * Creates and configures the main Elysia application
  * This factory function allows for better testing by avoiding global state
  */
-export function createApp(): Elysia {
+export function createApp() {
   // Track server start time for uptime calculation
   const serverStartTime = Date.now();
 
@@ -21,9 +21,18 @@ export function createApp(): Elysia {
     .use(
       cors({
         origin: process.env.CORS_ORIGIN || "http://localhost:3000",
-        credentials: true,
+        credentials: false, // Match EventSource default behavior (no credentials)
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+        allowedHeaders: [
+          "Content-Type", 
+          "Authorization", 
+          "Accept",
+          "Cache-Control",      // Required for EventSource
+          "Connection",         // Required for keep-alive  
+          "Accept-Language",    // Browser default header
+          "Accept-Encoding",    // Browser default header
+          "User-Agent"          // Browser default header
+        ],
       })
     )
     .use(
@@ -41,6 +50,17 @@ export function createApp(): Elysia {
         },
       })
     )
+    // Add global OPTIONS handler for debugging CORS preflight requests
+    .options("*", ({ set, headers }) => {
+      console.log("🔍 CORS Preflight OPTIONS request received");
+      console.log("🌐 Request headers:", {
+        origin: headers.origin,
+        'access-control-request-method': headers['access-control-request-method'],
+        'access-control-request-headers': headers['access-control-request-headers'],
+      });
+      set.status = 200;
+      return "CORS preflight OK";
+    })
     .use(researchRoutes) // This will include both /complete and /stream endpoints
     .get(
       "/health",
