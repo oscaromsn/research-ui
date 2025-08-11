@@ -3,7 +3,7 @@
 //    Output: LegalQueryAnalysis (contains initial SearchQueryItem[] and reasoning)
 
 function GenerateLegalSearchQueries(legal_question: string) -> LegalQueryAnalysis {
-  client QueryGeneration
+  client CustomGPT4oMini
   prompt #"
 You are an expert legal research assistant. Return ONLY valid JSON with no markdown formatting.
 

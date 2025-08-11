@@ -4,14 +4,13 @@
  */
 
 import type {
-  ResearchUpdate,
   ResearchPipelineStage,
-  ResearchUpdateType,
+  ResearchSession,
+  ResearchUpdate,
   ResearchUpdateData,
+  ResearchUpdateType,
   SSEEvent,
   SSEStreamConfig,
-  ResearchSession,
-  SSEConnectionState,
 } from "../types/streaming";
 
 /**
@@ -36,17 +35,17 @@ export function formatSSEEvent(update: ResearchUpdate): string {
   };
 
   let eventString = "";
-  
+
   if (sseEvent.id) {
     eventString += `id: ${sseEvent.id}\n`;
   }
-  
+
   if (sseEvent.event) {
     eventString += `event: ${sseEvent.event}\n`;
   }
-  
+
   eventString += `data: ${sseEvent.data}\n\n`;
-  
+
   return eventString;
 }
 
@@ -60,7 +59,10 @@ export function createKeepAliveEvent(): string {
 /**
  * Creates an SSE error event
  */
-export function createErrorEvent(error: Error, stage?: ResearchPipelineStage): string {
+export function createErrorEvent(
+  error: Error,
+  stage?: ResearchPipelineStage
+): string {
   const errorUpdate: ResearchUpdate = {
     stage: stage || "ERROR",
     type: "ERROR",
@@ -68,13 +70,13 @@ export function createErrorEvent(error: Error, stage?: ResearchPipelineStage): s
     data: {
       error: {
         message: error.message,
-        stage,
+        ...(stage !== undefined && { stage }),
         recoverable: !isNonRecoverableError(error),
       },
     },
     timestamp: new Date().toISOString(),
   };
-  
+
   return formatSSEEvent(errorUpdate);
 }
 
@@ -88,7 +90,7 @@ export function createCompletionEvent(): string {
     message: "Research pipeline completed successfully",
     timestamp: new Date().toISOString(),
   };
-  
+
   return formatSSEEvent(completionUpdate);
 }
 
@@ -101,14 +103,20 @@ export function createResearchUpdate(
   message: string,
   data?: ResearchUpdateData
 ): ResearchUpdate {
-  return {
+  const update: ResearchUpdate = {
     stage,
     type,
     message,
-    data,
     id: generateEventId(),
     timestamp: new Date().toISOString(),
   };
+  
+  // Only add data if it's defined to avoid undefined assignment with exactOptionalPropertyTypes
+  if (data !== undefined) {
+    update.data = data;
+  }
+  
+  return update;
 }
 
 /**
@@ -121,7 +129,7 @@ export function createProgressUpdate(
   operation?: string
 ): ResearchUpdate {
   const percentage = Math.round((current / total) * 100);
-  
+
   return createResearchUpdate(
     stage,
     "PROGRESS",
@@ -131,7 +139,7 @@ export function createProgressUpdate(
         current,
         total,
         percentage,
-        operation,
+        ...(operation !== undefined && { operation }),
       },
     }
   );
@@ -140,11 +148,13 @@ export function createProgressUpdate(
 /**
  * Creates SSE headers for the response
  */
-export function createSSEHeaders(customHeaders: Record<string, string> = {}): Record<string, string> {
+export function createSSEHeaders(
+  customHeaders: Record<string, string> = {}
+): Record<string, string> {
   return {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache",
-    "Connection": "keep-alive",
+    Connection: "keep-alive",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Cache-Control",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -155,9 +165,11 @@ export function createSSEHeaders(customHeaders: Record<string, string> = {}): Re
 /**
  * Creates a streaming ResearchUpdate sender function
  */
-export function createResearchUpdateSender(writer: WritableStreamDefaultWriter<Uint8Array>) {
+export function createResearchUpdateSender(
+  writer: WritableStreamDefaultWriter<Uint8Array>
+) {
   const encoder = new TextEncoder();
-  
+
   return {
     /**
      * Send a research update via SSE
@@ -166,7 +178,7 @@ export function createResearchUpdateSender(writer: WritableStreamDefaultWriter<U
       const eventData = formatSSEEvent(update);
       await writer.write(encoder.encode(eventData));
     },
-    
+
     /**
      * Send a progress update
      */
@@ -179,7 +191,7 @@ export function createResearchUpdateSender(writer: WritableStreamDefaultWriter<U
       const update = createProgressUpdate(stage, current, total, operation);
       await this.sendUpdate(update);
     },
-    
+
     /**
      * Send a status change update
      */
@@ -188,10 +200,15 @@ export function createResearchUpdateSender(writer: WritableStreamDefaultWriter<U
       message: string,
       data?: ResearchUpdateData
     ): Promise<void> {
-      const update = createResearchUpdate(stage, "STATUS_CHANGE", message, data);
+      const update = createResearchUpdate(
+        stage,
+        "STATUS_CHANGE",
+        message,
+        data
+      );
       await this.sendUpdate(update);
     },
-    
+
     /**
      * Send a data update
      */
@@ -203,7 +220,7 @@ export function createResearchUpdateSender(writer: WritableStreamDefaultWriter<U
       const update = createResearchUpdate(stage, "DATA", message, data);
       await this.sendUpdate(update);
     },
-    
+
     /**
      * Send a log message
      */
@@ -214,15 +231,18 @@ export function createResearchUpdateSender(writer: WritableStreamDefaultWriter<U
       const update = createResearchUpdate(stage, "LOG", message);
       await this.sendUpdate(update);
     },
-    
+
     /**
      * Send an error
      */
-    async sendError(error: Error, stage?: ResearchPipelineStage): Promise<void> {
+    async sendError(
+      error: Error,
+      stage?: ResearchPipelineStage
+    ): Promise<void> {
       const errorEvent = createErrorEvent(error, stage);
       await writer.write(encoder.encode(errorEvent));
     },
-    
+
     /**
      * Send keep-alive ping
      */
@@ -230,7 +250,7 @@ export function createResearchUpdateSender(writer: WritableStreamDefaultWriter<U
       const keepAlive = createKeepAliveEvent();
       await writer.write(encoder.encode(keepAlive));
     },
-    
+
     /**
      * Send completion event and close stream
      */
@@ -244,23 +264,39 @@ export function createResearchUpdateSender(writer: WritableStreamDefaultWriter<U
 /**
  * Creates a streaming response for SSE
  */
-export function createSSEStream(
-  config: SSEStreamConfig = {}
-): { response: Response; sender: ReturnType<typeof createResearchUpdateSender>; cleanup: () => void } {
+export function createSSEStream(config: SSEStreamConfig = {}): {
+  response: Response;
+  sender: ReturnType<typeof createResearchUpdateSender>;
+  cleanup: () => void;
+} {
   const streamConfig = { ...DEFAULT_SSE_CONFIG, ...config };
-  
+
   let keepAliveInterval: Timer | null = null;
   let connectionTimeout: Timer | null = null;
-  
+
   const stream = new ReadableStream({
     start(controller) {
-      const writer = controller.writable?.getWriter();
-      if (!writer) {
-        throw new Error("Failed to get stream writer");
-      }
-      
-      const sender = createResearchUpdateSender(writer);
-      
+      // Create a mock writer that uses the controller to enqueue data
+      const mockWriter = {
+        write: async (chunk: Uint8Array) => {
+          controller.enqueue(chunk);
+        },
+        close: async () => {
+          controller.close();
+        },
+        abort: async (reason?: any) => {
+          controller.error(reason);
+        },
+        get closed() {
+          return Promise.resolve();
+        },
+        get ready() {
+          return Promise.resolve();
+        }
+      } as WritableStreamDefaultWriter<Uint8Array>;
+
+      const sender = createResearchUpdateSender(mockWriter);
+
       // Set up keep-alive interval
       if (streamConfig.keepAliveInterval > 0) {
         keepAliveInterval = setInterval(async () => {
@@ -271,7 +307,7 @@ export function createSSEStream(
           }
         }, streamConfig.keepAliveInterval);
       }
-      
+
       // Set up connection timeout
       if (streamConfig.maxConnectionTime > 0) {
         connectionTimeout = setTimeout(() => {
@@ -282,15 +318,15 @@ export function createSSEStream(
           }
         }, streamConfig.maxConnectionTime);
       }
-      
+
       return sender;
     },
-    
+
     cancel() {
       cleanup();
     },
   });
-  
+
   const cleanup = () => {
     if (keepAliveInterval) {
       clearInterval(keepAliveInterval);
@@ -301,11 +337,11 @@ export function createSSEStream(
       connectionTimeout = null;
     }
   };
-  
+
   const response = new Response(stream, {
     headers: createSSEHeaders(streamConfig.customHeaders),
   });
-  
+
   // Note: We need to create the sender properly, this is a simplified version
   const mockWriter = {
     write: async (data: Uint8Array) => {
@@ -313,9 +349,9 @@ export function createSSEStream(
       console.log("SSE Write:", new TextDecoder().decode(data));
     },
   } as WritableStreamDefaultWriter<Uint8Array>;
-  
+
   const sender = createResearchUpdateSender(mockWriter);
-  
+
   return { response, sender, cleanup };
 }
 
@@ -336,15 +372,17 @@ function generateEventId(): string {
 function isNonRecoverableError(error: Error): boolean {
   const nonRecoverablePatterns = [
     "authentication",
-    "authorization", 
+    "authorization",
     "api key",
     "permission denied",
     "quota exceeded",
     "invalid configuration",
   ];
-  
+
   const errorMessage = error.message.toLowerCase();
-  return nonRecoverablePatterns.some(pattern => errorMessage.includes(pattern));
+  return nonRecoverablePatterns.some((pattern) =>
+    errorMessage.includes(pattern)
+  );
 }
 
 /**
@@ -355,7 +393,7 @@ export function createResearchSession(
   config: SSEStreamConfig = {}
 ): ResearchSession {
   const sessionId = `session-${generateEventId()}`;
-  
+
   return {
     sessionId,
     legalQuestion,

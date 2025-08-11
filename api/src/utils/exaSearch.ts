@@ -1,5 +1,8 @@
 import axios, { type AxiosResponse } from "axios";
-import type { SearchQueryItem, SearchResultItem } from "../../baml_client/types";
+import type {
+  SearchQueryItem,
+  SearchResultItem,
+} from "../../baml_client/types";
 import { getApiKey } from "../config";
 
 // --- Interfaces for Exa API Response ---
@@ -58,7 +61,11 @@ const EXA_API_BASE_URL = "https://api.exa.ai";
 // --- Error Classes (Simplified) ---
 
 export class ExaSearchError extends Error {
-  constructor(message: string, public statusCode?: number, public query?: string) {
+  constructor(
+    message: string,
+    public statusCode?: number,
+    public query?: string
+  ) {
     super(message);
     this.name = "ExaSearchError";
   }
@@ -82,11 +89,13 @@ export class ExaRateLimitError extends ExaSearchError {
 
 function validateApiKey(): string {
   const apiKey = getApiKey("EXA_API_KEY");
-  
+
   if (!apiKey || apiKey.trim() === "") {
-    throw new ExaAuthError("EXA_API_KEY environment variable is not set or is empty");
+    throw new ExaAuthError(
+      "EXA_API_KEY environment variable is not set or is empty"
+    );
   }
-  
+
   return apiKey;
 }
 
@@ -94,7 +103,7 @@ function buildRequestBody(
   searchQuery: SearchQueryItem,
   numResults: number,
   fetchFullText: boolean,
-  numHighlightSentences: number = 3
+  numHighlightSentences = 3
 ): ExaSearchRequestBody {
   const requestBody: ExaSearchRequestBody = {
     query: searchQuery.query_string,
@@ -104,12 +113,12 @@ function buildRequestBody(
   };
 
   if (fetchFullText) {
-    requestBody.contents = { 
-      ...requestBody.contents, 
-      text: { 
+    requestBody.contents = {
+      ...requestBody.contents,
+      text: {
         max_characters: 10000,
         include_html_tags: false,
-      } 
+      },
     };
   }
 
@@ -126,7 +135,7 @@ function buildRequestBody(
 async function makeExaApiRequest(
   requestBody: ExaSearchRequestBody,
   apiKey: string,
-  timeoutMs: number = 30000
+  timeoutMs = 30000
 ): Promise<AxiosResponse<ExaSearchApiResponse>> {
   console.log(`🔎 Executing Exa search for: "${requestBody.query}"`);
 
@@ -182,23 +191,30 @@ async function makeExaApiRequest(
       if (error.response) {
         // The request was made and the server responded with a status code
         const status = error.response.status;
-        const message = error.response.data?.message || error.response.statusText;
-        
+        const message =
+          error.response.data?.message || error.response.statusText;
+
         if (status === 401) {
-          throw new ExaAuthError(`Authentication failed: ${message}`, requestBody.query);
+          throw new ExaAuthError(
+            `Authentication failed: ${message}`,
+            requestBody.query
+          );
         }
-        
+
         if (status === 429) {
-          throw new ExaRateLimitError(`Rate limit exceeded: ${message}`, requestBody.query);
+          throw new ExaRateLimitError(
+            `Rate limit exceeded: ${message}`,
+            requestBody.query
+          );
         }
-        
+
         throw new ExaSearchError(
           `Exa API error: ${message}`,
           status,
           requestBody.query
         );
       }
-      
+
       // Network error
       throw new ExaSearchError(
         `Network error: ${error.message}`,
@@ -238,7 +254,7 @@ function validateApiResponse(
 function mapExaResultToBaml(
   exaResult: ExaApiResult,
   index: number,
-  retrievalDate: string,
+  _retrievalDate: string,
   searchQuery: SearchQueryItem
 ): SearchResultItem {
   // Validate required fields
@@ -271,6 +287,7 @@ function mapExaResultToBaml(
     title: exaResult.title || "Untitled",
     source_name: sourceName,
     full_text: exaResult.text || "",
+    retrieval_date: new Date().toISOString(), // Required field - when document was retrieved
     // Additional fields that might be used by BAML analysis
     ...(snippet && { snippet }),
     ...(exaResult.author && { author: exaResult.author }),
@@ -286,9 +303,9 @@ function mapExaResultToBaml(
  */
 export async function executeExaSearch(
   searchQuery: SearchQueryItem,
-  numResults: number = 5,
-  fetchFullText: boolean = true,
-  maxRetries: number = 2
+  numResults = 5,
+  fetchFullText = true,
+  maxRetries = 2
 ): Promise<SearchResultItem[]> {
   const apiKey = validateApiKey();
   let lastError: Error | null = null;
@@ -296,48 +313,61 @@ export async function executeExaSearch(
   // Simple retry logic (without sophisticated circuit breaker)
   for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
     try {
-      console.log(`🔍 Search attempt ${attempt}/${maxRetries + 1} for: "${searchQuery.query_string}"`);
-      
+      console.log(
+        `🔍 Search attempt ${attempt}/${maxRetries + 1} for: "${searchQuery.query_string}"`
+      );
+
       const requestBody = buildRequestBody(
         searchQuery,
         numResults,
         fetchFullText,
         3 // highlight sentences
       );
-      
+
       const response = await makeExaApiRequest(requestBody, apiKey);
-      const exaResults = validateApiResponse(response, searchQuery.query_string);
+      const exaResults = validateApiResponse(
+        response,
+        searchQuery.query_string
+      );
       const retrievalDate = new Date().toISOString();
-      
-      const bamlResults: SearchResultItem[] = exaResults.map((exaResult, index) =>
-        mapExaResultToBaml(exaResult, index, retrievalDate, searchQuery)
+
+      const bamlResults: SearchResultItem[] = exaResults.map(
+        (exaResult, index) =>
+          mapExaResultToBaml(exaResult, index, retrievalDate, searchQuery)
       );
 
-      console.log(`✅ Exa search successful: ${bamlResults.length} results for "${searchQuery.query_string}"`);
+      console.log(
+        `✅ Exa search successful: ${bamlResults.length} results for "${searchQuery.query_string}"`
+      );
       return bamlResults;
-      
     } catch (error) {
       lastError = error as Error;
-      
+
       // Don't retry on authentication or rate limit errors
       if (error instanceof ExaAuthError || error instanceof ExaRateLimitError) {
         console.error(`❌ Non-retryable error: ${error.message}`);
         throw error;
       }
-      
+
       // Don't retry on the last attempt
       if (attempt === maxRetries + 1) {
-        console.error(`❌ All retry attempts failed for query: "${searchQuery.query_string}"`);
+        console.error(
+          `❌ All retry attempts failed for query: "${searchQuery.query_string}"`
+        );
         throw error;
       }
-      
+
       // Wait before retrying (exponential backoff)
-      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
-      console.warn(`⚠️ Search attempt ${attempt} failed, retrying in ${delay}ms: ${error.message}`);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      const delay = Math.min(1000 * 2 ** (attempt - 1), 10000);
+      console.warn(
+        `⚠️ Search attempt ${attempt} failed, retrying in ${delay}ms: ${(error as Error).message || 'Unknown error'}`
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 
   // This shouldn't be reached, but just in case
-  throw lastError || new ExaSearchError("Unknown error during search execution");
+  throw (
+    lastError || new ExaSearchError("Unknown error during search execution")
+  );
 }
