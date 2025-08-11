@@ -3,10 +3,11 @@
 // Just ensure that the output_dir is different for each generator.
 generator target {
     // Valid values: "python/pydantic", "typescript", "ruby/sorbet", "rest/openapi"
-    output_type "typescript/react"
+    output_type "typescript"
 
     // Where the generated code will be saved (relative to baml_src/)
-    output_dir "../"
+    // Generate BAML client in the api directory for backend use
+    output_dir "../api"
 
     // The version of the BAML package you have installed (e.g. same version as your baml-py or @boundaryml/baml).
     // The BAML VSCode extension version should also match this version.

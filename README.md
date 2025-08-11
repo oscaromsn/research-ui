@@ -72,64 +72,109 @@ Jotai for a dynamic, streaming UI.
 
 ## Tech Stack
 
-* **Framework:** Next.js 15 (App Router, RSC, Server Actions)
+### Frontend (Next.js)
+* **Framework:** Next.js 15 (App Router, RSC)
 * **Language:** TypeScript (strict mode)
-* **Package Manager:** bun (v1.1.0+)
-* **AI/LLM Layer:** BAML (Boundary AI Markup Language) v0.89.0+
-* **State Management (Client):** Jotai v2.12.4+
+* **State Management:** Jotai v2.12.4+
 * **Styling:** Tailwind CSS v4, Class Variance Authority (CVA)
 * **UI Primitives:** Shadcn/ui, Radix UI
+* **API Client:** Eden Treaty (type-safe API communication)
+* **Streaming:** EventSource API with ResilientEventSource wrapper
+
+### Backend (Elysia)
+* **Framework:** Elysia.js (high-performance backend)
+* **AI/LLM Layer:** BAML (Boundary AI Markup Language) v0.89.0+
+* **Streaming:** Server-Sent Events (SSE) with granular event types
 * **HTTP Client:** Axios (for external APIs like Exa Search)
-* **Schema Validation (Non-LLM):** Zod v3.25.7+
+* **Resilience:** Circuit breakers, request throttling, retry logic
+* **Documentation:** Auto-generated OpenAPI/Swagger
+
+### Shared/Development
+* **Package Manager:** bun (v1.1.0+)
+* **Schema Validation:** Zod v3.25.7+ (shared type contracts)
 * **Testing:**
     * BAML Native Tests
     * Vitest & React Testing Library (Unit/Component/Integration)
     * Playwright (End-to-End)
 * **Code Quality:** Biome (formatting and linting)
 * **DevOps & Tooling:** Husky, lint-staged, commitlint, Knip, Dependency-Cruiser
+* **Development:** Concurrent development with hot reloading
 
 ## Architecture
 
-JurisConsulta follows a well-defined architecture centered around the "Research
-Agent Orchestrator" pattern.
+JurisConsulta implements a **modern dual-service architecture** with dedicated frontend and backend services communicating via type-safe APIs and Server-Sent Events (SSE) for optimal streaming performance.
+
+### System Architecture
+
+```
+┌─────────────────────────────────┐    SSE Stream    ┌──────────────────────────────────┐
+│         Next.js Frontend        │ ◄──────────────► │       Elysia Backend             │
+│          (Port 3000)            │                  │        (Port 3001)               │
+│                                 │                  │                                  │
+│  ┌─────────────────────────────┐ │                  │ ┌──────────────────────────────┐ │
+│  │    React Components         │ │                  │ │     BAML AI Pipeline         │ │
+│  │  - Guidance Strategy        │ │                  │ │  - Query Generation          │ │
+│  │  - Evidence Analysis        │ │                  │ │  - Document Analysis         │ │
+│  │  - Report Generation        │ │                  │ │  - Synthesis & Assessment    │ │
+│  └─────────────────────────────┘ │                  │ │  - Report Streaming          │ │
+│                                 │                  │ └──────────────────────────────┘ │
+│  ┌─────────────────────────────┐ │    Eden Treaty   │ ┌──────────────────────────────┐ │
+│  │    useResearchAgent Hook    │ │ ◄──────────────► │ │      RESTful Endpoints       │ │
+│  │  - ResilientEventSource     │ │                  │ │  - /api/research/complete    │ │
+│  │  - SSE Event Processing     │ │                  │ │  - /api/research/stream      │ │
+│  │  - Jotai State Management   │ │                  │ │  - /api/health               │ │
+│  └─────────────────────────────┘ │                  │ └──────────────────────────────┘ │
+│                                 │                  │                                  │
+│  ┌─────────────────────────────┐ │                  │ ┌──────────────────────────────┐ │
+│  │      Shared Types           │ │ ◄──────────────► │ │     Resilience Layer         │ │
+│  │  - SSE Event Schemas        │ │                  │ │  - Circuit Breakers          │ │
+│  │  - API Request/Response     │ │                  │ │  - Request Throttling        │ │
+│  │  - BAML Type Definitions    │ │                  │ │  - Error Recovery            │ │
+│  └─────────────────────────────┘ │                  │ └──────────────────────────────┘ │
+└─────────────────────────────────┘                  └──────────────────────────────────┘
+```
 
 ### Directory Structure
 
-A brief overview of key directories:
+* **Frontend (Next.js)**:
+  * `/__mocks__/`: Mock implementations for testing
+  * `/__tests__/`: Vitest tests, mirroring source structure
+  * `/app/`: Next.js App Router (pages and layouts only)
+  * `/components/`: React UI components (`ui/`, `domain/`, `layout/`)
+  * `/lib/`: Client utilities, hooks (`lib/hooks/`), Jotai atoms (`lib/state/`)
 
-* `/__mocks__/`: Mock implementations for testing.
-* `/__tests__/`: Vitest tests, mirroring the source structure.
-* `/app/`: Next.js App Router, including Server Actions (`app/actions/`).
-* `/baml_src/`: All BAML source files (functions, types, clients, tests).
-* `/baml_client/`: **Auto-generated** BAML client code (DO NOT EDIT MANUALLY).
-* `/components/`: React UI components, categorized into `ui/`, `domain/`, and
-  `layout/`.
-* `/lib/`: Shared utilities, custom React hooks (`lib/hooks/`), Zod schemas (
-  `lib/schemas/`), and Jotai atoms (`lib/state/`).
-* `/e2e/`: Playwright end-to-end tests.
-* (Root): Configuration files for Next.js, TypeScript, Biome, Vitest,
-  Playwright, Husky, etc.
+* **Backend (Elysia)**:
+  * `/api/`: Dedicated Elysia backend service
+  * `/api/src/`: Backend source code
+  * `/api/src/routes/`: API endpoints and SSE handlers
+  * `/api/src/utils/`: Pipeline stages and utilities
+  * `/api/baml_client/`: **Auto-generated** BAML client (DO NOT EDIT)
 
-### Research Agent Orchestrator Pattern
+* **Shared Resources**:
+  * `/baml_src/`: All BAML source files (functions, types, tests)
+  * `/packages/shared-types/`: Shared type definitions and Zod schemas
+  * `/e2e/`: Playwright end-to-end tests
+  * (Root): Configuration files for both services
 
-1. **Client Initiates:** User submits a legal question via the UI.
-2. **Hook Invokes Action:** `useResearchAgent` (client-side hook) calls
-   `conductResearch` (Server Action).
-3. **Server Orchestrates:** `conductResearch` in
-   `app/actions/researchAgentOrchestrator.ts` manages the BAML pipeline
-   server-side.
-    * Calls BAML functions for each research stage (query generation, analysis,
-      synthesis, etc.).
-    * Streams `ResearchUpdate` objects (newline-separated JSON) to the client,
-      containing stage progress, data, logs, or errors.
-4. **Hook Processes Stream:** `useResearchAgent` consumes the stream.
-5. **State Updates:** Jotai atoms in `lib/state/researchAtoms.ts` are updated
-   based on `ResearchUpdate` payloads.
-6. **UI Reacts:** Components subscribed to Jotai atoms re-render, displaying
-   live progress and results.
+### Streaming Research Pipeline
 
-This pattern ensures that complex AI logic remains server-side, while the client
-receives structured, streamable updates for a responsive UI.
+1. **User Initiates Research:** User submits legal question via the UI
+2. **Frontend Hook:** `useResearchAgent` establishes ResilientEventSource connection
+3. **Backend Orchestration:** Elysia backend (`/api/research/stream`) manages the BAML pipeline
+   * Calls BAML streaming functions for each stage
+   * Emits granular SSE events: `stage.change`, `document.analyzed`, `report.chunk`
+   * Handles errors with circuit breakers and retry logic
+4. **Real-time Streaming:** SSE events stream to frontend with type-safe schemas
+5. **State Management:** Jotai atoms update based on incoming SSE events
+6. **UI Reactivity:** Components re-render in real-time showing progress and results
+
+### Key Architectural Benefits
+
+* **🚀 Performance**: Granular SSE streaming for real-time UI updates
+* **🛡️ Reliability**: Circuit breakers, request throttling, and automatic retry
+* **📊 Scalability**: Independent scaling of frontend and backend services  
+* **🔧 Developer Experience**: End-to-end type safety with shared contracts
+* **⚡ Streaming**: Progressive content delivery without buffering delays
 
 ### Testing Architecture: Conflict-Free Development
 
@@ -207,18 +252,42 @@ variables (see `vitest.config.ts`).
 
 ### Running the Development Server
 
+JurisConsulta requires both frontend and backend services to run concurrently during development.
+
 1. **Generate BAML client (if `baml_src` has changed or first time setup):**
    ```bash
    bun baml:generate
    ```
 
-2. **Start the Next.js development server:**
+2. **Start both services concurrently:**
    ```bash
    bun dev
    ```
+   This automatically starts:
+   - **Next.js Frontend**: [http://localhost:3000](http://localhost:3000) 
+   - **Elysia Backend**: [http://localhost:3001](http://localhost:3001)
+   - **API Documentation**: [http://localhost:3001/swagger](http://localhost:3001/swagger)
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the
-application.
+   **Alternative - Run services separately:**
+   ```bash
+   # Terminal 1: Start the backend
+   bun run dev:api
+
+   # Terminal 2: Start the frontend  
+   bun run dev:next
+   ```
+
+3. **Verify both services are running:**
+   - Frontend: [http://localhost:3000](http://localhost:3000)
+   - Backend Health: [http://localhost:3001/api/health](http://localhost:3001/api/health)
+   - API Docs: [http://localhost:3001/swagger](http://localhost:3001/swagger)
+
+### Development Workflow
+
+* **Frontend Development**: Work on UI components, hooks, and state management
+* **Backend Development**: Modify BAML functions, API endpoints, and streaming logic
+* **Hot Reloading**: Both services support hot reloading for rapid development
+* **Type Safety**: Shared types ensure end-to-end type safety across services
 
 ## Running Tests
 
@@ -266,13 +335,14 @@ tests*
 
 ```
 📁 __tests__/
-├── 📁 actions/          # Server Action tests
+├── 📁 actions/          # Legacy action tests (deprecated)
 ├── 📁 components/       # React Component tests  
 ├── 📁 integration/      # Real API tests (SLOW)
 ├── 📁 lib/             # Hook & utility tests
 └── 📁 utils/           # Test helpers
 
-📁 e2e/                 # Playwright E2E tests
+📁 api/src/__tests__/   # Backend Elysia tests
+📁 e2e/                 # Playwright E2E tests  
 📁 baml_src/            # AI function tests
 ```
 
@@ -289,17 +359,32 @@ see [docs/TESTING.md](./docs/tooling/TESTING.md).
 4. If tests pass and changes are made, regenerate the BAML client:
    `bun baml:generate`. This updates the `baml_client/` directory.
 
-### Frontend Development
+### Development Workflow
 
-1. **Server Actions (`app/actions/`):** Implement or update server-side
-   orchestration logic.
-2. **Client Hooks (`lib/hooks/`):** Modify `useResearchAgent.ts` to handle new
-   `ResearchUpdate` types or data structures, and to update Jotai atoms.
-3. **State (`lib/state/`):** Define or update Jotai atoms in `researchAtoms.ts`
-   to store client-side state.
-4. **UI Components (`components/`):** Create or modify React components to
-   consume Jotai state (using `useAtomValue`) and interact with client hooks.
-5. **Testing:** Write Vitest tests for hooks and components.
+#### Backend Development (Elysia)
+
+1. **BAML Functions (`baml_src/`):** Define or update AI pipeline functions and types
+2. **API Endpoints (`api/src/routes/`):** Implement RESTful and SSE streaming endpoints
+3. **Pipeline Stages (`api/src/utils/`):** Modify research pipeline logic and utilities
+4. **Testing:** Write comprehensive backend tests with type-safe mocks
+5. **Generate Types:** Run `bun baml:generate` to update shared client types
+
+#### Frontend Development (Next.js)
+
+1. **Client Hooks (`lib/hooks/`):** Modify `useResearchAgent.ts` to handle SSE events
+   and update Jotai atoms based on streaming backend responses
+2. **State Management (`lib/state/`):** Define or update Jotai atoms in `researchAtoms.ts`
+   to store client-side state from SSE events
+3. **UI Components (`components/`):** Create React components that consume Jotai state
+   and provide real-time updates during research workflows  
+4. **API Integration:** Use Eden Treaty for type-safe API calls and ResilientEventSource for SSE
+5. **Testing:** Write Vitest tests for components and hooks with proper SSE mocking
+
+#### Shared Development
+
+1. **Type Contracts (`packages/shared-types/`):** Define Zod schemas for SSE events and API contracts
+2. **E2E Testing:** Use Playwright to test complete user workflows across both services
+3. **Integration Testing:** Verify frontend-backend communication and streaming functionality
 
 ### Code Quality & Conventions
 
