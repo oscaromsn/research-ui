@@ -112,3 +112,8 @@ export function createApp() {
  * This maintains compatibility with the existing index.ts structure
  */
 export const app = createApp();
+
+/**
+ * Export the app type for Eden Treaty type safety
+ */
+export type App = typeof app;

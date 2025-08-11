@@ -13,10 +13,12 @@ import type {
 } from "../types/research";
 import {
   analyzeDocumentsStage,
+  analyzeDocumentsStageStreaming,
   assessResearchStage,
   fetchDocumentsStage,
   generateQueriesStage,
   generateReportStage,
+  generateReportStageStreaming,
   synthesizeFindingsStage,
 } from "../utils/pipelineStages";
 import {
@@ -316,45 +318,12 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
               return;
             }
 
-            // Stream individual document analyses
-            analyzedDocuments = [];
-            for (let i = 0; i < fetchedDocuments.length; i++) {
-              const doc = fetchedDocuments[i];
-              if (!doc) continue;
-
-              await sender.sendProgress(
-                "ANALYZING_DOCUMENTS",
-                i + 1,
-                fetchedDocuments.length,
-                `Analyzing: ${doc.title || "Document"}`
-              );
-
-              try {
-                const analysis = await bamlCircuitBreaker.execute(
-                  () => b.AnalyzeSingleDocument(doc, legalQuestion),
-                  'AnalyzeSingleDocument'
-                );
-                analyzedDocuments.push(analysis);
-
-                await sender.sendData(
-                  "ANALYZING_DOCUMENTS",
-                  `Analyzed: ${doc.title || "Document"} (Relevance: ${analysis.relevance_score}/10)`,
-                  {
-                    documentAnalysis: {
-                      document: doc,
-                      analysis,
-                      index: i,
-                      total: fetchedDocuments.length,
-                    },
-                  }
-                );
-              } catch (error) {
-                await sender.sendLog(
-                  "ANALYZING_DOCUMENTS",
-                  `Failed to analyze document: ${doc.title || doc.id}`
-                );
-              }
-            }
+            // Use streaming document analysis with granular events
+            analyzedDocuments = await analyzeDocumentsStageStreaming(
+              legalQuestion,
+              fetchedDocuments,
+              writer
+            );
 
             await sender.sendData(
               "ANALYZING_DOCUMENTS",
@@ -410,18 +379,20 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
             if (assessment.next_action === "GENERATE_REPORT") {
               await sender.sendStatusChange(
                 "GENERATING_REPORT",
-                "Generating comprehensive legal report..."
+                "Generating comprehensive legal report with streaming..."
               );
 
-              finalReport = await generateReportStage(
+              // Use streaming version for granular report updates
+              finalReport = await generateReportStageStreaming(
                 legalQuestion,
                 synthesis,
-                queryAnalysis
+                queryAnalysis,
+                writer
               );
 
               await sender.sendData(
                 "GENERATING_REPORT",
-                `Report generated: "${finalReport.report_title}"`,
+                `Report generated with streaming: "${finalReport.report_title}"`,
                 {
                   finalReport,
                   progress: { current: 6, total: 6, percentage: 100 },
@@ -527,7 +498,7 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
             description: "Invalid request - legal question is required",
           },
         },
-      },
+      }
     }
   )
   .get(

@@ -200,7 +200,7 @@ export class RequestThrottler {
 
 // Global request throttler instance for BAML operations
 export const bamlRequestThrottler = new RequestThrottler({
-  maxConcurrent: 2, // Very conservative for BAML operations
-  maxQueue: 8, // Allow some queuing but not too much
+  maxConcurrent: 4, // Optimized for parallel document analysis (was 2)
+  maxQueue: 12, // Increased queue capacity for better throughput (was 8)
   requestTimeout: 90000, // 90 seconds per BAML request
 });
