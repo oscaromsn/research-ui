@@ -159,6 +159,38 @@ export const ReportChunkEventSchema = BaseSSEEventSchema.extend({
 
 export type ReportChunkEvent = z.infer<typeof ReportChunkEventSchema>;
 
+/**
+ * Enhanced error classification for intelligent error handling
+ */
+export const ErrorClassificationSchema = z.enum([
+  'RATE_LIMIT',
+  'AUTHENTICATION',
+  'NETWORK',
+  'CONFIGURATION',
+  'UNKNOWN'
+]);
+
+export type ErrorClassification = z.infer<typeof ErrorClassificationSchema>;
+
+/**
+ * Enhanced error information with classification and recovery guidance
+ */
+export const EnhancedErrorSchema = z.object({
+  message: z.string(),
+  classification: ErrorClassificationSchema,
+  recoverable: z.boolean(),
+  recommendedAction: z.string(),
+  stage: ResearchStageSchema.optional(),
+  // Rate limit specific fields
+  retryAfterMinutes: z.number().optional(),
+  quotaType: z.string().optional(),
+  // Network error specific fields
+  shouldAutoRetry: z.boolean().optional(),
+  maxRetries: z.number().optional(),
+});
+
+export type EnhancedErrorInfo = z.infer<typeof EnhancedErrorSchema>;
+
 // Error Event
 export const ErrorEventSchema = BaseSSEEventSchema.extend({
   error: z.string(),
@@ -169,6 +201,13 @@ export const ErrorEventSchema = BaseSSEEventSchema.extend({
   recoverable: z.boolean().optional(),
   retryAfter: z.number().optional(),
   details: z.record(z.any()).optional(),
+  // Enhanced error fields
+  classification: ErrorClassificationSchema.optional(),
+  recommendedAction: z.string().optional(),
+  retryAfterMinutes: z.number().optional(),
+  quotaType: z.string().optional(),
+  shouldAutoRetry: z.boolean().optional(),
+  maxRetries: z.number().optional(),
 });
 
 export type ErrorEvent = z.infer<typeof ErrorEventSchema>;
@@ -319,4 +358,30 @@ export function isCompletionEvent(
   event: SSEEventData
 ): event is Extract<SSEEventData, { type: "complete" }> {
   return event.type === "complete";
+}
+
+// Legacy compatibility types for old server action tests
+// These types maintain backwards compatibility while transitioning to the new SSE architecture
+
+export interface ResearchUpdate {
+  type: "STATUS_CHANGE" | "DATA" | "LOG" | "ERROR" | "PROGRESS";
+  stage: ResearchStage;
+  message?: string;
+  data?: Record<string, any> | {
+    error?: EnhancedErrorInfo;
+    [key: string]: any;
+  };
+  currentProcessedDoc?: number;
+  totalDocsToProcess?: number;
+  isFinalForStage?: boolean;
+  timestamp?: string;
+}
+
+// ResearchStage is already exported above
+
+// Additional legacy types that might be needed
+export interface LegacyStreamResponse {
+  data: ResearchUpdate[];
+  status: 'success' | 'error';
+  error?: string;
 }
