@@ -50,12 +50,15 @@ describe("Elysia API Integration Tests", () => {
 
       // Make request to research stream endpoint using GET for EventSource compatibility
       const response = await app.handle(
-        new Request(`http://localhost/api/research/stream?legalQuestion=${encodeURIComponent(legalQuestion)}`, {
-          method: "GET",
-          headers: {
-            "Accept": "text/event-stream",
-          },
-        })
+        new Request(
+          `http://localhost/api/research/stream?legalQuestion=${encodeURIComponent(legalQuestion)}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "text/event-stream",
+            },
+          }
+        )
       );
 
       expect(response.status).toBe(200);
@@ -70,12 +73,15 @@ describe("Elysia API Integration Tests", () => {
       const legalQuestion = "Test question for SSE validation";
 
       const response = await app.handle(
-        new Request(`http://localhost/api/research/stream?legalQuestion=${encodeURIComponent(legalQuestion)}`, {
-          method: "GET",
-          headers: {
-            "Accept": "text/event-stream",
-          },
-        })
+        new Request(
+          `http://localhost/api/research/stream?legalQuestion=${encodeURIComponent(legalQuestion)}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "text/event-stream",
+            },
+          }
+        )
       );
 
       expect(response.status).toBe(200);
@@ -102,7 +108,9 @@ describe("Elysia API Integration Tests", () => {
 
             while (true) {
               const { done, value } = await reader.read();
-              if (done) break;
+              if (done) {
+                break;
+              }
 
               buffer += value;
 
@@ -149,7 +157,9 @@ describe("Elysia API Integration Tests", () => {
           expect(completeEvent.event).toBe("research-update");
           expect(completeEvent.data).toBeDefined();
         } finally {
-          if (timeoutId) clearTimeout(timeoutId);
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
           reader.releaseLock();
         }
       }
@@ -160,7 +170,7 @@ describe("Elysia API Integration Tests", () => {
         new Request("http://localhost/api/research/stream", {
           method: "GET",
           headers: {
-            "Accept": "text/event-stream",
+            Accept: "text/event-stream",
           },
         })
       );
@@ -175,7 +185,7 @@ describe("Elysia API Integration Tests", () => {
         new Request("http://localhost/api/research/stream?legalQuestion=", {
           method: "GET",
           headers: {
-            "Accept": "text/event-stream",
+            Accept: "text/event-stream",
           },
         })
       );
@@ -208,16 +218,19 @@ describe("Elysia API Integration Tests", () => {
 
     test("should handle GET request for EventSource connection", async () => {
       const legalQuestion = "What are the key elements of contract formation?";
-      
+
       // Test the GET endpoint that EventSource will use
       const response = await app.handle(
-        new Request(`http://localhost/api/research/stream?legalQuestion=${encodeURIComponent(legalQuestion)}`, {
-          method: "GET",
-          headers: {
-            "Accept": "text/event-stream",
-            "Cache-Control": "no-cache",
-          },
-        })
+        new Request(
+          `http://localhost/api/research/stream?legalQuestion=${encodeURIComponent(legalQuestion)}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "text/event-stream",
+              "Cache-Control": "no-cache",
+            },
+          }
+        )
       );
 
       expect(response.status).toBe(200);
@@ -232,11 +245,11 @@ describe("Elysia API Integration Tests", () => {
       if (reader) {
         const { value } = await reader.read();
         expect(value).toBeDefined();
-        
+
         // Convert the first chunk to string and verify it's SSE format
         const chunk = new TextDecoder().decode(value);
         expect(chunk).toMatch(/^(id:|event:|data:)/); // Should start with valid SSE field
-        
+
         reader.releaseLock();
       }
     });
@@ -247,7 +260,7 @@ describe("Elysia API Integration Tests", () => {
         new Request("http://localhost/api/research/stream", {
           method: "GET",
           headers: {
-            "Accept": "text/event-stream",
+            Accept: "text/event-stream",
           },
         })
       );
@@ -263,7 +276,7 @@ describe("Elysia API Integration Tests", () => {
         new Request("http://localhost/api/research/stream?legalQuestion=", {
           method: "GET",
           headers: {
-            "Accept": "text/event-stream",
+            Accept: "text/event-stream",
           },
         })
       );

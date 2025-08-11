@@ -51,7 +51,7 @@ export class ResilientEventSource {
     this.url = url;
     this.callbacks = callbacks;
     this.eventSourceOptions = eventSourceOptions;
-    
+
     this.config = {
       maxRetryAttempts: 3,
       initialBackoffMs: 1000, // 1 second
@@ -78,7 +78,7 @@ export class ResilientEventSource {
     if (!this.eventListeners.has(type)) {
       this.eventListeners.set(type, []);
     }
-    this.eventListeners.get(type)!.push(listener);
+    this.eventListeners.get(type)?.push(listener);
 
     // If EventSource is already connected, add the listener immediately
     if (this.eventSource && this.eventSource.readyState === EventSource.OPEN) {
@@ -118,7 +118,7 @@ export class ResilientEventSource {
   /**
    * Attempt to establish EventSource connection
    */
-  private async attemptConnection(retryAttempt: number = 0): Promise<void> {
+  private async attemptConnection(retryAttempt = 0): Promise<void> {
     if (!this.shouldReconnect || retryAttempt >= this.config.maxRetryAttempts) {
       if (retryAttempt >= this.config.maxRetryAttempts) {
         const finalError = new Error(
@@ -137,14 +137,15 @@ export class ResilientEventSource {
     // Calculate backoff delay for retry attempts
     if (retryAttempt > 0) {
       const backoffMs = Math.min(
-        this.config.initialBackoffMs * Math.pow(this.config.backoffMultiplier, retryAttempt - 1),
+        this.config.initialBackoffMs *
+          this.config.backoffMultiplier ** (retryAttempt - 1),
         this.config.maxBackoffMs
       );
       this.stats.currentBackoffMs = backoffMs;
-      
+
       this.callbacks.onRetryAttempt?.(retryAttempt, backoffMs);
-      
-      await new Promise(resolve => {
+
+      await new Promise((resolve) => {
         this.reconnectTimeoutId = setTimeout(resolve, backoffMs);
       });
 
@@ -157,12 +158,17 @@ export class ResilientEventSource {
     try {
       // Create new EventSource connection
       this.eventSource = new EventSource(this.url, this.eventSourceOptions);
-      
+
       // Set connection timeout
       this.connectionTimeoutId = setTimeout(() => {
-        if (this.eventSource && this.eventSource.readyState === EventSource.CONNECTING) {
+        if (
+          this.eventSource &&
+          this.eventSource.readyState === EventSource.CONNECTING
+        ) {
           this.eventSource.close();
-          const timeoutError = new Error(`EventSource connection timeout after ${this.config.connectionTimeoutMs}ms`);
+          const timeoutError = new Error(
+            `EventSource connection timeout after ${this.config.connectionTimeoutMs}ms`
+          );
           this.handleConnectionError(timeoutError, retryAttempt);
         }
       }, this.config.connectionTimeoutMs);
@@ -178,7 +184,7 @@ export class ResilientEventSource {
         // Add all registered event listeners
         for (const [type, listeners] of this.eventListeners) {
           for (const listener of listeners) {
-            this.eventSource!.addEventListener(type, listener);
+            this.eventSource?.addEventListener(type, listener);
           }
         }
 
@@ -188,16 +194,16 @@ export class ResilientEventSource {
 
       this.eventSource.onerror = () => {
         this.clearConnectionTimeout();
-        
+
         let error: Error;
         const readyState = this.eventSource?.readyState;
-        
+
         switch (readyState) {
           case EventSource.CONNECTING:
-            error = new Error('EventSource connection failed to establish');
+            error = new Error("EventSource connection failed to establish");
             break;
           case EventSource.CLOSED:
-            error = new Error('EventSource connection was closed unexpectedly');
+            error = new Error("EventSource connection was closed unexpectedly");
             break;
           default:
             error = new Error(`EventSource error (readyState: ${readyState})`);
@@ -205,10 +211,10 @@ export class ResilientEventSource {
 
         this.handleConnectionError(error, retryAttempt);
       };
-
     } catch (error) {
       this.clearConnectionTimeout();
-      const connectionError = error instanceof Error ? error : new Error('Unknown EventSource error');
+      const connectionError =
+        error instanceof Error ? error : new Error("Unknown EventSource error");
       this.handleConnectionError(connectionError, retryAttempt);
     }
   }
@@ -227,8 +233,9 @@ export class ResilientEventSource {
     }
 
     const nextAttempt = currentAttempt + 1;
-    const willRetry = this.shouldReconnect && nextAttempt < this.config.maxRetryAttempts;
-    
+    const willRetry =
+      this.shouldReconnect && nextAttempt < this.config.maxRetryAttempts;
+
     this.callbacks.onError?.(error, willRetry, nextAttempt);
 
     if (willRetry) {
@@ -271,7 +278,7 @@ export class ResilientEventSource {
   disconnect(): void {
     this.shouldReconnect = false;
     this.isConnecting = false;
-    
+
     this.clearConnectionTimeout();
     this.clearReconnectTimeout();
 

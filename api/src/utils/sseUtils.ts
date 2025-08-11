@@ -3,6 +3,7 @@
  * Provides functions to create, manage, and format SSE responses
  */
 
+import type { ErrorClassification } from "../../../packages/shared-types/src/sse-events";
 import type {
   ResearchPipelineStage,
   ResearchSession,
@@ -12,11 +13,6 @@ import type {
   SSEEvent,
   SSEStreamConfig,
 } from "../types/streaming";
-
-import type {
-  EnhancedErrorInfo,
-  ErrorClassification,
-} from "../../../packages/shared-types/src/sse-events";
 
 // Re-export for use by other modules
 export type { ErrorClassification };
@@ -67,16 +63,19 @@ export function createKeepAliveEvent(): string {
 /**
  * Creates user-friendly error messages based on error classification
  */
-function getErrorDisplayMessage(error: Error, classification: ErrorClassification): string {
+function getErrorDisplayMessage(
+  error: Error,
+  classification: ErrorClassification
+): string {
   switch (classification) {
-    case 'RATE_LIMIT':
-      return 'API rate limit exceeded. Please wait a few minutes before trying again.';
-    case 'AUTHENTICATION':
-      return 'Authentication failed. Please check your API credentials.';
-    case 'CONFIGURATION':
-      return 'Configuration error detected. Please check your settings.';
-    case 'NETWORK':
-      return 'Network connection error. Retrying automatically...';
+    case "RATE_LIMIT":
+      return "API rate limit exceeded. Please wait a few minutes before trying again.";
+    case "AUTHENTICATION":
+      return "Authentication failed. Please check your API credentials.";
+    case "CONFIGURATION":
+      return "Configuration error detected. Please check your settings.";
+    case "NETWORK":
+      return "Network connection error. Retrying automatically...";
     default:
       return `Error occurred: ${error.message}`;
   }
@@ -87,16 +86,16 @@ function getErrorDisplayMessage(error: Error, classification: ErrorClassificatio
  */
 function getErrorAction(classification: ErrorClassification): string {
   switch (classification) {
-    case 'RATE_LIMIT':
-      return 'WAIT_AND_RETRY_LATER';
-    case 'AUTHENTICATION':
-      return 'CHECK_CREDENTIALS';
-    case 'CONFIGURATION':
-      return 'CHECK_SETTINGS';
-    case 'NETWORK':
-      return 'AUTOMATIC_RETRY';
+    case "RATE_LIMIT":
+      return "WAIT_AND_RETRY_LATER";
+    case "AUTHENTICATION":
+      return "CHECK_CREDENTIALS";
+    case "CONFIGURATION":
+      return "CHECK_SETTINGS";
+    case "NETWORK":
+      return "AUTOMATIC_RETRY";
     default:
-      return 'MANUAL_RETRY';
+      return "MANUAL_RETRY";
   }
 }
 
@@ -110,10 +109,10 @@ export function createErrorEvent(
   const classification = classifyError(error);
   const isRecoverable = !isNonRecoverableError(error);
   const displayMessage = getErrorDisplayMessage(error, classification);
-  
+
   // Create enhanced message that includes error classification info
-  const enhancedMessage = `${displayMessage} [Classification: ${classification}, Recoverable: ${isRecoverable ? 'yes' : 'no'}, Action: ${getErrorAction(classification)}]`;
-  
+  const enhancedMessage = `${displayMessage} [Classification: ${classification}, Recoverable: ${isRecoverable ? "yes" : "no"}, Action: ${getErrorAction(classification)}]`;
+
   const errorUpdate: ResearchUpdate = {
     stage: stage || "ERROR",
     type: "ERROR",
@@ -162,12 +161,12 @@ export function createResearchUpdate(
     id: generateEventId(),
     timestamp: new Date().toISOString(),
   };
-  
+
   // Only add data if it's defined to avoid undefined assignment with exactOptionalPropertyTypes
   if (data !== undefined) {
     update.data = data;
   }
-  
+
   return update;
 }
 
@@ -342,7 +341,7 @@ export function createSSEStream(config: SSEStreamConfig = {}): {
         },
         get ready() {
           return Promise.resolve();
-        }
+        },
       } as WritableStreamDefaultWriter<Uint8Array>;
 
       const sender = createResearchUpdateSender(mockWriter);
@@ -416,7 +415,6 @@ function generateEventId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
 
-
 /**
  * Classifies errors into specific categories for targeted handling
  */
@@ -427,13 +425,13 @@ export function classifyError(error: Error): ErrorClassification {
   const rateLimitPatterns = [
     "tokens per day limit exceeded",
     "token_quota_exceeded",
-    "too many requests", 
+    "too many requests",
     "rate limit",
     "quota exceeded",
     "limit exceeded",
     "quota limit",
     "daily limit",
-    "monthly limit", 
+    "monthly limit",
     "usage limit",
     "429",
   ];
@@ -443,7 +441,7 @@ export function classifyError(error: Error): ErrorClassification {
     "authentication",
     "authorization",
     "api key",
-    "permission denied", 
+    "permission denied",
     "unauthorized",
     "forbidden",
     "401",
@@ -469,23 +467,23 @@ export function classifyError(error: Error): ErrorClassification {
     "socket hang up",
   ];
 
-  if (rateLimitPatterns.some(pattern => errorMessage.includes(pattern))) {
-    return 'RATE_LIMIT';
-  }
-  
-  if (authPatterns.some(pattern => errorMessage.includes(pattern))) {
-    return 'AUTHENTICATION';
-  }
-  
-  if (configPatterns.some(pattern => errorMessage.includes(pattern))) {
-    return 'CONFIGURATION';
-  }
-  
-  if (networkPatterns.some(pattern => errorMessage.includes(pattern))) {
-    return 'NETWORK';
+  if (rateLimitPatterns.some((pattern) => errorMessage.includes(pattern))) {
+    return "RATE_LIMIT";
   }
 
-  return 'UNKNOWN';
+  if (authPatterns.some((pattern) => errorMessage.includes(pattern))) {
+    return "AUTHENTICATION";
+  }
+
+  if (configPatterns.some((pattern) => errorMessage.includes(pattern))) {
+    return "CONFIGURATION";
+  }
+
+  if (networkPatterns.some((pattern) => errorMessage.includes(pattern))) {
+    return "NETWORK";
+  }
+
+  return "UNKNOWN";
 }
 
 /**
@@ -493,10 +491,12 @@ export function classifyError(error: Error): ErrorClassification {
  */
 function isNonRecoverableError(error: Error): boolean {
   const classification = classifyError(error);
-  
+
   // Rate limits, auth issues, and config errors are non-recoverable
   // Network errors are recoverable (should retry)
-  return ['RATE_LIMIT', 'AUTHENTICATION', 'CONFIGURATION'].includes(classification);
+  return ["RATE_LIMIT", "AUTHENTICATION", "CONFIGURATION"].includes(
+    classification
+  );
 }
 
 /**

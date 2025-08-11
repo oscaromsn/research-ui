@@ -42,7 +42,7 @@ export class RequestThrottler {
    */
   async execute<T>(
     requestFn: () => Promise<T>,
-    context: string = 'unknown'
+    context = "unknown"
   ): Promise<T> {
     this.stats.totalRequests++;
 
@@ -136,15 +136,15 @@ export class RequestThrottler {
         // Check for expired requests (optional cleanup)
         const age = Date.now() - nextRequest.timestamp;
         if (age > this.config.requestTimeout) {
-          reject(new Error(`Queued request for ${context} expired after ${age}ms`));
+          reject(
+            new Error(`Queued request for ${context} expired after ${age}ms`)
+          );
           this.processQueue(); // Try the next one
           return;
         }
 
         // Execute the queued request
-        this.executeRequest(execute, context)
-          .then(resolve)
-          .catch(reject);
+        this.executeRequest(execute, context).then(resolve).catch(reject);
       }
     }
   }
@@ -155,7 +155,9 @@ export class RequestThrottler {
   private createTimeout(timeoutMs: number, context: string): Promise<never> {
     return new Promise((_, reject) => {
       setTimeout(() => {
-        reject(new Error(`BAML request timeout after ${timeoutMs}ms for ${context}`));
+        reject(
+          new Error(`BAML request timeout after ${timeoutMs}ms for ${context}`)
+        );
       }, timeoutMs);
     });
   }
@@ -177,7 +179,7 @@ export class RequestThrottler {
    */
   clearQueue(): void {
     const dropped = this.requestQueue.length;
-    this.requestQueue.forEach(request => {
+    this.requestQueue.forEach((request) => {
       request.reject(new Error(`Request queue cleared for ${request.context}`));
     });
     this.requestQueue = [];

@@ -3,7 +3,6 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useState } from "react";
 import { createStreamingURL } from "@/lib/apiClient";
-import { ResilientEventSource } from "@/lib/utils/eventSourceManager";
 import type {
   ClientAnalyzedDoc,
   ClientResearchAssessment,
@@ -25,6 +24,7 @@ import {
   synthesisDetailsAtom,
   systemHealthAtom,
 } from "@/lib/state/researchAtoms";
+import { ResilientEventSource } from "@/lib/utils/eventSourceManager";
 import {
   AssessmentCompleteEventSchema,
   CompletionEventSchema,
@@ -41,7 +41,6 @@ interface QueryData {
   query_string: string;
   expected_information_summary: string;
 }
-
 
 interface UseResearchAgentReturn {
   startResearch: (legalQuestion: string) => Promise<void>;
@@ -115,10 +114,10 @@ export function useResearchAgent(): UseResearchAgentReturn {
   // Helper function to add system warnings
   const addSystemWarning = useCallback(
     (
-      type: 'RATE_LIMIT' | 'CIRCUIT_BREAKER' | 'CONNECTION' | 'API_ERROR',
+      type: "RATE_LIMIT" | "CIRCUIT_BREAKER" | "CONNECTION" | "API_ERROR",
       message: string,
-      severity: 'low' | 'medium' | 'high' = 'medium',
-      canRetry: boolean = true
+      severity: "low" | "medium" | "high" = "medium",
+      canRetry = true
     ) => {
       const warning = {
         id: `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
@@ -132,7 +131,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
       setSystemHealth((prev) => ({
         ...prev,
         warnings: [...prev.warnings, warning],
-        isHealthy: severity !== 'high', // Mark unhealthy if high severity
+        isHealthy: severity !== "high", // Mark unhealthy if high severity
       }));
 
       logResearchEvent("SYSTEM_WARNING", type, message);
@@ -144,11 +143,11 @@ export function useResearchAgent(): UseResearchAgentReturn {
   const checkSystemHealth = useCallback(async () => {
     try {
       // Check BAML health
-      const healthResponse = await fetch('/api/research/baml-health');
+      const healthResponse = await fetch("/api/research/baml-health");
       const healthData = await healthResponse.json();
 
       // Check throttler status
-      const throttlerResponse = await fetch('/api/research/throttler-status');
+      const throttlerResponse = await fetch("/api/research/throttler-status");
       const throttlerData = await throttlerResponse.json();
 
       setSystemHealth((prev) => ({
@@ -156,12 +155,14 @@ export function useResearchAgent(): UseResearchAgentReturn {
         lastHealthCheck: Date.now(),
         isHealthy: healthData.healthy && throttlerData.healthy,
         circuitBreakerStatus: {
-          state: healthData.circuitBreaker?.state || 'CLOSED',
+          state: healthData.circuitBreaker?.state || "CLOSED",
           failures: healthData.circuitBreaker?.failures || 0,
           lastFailureTime: healthData.circuitBreaker?.lastFailureTime || null,
         },
         rateLimitingStatus: {
-          isRateLimited: throttlerData.throttler?.activeRequests >= throttlerData.throttler?.maxConcurrent,
+          isRateLimited:
+            throttlerData.throttler?.activeRequests >=
+            throttlerData.throttler?.maxConcurrent,
           activeRequests: throttlerData.throttler?.activeRequests || 0,
           queuedRequests: throttlerData.throttler?.queuedRequests || 0,
           maxConcurrent: throttlerData.throttler?.maxConcurrent || 2,
@@ -171,21 +172,30 @@ export function useResearchAgent(): UseResearchAgentReturn {
 
       // Add warnings based on health status
       if (!healthData.healthy) {
-        addSystemWarning('CIRCUIT_BREAKER', 'BAML service is experiencing issues', 'high', true);
+        addSystemWarning(
+          "CIRCUIT_BREAKER",
+          "BAML service is experiencing issues",
+          "high",
+          true
+        );
       }
 
       if (throttlerData.throttler?.queuedRequests > 0) {
         addSystemWarning(
-          'RATE_LIMIT',
+          "RATE_LIMIT",
           `${throttlerData.throttler.queuedRequests} requests queued due to rate limiting`,
-          'medium',
+          "medium",
           false
         );
       }
-
     } catch (error) {
-      console.error('System health check failed:', error);
-      addSystemWarning('API_ERROR', 'Failed to check system health', 'low', true);
+      console.error("System health check failed:", error);
+      addSystemWarning(
+        "API_ERROR",
+        "Failed to check system health",
+        "low",
+        true
+      );
     }
   }, [setSystemHealth, addSystemWarning]);
 
@@ -194,9 +204,12 @@ export function useResearchAgent(): UseResearchAgentReturn {
     (warningId: string) => {
       setSystemHealth((prev) => ({
         ...prev,
-        warnings: prev.warnings.filter(w => w.id !== warningId),
+        warnings: prev.warnings.filter((w) => w.id !== warningId),
         // Recalculate health status
-        isHealthy: prev.warnings.filter(w => w.id !== warningId && w.severity === 'high').length === 0,
+        isHealthy:
+          prev.warnings.filter(
+            (w) => w.id !== warningId && w.severity === "high"
+          ).length === 0,
       }));
     },
     [setSystemHealth]
@@ -274,7 +287,6 @@ export function useResearchAgent(): UseResearchAgentReturn {
     }));
   }, [setAnalyzedDocs, setResearchSession]);
 
-
   // Helper function to handle stream errors
   const handleStreamError = useCallback(
     (error: Error) => {
@@ -312,12 +324,12 @@ export function useResearchAgent(): UseResearchAgentReturn {
    */
   const handleEnhancedError = useCallback(
     (errorInfo: any, resilientSource: ResilientEventSource) => {
-      const classification = errorInfo.classification || 'UNKNOWN';
-      const recoverable = errorInfo.recoverable || false;
-      const recommendedAction = errorInfo.recommendedAction || 'MANUAL_RETRY';
+      const classification = errorInfo.classification || "UNKNOWN";
+      const _recoverable = errorInfo.recoverable || false;
+      const recommendedAction = errorInfo.recommendedAction || "MANUAL_RETRY";
 
       // Update connection state with error classification
-      setConnectionState(prev => ({
+      setConnectionState((prev) => ({
         ...prev,
         isConnected: false,
         lastError: errorInfo.message,
@@ -326,7 +338,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
       }));
 
       // Update research status with user-friendly error information
-      setResearchStatus(prev => ({
+      setResearchStatus((prev) => ({
         ...prev,
         isLoading: false,
         stage: "ERROR" as ResearchStage,
@@ -336,53 +348,53 @@ export function useResearchAgent(): UseResearchAgentReturn {
 
       // Implement smart retry logic based on error classification
       switch (classification) {
-        case 'RATE_LIMIT':
+        case "RATE_LIMIT":
           // Rate limit errors: stop all retries, show clear message
           logResearchEvent(
-            "ERROR", 
-            "ERROR", 
+            "ERROR",
+            "ERROR",
             `API quota exceeded: ${errorInfo.message}. Stopping retries to preserve quota.`
           );
-          
+
           resilientSource.disconnect();
           setResilientEventSource(null);
-          
+
           // Set specific error state for rate limiting
-          setResearchStatus(prev => ({
+          setResearchStatus((prev) => ({
             ...prev,
             canRetry: false,
             retryRecommendation: `Wait ${errorInfo.retryAfterMinutes || 5} minutes before trying again`,
           }));
           break;
 
-        case 'AUTHENTICATION':
-        case 'CONFIGURATION':
+        case "AUTHENTICATION":
+        case "CONFIGURATION":
           // Auth/config errors: stop retries, require user action
           logResearchEvent(
             "ERROR",
-            "ERROR", 
+            "ERROR",
             `Non-recoverable error: ${errorInfo.message}. Manual intervention required.`
           );
-          
+
           resilientSource.disconnect();
           setResilientEventSource(null);
-          
-          setResearchStatus(prev => ({
+
+          setResearchStatus((prev) => ({
             ...prev,
             canRetry: false,
             retryRecommendation: getRetryRecommendation(recommendedAction),
           }));
           break;
 
-        case 'NETWORK':
+        case "NETWORK":
           // Network errors: allow automatic retries (handled by ResilientEventSource)
           logResearchEvent(
             "ERROR",
             "WARN",
             `Network error: ${errorInfo.message}. Automatic retry will be attempted.`
           );
-          
-          setResearchStatus(prev => ({
+
+          setResearchStatus((prev) => ({
             ...prev,
             canRetry: true,
             retryRecommendation: "Connection will be retried automatically",
@@ -397,33 +409,45 @@ export function useResearchAgent(): UseResearchAgentReturn {
             "WARN",
             `Unknown error type: ${errorInfo.message}. Manual retry available.`
           );
-          
-          setResearchStatus(prev => ({
+
+          setResearchStatus((prev) => ({
             ...prev,
             canRetry: true,
-            retryRecommendation: "You can try again, or contact support if the issue persists",
+            retryRecommendation:
+              "You can try again, or contact support if the issue persists",
           }));
           break;
       }
     },
-    [setConnectionState, setResearchStatus, setResilientEventSource, logResearchEvent]
+    [
+      setConnectionState,
+      setResearchStatus,
+      logResearchEvent,
+      getErrorUserMessage,
+      getRetryRecommendation,
+    ]
   );
 
   /**
    * Gets user-friendly error message based on classification
    */
-  const getErrorUserMessage = (classification: string, errorInfo: any): string => {
+  const getErrorUserMessage = (
+    classification: string,
+    errorInfo: any
+  ): string => {
     switch (classification) {
-      case 'RATE_LIMIT':
+      case "RATE_LIMIT":
         return `API usage limit reached. Please wait ${errorInfo.retryAfterMinutes || 5} minutes before trying again.`;
-      case 'AUTHENTICATION':
-        return 'Authentication failed. Please check your API credentials in settings.';
-      case 'CONFIGURATION':
-        return 'Configuration error detected. Please check your application settings.';
-      case 'NETWORK':
-        return 'Network connection issue. Retrying automatically...';
+      case "AUTHENTICATION":
+        return "Authentication failed. Please check your API credentials in settings.";
+      case "CONFIGURATION":
+        return "Configuration error detected. Please check your application settings.";
+      case "NETWORK":
+        return "Network connection issue. Retrying automatically...";
       default:
-        return errorInfo.message || 'An unexpected error occurred. Please try again.';
+        return (
+          errorInfo.message || "An unexpected error occurred. Please try again."
+        );
     }
   };
 
@@ -432,16 +456,16 @@ export function useResearchAgent(): UseResearchAgentReturn {
    */
   const getRetryRecommendation = (action: string): string => {
     switch (action) {
-      case 'WAIT_AND_RETRY_LATER':
-        return 'Please wait a few minutes before trying again';
-      case 'CHECK_CREDENTIALS':
-        return 'Please check your API credentials in settings';
-      case 'CHECK_SETTINGS':
-        return 'Please review your application configuration';
-      case 'AUTOMATIC_RETRY':
-        return 'Connection will be retried automatically';
+      case "WAIT_AND_RETRY_LATER":
+        return "Please wait a few minutes before trying again";
+      case "CHECK_CREDENTIALS":
+        return "Please check your API credentials in settings";
+      case "CHECK_SETTINGS":
+        return "Please review your application configuration";
+      case "AUTOMATIC_RETRY":
+        return "Connection will be retried automatically";
       default:
-        return 'You can try again, or contact support if the issue persists';
+        return "You can try again, or contact support if the issue persists";
     }
   };
 
@@ -536,12 +560,24 @@ export function useResearchAgent(): UseResearchAgentReturn {
               ...(docData.title !== undefined && { title: docData.title }),
               ...(docData.url !== undefined && { url: docData.url }),
               ...(docData.source !== undefined && { source: docData.source }),
-              ...(docData.globalSequenceNumber !== undefined && { globalSequenceNumber: docData.globalSequenceNumber }),
-              ...(docData.iterationIndex !== undefined && { iterationIndex: docData.iterationIndex }),
-              ...(docData.fetchBatchIndex !== undefined && { fetchBatchIndex: docData.fetchBatchIndex }),
-              ...(docData.fetchOrderIndex !== undefined && { fetchOrderIndex: docData.fetchOrderIndex }),
-              ...(docData.searchQueryId !== undefined && { searchQueryId: docData.searchQueryId }),
-              ...(docData.fetchTimestamp !== undefined && { fetchTimestamp: docData.fetchTimestamp }),
+              ...(docData.globalSequenceNumber !== undefined && {
+                globalSequenceNumber: docData.globalSequenceNumber,
+              }),
+              ...(docData.iterationIndex !== undefined && {
+                iterationIndex: docData.iterationIndex,
+              }),
+              ...(docData.fetchBatchIndex !== undefined && {
+                fetchBatchIndex: docData.fetchBatchIndex,
+              }),
+              ...(docData.fetchOrderIndex !== undefined && {
+                fetchOrderIndex: docData.fetchOrderIndex,
+              }),
+              ...(docData.searchQueryId !== undefined && {
+                searchQueryId: docData.searchQueryId,
+              }),
+              ...(docData.fetchTimestamp !== undefined && {
+                fetchTimestamp: docData.fetchTimestamp,
+              }),
             };
 
             setAnalyzedDocs((prev) => [...prev, docWithTimestamp]);
@@ -587,48 +623,103 @@ export function useResearchAgent(): UseResearchAgentReturn {
                 const updates: Partial<ClientAnalyzedDoc> = {
                   status: docData.status as any,
                 };
-                
+
                 // Only assign defined values to avoid undefined assignment
-                if (docData.relevanceScore !== undefined) updates.relevanceScore = docData.relevanceScore;
-                if (docData.confidenceScore !== undefined) updates.confidenceScore = docData.confidenceScore;
-                if (docData.summarySnippet !== undefined) updates.summarySnippet = docData.summarySnippet;
-                if (docData.keyArguments !== undefined) updates.keyArguments = docData.keyArguments;
-                if (docData.extractedQuotes !== undefined) updates.extractedQuotes = docData.extractedQuotes;
-                if (docData.counterArguments !== undefined) updates.counterArguments = docData.counterArguments;
-                if (docData.errorMessage !== undefined) updates.errorMessage = docData.errorMessage;
-                if (docData.progress !== undefined) updates.progress = docData.progress;
-                if (docData.estimatedTime !== undefined) updates.estimatedTime = docData.estimatedTime;
+                if (docData.relevanceScore !== undefined) {
+                  updates.relevanceScore = docData.relevanceScore;
+                }
+                if (docData.confidenceScore !== undefined) {
+                  updates.confidenceScore = docData.confidenceScore;
+                }
+                if (docData.summarySnippet !== undefined) {
+                  updates.summarySnippet = docData.summarySnippet;
+                }
+                if (docData.keyArguments !== undefined) {
+                  updates.keyArguments = docData.keyArguments;
+                }
+                if (docData.extractedQuotes !== undefined) {
+                  updates.extractedQuotes = docData.extractedQuotes;
+                }
+                if (docData.counterArguments !== undefined) {
+                  updates.counterArguments = docData.counterArguments;
+                }
+                if (docData.errorMessage !== undefined) {
+                  updates.errorMessage = docData.errorMessage;
+                }
+                if (docData.progress !== undefined) {
+                  updates.progress = docData.progress;
+                }
+                if (docData.estimatedTime !== undefined) {
+                  updates.estimatedTime = docData.estimatedTime;
+                }
                 if (docData.extractedEntities !== undefined) {
                   updates.extractedEntities = docData.extractedEntities.map(
                     (entity) => ({
                       name: entity.name,
-                      type: entity.type as "Case" | "Statute" | "Regulation" | "Person" | "Organization" | "LegalConcept" | "Jurisdiction",
+                      type: entity.type as
+                        | "Case"
+                        | "Statute"
+                        | "Regulation"
+                        | "Person"
+                        | "Organization"
+                        | "LegalConcept"
+                        | "Jurisdiction",
                       details: entity.details || "",
                     })
                   );
                 }
-                
+
                 // Handle optional properties correctly - existing doc is already valid ClientAnalyzedDoc
                 const existingDoc = newDocs[existingIndex] as ClientAnalyzedDoc;
                 const updatedDoc = { ...existingDoc };
-                
+
                 // Only assign defined values to avoid exactOptionalPropertyTypes conflicts
-                if (updates.docId !== undefined) updatedDoc.docId = updates.docId;
-                if (updates.status !== undefined) updatedDoc.status = updates.status;
-                if (updates.title !== undefined) updatedDoc.title = updates.title;
-                if (updates.url !== undefined) updatedDoc.url = updates.url;
-                if (updates.source !== undefined) updatedDoc.source = updates.source;
-                if (updates.relevanceScore !== undefined) updatedDoc.relevanceScore = updates.relevanceScore;
-                if (updates.confidenceScore !== undefined) updatedDoc.confidenceScore = updates.confidenceScore;
-                if (updates.summarySnippet !== undefined) updatedDoc.summarySnippet = updates.summarySnippet;
-                if (updates.keyArguments !== undefined) updatedDoc.keyArguments = updates.keyArguments;
-                if (updates.extractedEntities !== undefined) updatedDoc.extractedEntities = updates.extractedEntities;
-                if (updates.extractedQuotes !== undefined) updatedDoc.extractedQuotes = updates.extractedQuotes;
-                if (updates.counterArguments !== undefined) updatedDoc.counterArguments = updates.counterArguments;
-                if (updates.errorMessage !== undefined) updatedDoc.errorMessage = updates.errorMessage;
-                if (updates.progress !== undefined) updatedDoc.progress = updates.progress;
-                if (updates.estimatedTime !== undefined) updatedDoc.estimatedTime = updates.estimatedTime;
-                
+                if (updates.docId !== undefined) {
+                  updatedDoc.docId = updates.docId;
+                }
+                if (updates.status !== undefined) {
+                  updatedDoc.status = updates.status;
+                }
+                if (updates.title !== undefined) {
+                  updatedDoc.title = updates.title;
+                }
+                if (updates.url !== undefined) {
+                  updatedDoc.url = updates.url;
+                }
+                if (updates.source !== undefined) {
+                  updatedDoc.source = updates.source;
+                }
+                if (updates.relevanceScore !== undefined) {
+                  updatedDoc.relevanceScore = updates.relevanceScore;
+                }
+                if (updates.confidenceScore !== undefined) {
+                  updatedDoc.confidenceScore = updates.confidenceScore;
+                }
+                if (updates.summarySnippet !== undefined) {
+                  updatedDoc.summarySnippet = updates.summarySnippet;
+                }
+                if (updates.keyArguments !== undefined) {
+                  updatedDoc.keyArguments = updates.keyArguments;
+                }
+                if (updates.extractedEntities !== undefined) {
+                  updatedDoc.extractedEntities = updates.extractedEntities;
+                }
+                if (updates.extractedQuotes !== undefined) {
+                  updatedDoc.extractedQuotes = updates.extractedQuotes;
+                }
+                if (updates.counterArguments !== undefined) {
+                  updatedDoc.counterArguments = updates.counterArguments;
+                }
+                if (updates.errorMessage !== undefined) {
+                  updatedDoc.errorMessage = updates.errorMessage;
+                }
+                if (updates.progress !== undefined) {
+                  updatedDoc.progress = updates.progress;
+                }
+                if (updates.estimatedTime !== undefined) {
+                  updatedDoc.estimatedTime = updates.estimatedTime;
+                }
+
                 newDocs[existingIndex] = updatedDoc;
                 return newDocs;
               }
@@ -639,26 +730,55 @@ export function useResearchAgent(): UseResearchAgentReturn {
                 status: docData.status as any,
                 timestamp,
               };
-              
+
               // Only assign defined values
-              if (docData.title !== undefined) newDoc.title = docData.title;
-              if (docData.relevanceScore !== undefined) newDoc.relevanceScore = docData.relevanceScore;
-              if (docData.confidenceScore !== undefined) newDoc.confidenceScore = docData.confidenceScore;
-              if (docData.summarySnippet !== undefined) newDoc.summarySnippet = docData.summarySnippet;
-              if (docData.keyArguments !== undefined) newDoc.keyArguments = docData.keyArguments;
-              if (docData.extractedQuotes !== undefined) newDoc.extractedQuotes = docData.extractedQuotes;
-              if (docData.counterArguments !== undefined) newDoc.counterArguments = docData.counterArguments;
-              if (docData.errorMessage !== undefined) newDoc.errorMessage = docData.errorMessage;
-              if (docData.progress !== undefined) newDoc.progress = docData.progress;
-              if (docData.estimatedTime !== undefined) newDoc.estimatedTime = docData.estimatedTime;
-              if (docData.extractedEntities !== undefined) {
-                newDoc.extractedEntities = docData.extractedEntities.map((entity) => ({
-                  name: entity.name,
-                  type: entity.type as "Case" | "Statute" | "Regulation" | "Person" | "Organization" | "LegalConcept" | "Jurisdiction",
-                  details: entity.details || "",
-                }));
+              if (docData.title !== undefined) {
+                newDoc.title = docData.title;
               }
-              
+              if (docData.relevanceScore !== undefined) {
+                newDoc.relevanceScore = docData.relevanceScore;
+              }
+              if (docData.confidenceScore !== undefined) {
+                newDoc.confidenceScore = docData.confidenceScore;
+              }
+              if (docData.summarySnippet !== undefined) {
+                newDoc.summarySnippet = docData.summarySnippet;
+              }
+              if (docData.keyArguments !== undefined) {
+                newDoc.keyArguments = docData.keyArguments;
+              }
+              if (docData.extractedQuotes !== undefined) {
+                newDoc.extractedQuotes = docData.extractedQuotes;
+              }
+              if (docData.counterArguments !== undefined) {
+                newDoc.counterArguments = docData.counterArguments;
+              }
+              if (docData.errorMessage !== undefined) {
+                newDoc.errorMessage = docData.errorMessage;
+              }
+              if (docData.progress !== undefined) {
+                newDoc.progress = docData.progress;
+              }
+              if (docData.estimatedTime !== undefined) {
+                newDoc.estimatedTime = docData.estimatedTime;
+              }
+              if (docData.extractedEntities !== undefined) {
+                newDoc.extractedEntities = docData.extractedEntities.map(
+                  (entity) => ({
+                    name: entity.name,
+                    type: entity.type as
+                      | "Case"
+                      | "Statute"
+                      | "Regulation"
+                      | "Person"
+                      | "Organization"
+                      | "LegalConcept"
+                      | "Jurisdiction",
+                    details: entity.details || "",
+                  })
+                );
+              }
+
               return [...prev, newDoc];
             });
 
@@ -670,12 +790,18 @@ export function useResearchAgent(): UseResearchAgentReturn {
                   const updates: Partial<ClientAnalyzedDoc> = {
                     status: docData.status as any,
                   };
-                  
+
                   // Only assign defined values
-                  if (docData.relevanceScore !== undefined) updates.relevanceScore = docData.relevanceScore;
-                  if (docData.confidenceScore !== undefined) updates.confidenceScore = docData.confidenceScore;
-                  if (docData.summarySnippet !== undefined) updates.summarySnippet = docData.summarySnippet;
-                  
+                  if (docData.relevanceScore !== undefined) {
+                    updates.relevanceScore = docData.relevanceScore;
+                  }
+                  if (docData.confidenceScore !== undefined) {
+                    updates.confidenceScore = docData.confidenceScore;
+                  }
+                  if (docData.summarySnippet !== undefined) {
+                    updates.summarySnippet = docData.summarySnippet;
+                  }
+
                   return { ...doc, ...updates };
                 }
                 return doc;
@@ -756,15 +882,17 @@ export function useResearchAgent(): UseResearchAgentReturn {
               nextAction: assessmentData.nextAction,
               identifiedGaps: assessmentData.identifiedGaps || [],
             };
-            
+
             // Handle optional properties correctly to avoid undefined assignment issues
             if (assessmentData.suggestedRefinementQueries !== undefined) {
-              assessment.suggestedRefinementQueries = assessmentData.suggestedRefinementQueries.map(q => ({
-                query_string: q.query_string,
-                ...(q.expected_information_summary !== undefined && { 
-                  expected_information_summary: q.expected_information_summary 
-                }),
-              }));
+              assessment.suggestedRefinementQueries =
+                assessmentData.suggestedRefinementQueries.map((q) => ({
+                  query_string: q.query_string,
+                  ...(q.expected_information_summary !== undefined && {
+                    expected_information_summary:
+                      q.expected_information_summary,
+                  }),
+                }));
             }
 
             setResearchAssessment(assessment);
@@ -844,13 +972,13 @@ export function useResearchAgent(): UseResearchAgentReturn {
       resilientSource.addEventListener("research-update", (event) => {
         try {
           const eventData = JSON.parse((event as MessageEvent).data);
-          
+
           // Handle enhanced error events with smart retry logic
           if (eventData.type === "ERROR" && eventData.data?.error) {
             const errorInfo = eventData.data.error;
             handleEnhancedError(errorInfo, resilientSource);
           }
-          
+
           logResearchEvent(
             eventData.stage || "UNKNOWN",
             eventData.type || "INFO",
@@ -913,6 +1041,8 @@ export function useResearchAgent(): UseResearchAgentReturn {
       setFinalReportContent,
       setResearchSession,
       logResearchEvent,
+      cleanupResilientConnection,
+      handleEnhancedError,
     ]
   );
 
@@ -950,7 +1080,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
                 "INFO",
                 `EventSource connection established successfully: ${streamingUrl}`
               );
-              setConnectionState(prev => ({
+              setConnectionState((prev) => ({
                 ...prev,
                 isConnected: true,
                 isConnecting: false,
@@ -959,12 +1089,13 @@ export function useResearchAgent(): UseResearchAgentReturn {
                 retryAttempt: 0,
                 connectionStats: {
                   ...prev.connectionStats,
-                  successfulConnections: prev.connectionStats.successfulConnections + 1,
+                  successfulConnections:
+                    prev.connectionStats.successfulConnections + 1,
                 },
               }));
             },
             onError: (error, willRetry, attempt) => {
-              setConnectionState(prev => ({
+              setConnectionState((prev) => ({
                 ...prev,
                 isConnected: false,
                 lastErrorTime: Date.now(),
@@ -976,18 +1107,18 @@ export function useResearchAgent(): UseResearchAgentReturn {
                   totalAttempts: prev.connectionStats.totalAttempts + 1,
                 },
               }));
-              
+
               const errorMessage = `Connection error (attempt ${attempt}): ${error.message}`;
               logResearchEvent("CONNECTION_ERROR", "ERROR", errorMessage);
-              
+
               // Add connection warning
               addSystemWarning(
-                'CONNECTION',
+                "CONNECTION",
                 errorMessage,
-                willRetry ? 'medium' : 'high',
+                willRetry ? "medium" : "high",
                 willRetry
               );
-              
+
               if (!willRetry) {
                 setResearchStatus((prev) => ({
                   ...prev,
@@ -1004,7 +1135,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
                 "INFO",
                 `Reconnection attempt ${attempt} in ${delayMs}ms`
               );
-              setConnectionState(prev => ({
+              setConnectionState((prev) => ({
                 ...prev,
                 isConnecting: true,
                 retryAttempt: attempt,
@@ -1066,7 +1197,10 @@ export function useResearchAgent(): UseResearchAgentReturn {
       autoModeState.currentIteration,
       logResearchEvent,
       setupEventListeners,
-      handleStreamError,
+      handleStreamError, // Add connection warning
+      addSystemWarning,
+      setConnectionState,
+      setResearchStatus,
     ]
   );
 
@@ -1111,7 +1245,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
               "INFO",
               `EventSource connection resumed successfully: ${streamingUrl}`
             );
-            setConnectionState(prev => ({
+            setConnectionState((prev) => ({
               ...prev,
               isConnected: true,
               isConnecting: false,
@@ -1120,12 +1254,13 @@ export function useResearchAgent(): UseResearchAgentReturn {
               retryAttempt: 0,
               connectionStats: {
                 ...prev.connectionStats,
-                successfulConnections: prev.connectionStats.successfulConnections + 1,
+                successfulConnections:
+                  prev.connectionStats.successfulConnections + 1,
               },
             }));
           },
           onError: (error, willRetry, attempt) => {
-            setConnectionState(prev => ({
+            setConnectionState((prev) => ({
               ...prev,
               isConnected: false,
               lastErrorTime: Date.now(),
@@ -1137,10 +1272,10 @@ export function useResearchAgent(): UseResearchAgentReturn {
                 totalAttempts: prev.connectionStats.totalAttempts + 1,
               },
             }));
-            
+
             const errorMessage = `Resume connection error (attempt ${attempt}): ${error.message}`;
             logResearchEvent("CONNECTION_ERROR", "ERROR", errorMessage);
-            
+
             if (!willRetry) {
               setResearchStatus((prev) => ({
                 ...prev,
@@ -1208,6 +1343,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
     logResearchEvent,
     setupEventListeners,
     handleStreamError,
+    setConnectionState,
   ]);
 
   /**
@@ -1279,12 +1415,12 @@ export function useResearchAgent(): UseResearchAgentReturn {
    */
   const retryConnection = useCallback(async () => {
     if (!autoModeState.originalQuestion) {
-      console.warn('Cannot retry connection: No original question available');
+      console.warn("Cannot retry connection: No original question available");
       return;
     }
 
     // Reset connection state
-    setConnectionState(prev => ({
+    setConnectionState((prev) => ({
       ...prev,
       retryAttempt: 0,
       lastError: null,
@@ -1292,14 +1428,19 @@ export function useResearchAgent(): UseResearchAgentReturn {
     }));
 
     // Clear connection warnings
-    setSystemHealth(prev => ({
+    setSystemHealth((prev) => ({
       ...prev,
-      warnings: prev.warnings.filter(w => w.type !== 'CONNECTION'),
+      warnings: prev.warnings.filter((w) => w.type !== "CONNECTION"),
     }));
 
     // Start research with existing question
     await startResearch(autoModeState.originalQuestion);
-  }, [autoModeState.originalQuestion, startResearch, setConnectionState, setSystemHealth]);
+  }, [
+    autoModeState.originalQuestion,
+    startResearch,
+    setConnectionState,
+    setSystemHealth,
+  ]);
 
   return {
     startResearch,

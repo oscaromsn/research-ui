@@ -8,9 +8,11 @@ import type {
   ResearchAssessment,
   SearchResultItem,
 } from "../../baml_client/types";
-import type {
-  ResearchPipelineResult,
-} from "../types/research";
+import type { ResearchPipelineResult } from "../types/research";
+import {
+  bamlCircuitBreaker,
+  CircuitBreakerError,
+} from "../utils/circuitBreaker";
 import {
   analyzeDocumentsStage,
   analyzeDocumentsStageStreaming,
@@ -21,12 +23,11 @@ import {
   generateReportStageStreaming,
   synthesizeFindingsStage,
 } from "../utils/pipelineStages";
+import { bamlRequestThrottler } from "../utils/requestThrottler";
 import {
   createResearchUpdateSender,
   createSSEHeaders,
 } from "../utils/sseUtils";
-import { bamlCircuitBreaker, CircuitBreakerError } from "../utils/circuitBreaker";
-import { bamlRequestThrottler } from "../utils/requestThrottler";
 
 // Simple connection monitoring
 interface ActiveConnection {
@@ -43,8 +44,8 @@ const activeConnections = new Map<string, ActiveConnection>();
 // Cleanup inactive connections periodically
 setInterval(() => {
   const now = Date.now();
-  const fiveMinutesAgo = now - (5 * 60 * 1000);
-  
+  const fiveMinutesAgo = now - 5 * 60 * 1000;
+
   for (const [id, connection] of activeConnections) {
     if (connection.lastActivityTime < fiveMinutesAgo) {
       console.log(`🧹 Cleaning up inactive connection: ${id}`);
@@ -168,19 +169,23 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
   .get(
     "/stream",
     async ({ query, set, request }) => {
-      const { 
+      const {
         legalQuestion,
         autoMode = "false",
-        maxIterations = "5", 
-        currentIteration = "0"
+        maxIterations = "5",
+        currentIteration = "0",
       } = query;
 
       // Generate unique connection ID for monitoring
       const connectionId = `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const userAgent = request.headers.get("user-agent");
 
-      console.log(`🌊 SSE Stream Request [${connectionId}] - Legal Question: "${legalQuestion}"`);
-      console.log(`📊 SSE Stream Config - autoMode: ${autoMode}, maxIterations: ${maxIterations}, currentIteration: ${currentIteration}`);
+      console.log(
+        `🌊 SSE Stream Request [${connectionId}] - Legal Question: "${legalQuestion}"`
+      );
+      console.log(
+        `📊 SSE Stream Config - autoMode: ${autoMode}, maxIterations: ${maxIterations}, currentIteration: ${currentIteration}`
+      );
 
       // Validate legal question
       if (!legalQuestion || legalQuestion.trim().length === 0) {
@@ -198,7 +203,9 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
         ...(userAgent && { userAgent }),
       };
       activeConnections.set(connectionId, connection);
-      console.log(`📊 Connection registered [${connectionId}]. Active connections: ${activeConnections.size}`);
+      console.log(
+        `📊 Connection registered [${connectionId}]. Active connections: ${activeConnections.size}`
+      );
 
       // Create SSE stream
       let isStreamClosed = false;
@@ -213,11 +220,17 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
                 try {
                   controller.enqueue(data);
                   // Log successful data transmission
-                  const dataPreview = new TextDecoder().decode(data).substring(0, 100);
-                  console.log(`✅ [${connectionId}] Data sent: ${dataPreview}...`);
+                  const dataPreview = new TextDecoder()
+                    .decode(data)
+                    .substring(0, 100);
+                  console.log(
+                    `✅ [${connectionId}] Data sent: ${dataPreview}...`
+                  );
                 } catch (error) {
                   // Client disconnected - this is normal behavior
-                  console.log(`📤 [${connectionId}] Client disconnected during stream: ${error}`);
+                  console.log(
+                    `📤 [${connectionId}] Client disconnected during stream: ${error}`
+                  );
                   isStreamClosed = true;
                 }
               }
@@ -251,13 +264,17 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
             let finalReport: FinalLegalReport | null = null;
 
             // Send initialization update
-            console.log(`📨 [${connectionId}] Sending initialization update...`);
+            console.log(
+              `📨 [${connectionId}] Sending initialization update...`
+            );
             await sender.sendStatusChange(
               "INITIALIZING",
               "Starting legal research pipeline...",
               { metadata: { timestamp: new Date().toISOString() } }
             );
-            console.log(`✅ [${connectionId}] Initialization update sent successfully`);
+            console.log(
+              `✅ [${connectionId}] Initialization update sent successfully`
+            );
 
             // Stage 1: Generate Queries
             await sender.sendStatusChange(
@@ -266,7 +283,9 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
             );
 
             if (!shouldContinue()) {
-              console.log("⚡ Aborting: Client disconnected before query generation");
+              console.log(
+                "⚡ Aborting: Client disconnected before query generation"
+              );
               return;
             }
 
@@ -321,7 +340,9 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
             );
 
             if (!shouldContinue()) {
-              console.log("⚡ Aborting: Client disconnected before document analysis");
+              console.log(
+                "⚡ Aborting: Client disconnected before document analysis"
+              );
               return;
             }
 
@@ -434,7 +455,9 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
             if (conn) {
               conn.isActive = false;
               activeConnections.delete(connectionId);
-              console.log(`📊 Connection closed [${connectionId}]. Active connections: ${activeConnections.size}`);
+              console.log(
+                `📊 Connection closed [${connectionId}]. Active connections: ${activeConnections.size}`
+              );
             }
 
             if (!isStreamClosed) {
@@ -448,25 +471,32 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
         },
 
         cancel(reason?: string) {
-          console.log(`📤 SSE stream cancelled by client [${connectionId}]${reason ? `: ${reason}` : ""}`);
+          console.log(
+            `📤 SSE stream cancelled by client [${connectionId}]${reason ? `: ${reason}` : ""}`
+          );
           const currentTime = Date.now();
           console.log(`⏱️  Stream was cancelled at: ${currentTime}ms`);
-          
+
           // Cleanup connection monitoring
           const conn = activeConnections.get(connectionId);
           if (conn) {
             conn.isActive = false;
             activeConnections.delete(connectionId);
-            console.log(`📊 Connection cancelled [${connectionId}]. Active connections: ${activeConnections.size}`);
+            console.log(
+              `📊 Connection cancelled [${connectionId}]. Active connections: ${activeConnections.size}`
+            );
           }
-          
+
           isStreamClosed = true;
         },
       });
 
       const sseHeaders = createSSEHeaders();
-      console.log(`🎯 [${connectionId}] Returning SSE Response with headers:`, sseHeaders);
-      
+      console.log(
+        `🎯 [${connectionId}] Returning SSE Response with headers:`,
+        sseHeaders
+      );
+
       return new Response(stream, {
         headers: sseHeaders,
       });
@@ -481,7 +511,9 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
       error: ({ code, set }) => {
         if (code === "VALIDATION") {
           set.status = 400;
-          return { error: "Invalid query parameters - legal question is required" };
+          return {
+            error: "Invalid query parameters - legal question is required",
+          };
         }
         set.status = 500;
         return { error: "Internal server error" };
@@ -508,33 +540,34 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
             description: "Invalid request - legal question is required",
           },
         },
-      }
+      },
     }
   )
   .get(
     "/test-baml",
     async ({ query }) => {
-      const { legalQuestion = "Test legal question about contract law" } = query;
-      
+      const { legalQuestion = "Test legal question about contract law" } =
+        query;
+
       console.log(`🧪 Testing BAML function with: "${legalQuestion}"`);
-      
+
       try {
         const startTime = Date.now();
         const result = await bamlCircuitBreaker.execute(
           () => b.GenerateLegalSearchQueries(legalQuestion),
-          'GenerateLegalSearchQueries'
+          "GenerateLegalSearchQueries"
         );
         const duration = Date.now() - startTime;
-        
+
         console.log(`✅ BAML function completed in ${duration}ms`);
-        
+
         return {
           success: true,
           duration,
           result: {
             queryCount: result.search_queries.length,
-            firstQuery: result.search_queries[0]?.query_string || "No queries"
-          }
+            firstQuery: result.search_queries[0]?.query_string || "No queries",
+          },
         };
       } catch (error) {
         console.error("❌ BAML function failed:", error);
@@ -554,18 +587,18 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
     "/baml-health",
     async () => {
       console.log("🏥 BAML health check requested");
-      
+
       try {
         const circuitStatus = bamlCircuitBreaker.getStatus();
-        
+
         // Quick health check with minimal token usage
         const startTime = Date.now();
         const result = await bamlCircuitBreaker.execute(
           () => b.GenerateLegalSearchQueries("test health check"),
-          'HealthCheck'
+          "HealthCheck"
         );
         const duration = Date.now() - startTime;
-        
+
         return {
           healthy: true,
           duration,
@@ -584,9 +617,9 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
       } catch (error) {
         const circuitStatus = bamlCircuitBreaker.getStatus();
         const isCircuitBreakerError = error instanceof CircuitBreakerError;
-        
+
         console.error("❌ BAML health check failed:", error);
-        
+
         return {
           healthy: false,
           circuitBreaker: {
@@ -598,7 +631,7 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
           baml: {
             available: false,
             error: error instanceof Error ? error.message : "Unknown error",
-            errorType: isCircuitBreakerError ? error.type : 'BAML_ERROR',
+            errorType: isCircuitBreakerError ? error.type : "BAML_ERROR",
           },
           timestamp: new Date().toISOString(),
         };
@@ -611,7 +644,8 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
         description: "Checks BAML connectivity and circuit breaker status",
         responses: {
           200: {
-            description: "Health check completed (may indicate healthy or unhealthy state)",
+            description:
+              "Health check completed (may indicate healthy or unhealthy state)",
           },
         },
       },
@@ -621,13 +655,16 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
     "/throttler-status",
     async () => {
       console.log("🚦 Request throttler status requested");
-      
+
       try {
         const throttlerStatus = bamlRequestThrottler.getStatus();
         const circuitStatus = bamlCircuitBreaker.getStatus();
-        
+
         return {
-          healthy: circuitStatus.state === 'CLOSED' && throttlerStatus.activeRequests < throttlerStatus.config.maxConcurrent,
+          healthy:
+            circuitStatus.state === "CLOSED" &&
+            throttlerStatus.activeRequests <
+              throttlerStatus.config.maxConcurrent,
           throttler: {
             activeRequests: throttlerStatus.activeRequests,
             queuedRequests: throttlerStatus.queuedRequests,
@@ -656,7 +693,8 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
       detail: {
         tags: ["Research"],
         summary: "Request throttler and circuit breaker status",
-        description: "Shows current status of request throttling and circuit breaker protection",
+        description:
+          "Shows current status of request throttling and circuit breaker protection",
         responses: {
           200: {
             description: "Status check completed",
@@ -669,32 +707,39 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
     "/connections",
     async () => {
       console.log("🔍 Active connections status requested");
-      
+
       try {
         const now = Date.now();
-        const connections = Array.from(activeConnections.values()).map(conn => ({
-          id: conn.id,
-          url: conn.url,
-          userAgent: conn.userAgent,
-          startTime: conn.startTime,
-          lastActivityTime: conn.lastActivityTime,
-          duration: now - conn.startTime,
-          idleTime: now - conn.lastActivityTime,
-          isActive: conn.isActive,
-        }));
+        const connections = Array.from(activeConnections.values()).map(
+          (conn) => ({
+            id: conn.id,
+            url: conn.url,
+            userAgent: conn.userAgent,
+            startTime: conn.startTime,
+            lastActivityTime: conn.lastActivityTime,
+            duration: now - conn.startTime,
+            idleTime: now - conn.lastActivityTime,
+            isActive: conn.isActive,
+          })
+        );
 
         return {
           totalConnections: activeConnections.size,
           connections,
           timestamp: new Date().toISOString(),
           stats: {
-            totalActive: connections.filter(c => c.isActive).length,
-            avgDuration: connections.length > 0 
-              ? Math.round(connections.reduce((sum, c) => sum + c.duration, 0) / connections.length)
-              : 0,
-            longestConnection: connections.length > 0 
-              ? Math.max(...connections.map(c => c.duration))
-              : 0,
+            totalActive: connections.filter((c) => c.isActive).length,
+            avgDuration:
+              connections.length > 0
+                ? Math.round(
+                    connections.reduce((sum, c) => sum + c.duration, 0) /
+                      connections.length
+                  )
+                : 0,
+            longestConnection:
+              connections.length > 0
+                ? Math.max(...connections.map((c) => c.duration))
+                : 0,
           },
         };
       } catch (error) {
@@ -709,7 +754,8 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
       detail: {
         tags: ["Research"],
         summary: "Active SSE connections monitoring",
-        description: "Shows current active Server-Sent Events connections and statistics",
+        description:
+          "Shows current active Server-Sent Events connections and statistics",
         responses: {
           200: {
             description: "Connection monitoring data retrieved",

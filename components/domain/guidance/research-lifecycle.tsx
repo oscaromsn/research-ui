@@ -12,9 +12,8 @@ import {
 } from "lucide-react";
 import type { ReactElement } from "react";
 import { useMemo } from "react";
-
-import type { ResearchStage } from "@/packages/shared-types/src/sse-events";
 import { researchStatusAtom } from "@/lib/state/researchAtoms";
+import type { ResearchStage } from "@/packages/shared-types/src/sse-events";
 
 // Stage styling constants
 const STAGE_STYLES = {

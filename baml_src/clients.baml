@@ -1,63 +1,57 @@
 // Learn more about clients at https://docs.boundaryml.com/docs/snippets/clients/overview
 
 client<llm> QueryGeneration {
-  provider "openai-generic"
+  provider openai
   options {
-    base_url "https://api.cerebras.ai/v1"
-    model "llama-4-scout-17b-16e-instruct"
-    api_key env.CEREBRAS_API_KEY
+    model "gpt-5-nano-2025-08-07"
+    api_key env.OPENAI_API_KEY
   }
 }
 
 client<llm> DocumentAnalysis {
-  provider "openai-generic"
+  provider openai
   options {
-    base_url "https://api.cerebras.ai/v1"
-    model "llama-4-scout-17b-16e-instruct"
-    api_key env.CEREBRAS_API_KEY
+    model "gpt-5-nano-2025-08-07"
+    api_key env.OPENAI_API_KEY
   }
 }
 
 client<llm> FindingsSynthetizing {
-  provider "openai-generic"
+  provider openai
   options {
-    base_url "https://api.cerebras.ai/v1"
-    model "llama-4-scout-17b-16e-instruct"
-    api_key env.CEREBRAS_API_KEY
+    model "gpt-5-nano-2025-08-07"
+    api_key env.OPENAI_API_KEY
   }
 }
 
 client<llm> DecidesNextStep {
-  provider "openai-generic"
+  provider openai
   options {
-    base_url "https://api.cerebras.ai/v1"
-    model "llama-4-scout-17b-16e-instruct"
-    api_key env.CEREBRAS_API_KEY
+    model "gpt-5-nano-2025-08-07"
+    api_key env.OPENAI_API_KEY
   }
 }
 
 client<llm> GenerateFinalReport {
-  provider "openai-generic"
+  provider openai
   options {
-    base_url "https://api.cerebras.ai/v1"
-    model "llama-4-scout-17b-16e-instruct"
-    api_key env.CEREBRAS_API_KEY
+    model "gpt-5-nano-2025-08-07"
+    api_key env.OPENAI_API_KEY
   }
 }
 
 client<llm> CustomCerebras {
-  provider "openai-generic"
+  provider openai
   options {
-    base_url "https://api.cerebras.ai/v1"
-    model "llama-4-scout-17b-16e-instruct"
-    api_key env.CEREBRAS_API_KEY
+    model "gpt-5-nano-2025-08-07"
+    api_key env.OPENAI_API_KEY
   }
 }
 
 client<llm> GptMini {
   provider openai
   options {
-    model "gpt-4.1-mini"
+    model "gpt-5-nano-2025-08-07"
     api_key env.OPENAI_API_KEY
   }
 }
@@ -65,7 +59,7 @@ client<llm> GptMini {
 client<llm> CustomGPT4oMini {
   provider openai
   options {
-    model "gpt-4o-mini"
+    model "gpt-5-nano-2025-08-07"
     api_key env.OPENAI_API_KEY
   }
 }

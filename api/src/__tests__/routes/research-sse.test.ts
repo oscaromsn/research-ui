@@ -48,10 +48,18 @@ mock.module("../../../baml_client", () => ({
           analyze_legal_question: {
             summary: "Generated queries for SSE test",
           },
-          consider_relevant_legal_principles: { summary: "Considered legal principles" },
-          formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-          specify_expected_information_strategy: { summary: "Specified information strategy" },
-          ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
+          consider_relevant_legal_principles: {
+            summary: "Considered legal principles",
+          },
+          formulate_search_queries_strategy: {
+            summary: "Formulated search strategy",
+          },
+          specify_expected_information_strategy: {
+            summary: "Specified information strategy",
+          },
+          ensure_comprehensive_coverage_strategy: {
+            summary: "Ensured comprehensive coverage",
+          },
         },
       });
     }),
@@ -70,10 +78,18 @@ mock.module("../../../baml_client", () => ({
           analyze_legal_question: {
             summary: "Document analyzed for SSE test",
           },
-          consider_relevant_legal_principles: { summary: "Considered legal principles" },
-          formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-          specify_expected_information_strategy: { summary: "Specified information strategy" },
-          ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
+          consider_relevant_legal_principles: {
+            summary: "Considered legal principles",
+          },
+          formulate_search_queries_strategy: {
+            summary: "Formulated search strategy",
+          },
+          specify_expected_information_strategy: {
+            summary: "Specified information strategy",
+          },
+          ensure_comprehensive_coverage_strategy: {
+            summary: "Ensured comprehensive coverage",
+          },
         },
       });
     }),
@@ -93,10 +109,18 @@ mock.module("../../../baml_client", () => ({
           analyze_legal_question: {
             summary: "Synthesis for SSE test",
           },
-          consider_relevant_legal_principles: { summary: "Considered legal principles" },
-          formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-          specify_expected_information_strategy: { summary: "Specified information strategy" },
-          ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
+          consider_relevant_legal_principles: {
+            summary: "Considered legal principles",
+          },
+          formulate_search_queries_strategy: {
+            summary: "Formulated search strategy",
+          },
+          specify_expected_information_strategy: {
+            summary: "Specified information strategy",
+          },
+          ensure_comprehensive_coverage_strategy: {
+            summary: "Ensured comprehensive coverage",
+          },
         },
       });
     }),
@@ -133,25 +157,27 @@ mock.module("../../../baml_client", () => ({
               report_title: "SSE Test Legal Report",
               executive_summary: {
                 value: "Executive summary for SSE test",
-                state: "Complete"
+                state: "Complete",
               },
-              sections: [{
-                section_title: "SSE Analysis",
-                content: {
-                  value: "Content for SSE streaming test",
-                  state: "Complete"
-                }
-              }],
+              sections: [
+                {
+                  section_title: "SSE Analysis",
+                  content: {
+                    value: "Content for SSE streaming test",
+                    state: "Complete",
+                  },
+                },
+              ],
               conclusion: {
                 value: "SSE streaming conclusion",
-                state: "Complete"
+                state: "Complete",
               },
               limitations_and_caveats: ["This is a test report for SSE"],
               appendix_document_ids: [],
             };
-          }
+          },
         };
-      })
+      }),
     },
   },
 }));
@@ -172,9 +198,12 @@ describe("SSE Research Streaming Endpoint", () => {
   describe("SSE Connection and Headers", () => {
     test("should establish SSE connection with proper headers", async () => {
       const response = await app.handle(
-        new Request("http://localhost/api/research/stream?legalQuestion=What%20is%20SSE%20streaming%3F", {
-          method: "GET",
-        })
+        new Request(
+          "http://localhost/api/research/stream?legalQuestion=What%20is%20SSE%20streaming%3F",
+          {
+            method: "GET",
+          }
+        )
       );
 
       // Should return 200 for SSE connection
@@ -211,9 +240,12 @@ describe("SSE Research Streaming Endpoint", () => {
   describe("SSE Event Streaming", () => {
     test("should stream ResearchUpdate events in proper SSE format", async () => {
       const response = await app.handle(
-        new Request("http://localhost/api/research/stream?legalQuestion=What%20is%20contract%20law%3F", {
-          method: "GET",
-        })
+        new Request(
+          "http://localhost/api/research/stream?legalQuestion=What%20is%20contract%20law%3F",
+          {
+            method: "GET",
+          }
+        )
       );
 
       expect(response.status).toBe(200);
@@ -231,7 +263,9 @@ describe("SSE Research Streaming Endpoint", () => {
 
         while (eventCount < maxEvents) {
           const { done, value } = await reader.read();
-          if (done) break;
+          if (done) {
+            break;
+          }
 
           const chunk = decoder.decode(value);
           events.push(chunk);
@@ -248,7 +282,7 @@ describe("SSE Research Streaming Endpoint", () => {
 
         // Extract and parse the first ResearchUpdate - handle multiline JSON
         const dataMatch = eventsText.match(/data: (\{[\s\S]*?\})\n/);
-        if (dataMatch && dataMatch[1]) {
+        if (dataMatch?.[1]) {
           try {
             const updateData = JSON.parse(dataMatch[1]);
             const update = updateData as ResearchUpdate;
@@ -290,9 +324,12 @@ describe("SSE Research Streaming Endpoint", () => {
 
     test("should stream progress updates during pipeline execution", async () => {
       const response = await app.handle(
-        new Request("http://localhost/api/research/stream?legalQuestion=How%20does%20progress%20streaming%20work%3F", {
-          method: "GET",
-        })
+        new Request(
+          "http://localhost/api/research/stream?legalQuestion=How%20does%20progress%20streaming%20work%3F",
+          {
+            method: "GET",
+          }
+        )
       );
 
       expect(response.status).toBe(200);
@@ -306,18 +343,23 @@ describe("SSE Research Streaming Endpoint", () => {
 
         while (eventCount < maxEvents && !foundProgressUpdate) {
           const { done, value } = await reader.read();
-          if (done) break;
+          if (done) {
+            break;
+          }
 
           const chunk = decoder.decode(value);
           eventCount++;
 
           // Look for progress updates or data updates with progress info
-          if (chunk.includes('"type":"PROGRESS"') || chunk.includes('"progress"')) {
+          if (
+            chunk.includes('"type":"PROGRESS"') ||
+            chunk.includes('"progress"')
+          ) {
             foundProgressUpdate = true;
 
             // Parse the update (more lenient approach)
             const dataMatch = chunk.match(/data: (\{[\s\S]*?\})\n/);
-            if (dataMatch && dataMatch[1]) {
+            if (dataMatch?.[1]) {
               try {
                 const updateData = JSON.parse(dataMatch[1]);
                 const update = updateData as ResearchUpdate;
@@ -345,9 +387,12 @@ describe("SSE Research Streaming Endpoint", () => {
 
     test("should include data updates for each pipeline stage", async () => {
       const response = await app.handle(
-        new Request("http://localhost/api/research/stream?legalQuestion=Test%20data%20streaming%20for%20each%20stage", {
-          method: "GET",
-        })
+        new Request(
+          "http://localhost/api/research/stream?legalQuestion=Test%20data%20streaming%20for%20each%20stage",
+          {
+            method: "GET",
+          }
+        )
       );
 
       expect(response.status).toBe(200);
@@ -361,7 +406,9 @@ describe("SSE Research Streaming Endpoint", () => {
 
         while (eventCount < maxEvents) {
           const { done, value } = await reader.read();
-          if (done) break;
+          if (done) {
+            break;
+          }
 
           const chunk = decoder.decode(value);
           eventCount++;
@@ -376,7 +423,7 @@ describe("SSE Research Streaming Endpoint", () => {
                 if (update.stage) {
                   foundStages.add(update.stage);
                 }
-              } catch (error) {
+              } catch (_error) {
                 // Skip parsing errors
               }
             }
@@ -407,9 +454,12 @@ describe("SSE Research Streaming Endpoint", () => {
       // This test will use a separate temporary mock that doesn't interfere with global mocks
       // Since we already have global mocks set up, we'll test error handling indirectly
       const response = await app.handle(
-        new Request("http://localhost/api/research/stream?legalQuestion=Test%20error%20handling%20in%20SSE%20context", {
-          method: "GET",
-        })
+        new Request(
+          "http://localhost/api/research/stream?legalQuestion=Test%20error%20handling%20in%20SSE%20context",
+          {
+            method: "GET",
+          }
+        )
       );
 
       expect(response.status).toBe(200); // SSE connection still established
@@ -423,7 +473,9 @@ describe("SSE Research Streaming Endpoint", () => {
 
         while (eventCount < maxEvents && !foundInitialization) {
           const { done, value } = await reader.read();
-          if (done) break;
+          if (done) {
+            break;
+          }
 
           const chunk = decoder.decode(value);
           eventCount++;
@@ -448,9 +500,12 @@ describe("SSE Research Streaming Endpoint", () => {
   describe("SSE Stream Completion", () => {
     test("should send completion event and close stream", async () => {
       const response = await app.handle(
-        new Request("http://localhost/api/research/stream?legalQuestion=Simple%20completion%20test", {
-          method: "GET",
-        })
+        new Request(
+          "http://localhost/api/research/stream?legalQuestion=Simple%20completion%20test",
+          {
+            method: "GET",
+          }
+        )
       );
 
       expect(response.status).toBe(200);

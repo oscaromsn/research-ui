@@ -22,10 +22,10 @@ vi.mock("@/lib/utils/eventSourceManager", () => {
     connect: vi.fn(),
     disconnect: vi.fn(),
   };
-  
+
   const MockResilientEventSource = vi.fn(() => mockInstance);
   MockResilientEventSource.mockInstance = mockInstance;
-  
+
   return {
     ResilientEventSource: MockResilientEventSource,
   };
@@ -76,6 +76,8 @@ import {
   researchLogAtom,
   researchStatusAtom,
 } from "@/lib/state/researchAtoms";
+// Import the mocked module to get access to the mock
+import { ResilientEventSource } from "@/lib/utils/eventSourceManager";
 // Import after mocking
 import {
   DocumentAnalyzedEventSchema,
@@ -84,9 +86,6 @@ import {
   StageChangeEventSchema,
 } from "../../../packages/shared-types/src/sse-events";
 
-// Import the mocked module to get access to the mock
-import { ResilientEventSource } from "@/lib/utils/eventSourceManager";
-
 // Type mocks for better TypeScript support
 const mockStageChangeEventSchema = StageChangeEventSchema as any;
 const mockQueryGeneratedEventSchema = QueryGeneratedEventSchema as any;
@@ -94,7 +93,8 @@ const mockDocumentAnalyzedEventSchema = DocumentAnalyzedEventSchema as any;
 const mockReportChunkEventSchema = ReportChunkEventSchema as any;
 const mockCreateStreamingURL = createStreamingURL as ReturnType<typeof vi.fn>;
 const mockResilientEventSource = ResilientEventSource as any;
-const mockResilientEventSourceInstance = (ResilientEventSource as any).mockInstance;
+const mockResilientEventSourceInstance = (ResilientEventSource as any)
+  .mockInstance;
 
 describe("useResearchAgent Hook - EventSource Integration (TDD)", () => {
   let store: ReturnType<typeof createStore>;
@@ -108,7 +108,9 @@ describe("useResearchAgent Hook - EventSource Integration (TDD)", () => {
 
     // Reset ResilientEventSource mock
     mockResilientEventSourceInstance.connect.mockResolvedValue(undefined);
-    mockResilientEventSourceInstance.addEventListener.mockImplementation(() => {});
+    mockResilientEventSourceInstance.addEventListener.mockImplementation(
+      () => {}
+    );
     mockResilientEventSourceInstance.disconnect.mockImplementation(() => {});
 
     // Reset mock implementations
@@ -143,15 +145,14 @@ describe("useResearchAgent Hook - EventSource Integration (TDD)", () => {
       expect(mockResilientEventSource).toHaveBeenCalledWith(
         "http://localhost:3001/api/research/stream",
         expect.any(Object), // callbacks
-        expect.any(Object), // config
+        expect.any(Object) // config
       );
-      
+
       // Should set up event listeners
-      expect(mockResilientEventSourceInstance.addEventListener).toHaveBeenCalledWith(
-        "stage.change",
-        expect.any(Function)
-      );
-      
+      expect(
+        mockResilientEventSourceInstance.addEventListener
+      ).toHaveBeenCalledWith("stage.change", expect.any(Function));
+
       // Should attempt to connect
       expect(mockResilientEventSourceInstance.connect).toHaveBeenCalled();
     });
@@ -209,11 +210,13 @@ describe("useResearchAgent Hook - EventSource Integration (TDD)", () => {
       let stageChangeListener: EventListener | null = null;
 
       // Capture the event listener when addEventListener is called
-      mockResilientEventSourceInstance.addEventListener.mockImplementation((eventType: string, listener: EventListener) => {
-        if (eventType === "stage.change") {
-          stageChangeListener = listener;
+      mockResilientEventSourceInstance.addEventListener.mockImplementation(
+        (eventType: string, listener: EventListener) => {
+          if (eventType === "stage.change") {
+            stageChangeListener = listener;
+          }
         }
-      });
+      );
 
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,

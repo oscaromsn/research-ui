@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { SearchQueryItem, SearchResultItem } from "@/packages/shared-types/src";
 import {
   createRetryContext,
   createSearchContext,
@@ -7,6 +6,10 @@ import {
   SearchCircuitBreaker,
   type SearchContext,
 } from "@/lib/utils/errorRecovery";
+import type {
+  SearchQueryItem,
+  SearchResultItem,
+} from "@/packages/shared-types/src";
 
 // Mock search result for testing
 const mockSearchResult: SearchResultItem = {

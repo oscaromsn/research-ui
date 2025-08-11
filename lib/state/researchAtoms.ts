@@ -180,7 +180,12 @@ export interface ResearchStatus {
   // Enhanced retry management
   canRetry?: boolean; // Whether retry is allowed for the current error
   retryRecommendation?: string; // User-friendly retry guidance
-  errorClassification?: 'RATE_LIMIT' | 'AUTHENTICATION' | 'NETWORK' | 'CONFIGURATION' | 'UNKNOWN'; // Error type for UI handling
+  errorClassification?:
+    | "RATE_LIMIT"
+    | "AUTHENTICATION"
+    | "NETWORK"
+    | "CONFIGURATION"
+    | "UNKNOWN"; // Error type for UI handling
 }
 
 /**
@@ -215,7 +220,13 @@ export interface ConnectionState {
     failedConnections: number;
   };
   // Enhanced error classification and retry management
-  errorClassification: 'RATE_LIMIT' | 'AUTHENTICATION' | 'NETWORK' | 'CONFIGURATION' | 'UNKNOWN' | null;
+  errorClassification:
+    | "RATE_LIMIT"
+    | "AUTHENTICATION"
+    | "NETWORK"
+    | "CONFIGURATION"
+    | "UNKNOWN"
+    | null;
   canRetry: boolean; // Whether automatic retries are allowed
   retryRecommendation: string | null; // User-friendly retry guidance
   userActionRequired: boolean; // Whether manual intervention is needed
@@ -229,7 +240,7 @@ export interface SystemHealthState {
   isHealthy: boolean;
   lastHealthCheck: number | null;
   circuitBreakerStatus: {
-    state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+    state: "CLOSED" | "OPEN" | "HALF_OPEN";
     failures: number;
     lastFailureTime: number | null;
   };
@@ -242,10 +253,10 @@ export interface SystemHealthState {
   };
   warnings: Array<{
     id: string;
-    type: 'RATE_LIMIT' | 'CIRCUIT_BREAKER' | 'CONNECTION' | 'API_ERROR';
+    type: "RATE_LIMIT" | "CIRCUIT_BREAKER" | "CONNECTION" | "API_ERROR";
     message: string;
     timestamp: number;
-    severity: 'low' | 'medium' | 'high';
+    severity: "low" | "medium" | "high";
     canRetry: boolean;
   }>;
 }
@@ -366,7 +377,7 @@ export const systemHealthAtom = atom<SystemHealthState>({
   isHealthy: true,
   lastHealthCheck: null,
   circuitBreakerStatus: {
-    state: 'CLOSED',
+    state: "CLOSED",
     failures: 0,
     lastFailureTime: null,
   },

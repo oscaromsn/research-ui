@@ -106,28 +106,33 @@ mock.module("../../../baml_client", () => ({
             yield {
               report_title: "Legal Analysis: Contract Formation Requirements",
               executive_summary: {
-                value: "This report analyzes the essential elements of contract formation.",
-                state: "Complete"
+                value:
+                  "This report analyzes the essential elements of contract formation.",
+                state: "Complete",
               },
-              sections: [{
-                section_title: "Essential Elements",
-                content: {
-                  value: "Contracts require offer, acceptance, and consideration.",
-                  state: "Complete"
-                }
-              }],
+              sections: [
+                {
+                  section_title: "Essential Elements",
+                  content: {
+                    value:
+                      "Contracts require offer, acceptance, and consideration.",
+                    state: "Complete",
+                  },
+                },
+              ],
               conclusion: {
-                value: "The legal requirements for contract formation are well-established.",
-                state: "Complete"
+                value:
+                  "The legal requirements for contract formation are well-established.",
+                state: "Complete",
               },
               limitations_and_caveats: [
                 "This analysis is based on general principles",
               ],
               appendix_document_ids: ["test-doc-1"],
             };
-          }
+          },
         };
-      })
+      }),
     },
   },
 }));

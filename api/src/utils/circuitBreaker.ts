@@ -4,8 +4,8 @@
  * Integrated with request throttling for comprehensive protection
  */
 
-import { bamlRequestThrottler } from './requestThrottler';
-import { classifyError, type ErrorClassification } from './sseUtils';
+import { bamlRequestThrottler } from "./requestThrottler";
+import { classifyError } from "./sseUtils";
 
 export interface CircuitBreakerConfig {
   failureThreshold: number; // Number of failures before opening circuit
@@ -18,7 +18,7 @@ export interface CircuitBreakerConfig {
 export interface CircuitBreakerState {
   failures: number;
   lastFailureTime: number;
-  state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+  state: "CLOSED" | "OPEN" | "HALF_OPEN";
   consecutiveSuccesses: number;
 }
 
@@ -39,7 +39,7 @@ export class CircuitBreaker {
     this.state = {
       failures: 0,
       lastFailureTime: 0,
-      state: 'CLOSED',
+      state: "CLOSED",
       consecutiveSuccesses: 0,
     };
   }
@@ -47,23 +47,20 @@ export class CircuitBreaker {
   /**
    * Execute a function with circuit breaker protection and request throttling
    */
-  async execute<T>(
-    fn: () => Promise<T>,
-    context: string = 'unknown'
-  ): Promise<T> {
+  async execute<T>(fn: () => Promise<T>, context = "unknown"): Promise<T> {
     // Check if circuit is open and should remain open
-    if (this.state.state === 'OPEN') {
+    if (this.state.state === "OPEN") {
       const timeSinceLastFailure = Date.now() - this.state.lastFailureTime;
       if (timeSinceLastFailure < this.config.recoveryTimeout) {
         throw new CircuitBreakerError(
           `Circuit breaker is OPEN for ${context}. Retry after ${Math.ceil(
             (this.config.recoveryTimeout - timeSinceLastFailure) / 1000
           )} seconds.`,
-          'CIRCUIT_OPEN'
+          "CIRCUIT_OPEN"
         );
       }
       // Try to transition to HALF_OPEN
-      this.state.state = 'HALF_OPEN';
+      this.state.state = "HALF_OPEN";
       this.state.consecutiveSuccesses = 0;
     }
 
@@ -82,12 +79,12 @@ export class CircuitBreaker {
     context: string
   ): Promise<T> {
     let lastError: Error | null = null;
-    
+
     for (let attempt = 0; attempt < this.config.maxRetries; attempt++) {
       try {
         if (attempt > 0) {
           const backoffTime = Math.min(
-            this.config.initialBackoffMs * Math.pow(2, attempt - 1),
+            this.config.initialBackoffMs * 2 ** (attempt - 1),
             this.config.maxBackoffMs
           );
           console.log(
@@ -97,50 +94,63 @@ export class CircuitBreaker {
         }
 
         const result = await fn();
-        
+
         // Success - update state
         this.onSuccess();
         return result;
-        
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        
+
         // Classify the error to determine retry strategy
         const errorClassification = classifyError(lastError);
-        
+
         // Rate limit and quota errors: fail fast (no retries)
-        if (errorClassification === 'RATE_LIMIT') {
-          console.warn(`🚨 Rate limit/quota exceeded for ${context}: ${lastError.message}`);
-          console.warn(`⚡ Fast-failing without retries to preserve quota`);
+        if (errorClassification === "RATE_LIMIT") {
+          console.warn(
+            `🚨 Rate limit/quota exceeded for ${context}: ${lastError.message}`
+          );
+          console.warn("⚡ Fast-failing without retries to preserve quota");
           break; // Skip all retries for rate limit errors
         }
-        
+
         // Authentication/configuration errors: also fail fast
-        if (['AUTHENTICATION', 'CONFIGURATION'].includes(errorClassification)) {
-          console.warn(`🚫 Non-recoverable error for ${context}: ${lastError.message}`);
+        if (["AUTHENTICATION", "CONFIGURATION"].includes(errorClassification)) {
+          console.warn(
+            `🚫 Non-recoverable error for ${context}: ${lastError.message}`
+          );
           break; // Skip retries for auth/config errors
         }
-        
+
         // Legacy rate limit detection (for additional safety)
         if (this.isRateLimitError(lastError)) {
-          console.warn(`⚠️  Legacy rate limit detection for ${context}:`, lastError.message);
-          console.warn(`⚡ Fast-failing to prevent quota waste`);
+          console.warn(
+            `⚠️  Legacy rate limit detection for ${context}:`,
+            lastError.message
+          );
+          console.warn("⚡ Fast-failing to prevent quota waste");
           break; // Skip retries
         }
-        
+
         // Network errors: retry with exponential backoff
-        if (errorClassification === 'NETWORK' || this.isRetryableError(lastError)) {
+        if (
+          errorClassification === "NETWORK" ||
+          this.isRetryableError(lastError)
+        ) {
           if (attempt < this.config.maxRetries - 1) {
             const backoffTime = Math.min(
-              this.config.initialBackoffMs * Math.pow(2, attempt),
+              this.config.initialBackoffMs * 2 ** attempt,
               this.config.maxBackoffMs
             );
-            console.log(`🔄 Network error retry ${attempt + 1}/${this.config.maxRetries} for ${context} after ${backoffTime}ms`);
+            console.log(
+              `🔄 Network error retry ${attempt + 1}/${this.config.maxRetries} for ${context} after ${backoffTime}ms`
+            );
             await this.delay(backoffTime);
           }
         } else {
           // Unknown errors: don't retry by default
-          console.warn(`❓ Unknown error type for ${context}, not retrying: ${lastError.message}`);
+          console.warn(
+            `❓ Unknown error type for ${context}, not retrying: ${lastError.message}`
+          );
           break;
         }
       }
@@ -148,18 +158,18 @@ export class CircuitBreaker {
 
     // All retries failed
     this.onFailure(context);
-    
+
     if (lastError) {
       throw new CircuitBreakerError(
         `Circuit breaker: All retries failed for ${context}. ${lastError.message}`,
-        'MAX_RETRIES_EXCEEDED',
+        "MAX_RETRIES_EXCEEDED",
         lastError
       );
     }
-    
+
     throw new CircuitBreakerError(
       `Circuit breaker: Unknown error for ${context}`,
-      'UNKNOWN_ERROR'
+      "UNKNOWN_ERROR"
     );
   }
 
@@ -167,15 +177,15 @@ export class CircuitBreaker {
    * Handle successful execution
    */
   private onSuccess(): void {
-    if (this.state.state === 'HALF_OPEN') {
+    if (this.state.state === "HALF_OPEN") {
       this.state.consecutiveSuccesses++;
       // If we have enough consecutive successes, close the circuit
       if (this.state.consecutiveSuccesses >= 2) {
-        this.state.state = 'CLOSED';
+        this.state.state = "CLOSED";
         this.state.failures = 0;
-        console.log('✅ Circuit breaker transitioned to CLOSED');
+        console.log("✅ Circuit breaker transitioned to CLOSED");
       }
-    } else if (this.state.state === 'CLOSED') {
+    } else if (this.state.state === "CLOSED") {
       // Reset failure count on success
       this.state.failures = Math.max(0, this.state.failures - 1);
     }
@@ -190,7 +200,7 @@ export class CircuitBreaker {
     this.state.consecutiveSuccesses = 0;
 
     if (this.state.failures >= this.config.failureThreshold) {
-      this.state.state = 'OPEN';
+      this.state.state = "OPEN";
       console.warn(
         `🚨 Circuit breaker OPENED for ${context} after ${this.state.failures} failures`
       );
@@ -203,11 +213,11 @@ export class CircuitBreaker {
   private isRateLimitError(error: Error): boolean {
     const message = error.message.toLowerCase();
     return (
-      message.includes('429') ||
-      message.includes('too many requests') ||
-      message.includes('rate limit') ||
-      message.includes('quota exceeded') ||
-      message.includes('token_quota_exceeded')
+      message.includes("429") ||
+      message.includes("too many requests") ||
+      message.includes("rate limit") ||
+      message.includes("quota exceeded") ||
+      message.includes("token_quota_exceeded")
     );
   }
 
@@ -216,25 +226,25 @@ export class CircuitBreaker {
    */
   private isRetryableError(error: Error): boolean {
     const message = error.message.toLowerCase();
-    
+
     // Don't retry validation errors, authentication errors, etc.
     const nonRetryablePatterns = [
-      'invalid',
-      'unauthorized',
-      'forbidden',
-      'not found',
-      'bad request',
-      'validation',
+      "invalid",
+      "unauthorized",
+      "forbidden",
+      "not found",
+      "bad request",
+      "validation",
     ];
-    
-    return !nonRetryablePatterns.some(pattern => message.includes(pattern));
+
+    return !nonRetryablePatterns.some((pattern) => message.includes(pattern));
   }
 
   /**
    * Simple delay utility
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -254,7 +264,7 @@ export class CircuitBreaker {
     this.state = {
       failures: 0,
       lastFailureTime: 0,
-      state: 'CLOSED',
+      state: "CLOSED",
       consecutiveSuccesses: 0,
     };
   }
@@ -263,11 +273,14 @@ export class CircuitBreaker {
 export class CircuitBreakerError extends Error {
   constructor(
     message: string,
-    public readonly type: 'CIRCUIT_OPEN' | 'MAX_RETRIES_EXCEEDED' | 'UNKNOWN_ERROR',
+    public readonly type:
+      | "CIRCUIT_OPEN"
+      | "MAX_RETRIES_EXCEEDED"
+      | "UNKNOWN_ERROR",
     public readonly originalError?: Error
   ) {
     super(message);
-    this.name = 'CircuitBreakerError';
+    this.name = "CircuitBreakerError";
   }
 }
 

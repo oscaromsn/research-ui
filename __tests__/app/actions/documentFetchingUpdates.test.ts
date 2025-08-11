@@ -1,9 +1,8 @@
 // __tests__/app/actions/documentFetchingUpdates.test.ts
 
 import { describe, expect, it } from "vitest";
-
-import type { ResearchUpdate } from "@/packages/shared-types/src";
 import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
+import type { ResearchUpdate } from "@/packages/shared-types/src";
 
 // Mock data for testing
 const mockSearchResultItems = [

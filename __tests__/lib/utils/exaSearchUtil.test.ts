@@ -8,7 +8,6 @@ import {
   type MockInstance,
   vi,
 } from "vitest";
-import type { SearchQueryItem } from "@/packages/shared-types/src";
 import * as errorRecovery from "@/lib/utils/errorRecovery";
 import * as exaErrorHandler from "@/lib/utils/exaErrorHandler";
 import {
@@ -19,6 +18,7 @@ import {
   isExaRateLimitError,
   isExaServerError,
 } from "@/lib/utils/exaSearchErrors";
+import type { SearchQueryItem } from "@/packages/shared-types/src";
 
 // Type definition for request body to match exaSearchUtil.ts
 interface ExaSearchRequestBody {

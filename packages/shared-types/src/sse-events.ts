@@ -163,11 +163,11 @@ export type ReportChunkEvent = z.infer<typeof ReportChunkEventSchema>;
  * Enhanced error classification for intelligent error handling
  */
 export const ErrorClassificationSchema = z.enum([
-  'RATE_LIMIT',
-  'AUTHENTICATION',
-  'NETWORK',
-  'CONFIGURATION',
-  'UNKNOWN'
+  "RATE_LIMIT",
+  "AUTHENTICATION",
+  "NETWORK",
+  "CONFIGURATION",
+  "UNKNOWN",
 ]);
 
 export type ErrorClassification = z.infer<typeof ErrorClassificationSchema>;
@@ -367,10 +367,12 @@ export interface ResearchUpdate {
   type: "STATUS_CHANGE" | "DATA" | "LOG" | "ERROR" | "PROGRESS";
   stage: ResearchStage;
   message?: string;
-  data?: Record<string, any> | {
-    error?: EnhancedErrorInfo;
-    [key: string]: any;
-  };
+  data?:
+    | Record<string, any>
+    | {
+        error?: EnhancedErrorInfo;
+        [key: string]: any;
+      };
   currentProcessedDoc?: number;
   totalDocsToProcess?: number;
   isFinalForStage?: boolean;
@@ -382,6 +384,6 @@ export interface ResearchUpdate {
 // Additional legacy types that might be needed
 export interface LegacyStreamResponse {
   data: ResearchUpdate[];
-  status: 'success' | 'error';
+  status: "success" | "error";
   error?: string;
 }

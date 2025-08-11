@@ -132,10 +132,18 @@ mock.module("../../../baml_client", () => ({
           analyze_legal_question: {
             summary: "Document analysis completed successfully",
           },
-          consider_relevant_legal_principles: { summary: "Considered legal principles" },
-          formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-          specify_expected_information_strategy: { summary: "Specified information strategy" },
-          ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
+          consider_relevant_legal_principles: {
+            summary: "Considered legal principles",
+          },
+          formulate_search_queries_strategy: {
+            summary: "Formulated search strategy",
+          },
+          specify_expected_information_strategy: {
+            summary: "Specified information strategy",
+          },
+          ensure_comprehensive_coverage_strategy: {
+            summary: "Ensured comprehensive coverage",
+          },
         },
       });
     }),
@@ -146,7 +154,9 @@ mock.module("../../../baml_client", () => ({
             topic_title: "Main Legal Topic",
             synthesis: `Synthesis of findings for: ${legalQuestion}`,
             confidence_score: 8,
-            supporting_document_ids: documents.map((d) => d.search_result_id || d.id),
+            supporting_document_ids: documents.map(
+              (d) => d.search_result_id || d.id
+            ),
           },
         ],
         unanswered_aspects: [],
@@ -155,10 +165,18 @@ mock.module("../../../baml_client", () => ({
           analyze_legal_question: {
             summary: "Synthesis completed successfully",
           },
-          consider_relevant_legal_principles: { summary: "Considered legal principles" },
-          formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-          specify_expected_information_strategy: { summary: "Specified information strategy" },
-          ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
+          consider_relevant_legal_principles: {
+            summary: "Considered legal principles",
+          },
+          formulate_search_queries_strategy: {
+            summary: "Formulated search strategy",
+          },
+          specify_expected_information_strategy: {
+            summary: "Specified information strategy",
+          },
+          ensure_comprehensive_coverage_strategy: {
+            summary: "Ensured comprehensive coverage",
+          },
         },
       });
     }),
@@ -193,34 +211,38 @@ mock.module("../../../baml_client", () => ({
     ),
     // Add streaming functions for pipeline stages tests
     stream: {
-      GenerateFinalLegalReport: mock((legalQuestion: string, _synthesis: any, _queryAnalysis: any) => {
-        return {
-          async *[Symbol.asyncIterator]() {
-            yield {
-              report_title: `Legal Analysis Report: ${legalQuestion}`,
-              executive_summary: {
-                value: `Executive summary for legal question: ${legalQuestion}`,
-                state: "Complete"
-              },
-              sections: [{
-                section_title: "Analysis Section",
-                content: {
-                  value: "Detailed analysis content for the legal question",
-                  state: "Complete"
-                }
-              }],
-              conclusion: {
-                value: "Legal conclusion based on research",
-                state: "Complete"
-              },
-              limitations_and_caveats: [
-                "This analysis is based on available sources",
-              ],
-              appendix_document_ids: [],
-            };
-          }
-        };
-      })
+      GenerateFinalLegalReport: mock(
+        (legalQuestion: string, _synthesis: any, _queryAnalysis: any) => {
+          return {
+            async *[Symbol.asyncIterator]() {
+              yield {
+                report_title: `Legal Analysis Report: ${legalQuestion}`,
+                executive_summary: {
+                  value: `Executive summary for legal question: ${legalQuestion}`,
+                  state: "Complete",
+                },
+                sections: [
+                  {
+                    section_title: "Analysis Section",
+                    content: {
+                      value: "Detailed analysis content for the legal question",
+                      state: "Complete",
+                    },
+                  },
+                ],
+                conclusion: {
+                  value: "Legal conclusion based on research",
+                  state: "Complete",
+                },
+                limitations_and_caveats: [
+                  "This analysis is based on available sources",
+                ],
+                appendix_document_ids: [],
+              };
+            },
+          };
+        }
+      ),
     },
   },
 }));
@@ -574,45 +596,71 @@ describe("Pipeline Stages", () => {
                 analyze_legal_question: {
                   summary: "Document analysis complete",
                 },
-                consider_relevant_legal_principles: { summary: "Considered legal principles" },
-                formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-                specify_expected_information_strategy: { summary: "Specified information strategy" },
-                ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
+                consider_relevant_legal_principles: {
+                  summary: "Considered legal principles",
+                },
+                formulate_search_queries_strategy: {
+                  summary: "Formulated search strategy",
+                },
+                specify_expected_information_strategy: {
+                  summary: "Specified information strategy",
+                },
+                ensure_comprehensive_coverage_strategy: {
+                  summary: "Ensured comprehensive coverage",
+                },
               },
             });
           }),
           // Add other required BAML functions to prevent undefined errors
-          SynthesizeAllFindings: mock(() => Promise.resolve({
-            key_synthesized_topics: [{
-              topic_title: "Test Topic",
-              synthesis: "Test synthesis",
-              confidence_score: 8,
-              supporting_document_ids: ["test-doc-1"],
-            }],
-            unanswered_aspects: [],
-            emerging_questions: [],
-            reasoning: {
-              analyze_legal_question: { summary: "Synthesis complete" },
-              consider_relevant_legal_principles: { summary: "Considered legal principles" },
-              formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-              specify_expected_information_strategy: { summary: "Specified information strategy" },
-              ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
-            },
-          })),
-          AssessResearchAndPlanNextSteps: mock(() => Promise.resolve({
-            is_sufficient: true,
-            next_action: "GENERATE_REPORT",
-            assessment_summary: "Test assessment",
-            identified_gaps: [],
-          })),
-          GenerateFinalLegalReport: mock(() => Promise.resolve({
-            report_title: "Test Report",
-            executive_summary: "Test summary",
-            sections: [{ section_title: "Test Section", content: "Test content" }],
-            conclusion: "Test conclusion",
-            limitations_and_caveats: [],
-            appendix_document_ids: [],
-          })),
+          SynthesizeAllFindings: mock(() =>
+            Promise.resolve({
+              key_synthesized_topics: [
+                {
+                  topic_title: "Test Topic",
+                  synthesis: "Test synthesis",
+                  confidence_score: 8,
+                  supporting_document_ids: ["test-doc-1"],
+                },
+              ],
+              unanswered_aspects: [],
+              emerging_questions: [],
+              reasoning: {
+                analyze_legal_question: { summary: "Synthesis complete" },
+                consider_relevant_legal_principles: {
+                  summary: "Considered legal principles",
+                },
+                formulate_search_queries_strategy: {
+                  summary: "Formulated search strategy",
+                },
+                specify_expected_information_strategy: {
+                  summary: "Specified information strategy",
+                },
+                ensure_comprehensive_coverage_strategy: {
+                  summary: "Ensured comprehensive coverage",
+                },
+              },
+            })
+          ),
+          AssessResearchAndPlanNextSteps: mock(() =>
+            Promise.resolve({
+              is_sufficient: true,
+              next_action: "GENERATE_REPORT",
+              assessment_summary: "Test assessment",
+              identified_gaps: [],
+            })
+          ),
+          GenerateFinalLegalReport: mock(() =>
+            Promise.resolve({
+              report_title: "Test Report",
+              executive_summary: "Test summary",
+              sections: [
+                { section_title: "Test Section", content: "Test content" },
+              ],
+              conclusion: "Test conclusion",
+              limitations_and_caveats: [],
+              appendix_document_ids: [],
+            })
+          ),
         },
       }));
 
@@ -641,7 +689,9 @@ describe("Pipeline Stages", () => {
       // Should return analyses array (error handling is graceful, continues with other docs)
       expect(analyses).toBeInstanceOf(Array);
       expect(analyses.length).toBeGreaterThanOrEqual(1); // At least one successful (since global mocks are used)
-      expect(analyses.some(a => a.search_result_id === "test-doc-1")).toBe(true);
+      expect(analyses.some((a) => a.search_result_id === "test-doc-1")).toBe(
+        true
+      );
     });
 
     test("should analyze documents with different relevance scores", async () => {
@@ -650,11 +700,11 @@ describe("Pipeline Stages", () => {
       );
 
       // Mock different relevance scores for different documents
-      let callCount = 0;
+      let _callCount = 0;
       mock.module("../../../baml_client", () => ({
         b: {
           AnalyzeSingleDocument: mock((doc: any) => {
-            callCount++;
+            _callCount++;
             const relevanceScore = doc.title?.includes("Contract") ? 9 : 3;
 
             return Promise.resolve({
@@ -670,45 +720,71 @@ describe("Pipeline Stages", () => {
                 analyze_legal_question: {
                   summary: "Analysis complete",
                 },
-                consider_relevant_legal_principles: { summary: "Considered legal principles" },
-                formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-                specify_expected_information_strategy: { summary: "Specified information strategy" },
-                ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
+                consider_relevant_legal_principles: {
+                  summary: "Considered legal principles",
+                },
+                formulate_search_queries_strategy: {
+                  summary: "Formulated search strategy",
+                },
+                specify_expected_information_strategy: {
+                  summary: "Specified information strategy",
+                },
+                ensure_comprehensive_coverage_strategy: {
+                  summary: "Ensured comprehensive coverage",
+                },
               },
             });
           }),
           // Add other required BAML functions to prevent undefined errors
-          SynthesizeAllFindings: mock(() => Promise.resolve({
-            key_synthesized_topics: [{
-              topic_title: "Test Topic",
-              synthesis: "Test synthesis",
-              confidence_score: 8,
-              supporting_document_ids: ["relevant-doc"],
-            }],
-            unanswered_aspects: [],
-            emerging_questions: [],
-            reasoning: {
-              analyze_legal_question: { summary: "Synthesis complete" },
-              consider_relevant_legal_principles: { summary: "Considered legal principles" },
-              formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-              specify_expected_information_strategy: { summary: "Specified information strategy" },
-              ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
-            },
-          })),
-          AssessResearchAndPlanNextSteps: mock(() => Promise.resolve({
-            is_sufficient: true,
-            next_action: "GENERATE_REPORT",
-            assessment_summary: "Test assessment",
-            identified_gaps: [],
-          })),
-          GenerateFinalLegalReport: mock(() => Promise.resolve({
-            report_title: "Test Report",
-            executive_summary: "Test summary",
-            sections: [{ section_title: "Test Section", content: "Test content" }],
-            conclusion: "Test conclusion",
-            limitations_and_caveats: [],
-            appendix_document_ids: [],
-          })),
+          SynthesizeAllFindings: mock(() =>
+            Promise.resolve({
+              key_synthesized_topics: [
+                {
+                  topic_title: "Test Topic",
+                  synthesis: "Test synthesis",
+                  confidence_score: 8,
+                  supporting_document_ids: ["relevant-doc"],
+                },
+              ],
+              unanswered_aspects: [],
+              emerging_questions: [],
+              reasoning: {
+                analyze_legal_question: { summary: "Synthesis complete" },
+                consider_relevant_legal_principles: {
+                  summary: "Considered legal principles",
+                },
+                formulate_search_queries_strategy: {
+                  summary: "Formulated search strategy",
+                },
+                specify_expected_information_strategy: {
+                  summary: "Specified information strategy",
+                },
+                ensure_comprehensive_coverage_strategy: {
+                  summary: "Ensured comprehensive coverage",
+                },
+              },
+            })
+          ),
+          AssessResearchAndPlanNextSteps: mock(() =>
+            Promise.resolve({
+              is_sufficient: true,
+              next_action: "GENERATE_REPORT",
+              assessment_summary: "Test assessment",
+              identified_gaps: [],
+            })
+          ),
+          GenerateFinalLegalReport: mock(() =>
+            Promise.resolve({
+              report_title: "Test Report",
+              executive_summary: "Test summary",
+              sections: [
+                { section_title: "Test Section", content: "Test content" },
+              ],
+              conclusion: "Test conclusion",
+              limitations_and_caveats: [],
+              appendix_document_ids: [],
+            })
+          ),
         },
       }));
 
@@ -737,7 +813,9 @@ describe("Pipeline Stages", () => {
       expect(analyses).toHaveLength(2);
 
       // Find analyses by document ID
-      const contractAnalysis = analyses.find((a) => a.search_result_id === "relevant-doc");
+      const contractAnalysis = analyses.find(
+        (a) => a.search_result_id === "relevant-doc"
+      );
       const propertyAnalysis = analyses.find(
         (a) => a.search_result_id === "less-relevant-doc"
       );
@@ -766,16 +844,28 @@ describe("Pipeline Stages", () => {
             "Acceptance must mirror offer",
           ],
           extracted_entities: [
-            { name: "Contract", type: "LegalConcept" as const, details: "Agreement" },
+            {
+              name: "Contract",
+              type: "LegalConcept" as const,
+              details: "Agreement",
+            },
           ],
           extracted_quotes: ["A contract requires mutual assent"],
           counter_arguments_or_nuances: [],
           reasoning: {
             analyze_legal_question: { summary: "Analysis complete" },
-            consider_relevant_legal_principles: { summary: "Considered legal principles" },
-            formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-            specify_expected_information_strategy: { summary: "Specified information strategy" },
-            ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
+            consider_relevant_legal_principles: {
+              summary: "Considered legal principles",
+            },
+            formulate_search_queries_strategy: {
+              summary: "Formulated search strategy",
+            },
+            specify_expected_information_strategy: {
+              summary: "Specified information strategy",
+            },
+            ensure_comprehensive_coverage_strategy: {
+              summary: "Ensured comprehensive coverage",
+            },
           },
         },
       ];
@@ -812,23 +902,33 @@ describe("Pipeline Stages", () => {
         "../../utils/pipelineStages"
       );
 
-      const analyzedDocuments = [{
-        search_result_id: "doc1",
-        relevance_score: 8,
-        confidence_score: 9,
-        summary: "Test analysis summary",
-        key_arguments_and_reasoning: ["Test argument"],
-        extracted_entities: [],
-        extracted_quotes: [],
-        counter_arguments_or_nuances: [],
-        reasoning: {
-          analyze_legal_question: { summary: "Analysis complete" },
-          consider_relevant_legal_principles: { summary: "Considered legal principles" },
-          formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-          specify_expected_information_strategy: { summary: "Specified information strategy" },
-          ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
+      const analyzedDocuments = [
+        {
+          search_result_id: "doc1",
+          relevance_score: 8,
+          confidence_score: 9,
+          summary: "Test analysis summary",
+          key_arguments_and_reasoning: ["Test argument"],
+          extracted_entities: [],
+          extracted_quotes: [],
+          counter_arguments_or_nuances: [],
+          reasoning: {
+            analyze_legal_question: { summary: "Analysis complete" },
+            consider_relevant_legal_principles: {
+              summary: "Considered legal principles",
+            },
+            formulate_search_queries_strategy: {
+              summary: "Formulated search strategy",
+            },
+            specify_expected_information_strategy: {
+              summary: "Specified information strategy",
+            },
+            ensure_comprehensive_coverage_strategy: {
+              summary: "Ensured comprehensive coverage",
+            },
+          },
         },
-      }];
+      ];
 
       await expect(
         synthesizeFindingsStage("", analyzedDocuments)
@@ -864,10 +964,18 @@ describe("Pipeline Stages", () => {
         ],
         reasoning: {
           analyze_legal_question: { summary: "Query analysis" },
-          consider_relevant_legal_principles: { summary: "Considered legal principles" },
-          formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-          specify_expected_information_strategy: { summary: "Specified information strategy" },
-          ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
+          consider_relevant_legal_principles: {
+            summary: "Considered legal principles",
+          },
+          formulate_search_queries_strategy: {
+            summary: "Formulated search strategy",
+          },
+          specify_expected_information_strategy: {
+            summary: "Specified information strategy",
+          },
+          ensure_comprehensive_coverage_strategy: {
+            summary: "Ensured comprehensive coverage",
+          },
         },
       };
       const synthesis = {
@@ -883,10 +991,18 @@ describe("Pipeline Stages", () => {
         emerging_questions: [],
         reasoning: {
           analyze_legal_question: { summary: "Synthesis" },
-          consider_relevant_legal_principles: { summary: "Considered legal principles" },
-          formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-          specify_expected_information_strategy: { summary: "Specified information strategy" },
-          ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
+          consider_relevant_legal_principles: {
+            summary: "Considered legal principles",
+          },
+          formulate_search_queries_strategy: {
+            summary: "Formulated search strategy",
+          },
+          specify_expected_information_strategy: {
+            summary: "Specified information strategy",
+          },
+          ensure_comprehensive_coverage_strategy: {
+            summary: "Ensured comprehensive coverage",
+          },
         },
       };
 
@@ -946,10 +1062,18 @@ describe("Pipeline Stages", () => {
         emerging_questions: [],
         reasoning: {
           analyze_legal_question: { summary: "Synthesis" },
-          consider_relevant_legal_principles: { summary: "Considered legal principles" },
-          formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-          specify_expected_information_strategy: { summary: "Specified information strategy" },
-          ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
+          consider_relevant_legal_principles: {
+            summary: "Considered legal principles",
+          },
+          formulate_search_queries_strategy: {
+            summary: "Formulated search strategy",
+          },
+          specify_expected_information_strategy: {
+            summary: "Specified information strategy",
+          },
+          ensure_comprehensive_coverage_strategy: {
+            summary: "Ensured comprehensive coverage",
+          },
         },
       };
       const queryAnalysis = {
@@ -961,10 +1085,18 @@ describe("Pipeline Stages", () => {
         ],
         reasoning: {
           analyze_legal_question: { summary: "Query analysis" },
-          consider_relevant_legal_principles: { summary: "Considered legal principles" },
-          formulate_search_queries_strategy: { summary: "Formulated search strategy" },
-          specify_expected_information_strategy: { summary: "Specified information strategy" },
-          ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
+          consider_relevant_legal_principles: {
+            summary: "Considered legal principles",
+          },
+          formulate_search_queries_strategy: {
+            summary: "Formulated search strategy",
+          },
+          specify_expected_information_strategy: {
+            summary: "Specified information strategy",
+          },
+          ensure_comprehensive_coverage_strategy: {
+            summary: "Ensured comprehensive coverage",
+          },
         },
       };
 

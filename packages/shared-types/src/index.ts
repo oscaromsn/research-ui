@@ -1,11 +1,11 @@
 // Re-export all SSE event types and schemas
-export * from "./sse-events.js";
-
-// Re-export BAML types for frontend consumption
-export * from "./baml-types.js";
 
 // Re-export API types for Eden Treaty type safety
 export * from "./api-types.js";
+
+// Re-export BAML types for frontend consumption
+export * from "./baml-types.js";
+export * from "./sse-events.js";
 
 // Additional utility types that might be useful across frontend and backend
 export interface RequestOptions {

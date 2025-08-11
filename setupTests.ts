@@ -412,7 +412,7 @@ beforeAll(() => {
   global.ResizeObserver = EnhancedResizeObserverMock as typeof ResizeObserver;
   global.IntersectionObserver =
     EnhancedIntersectionObserverMock as typeof IntersectionObserver;
-  
+
   // Create fetch mock with preconnect method for Bun compatibility
   const fetchMock = createFetchMock();
   (fetchMock as any).preconnect = vi.fn();

@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { SearchQueryItem, SearchResultItem } from "@/packages/shared-types/src";
 import { createSearchContext } from "@/lib/utils/errorRecovery";
 import {
   ExaAuthError,
@@ -21,6 +20,10 @@ import {
   partialResultsStrategy,
   retryWithBackoffStrategy,
 } from "@/lib/utils/recoveryStrategies";
+import type {
+  SearchQueryItem,
+  SearchResultItem,
+} from "@/packages/shared-types/src";
 
 // Mock search result for testing
 const mockSearchResult: SearchResultItem = {

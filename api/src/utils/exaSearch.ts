@@ -360,7 +360,7 @@ export async function executeExaSearch(
       // Wait before retrying (exponential backoff)
       const delay = Math.min(1000 * 2 ** (attempt - 1), 10000);
       console.warn(
-        `⚠️ Search attempt ${attempt} failed, retrying in ${delay}ms: ${(error as Error).message || 'Unknown error'}`
+        `⚠️ Search attempt ${attempt} failed, retrying in ${delay}ms: ${(error as Error).message || "Unknown error"}`
       );
       await new Promise((resolve) => setTimeout(resolve, delay));
     }

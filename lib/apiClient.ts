@@ -4,6 +4,7 @@
  */
 
 import { treaty } from "@elysiajs/eden";
+
 // TODO: Fix Eden Treaty type import - this should reference the Elysia app type
 // import type { App } from "@/api/src/app";
 // For now, using any to resolve TypeScript errors

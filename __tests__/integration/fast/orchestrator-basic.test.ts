@@ -9,12 +9,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 // TODO: Update to test new Elysia backend endpoints
 import type { ResearchUpdate } from "@/packages/shared-types/src";
+
 // Backend endpoint testing should use fetch or axios to call http://localhost:3001/api/research/stream
 
 // Mock function for backward compatibility during refactoring
-const conductResearch = async (question: string) => {
-  throw new Error("conductResearch has been moved to Elysia backend - update test to use HTTP endpoints");
+const conductResearch = async (_question: string) => {
+  throw new Error(
+    "conductResearch has been moved to Elysia backend - update test to use HTTP endpoints"
+  );
 };
+
 import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
 
 // Mock the executeExaSearch function to avoid real search API calls during

@@ -1,8 +1,7 @@
 import { AlertTriangle, CheckCircle, Clock } from "lucide-react";
-
-import type { DetailedReasoning } from "../../../../packages/shared-types/src/baml-types.js";
 import { Modal } from "@/components/ui/modal";
 import type { ClientSynthesis } from "@/lib/state/researchAtoms";
+import type { DetailedReasoning } from "../../../../packages/shared-types/src/baml-types.js";
 
 interface SynthesisReasoningModalProps {
   isOpen: boolean;

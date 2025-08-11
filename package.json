@@ -119,7 +119,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@boundaryml/baml": "^0.202.1",
+    "@boundaryml/baml": "^0.204.0",
     "@boundaryml/baml-nextjs-plugin": "^0.1.0",
     "@next/env": "15.4.0-canary.51",
     "@radix-ui/react-collapsible": "^1.1.11",

@@ -17,21 +17,27 @@ import { bamlCircuitBreaker } from "./circuitBreaker";
  * TTL: 5 minutes for query generation, 10 minutes for document analysis
  */
 class BAMLResultCache {
-  private cache = new Map<string, { result: any; timestamp: number; ttl: number }>();
+  private cache = new Map<
+    string,
+    { result: any; timestamp: number; ttl: number }
+  >();
 
-  set(key: string, result: any, ttlMs: number = 300000): void { // 5 minute default TTL
+  set(key: string, result: any, ttlMs = 300000): void {
+    // 5 minute default TTL
     this.cache.set(key, { result, timestamp: Date.now(), ttl: ttlMs });
   }
 
   get(key: string): any | null {
     const entry = this.cache.get(key);
-    if (!entry) return null;
-    
+    if (!entry) {
+      return null;
+    }
+
     if (Date.now() - entry.timestamp > entry.ttl) {
       this.cache.delete(key);
       return null;
     }
-    
+
     return entry.result;
   }
 
@@ -52,7 +58,7 @@ class BAMLResultCache {
   getStats() {
     return {
       size: this.cache.size,
-      entries: Array.from(this.cache.keys())
+      entries: Array.from(this.cache.keys()),
     };
   }
 }
@@ -74,10 +80,14 @@ setInterval(() => bamlCache.cleanup(), 120000);
 function extractStreamValue<T>(
   streamState: T | { value: T; state: string } | undefined | null
 ): { value: T | null; isComplete: boolean } {
-  if (streamState && typeof streamState === 'object' && 'value' in streamState) {
+  if (
+    streamState &&
+    typeof streamState === "object" &&
+    "value" in streamState
+  ) {
     return {
       value: streamState.value,
-      isComplete: (streamState as any).state === 'Complete'
+      isComplete: (streamState as any).state === "Complete",
     };
   }
   return { value: streamState as T | null, isComplete: true };
@@ -99,7 +109,9 @@ export async function generateQueriesStage(
   const cacheKey = `GenerateLegalSearchQueries:${legalQuestion.trim()}`;
   const cachedResult = bamlCache.get(cacheKey);
   if (cachedResult) {
-    console.log(`📋 Using cached queries for: "${legalQuestion}" (${cachedResult.search_queries.length} queries)`);
+    console.log(
+      `📋 Using cached queries for: "${legalQuestion}" (${cachedResult.search_queries.length} queries)`
+    );
     return cachedResult;
   }
 
@@ -108,7 +120,7 @@ export async function generateQueriesStage(
 
     const queryAnalysis = await bamlCircuitBreaker.execute(
       () => b.GenerateLegalSearchQueries(legalQuestion),
-      'GenerateLegalSearchQueries'
+      "GenerateLegalSearchQueries"
     );
 
     // Cache the result for 5 minutes
@@ -151,7 +163,9 @@ export async function fetchDocumentsStage(
 
   for (let i = 0; i < Math.min(queries.length, maxQueries); i++) {
     const query = queries[i];
-    if (!query) continue;
+    if (!query) {
+      continue;
+    }
 
     try {
       console.log(`🔎 Searching: "${query.query_string}"`);
@@ -205,7 +219,9 @@ export async function analyzeDocumentsStage(
 
   for (let i = 0; i < documents.length; i++) {
     const doc = documents[i];
-    if (!doc) continue;
+    if (!doc) {
+      continue;
+    }
 
     try {
       console.log(
@@ -214,7 +230,7 @@ export async function analyzeDocumentsStage(
 
       const analysis = await bamlCircuitBreaker.execute(
         () => b.AnalyzeSingleDocument(doc, legalQuestion),
-        'AnalyzeSingleDocument'
+        "AnalyzeSingleDocument"
       );
       analyzed.push(analysis);
 
@@ -276,55 +292,70 @@ export async function analyzeDocumentsStageStreaming(
         confidenceScore: analysis.confidence_score,
         summarySnippet: analysis.summary?.slice(0, 200), // First 200 chars as snippet
         keyArguments: analysis.key_arguments_and_reasoning?.slice(0, 3), // First 3 key arguments
-        extractedEntities: analysis.extracted_entities?.slice(0, 5)?.map(entity => ({
-          name: entity.name || '',
-          type: entity.type || '',
-          details: entity.details
-        })),
+        extractedEntities: analysis.extracted_entities
+          ?.slice(0, 5)
+          ?.map((entity) => ({
+            name: entity.name || "",
+            type: entity.type || "",
+            details: entity.details,
+          })),
         extractedQuotes: analysis.extracted_quotes?.slice(0, 2), // First 2 quotes
-        counterArguments: analysis.counter_arguments_or_nuances?.slice(0, 2)
+        counterArguments: analysis.counter_arguments_or_nuances?.slice(0, 2),
       }),
       ...(errorMessage && { errorMessage }),
       ...(progress !== undefined && { progress }),
       timestamp: new Date().toISOString(),
-      eventId: `doc_analysis_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`
+      eventId: `doc_analysis_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
     };
 
     const sseEvent = `event: document.analyzed\ndata: ${JSON.stringify(eventData)}\n\n`;
     await sseWriter.write(encoder.encode(sseEvent));
   };
 
-  console.log(`🔍 Analyzing ${documents.length} documents in parallel with streaming`);
-  
+  console.log(
+    `🔍 Analyzing ${documents.length} documents in parallel with streaming`
+  );
+
   // Send initial "analyzing" status for all documents
   for (let i = 0; i < documents.length; i++) {
     const doc = documents[i];
     if (doc) {
       const docId = doc.id || doc.url || `doc_${i}`;
-      await sendDocumentAnalysisEvent(docId, "analyzing", doc, undefined, undefined, 0);
+      await sendDocumentAnalysisEvent(
+        docId,
+        "analyzing",
+        doc,
+        undefined,
+        undefined,
+        0
+      );
     }
   }
 
   // Process documents in parallel using Promise.allSettled for graceful error handling
   const analysisResults = await Promise.allSettled(
     documents.map(async (doc, index) => {
-      if (!doc) throw new Error("Invalid document");
+      if (!doc) {
+        throw new Error("Invalid document");
+      }
 
       const docId = doc.id || doc.url || `doc_${index}`;
-      
+
       console.log(`📖 Starting analysis of: ${doc.title || "Untitled"}`);
 
       try {
         // Check cache first (using URL and question hash as key)
         const docCacheKey = `AnalyzeSingleDocument:${doc.url}:${legalQuestion.trim()}`;
         let analysis = bamlCache.get(docCacheKey);
-        
+
         if (analysis) {
-          console.log(`📋 Using cached analysis for: "${doc.title || "Untitled"}"`);
+          console.log(
+            `📋 Using cached analysis for: "${doc.title || "Untitled"}"`
+          );
         } else {
           analysis = await bamlCircuitBreaker.execute(
             () => b.AnalyzeSingleDocument(doc, legalQuestion),
-            'AnalyzeSingleDocument'
+            "AnalyzeSingleDocument"
           );
 
           // Cache the result for 10 minutes (document analysis is expensive)
@@ -337,17 +368,18 @@ export async function analyzeDocumentsStageStreaming(
 
         // Send success status
         await sendDocumentAnalysisEvent(
-          docId, 
-          "analyzed", 
-          doc, 
-          analysis, 
-          undefined, 
+          docId,
+          "analyzed",
+          doc,
+          analysis,
+          undefined,
           Math.round(((index + 1) / documents.length) * 100)
         );
 
         return { doc, analysis, index };
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Unknown analysis error";
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown analysis error";
         console.error(
           `Analysis failed for document "${doc.title || doc.id}":`,
           error
@@ -370,7 +402,7 @@ export async function analyzeDocumentsStageStreaming(
 
   // Process results and maintain original order
   for (const result of analysisResults) {
-    if (result.status === 'fulfilled') {
+    if (result.status === "fulfilled") {
       analyzed.push(result.value.analysis);
     }
     // Failures are already logged and reported via SSE events
@@ -406,7 +438,7 @@ export async function synthesizeFindingsStage(
 
     const synthesis = await bamlCircuitBreaker.execute(
       () => b.SynthesizeAllFindings(analyzedDocuments, legalQuestion),
-      'SynthesizeAllFindings'
+      "SynthesizeAllFindings"
     );
 
     console.log(
@@ -443,8 +475,13 @@ export async function assessResearchStage(
     console.log("🎯 Assessing research sufficiency...");
 
     const assessment = await bamlCircuitBreaker.execute(
-      () => b.AssessResearchAndPlanNextSteps(legalQuestion, queryAnalysis, synthesis),
-      'AssessResearchAndPlanNextSteps'
+      () =>
+        b.AssessResearchAndPlanNextSteps(
+          legalQuestion,
+          queryAnalysis,
+          synthesis
+        ),
+      "AssessResearchAndPlanNextSteps"
     );
 
     console.log(
@@ -483,8 +520,9 @@ export async function generateReportStage(
     console.log("📝 Generating final legal report...");
 
     const finalReport = await bamlCircuitBreaker.execute(
-      () => b.GenerateFinalLegalReport(legalQuestion, synthesis, [queryAnalysis]),
-      'GenerateFinalLegalReport'
+      () =>
+        b.GenerateFinalLegalReport(legalQuestion, synthesis, [queryAnalysis]),
+      "GenerateFinalLegalReport"
     );
 
     console.log(`✅ Report generated: "${finalReport.report_title}"`);
@@ -524,7 +562,7 @@ export async function generateReportStageStreaming(
   const sendReportChunk = async (
     fieldName: "title" | "executiveSummary" | "section" | "conclusion",
     content: string,
-    isFieldComplete: boolean = false,
+    isFieldComplete = false,
     sectionInfo?: { index: number; title: string }
   ) => {
     const eventData = {
@@ -533,7 +571,7 @@ export async function generateReportStageStreaming(
       isFieldComplete,
       ...(sectionInfo && { sectionInfo }),
       timestamp: new Date().toISOString(),
-      eventId: `report_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`
+      eventId: `report_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
     };
 
     const sseEvent = `event: report.chunk\ndata: ${JSON.stringify(eventData)}\n\n`;
@@ -545,30 +583,38 @@ export async function generateReportStageStreaming(
 
     // Use the streaming BAML function
     const reportStream = b.stream.GenerateFinalLegalReport(
-      legalQuestion, 
-      synthesis, 
+      legalQuestion,
+      synthesis,
       [queryAnalysis]
     );
 
     let currentReport: Partial<FinalLegalReport> = {};
-    let lastTitleContent = '';
-    let lastExecutiveSummaryContent = '';
-    let lastConclusionContent = '';
-    let sectionContents: { [key: number]: string } = {};
+    let lastTitleContent = "";
+    let lastExecutiveSummaryContent = "";
+    let lastConclusionContent = "";
+    const sectionContents: { [key: number]: string } = {};
 
     // Process the stream of partial reports
     for await (const partialReport of reportStream) {
       // Handle report title updates
-      if (partialReport.report_title && partialReport.report_title !== lastTitleContent) {
+      if (
+        partialReport.report_title &&
+        partialReport.report_title !== lastTitleContent
+      ) {
         lastTitleContent = partialReport.report_title;
         await sendReportChunk("title", partialReport.report_title);
       }
 
       // Handle executive summary updates (StreamState - optimized)
-      const { value: summaryValue, isComplete: summaryComplete } = extractStreamValue(partialReport.executive_summary);
+      const { value: summaryValue, isComplete: summaryComplete } =
+        extractStreamValue(partialReport.executive_summary);
       if (summaryValue && summaryValue !== lastExecutiveSummaryContent) {
         lastExecutiveSummaryContent = summaryValue;
-        await sendReportChunk("executiveSummary", summaryValue, summaryComplete);
+        await sendReportChunk(
+          "executiveSummary",
+          summaryValue,
+          summaryComplete
+        );
       }
 
       // Handle section updates (optimized)
@@ -576,16 +622,20 @@ export async function generateReportStageStreaming(
         for (let i = 0; i < partialReport.sections.length; i++) {
           const section = partialReport.sections[i];
           if (section?.content) {
-            const { value: sectionContentValue, isComplete: sectionComplete } = extractStreamValue(section.content);
-            if (sectionContentValue && sectionContentValue !== sectionContents[i]) {
+            const { value: sectionContentValue, isComplete: sectionComplete } =
+              extractStreamValue(section.content);
+            if (
+              sectionContentValue &&
+              sectionContentValue !== sectionContents[i]
+            ) {
               sectionContents[i] = sectionContentValue;
               await sendReportChunk(
-                "section", 
+                "section",
                 sectionContentValue,
-                sectionComplete, 
-                { 
-                  index: i, 
-                  title: section.section_title || `Section ${i + 1}` 
+                sectionComplete,
+                {
+                  index: i,
+                  title: section.section_title || `Section ${i + 1}`,
                 }
               );
             }
@@ -594,19 +644,29 @@ export async function generateReportStageStreaming(
       }
 
       // Handle conclusion updates (StreamState - optimized)
-      const { value: conclusionValue, isComplete: conclusionComplete } = extractStreamValue(partialReport.conclusion);
+      const { value: conclusionValue, isComplete: conclusionComplete } =
+        extractStreamValue(partialReport.conclusion);
       if (conclusionValue && conclusionValue !== lastConclusionContent) {
         lastConclusionContent = conclusionValue;
-        await sendReportChunk("conclusion", conclusionValue, conclusionComplete);
+        await sendReportChunk(
+          "conclusion",
+          conclusionValue,
+          conclusionComplete
+        );
       }
 
-      // Convert partial sections to full sections  
-      const convertedSections: LegalReportSection[] = partialReport.sections ? partialReport.sections.map(section => ({
-        section_title: section.section_title || '',
-        content: section.content && typeof section.content === 'object' && 'value' in section.content 
-          ? section.content.value || '' 
-          : ''
-      })) : currentReport.sections || [];
+      // Convert partial sections to full sections
+      const convertedSections: LegalReportSection[] = partialReport.sections
+        ? partialReport.sections.map((section) => ({
+            section_title: section.section_title || "",
+            content:
+              section.content &&
+              typeof section.content === "object" &&
+              "value" in section.content
+                ? section.content.value || ""
+                : "",
+          }))
+        : currentReport.sections || [];
 
       // Update our current report state (extract values from StreamState objects)
       const updatedReport: Partial<FinalLegalReport> = {
@@ -617,8 +677,13 @@ export async function generateReportStageStreaming(
       if (partialReport.report_title) {
         updatedReport.report_title = partialReport.report_title;
       }
-      
-      if (partialReport.executive_summary && typeof partialReport.executive_summary === 'object' && 'value' in partialReport.executive_summary && partialReport.executive_summary.value) {
+
+      if (
+        partialReport.executive_summary &&
+        typeof partialReport.executive_summary === "object" &&
+        "value" in partialReport.executive_summary &&
+        partialReport.executive_summary.value
+      ) {
         updatedReport.executive_summary = partialReport.executive_summary.value;
       }
 
@@ -626,16 +691,23 @@ export async function generateReportStageStreaming(
         updatedReport.sections = convertedSections;
       }
 
-      if (partialReport.conclusion && typeof partialReport.conclusion === 'object' && 'value' in partialReport.conclusion && partialReport.conclusion.value) {
+      if (
+        partialReport.conclusion &&
+        typeof partialReport.conclusion === "object" &&
+        "value" in partialReport.conclusion &&
+        partialReport.conclusion.value
+      ) {
         updatedReport.conclusion = partialReport.conclusion.value;
       }
 
       if (partialReport.limitations_and_caveats) {
-        updatedReport.limitations_and_caveats = partialReport.limitations_and_caveats;
+        updatedReport.limitations_and_caveats =
+          partialReport.limitations_and_caveats;
       }
 
       if (partialReport.appendix_document_ids) {
-        updatedReport.appendix_document_ids = partialReport.appendix_document_ids;
+        updatedReport.appendix_document_ids =
+          partialReport.appendix_document_ids;
       }
 
       currentReport = updatedReport;
@@ -646,14 +718,20 @@ export async function generateReportStageStreaming(
       await sendReportChunk("title", currentReport.report_title, true);
     }
     if (currentReport.executive_summary) {
-      await sendReportChunk("executiveSummary", currentReport.executive_summary, true);
+      await sendReportChunk(
+        "executiveSummary",
+        currentReport.executive_summary,
+        true
+      );
     }
     if (currentReport.conclusion) {
       await sendReportChunk("conclusion", currentReport.conclusion, true);
     }
 
     const finalReport = currentReport as FinalLegalReport;
-    console.log(`✅ Report generated with streaming: "${finalReport.report_title}"`);
+    console.log(
+      `✅ Report generated with streaming: "${finalReport.report_title}"`
+    );
 
     return finalReport;
   } catch (error) {

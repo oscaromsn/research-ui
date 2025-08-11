@@ -10,9 +10,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // import { conductResearch } from "@/api/src/routes/research";
 
 // Mock function for backward compatibility during refactoring
-const conductResearch = async (question: string) => {
-  throw new Error("conductResearch has been moved to Elysia backend - update test to use HTTP endpoints");
+const conductResearch = async (_question: string) => {
+  throw new Error(
+    "conductResearch has been moved to Elysia backend - update test to use HTTP endpoints"
+  );
 };
+
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
   analyzedDocsSummaryAtom,

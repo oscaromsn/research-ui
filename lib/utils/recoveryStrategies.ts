@@ -1,5 +1,5 @@
-import type { SearchResultItem } from "../../packages/shared-types/src/baml-types.js";
 import { config } from "@/lib/config";
+import type { SearchResultItem } from "../../packages/shared-types/src/baml-types.js";
 import type { RecoveryStrategy, SearchContext } from "./errorRecovery";
 import {
   ExaAuthError,

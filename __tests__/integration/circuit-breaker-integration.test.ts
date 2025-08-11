@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { SearchQueryItem, SearchResultItem } from "@/packages/shared-types/src";
 import type { RecoveryStrategy } from "@/lib/utils/errorRecovery";
 import {
   createSearchContext,
@@ -11,6 +10,10 @@ import {
   ExaRateLimitError,
   ExaServerError,
 } from "@/lib/utils/exaSearchErrors";
+import type {
+  SearchQueryItem,
+  SearchResultItem,
+} from "@/packages/shared-types/src";
 
 describe("Circuit Breaker Integration Tests", () => {
   let mockSearchQuery: SearchQueryItem;

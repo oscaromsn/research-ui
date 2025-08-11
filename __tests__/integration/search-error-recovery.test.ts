@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { SearchQueryItem } from "@/packages/shared-types/src";
 import { executeExaSearch } from "@/lib/utils/exaSearchUtil";
+import type { SearchQueryItem } from "@/packages/shared-types/src";
 
 // Error types are imported for type checking and may be used in future tests
 

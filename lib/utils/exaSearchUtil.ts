@@ -4,14 +4,13 @@ import { config } from "dotenv";
 // Load environment variables
 config();
 
+// Import validated environment
+import { env } from "@/lib/schemas";
 // Import BAML types from shared types package
 import type {
   SearchResultItem as BamlSearchResultItem,
   SearchQueryItem,
 } from "../../packages/shared-types/src/baml-types.js";
-
-// Import validated environment
-import { env } from "@/lib/schemas";
 // Import error recovery system
 import { createSearchContext, SearchCircuitBreaker } from "./errorRecovery";
 // Import enhanced error handler
