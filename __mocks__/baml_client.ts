@@ -15,7 +15,7 @@ import type {
   ResearchAssessment,
   SearchQueryItem,
   SynthesizedTopic,
-} from "@/baml_client/types";
+} from "@/packages/shared-types/src";
 
 // Mock data factories
 const createMockReasoningStep = (summary: string): ReasoningStep => ({
