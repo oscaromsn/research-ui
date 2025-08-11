@@ -6,11 +6,17 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+// TODO: Update to test new Elysia backend endpoints
 import type {
   ResearchStage,
   ResearchUpdate,
-} from "@/app/actions/researchAgentOrchestrator";
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
+} from "@/packages/shared-types/src";
+// Backend endpoint testing should use fetch or axios to call http://localhost:3001/api/research/stream
+
+// Mock function for backward compatibility during refactoring
+const conductResearch = async (question: string) => {
+  throw new Error("conductResearch has been moved to Elysia backend - update test to use HTTP endpoints");
+};
 
 // Unmock axios for integration tests that need real HTTP requests
 vi.unmock("axios");

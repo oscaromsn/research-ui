@@ -4,9 +4,14 @@
  */
 
 import { beforeAll, beforeEach, expect, vi } from "vitest";
-import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator";
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
-import type { FinalLegalReport } from "@/baml_client/types";
+// TODO: Update to test new Elysia backend endpoints
+import type { ResearchUpdate, FinalLegalReport } from "@/packages/shared-types/src";
+// import { conductResearch } from "@/api/src/routes/research";
+
+// Mock function for backward compatibility during refactoring
+const conductResearch = async (question: string) => {
+  throw new Error("conductResearch has been moved to Elysia backend - update test to use HTTP endpoints");
+};
 
 import {
   API_KEYS,

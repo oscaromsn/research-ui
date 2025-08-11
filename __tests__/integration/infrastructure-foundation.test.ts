@@ -47,7 +47,7 @@ describe("Infrastructure Foundation - End-to-End Validation", () => {
       "@/lib/config",
       "@/lib/utils/exaSearchUtil",
       "@/lib/hooks/useResearchAgent",
-      "@/app/actions/researchAgentOrchestrator",
+      // Note: @/app/actions/researchAgentOrchestrator removed - now using Elysia backend
     ];
 
     for (const modulePath of modulesToClear) {

@@ -6,7 +6,7 @@ import type {
   LegalEntity,
   ReasoningStep,
   SearchResultItem,
-} from "@/baml_client/types";
+} from "@/packages/shared-types/src";
 
 // Mock BAML client
 const mockBamlClient = {

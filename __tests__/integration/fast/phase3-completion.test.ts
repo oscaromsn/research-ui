@@ -6,7 +6,13 @@ import type { ReactNode } from "react";
 import { createElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
+// TODO: Update to test new Elysia backend endpoints
+// import { conductResearch } from "@/api/src/routes/research";
+
+// Mock function for backward compatibility during refactoring
+const conductResearch = async (question: string) => {
+  throw new Error("conductResearch has been moved to Elysia backend - update test to use HTTP endpoints");
+};
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
   analyzedDocsSummaryAtom,

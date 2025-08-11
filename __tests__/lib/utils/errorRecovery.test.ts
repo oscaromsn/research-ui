@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { SearchQueryItem, SearchResultItem } from "@/baml_client/types";
+import type { SearchQueryItem, SearchResultItem } from "@/packages/shared-types/src";
 import {
   createRetryContext,
   createSearchContext,

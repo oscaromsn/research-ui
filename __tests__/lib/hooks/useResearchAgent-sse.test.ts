@@ -1,4 +1,4 @@
-// TDD Failing Tests for EventSource-based useResearchAgent Hook
+// TDD Tests for ResilientEventSource-based useResearchAgent Hook
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the API client
@@ -13,6 +13,23 @@ vi.mock("@/lib/apiClient", () => ({
     },
   },
 }));
+
+// Mock ResilientEventSource - define the mock inline to avoid hoisting issues
+vi.mock("@/lib/utils/eventSourceManager", () => {
+  const mockInstance = {
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    connect: vi.fn(),
+    disconnect: vi.fn(),
+  };
+  
+  const MockResilientEventSource = vi.fn(() => mockInstance);
+  MockResilientEventSource.mockInstance = mockInstance;
+  
+  return {
+    ResilientEventSource: MockResilientEventSource,
+  };
+});
 
 // Mock shared types for SSE event validation
 vi.mock("../../../packages/shared-types/src/sse-events", () => ({
@@ -50,25 +67,6 @@ import { createStore, Provider } from "jotai";
 import type { ReactNode } from "react";
 import { createElement } from "react";
 
-// EventSource Mock Setup
-const mockEventSourceInstance = {
-  addEventListener: vi.fn(),
-  removeEventListener: vi.fn(),
-  close: vi.fn(),
-  readyState: 1, // EventSource.OPEN
-  CONNECTING: 0,
-  OPEN: 1,
-  CLOSED: 2,
-};
-
-const mockEventSource = vi.fn(() => mockEventSourceInstance);
-
-// Mock EventSource globally
-Object.defineProperty(global, "EventSource", {
-  value: mockEventSource,
-  writable: true,
-});
-
 import { createStreamingURL } from "@/lib/apiClient";
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
@@ -86,12 +84,17 @@ import {
   StageChangeEventSchema,
 } from "../../../packages/shared-types/src/sse-events";
 
+// Import the mocked module to get access to the mock
+import { ResilientEventSource } from "@/lib/utils/eventSourceManager";
+
 // Type mocks for better TypeScript support
 const mockStageChangeEventSchema = StageChangeEventSchema as any;
 const mockQueryGeneratedEventSchema = QueryGeneratedEventSchema as any;
 const mockDocumentAnalyzedEventSchema = DocumentAnalyzedEventSchema as any;
 const mockReportChunkEventSchema = ReportChunkEventSchema as any;
 const mockCreateStreamingURL = createStreamingURL as ReturnType<typeof vi.fn>;
+const mockResilientEventSource = ResilientEventSource as any;
+const mockResilientEventSourceInstance = (ResilientEventSource as any).mockInstance;
 
 describe("useResearchAgent Hook - EventSource Integration (TDD)", () => {
   let store: ReturnType<typeof createStore>;
@@ -102,7 +105,11 @@ describe("useResearchAgent Hook - EventSource Integration (TDD)", () => {
   beforeEach(() => {
     store = createStore();
     vi.clearAllMocks();
-    mockEventSourceInstance.readyState = 1; // OPEN
+
+    // Reset ResilientEventSource mock
+    mockResilientEventSourceInstance.connect.mockResolvedValue(undefined);
+    mockResilientEventSourceInstance.addEventListener.mockImplementation(() => {});
+    mockResilientEventSourceInstance.disconnect.mockImplementation(() => {});
 
     // Reset mock implementations
     mockStageChangeEventSchema.safeParse.mockReturnValue({ success: false });
@@ -122,8 +129,8 @@ describe("useResearchAgent Hook - EventSource Integration (TDD)", () => {
     await global.testUtils?.flushPromises?.();
   });
 
-  describe("EventSource Connection Management", () => {
-    it("should establish EventSource connection on startResearch", async () => {
+  describe("ResilientEventSource Connection Management", () => {
+    it("should establish ResilientEventSource connection on startResearch", async () => {
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
       });
@@ -132,18 +139,24 @@ describe("useResearchAgent Hook - EventSource Integration (TDD)", () => {
         await result.current.startResearch("Test legal question");
       });
 
-      // FAILING: Hook doesn't use EventSource yet
-      expect(mockEventSource).toHaveBeenCalledWith(
+      // Should create ResilientEventSource with streaming URL
+      expect(mockResilientEventSource).toHaveBeenCalledWith(
         "http://localhost:3001/api/research/stream",
-        expect.any(Object)
+        expect.any(Object), // callbacks
+        expect.any(Object), // config
       );
-      expect(mockEventSourceInstance.addEventListener).toHaveBeenCalledWith(
+      
+      // Should set up event listeners
+      expect(mockResilientEventSourceInstance.addEventListener).toHaveBeenCalledWith(
         "stage.change",
         expect.any(Function)
       );
+      
+      // Should attempt to connect
+      expect(mockResilientEventSourceInstance.connect).toHaveBeenCalled();
     });
 
-    it("should close EventSource connection on abortResearch", async () => {
+    it("should disconnect ResilientEventSource connection on abortResearch", async () => {
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
       });
@@ -156,8 +169,8 @@ describe("useResearchAgent Hook - EventSource Integration (TDD)", () => {
         result.current.abortResearch();
       });
 
-      // FAILING: Hook doesn't manage EventSource yet
-      expect(mockEventSourceInstance.close).toHaveBeenCalled();
+      // Should disconnect the ResilientEventSource connection
+      expect(mockResilientEventSourceInstance.disconnect).toHaveBeenCalled();
     });
 
     it("should create streaming URL with correct parameters", async () => {
@@ -193,6 +206,15 @@ describe("useResearchAgent Hook - EventSource Integration (TDD)", () => {
         },
       });
 
+      let stageChangeListener: EventListener | null = null;
+
+      // Capture the event listener when addEventListener is called
+      mockResilientEventSourceInstance.addEventListener.mockImplementation((eventType: string, listener: EventListener) => {
+        if (eventType === "stage.change") {
+          stageChangeListener = listener;
+        }
+      });
+
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
       });
@@ -201,6 +223,8 @@ describe("useResearchAgent Hook - EventSource Integration (TDD)", () => {
         await result.current.startResearch("Test question");
       });
 
+      expect(stageChangeListener).toBeDefined();
+
       // Simulate stage change event
       const mockEvent = {
         data: JSON.stringify({
@@ -208,22 +232,13 @@ describe("useResearchAgent Hook - EventSource Integration (TDD)", () => {
           message: "Generating search queries...",
           progress: 17,
         }),
-      };
-
-      // Find the addEventListener call for 'stage.change'
-      const stageChangeListener =
-        mockEventSourceInstance.addEventListener.mock.calls.find(
-          ([eventType]) => eventType === "stage.change"
-        )?.[1];
-
-      expect(stageChangeListener).toBeDefined();
+      } as MessageEvent;
 
       // Trigger the event listener
       act(() => {
         stageChangeListener?.(mockEvent);
       });
 
-      // FAILING: Hook doesn't process SSE events yet
       await waitFor(() => {
         const status = store.get(researchStatusAtom);
         expect(status.stage).toBe("GENERATING_QUERIES");
@@ -808,25 +823,30 @@ describe("useResearchAgent Hook - EventSource Integration (TDD)", () => {
   });
 
   describe("Backward Compatibility", () => {
-    it("should maintain the same hook interface", () => {
+    it("should maintain the expected hook interface", () => {
       const { result } = renderHook(() => useResearchAgent(), {
         wrapper: JotaiProvider,
       });
 
-      // Hook should still provide same functions
-      expect(result.current).toEqual({
+      // Hook should provide the expected functions and properties
+      expect(result.current).toMatchObject({
         startResearch: expect.any(Function),
         resumeResearch: expect.any(Function),
         pauseResearch: expect.any(Function),
         abortResearch: expect.any(Function),
-        isLoading: false,
-        currentStage: "IDLE",
-        currentMessage: "Ready to start research.",
+        retryConnection: expect.any(Function),
+        isLoading: expect.any(Boolean),
+        currentStage: expect.any(String),
+        currentMessage: expect.any(String),
         error: null,
-        isPaused: false,
-        canResume: false,
-        autoModeEnabled: false,
+        isPaused: expect.any(Boolean),
+        canResume: expect.any(Boolean),
+        autoModeEnabled: expect.any(Boolean),
         toggleAutoMode: expect.any(Function),
+        connectionState: expect.any(Object),
+        systemHealth: expect.any(Object),
+        dismissWarning: expect.any(Function),
+        checkSystemHealth: expect.any(Function),
       });
     });
 

@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator";
+import type { ResearchUpdate } from "@/packages/shared-types/src";
 import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 
 // Mock data for testing

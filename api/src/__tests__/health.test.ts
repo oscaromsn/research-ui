@@ -64,7 +64,7 @@ describe("Health Check Endpoint", () => {
       })
     );
 
-    // Should allow CORS preflight
+    // Should allow CORS preflight (Elysia returns 204 by default for OPTIONS)
     expect(response.status).toBe(204);
   });
 });

@@ -8,7 +8,7 @@ import {
   type MockInstance,
   vi,
 } from "vitest";
-import type { SearchQueryItem } from "@/baml_client/types";
+import type { SearchQueryItem } from "@/packages/shared-types/src";
 import * as errorRecovery from "@/lib/utils/errorRecovery";
 import * as exaErrorHandler from "@/lib/utils/exaErrorHandler";
 import {
