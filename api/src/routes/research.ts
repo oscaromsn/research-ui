@@ -204,6 +204,7 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
       let isStreamClosed = false;
       const stream = new ReadableStream({
         async start(controller) {
+          console.log(`🔄 [${connectionId}] Starting SSE stream handler`);
 
           // Create sender utility
           const writer = {
@@ -211,9 +212,12 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
               if (!isStreamClosed) {
                 try {
                   controller.enqueue(data);
+                  // Log successful data transmission
+                  const dataPreview = new TextDecoder().decode(data).substring(0, 100);
+                  console.log(`✅ [${connectionId}] Data sent: ${dataPreview}...`);
                 } catch (error) {
                   // Client disconnected - this is normal behavior
-                  console.log("📤 Client disconnected during stream");
+                  console.log(`📤 [${connectionId}] Client disconnected during stream: ${error}`);
                   isStreamClosed = true;
                 }
               }
@@ -236,6 +240,7 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
 
           try {
             const startTime = Date.now();
+            console.log(`🚀 [${connectionId}] Beginning pipeline execution`);
 
             // Initialize pipeline result
             let queryAnalysis: LegalQueryAnalysis | null = null;
@@ -246,11 +251,13 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
             let finalReport: FinalLegalReport | null = null;
 
             // Send initialization update
+            console.log(`📨 [${connectionId}] Sending initialization update...`);
             await sender.sendStatusChange(
               "INITIALIZING",
               "Starting legal research pipeline...",
               { metadata: { timestamp: new Date().toISOString() } }
             );
+            console.log(`✅ [${connectionId}] Initialization update sent successfully`);
 
             // Stage 1: Generate Queries
             await sender.sendStatusChange(
@@ -457,8 +464,11 @@ export const researchRoutes = new Elysia({ prefix: "/research" })
         },
       });
 
+      const sseHeaders = createSSEHeaders();
+      console.log(`🎯 [${connectionId}] Returning SSE Response with headers:`, sseHeaders);
+      
       return new Response(stream, {
-        headers: createSSEHeaders(),
+        headers: sseHeaders,
       });
     },
     {
