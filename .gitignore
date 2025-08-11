@@ -50,7 +50,9 @@ dependency-report.html
 # baml_client
 
 # dev notes
-# _notes
+_notes/**
+dev/**
+docs/dev/**
 
 # IDEs
 .zed

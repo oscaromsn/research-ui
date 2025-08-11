@@ -2,9 +2,8 @@
 # Example:
 # *.log
 # tmp/
-docs/dependencies/**
-docs/exemplars/**
-docs/sprints/3-future/**
+docs/**
+__tests__/**
 
 .gemini/**
 **.svg
