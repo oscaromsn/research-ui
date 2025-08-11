@@ -307,6 +307,144 @@ export function useResearchAgent(): UseResearchAgentReturn {
     [setResearchStatus, logResearchEvent, cleanupOrphanedDocuments]
   );
 
+  /**
+   * Handles enhanced error events with smart retry logic based on error classification
+   */
+  const handleEnhancedError = useCallback(
+    (errorInfo: any, resilientSource: ResilientEventSource) => {
+      const classification = errorInfo.classification || 'UNKNOWN';
+      const recoverable = errorInfo.recoverable || false;
+      const recommendedAction = errorInfo.recommendedAction || 'MANUAL_RETRY';
+
+      // Update connection state with error classification
+      setConnectionState(prev => ({
+        ...prev,
+        isConnected: false,
+        lastError: errorInfo.message,
+        lastErrorTime: Date.now(),
+        errorClassification: classification,
+      }));
+
+      // Update research status with user-friendly error information
+      setResearchStatus(prev => ({
+        ...prev,
+        isLoading: false,
+        stage: "ERROR" as ResearchStage,
+        error: errorInfo.message,
+        message: getErrorUserMessage(classification, errorInfo),
+      }));
+
+      // Implement smart retry logic based on error classification
+      switch (classification) {
+        case 'RATE_LIMIT':
+          // Rate limit errors: stop all retries, show clear message
+          logResearchEvent(
+            "ERROR", 
+            "ERROR", 
+            `API quota exceeded: ${errorInfo.message}. Stopping retries to preserve quota.`
+          );
+          
+          resilientSource.disconnect();
+          setResilientEventSource(null);
+          
+          // Set specific error state for rate limiting
+          setResearchStatus(prev => ({
+            ...prev,
+            canRetry: false,
+            retryRecommendation: `Wait ${errorInfo.retryAfterMinutes || 5} minutes before trying again`,
+          }));
+          break;
+
+        case 'AUTHENTICATION':
+        case 'CONFIGURATION':
+          // Auth/config errors: stop retries, require user action
+          logResearchEvent(
+            "ERROR",
+            "ERROR", 
+            `Non-recoverable error: ${errorInfo.message}. Manual intervention required.`
+          );
+          
+          resilientSource.disconnect();
+          setResilientEventSource(null);
+          
+          setResearchStatus(prev => ({
+            ...prev,
+            canRetry: false,
+            retryRecommendation: getRetryRecommendation(recommendedAction),
+          }));
+          break;
+
+        case 'NETWORK':
+          // Network errors: allow automatic retries (handled by ResilientEventSource)
+          logResearchEvent(
+            "ERROR",
+            "WARN",
+            `Network error: ${errorInfo.message}. Automatic retry will be attempted.`
+          );
+          
+          setResearchStatus(prev => ({
+            ...prev,
+            canRetry: true,
+            retryRecommendation: "Connection will be retried automatically",
+          }));
+          // Don't disconnect - let ResilientEventSource handle retries
+          break;
+
+        default:
+          // Unknown errors: conservative approach, allow manual retry
+          logResearchEvent(
+            "ERROR",
+            "WARN",
+            `Unknown error type: ${errorInfo.message}. Manual retry available.`
+          );
+          
+          setResearchStatus(prev => ({
+            ...prev,
+            canRetry: true,
+            retryRecommendation: "You can try again, or contact support if the issue persists",
+          }));
+          break;
+      }
+    },
+    [setConnectionState, setResearchStatus, setResilientEventSource, logResearchEvent]
+  );
+
+  /**
+   * Gets user-friendly error message based on classification
+   */
+  const getErrorUserMessage = (classification: string, errorInfo: any): string => {
+    switch (classification) {
+      case 'RATE_LIMIT':
+        return `API usage limit reached. Please wait ${errorInfo.retryAfterMinutes || 5} minutes before trying again.`;
+      case 'AUTHENTICATION':
+        return 'Authentication failed. Please check your API credentials in settings.';
+      case 'CONFIGURATION':
+        return 'Configuration error detected. Please check your application settings.';
+      case 'NETWORK':
+        return 'Network connection issue. Retrying automatically...';
+      default:
+        return errorInfo.message || 'An unexpected error occurred. Please try again.';
+    }
+  };
+
+  /**
+   * Gets retry recommendation based on recommended action
+   */
+  const getRetryRecommendation = (action: string): string => {
+    switch (action) {
+      case 'WAIT_AND_RETRY_LATER':
+        return 'Please wait a few minutes before trying again';
+      case 'CHECK_CREDENTIALS':
+        return 'Please check your API credentials in settings';
+      case 'CHECK_SETTINGS':
+        return 'Please review your application configuration';
+      case 'AUTOMATIC_RETRY':
+        return 'Connection will be retried automatically';
+      default:
+        return 'You can try again, or contact support if the issue persists';
+    }
+  };
+
   // Setup EventSource listeners for different SSE event types
   const setupEventListeners = useCallback(
     (resilientSource: ResilientEventSource) => {
@@ -702,7 +840,34 @@ export function useResearchAgent(): UseResearchAgentReturn {
         }
       });
 
-      // Note: Error events are now handled by ResilientEventSource callbacks
+      // Research Update events (including enhanced error events)
+      resilientSource.addEventListener("research-update", (event) => {
+        try {
+          const eventData = JSON.parse((event as MessageEvent).data);
+          
+          // Handle enhanced error events with smart retry logic
+          if (eventData.type === "ERROR" && eventData.data?.error) {
+            const errorInfo = eventData.data.error;
+            handleEnhancedError(errorInfo, resilientSource);
+          }
+          
+          logResearchEvent(
+            eventData.stage || "UNKNOWN",
+            eventData.type || "INFO",
+            eventData.message || "Research update received"
+          );
+        } catch (error) {
+          console.warn("Failed to parse research-update event:", error);
+          logResearchEvent(
+            "ERROR",
+            "ERROR",
+            `Failed to parse research-update event: ${error instanceof Error ? error.message : "Unknown error"}`
+          );
+        }
+      });
+
+      // Note: Connection-level errors are handled by ResilientEventSource callbacks
+      // Enhanced pipeline errors are handled above via research-update events
 
       // Completion events
       resilientSource.addEventListener("complete", (event) => {

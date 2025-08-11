@@ -2,7 +2,7 @@
 
 import { atom } from "jotai";
 
-import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
+import type { ResearchStage } from "@/packages/shared-types/src/sse-events";
 
 // --- Client-Friendly Data Structures ---
 
@@ -165,6 +165,7 @@ export interface ClientResearchAssessment {
 /**
  * Represents the current status of the research process.
  * Contains all information needed for UI status display and progress tracking.
+ * Enhanced with retry management for intelligent error handling.
  */
 export interface ResearchStatus {
   stage: ResearchStage | null;
@@ -176,6 +177,10 @@ export interface ResearchStatus {
   currentStreamingField?: string | null; // e.g., "executiveSummary", "sections[0].content"
   isPaused?: boolean; // Track if research is manually paused
   canResume?: boolean; // Track if research can be resumed
+  // Enhanced retry management
+  canRetry?: boolean; // Whether retry is allowed for the current error
+  retryRecommendation?: string; // User-friendly retry guidance
+  errorClassification?: 'RATE_LIMIT' | 'AUTHENTICATION' | 'NETWORK' | 'CONFIGURATION' | 'UNKNOWN'; // Error type for UI handling
 }
 
 /**
@@ -192,6 +197,7 @@ export interface AutoModeState {
 /**
  * Connection state management for resilient EventSource connections.
  * Tracks connection attempts, failures, and provides user feedback.
+ * Enhanced with error classification for intelligent retry handling.
  */
 export interface ConnectionState {
   isConnected: boolean;
@@ -208,6 +214,11 @@ export interface ConnectionState {
     successfulConnections: number;
     failedConnections: number;
   };
+  // Enhanced error classification and retry management
+  errorClassification: 'RATE_LIMIT' | 'AUTHENTICATION' | 'NETWORK' | 'CONFIGURATION' | 'UNKNOWN' | null;
+  canRetry: boolean; // Whether automatic retries are allowed
+  retryRecommendation: string | null; // User-friendly retry guidance
+  userActionRequired: boolean; // Whether manual intervention is needed
 }
 
 /**
@@ -343,6 +354,11 @@ export const connectionStateAtom = atom<ConnectionState>({
     successfulConnections: 0,
     failedConnections: 0,
   },
+  // Enhanced error classification and retry management
+  errorClassification: null,
+  canRetry: true,
+  retryRecommendation: null,
+  userActionRequired: false,
 });
 
 // System health state atom for BAML services and rate limiting
@@ -434,6 +450,10 @@ export const resetResearchStateAtom = atom(null, (get, set, _value) => {
     currentStreamingField: null,
     isPaused: false,
     canResume: false,
+    // Reset enhanced retry fields
+    canRetry: undefined,
+    retryRecommendation: undefined,
+    errorClassification: undefined,
   });
   set(researchLogAtom, []);
   set(generatedQueriesAtom, []);
@@ -487,6 +507,11 @@ export const resetResearchStateAtom = atom(null, (get, set, _value) => {
       successfulConnections: 0,
       failedConnections: 0,
     },
+    // Reset enhanced error fields
+    errorClassification: null,
+    canRetry: true,
+    retryRecommendation: null,
+    userActionRequired: false,
   });
 
   // Reset system health but keep current warnings for user awareness
