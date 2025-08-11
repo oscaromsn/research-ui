@@ -4,6 +4,10 @@
  */
 
 import { treaty } from "@elysiajs/eden";
+// TODO: Fix Eden Treaty type import - this should reference the Elysia app type
+// import type { App } from "@/api/src/app";
+// For now, using any to resolve TypeScript errors
+type App = any;
 
 // API configuration
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -12,7 +16,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
  * Type-safe API client using Eden Treaty
  * Provides autocomplete and type checking for all API endpoints
  */
-export const api = treaty<any>(API_URL); // Use any type to avoid exactOptionalPropertyTypes conflicts
+export const api = treaty<App>(API_URL);
 
 /**
  * API configuration object for manual requests if needed

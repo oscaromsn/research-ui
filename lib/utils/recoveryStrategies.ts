@@ -1,4 +1,4 @@
-import type { SearchResultItem } from "@/baml_client/types";
+import type { SearchResultItem } from "../../packages/shared-types/src/baml-types.js";
 import { config } from "@/lib/config";
 import type { RecoveryStrategy, SearchContext } from "./errorRecovery";
 import {

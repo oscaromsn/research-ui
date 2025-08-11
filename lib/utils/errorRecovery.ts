@@ -1,4 +1,4 @@
-import type { SearchQueryItem, SearchResultItem } from "@/baml_client/types";
+import type { SearchQueryItem, SearchResultItem } from "../../packages/shared-types/src/baml-types.js";
 
 /**
  * Context information provided to recovery strategies

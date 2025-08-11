@@ -4,12 +4,11 @@ import { config } from "dotenv";
 // Load environment variables
 config();
 
-// Assuming BAML-generated types are available.
-// You might need to adjust the import path based on your `generators.baml` output_dir.
+// Import BAML types from shared types package
 import type {
   SearchResultItem as BamlSearchResultItem,
   SearchQueryItem,
-} from "@/baml_client/types";
+} from "../../packages/shared-types/src/baml-types.js";
 
 // Import validated environment
 import { env } from "@/lib/schemas";
