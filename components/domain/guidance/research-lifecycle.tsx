@@ -13,7 +13,7 @@ import {
 import type { ReactElement } from "react";
 import { useMemo } from "react";
 
-import type { ResearchStage } from "@/app/actions/researchAgentOrchestrator";
+import type { ResearchStage } from "@/packages/shared-types/src/sse-events";
 import { researchStatusAtom } from "@/lib/state/researchAtoms";
 
 // Stage styling constants
