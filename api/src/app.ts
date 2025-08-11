@@ -21,7 +21,7 @@ export function createApp() {
     .use(
       cors({
         origin: process.env.CORS_ORIGIN || "http://localhost:3000",
-        credentials: false, // Match EventSource default behavior (no credentials)
+        credentials: true, // Enable credentials for better compatibility
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowedHeaders: [
           "Content-Type", 
@@ -31,8 +31,11 @@ export function createApp() {
           "Connection",         // Required for keep-alive  
           "Accept-Language",    // Browser default header
           "Accept-Encoding",    // Browser default header
-          "User-Agent"          // Browser default header
+          "User-Agent",         // Browser default header
+          "X-Requested-With"    // Common header for AJAX requests
         ],
+        preflight: true,        // Enable preflight requests handling
+        exposeHeaders: ["*"],   // Expose all headers to the client
       })
     )
     .use(
