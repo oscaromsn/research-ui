@@ -1,4 +1,4 @@
-import { describe, expect, test, mock } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { app } from "../../index";
 import type { ResearchPipelineResult } from "../../types/research";
 
@@ -38,7 +38,9 @@ mock.module("../../../baml_client", () => ({
             details: "Agreement between parties",
           },
         ],
-        extracted_quotes: ["A contract requires offer, acceptance, and consideration"],
+        extracted_quotes: [
+          "A contract requires offer, acceptance, and consideration",
+        ],
         counter_arguments_or_nuances: [],
         reasoning: {
           analyze_legal_question: {
@@ -70,22 +72,27 @@ mock.module("../../../baml_client", () => ({
       Promise.resolve({
         is_sufficient: true,
         next_action: "GENERATE_REPORT",
-        assessment_summary: "Research is sufficient for generating a comprehensive report.",
+        assessment_summary:
+          "Research is sufficient for generating a comprehensive report.",
         identified_gaps: [],
       })
     ),
     GenerateFinalLegalReport: mock(() =>
       Promise.resolve({
         report_title: "Legal Analysis: Contract Formation Requirements",
-        executive_summary: "This report analyzes the essential elements of contract formation.",
+        executive_summary:
+          "This report analyzes the essential elements of contract formation.",
         sections: [
           {
             section_title: "Essential Elements",
             content: "Contracts require offer, acceptance, and consideration.",
           },
         ],
-        conclusion: "The legal requirements for contract formation are well-established.",
-        limitations_and_caveats: ["This analysis is based on general principles"],
+        conclusion:
+          "The legal requirements for contract formation are well-established.",
+        limitations_and_caveats: [
+          "This analysis is based on general principles",
+        ],
         appendix_document_ids: ["test-doc-1"],
       })
     ),
@@ -101,7 +108,8 @@ mock.module("../../utils/exaSearch", () => ({
         url: "https://example.com/contract-law",
         title: "Contract Formation Principles",
         source_name: "example.com",
-        full_text: "A contract is formed when there is an offer, acceptance, and consideration...",
+        full_text:
+          "A contract is formed when there is an offer, acceptance, and consideration...",
       },
     ])
   ),
@@ -133,7 +141,9 @@ describe("Research Complete Endpoint", () => {
     // Verify query analysis
     expect(data.queryAnalysis).toBeDefined();
     expect(data.queryAnalysis?.search_queries).toHaveLength(2);
-    expect(data.queryAnalysis?.search_queries[0]?.query_string).toContain("contract");
+    expect(data.queryAnalysis?.search_queries[0]?.query_string).toContain(
+      "contract"
+    );
 
     // Verify fetched documents
     expect(data.fetchedDocuments).toBeDefined();
@@ -151,7 +161,9 @@ describe("Research Complete Endpoint", () => {
 
     // Verify assessment
     expect(data.assessment).toBeDefined();
-    expect(data.assessment?.next_action).toMatch(/GENERATE_REPORT|REFINE_QUERIES|REQUEST_HUMAN_REVIEW/);
+    expect(data.assessment?.next_action).toMatch(
+      /GENERATE_REPORT|REFINE_QUERIES|REQUEST_HUMAN_REVIEW/
+    );
 
     // Verify final report when assessment says to generate
     if (data.assessment?.next_action === "GENERATE_REPORT") {

@@ -412,7 +412,11 @@ beforeAll(() => {
   global.ResizeObserver = EnhancedResizeObserverMock as typeof ResizeObserver;
   global.IntersectionObserver =
     EnhancedIntersectionObserverMock as typeof IntersectionObserver;
-  global.fetch = createFetchMock();
+  
+  // Create fetch mock with preconnect method for Bun compatibility
+  const fetchMock = createFetchMock();
+  (fetchMock as any).preconnect = vi.fn();
+  global.fetch = fetchMock as any; // Use any to avoid Bun type conflicts
 
   // Mock other common browser APIs
   global.matchMedia = vi.fn((query) => ({
@@ -442,15 +446,14 @@ beforeAll(() => {
   global.localStorage = createStorageMock();
   global.sessionStorage = createStorageMock();
 
-  // Performance timing mock
-  global.performance = {
-    ...global.performance,
+  // Performance timing mock - use Object.assign to avoid type conflicts
+  Object.assign(global.performance, {
     now: vi.fn(() => Date.now()),
     mark: vi.fn(),
     measure: vi.fn(),
     getEntriesByName: vi.fn(() => []),
     getEntriesByType: vi.fn(() => []),
-  };
+  });
 
   // Note: vi.mock is not supported in bun test runner
   // Mock Next.js font imports handled in __mocks__ directory instead
@@ -523,7 +526,7 @@ global.testUtils = {
   waitForNextTick: () => new Promise((resolve) => setTimeout(resolve, 0)),
 
   mockApiCall: (url: string, response: unknown) => {
-    const mockFetch = global.fetch as ReturnType<typeof vi.fn>;
+    const mockFetch = global.fetch as any; // Use any to avoid type conflicts
     mockFetch.mockImplementationOnce((requestUrl: string) => {
       if (requestUrl.includes(url)) {
         return Promise.resolve({

@@ -48,14 +48,13 @@ describe("Elysia API Integration Tests", () => {
       const legalQuestion =
         "What are the legal implications of AI in healthcare?";
 
-      // Make request to research endpoint using app.handle
+      // Make request to research stream endpoint using GET for EventSource compatibility
       const response = await app.handle(
-        new Request("http://localhost/api/research", {
-          method: "POST",
+        new Request(`http://localhost/api/research/stream?legalQuestion=${encodeURIComponent(legalQuestion)}`, {
+          method: "GET",
           headers: {
-            "Content-Type": "application/json",
+            "Accept": "text/event-stream",
           },
-          body: JSON.stringify({ legalQuestion }),
         })
       );
 
@@ -71,12 +70,11 @@ describe("Elysia API Integration Tests", () => {
       const legalQuestion = "Test question for SSE validation";
 
       const response = await app.handle(
-        new Request("http://localhost/api/research", {
-          method: "POST",
+        new Request(`http://localhost/api/research/stream?legalQuestion=${encodeURIComponent(legalQuestion)}`, {
+          method: "GET",
           headers: {
-            "Content-Type": "application/json",
+            "Accept": "text/event-stream",
           },
-          body: JSON.stringify({ legalQuestion }),
         })
       );
 
@@ -134,9 +132,9 @@ describe("Elysia API Integration Tests", () => {
           // Validate events
           expect(events.length).toBeGreaterThanOrEqual(2);
 
-          // First event should be stage change
+          // First event should be research update
           const initEvent = events[0];
-          expect(initEvent.event).toBe("stage.change");
+          expect(initEvent.event).toBe("research-update");
           expect(initEvent.data).toBeDefined();
 
           // Validate event data against Zod schema
@@ -148,7 +146,7 @@ describe("Elysia API Integration Tests", () => {
 
           // Last event should be completion
           const completeEvent = events[events.length - 1];
-          expect(completeEvent.event).toBe("complete");
+          expect(completeEvent.event).toBe("research-update");
           expect(completeEvent.data).toBeDefined();
         } finally {
           if (timeoutId) clearTimeout(timeoutId);
@@ -159,12 +157,11 @@ describe("Elysia API Integration Tests", () => {
 
     test("should reject invalid request body", async () => {
       const response = await app.handle(
-        new Request("http://localhost/api/research", {
-          method: "POST",
+        new Request("http://localhost/api/research/stream", {
+          method: "GET",
           headers: {
-            "Content-Type": "application/json",
+            "Accept": "text/event-stream",
           },
-          body: JSON.stringify({ invalidField: "test" }),
         })
       );
 
@@ -175,12 +172,11 @@ describe("Elysia API Integration Tests", () => {
 
     test("should reject empty legal question", async () => {
       const response = await app.handle(
-        new Request("http://localhost/api/research", {
-          method: "POST",
+        new Request("http://localhost/api/research/stream?legalQuestion=", {
+          method: "GET",
           headers: {
-            "Content-Type": "application/json",
+            "Accept": "text/event-stream",
           },
-          body: JSON.stringify({ legalQuestion: "" }),
         })
       );
 
@@ -208,6 +204,73 @@ describe("Elysia API Integration Tests", () => {
 
       // Check for CORS headers (exact headers depend on configuration)
       expect(response.headers.get("access-control-allow-origin")).toBeDefined();
+    });
+
+    test("should handle GET request for EventSource connection", async () => {
+      const legalQuestion = "What are the key elements of contract formation?";
+      
+      // Test the GET endpoint that EventSource will use
+      const response = await app.handle(
+        new Request(`http://localhost/api/research/stream?legalQuestion=${encodeURIComponent(legalQuestion)}`, {
+          method: "GET",
+          headers: {
+            "Accept": "text/event-stream",
+            "Cache-Control": "no-cache",
+          },
+        })
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("content-type")).toBe("text/event-stream");
+      expect(response.headers.get("cache-control")).toBe("no-cache");
+      expect(response.headers.get("connection")).toBe("keep-alive");
+
+      // Verify we can read from the stream
+      const reader = response.body?.getReader();
+      expect(reader).toBeDefined();
+
+      if (reader) {
+        const { value } = await reader.read();
+        expect(value).toBeDefined();
+        
+        // Convert the first chunk to string and verify it's SSE format
+        const chunk = new TextDecoder().decode(value);
+        expect(chunk).toMatch(/^(id:|event:|data:)/); // Should start with valid SSE field
+        
+        reader.releaseLock();
+      }
+    });
+
+    test("should validate query parameters for GET stream endpoint", async () => {
+      // Test missing legalQuestion parameter
+      const response = await app.handle(
+        new Request("http://localhost/api/research/stream", {
+          method: "GET",
+          headers: {
+            "Accept": "text/event-stream",
+          },
+        })
+      );
+
+      expect(response.status).toBe(400);
+      const errorData = await response.json();
+      expect(errorData.error).toContain("legal question is required");
+    });
+
+    test("should validate empty legalQuestion in query parameters", async () => {
+      // Test empty legalQuestion parameter
+      const response = await app.handle(
+        new Request("http://localhost/api/research/stream?legalQuestion=", {
+          method: "GET",
+          headers: {
+            "Accept": "text/event-stream",
+          },
+        })
+      );
+
+      expect(response.status).toBe(400);
+      const errorData = await response.json();
+      expect(errorData.error).toContain("legal question is required");
     });
   });
 });

@@ -1,0 +1,332 @@
+/*
+ * ⚠️  DEPRECATED TEST FILE ⚠️ 
+ * 
+ * This test file is DEPRECATED and should not be used.
+ * 
+ * REASON: The useResearchAgent hook was refactored in Phase 4 to use EventSource-based
+ * SSE instead of Next.js Server Actions. These tests are for the old implementation.
+ * 
+ * CURRENT TESTS: See __tests__/lib/hooks/useResearchAgent-sse.test.ts
+ * 
+ * MIGRATION DATE: January 11, 2025
+ */
+
+// __tests__/lib/hooks/useResearchAgent-fetchingDocuments.test.ts
+
+import { createStore } from "jotai";
+import { beforeEach, describe, expect, it } from "vitest";
+
+import type { ResearchUpdate } from "@/app/actions/researchAgentOrchestrator";
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
+import { analyzedDocsSummaryAtom } from "@/lib/state/researchAtoms";
+
+describe("useResearchAgent Hook - FETCHING_DOCUMENTS Updates", () => {
+  let store: ReturnType<typeof createStore>;
+
+  beforeEach(() => {
+    store = createStore();
+  });
+
+  describe("Individual Document Fetching Updates", () => {
+    it("should handle FETCHING_DOCUMENTS updates with individual document data", () => {
+      // Test that the hook properly processes individual document updates from FETCHING_DOCUMENTS stage
+      // We'll simulate the expected behavior by directly updating atoms
+
+      const mockDocs = [
+        {
+          docId: "doc-1",
+          title: "Contract Law and Force Majeure",
+          url: "https://example.com/doc1",
+          source: "Westlaw",
+          status: "fetched" as const,
+          timestamp: "2024-01-01T00:00:00Z",
+        },
+        {
+          docId: "doc-2",
+          title: "COVID-19 Impact on Contract Performance",
+          url: "https://example.com/doc2",
+          source: "LexisNexis",
+          status: "fetched" as const,
+          timestamp: "2024-01-01T00:00:00Z",
+        },
+        {
+          docId: "doc-3",
+          title: "California Civil Code § 1511",
+          url: "https://example.com/doc3",
+          source: "California Legislature",
+          status: "fetched" as const,
+          timestamp: "2024-01-01T00:00:00Z",
+        },
+      ];
+
+      // Simulate processing individual document updates
+      for (const docData of mockDocs) {
+        const currentDocs = store.get(analyzedDocsSummaryAtom);
+        const newDoc: ClientAnalyzedDoc = {
+          docId: docData.docId,
+          title: docData.title,
+          url: docData.url,
+          source: docData.source,
+          status: docData.status,
+          timestamp: docData.timestamp,
+        };
+        store.set(analyzedDocsSummaryAtom, [...currentDocs, newDoc]);
+      }
+
+      const docs = store.get(analyzedDocsSummaryAtom);
+      expect(docs).toHaveLength(3);
+
+      // Verify first document
+      expect(docs[0]).toMatchObject({
+        docId: "doc-1",
+        title: "Contract Law and Force Majeure",
+        url: "https://example.com/doc1",
+        source: "Westlaw",
+        status: "fetched",
+      });
+
+      // Verify second document
+      expect(docs[1]).toMatchObject({
+        docId: "doc-2",
+        title: "COVID-19 Impact on Contract Performance",
+        url: "https://example.com/doc2",
+        source: "LexisNexis",
+        status: "fetched",
+      });
+
+      // Verify third document
+      expect(docs[2]).toMatchObject({
+        docId: "doc-3",
+        title: "California Civil Code § 1511",
+        url: "https://example.com/doc3",
+        source: "California Legislature",
+        status: "fetched",
+      });
+
+      // Verify no analysis data is present yet
+      expect(docs[0]?.relevanceScore).toBeUndefined();
+      expect(docs[0]?.summarySnippet).toBeUndefined();
+      expect(docs[0]?.keyArguments).toBeUndefined();
+    });
+
+    it("should handle documents with missing optional fields during fetching", () => {
+      const incompleteDocUpdate = JSON.stringify({
+        type: "DATA",
+        stage: "FETCHING_DOCUMENTS",
+        message: "Document 1/1 retrieved: Untitled",
+        data: {
+          docId: "incomplete-doc",
+          url: "https://example.com/incomplete",
+          source: "Unknown Source",
+          status: "fetched",
+          timestamp: "2024-01-01T00:00:00Z",
+          // Missing title
+        },
+        currentProcessedDoc: 1,
+        totalDocsToProcess: 1,
+      });
+
+      // Simulate processing the incomplete document
+      const update = JSON.parse(incompleteDocUpdate) as ResearchUpdate;
+      const docData = update.data as Partial<ClientAnalyzedDoc>;
+
+      const newDoc = {
+        docId: docData.docId || "",
+        title: docData.title,
+        url: docData.url,
+        source: docData.source,
+        status: docData.status || "fetched",
+        timestamp: docData.timestamp || new Date().toISOString(),
+      } as ClientAnalyzedDoc;
+
+      store.set(analyzedDocsSummaryAtom, [newDoc]);
+
+      const docs = store.get(analyzedDocsSummaryAtom);
+      expect(docs).toHaveLength(1);
+      expect(docs[0]).toMatchObject({
+        docId: "incomplete-doc",
+        url: "https://example.com/incomplete",
+        source: "Unknown Source",
+        status: "fetched",
+        title: undefined,
+      });
+    });
+
+    it("should transition documents from 'fetched' to 'analyzing' status", async () => {
+      // First, add a fetched document
+      const fetchedDoc: ClientAnalyzedDoc = {
+        docId: "doc-transition",
+        title: "Test Document",
+        url: "https://example.com/test",
+        source: "Test Source",
+        status: "fetched",
+        timestamp: "2024-01-01T00:00:00Z",
+      };
+
+      store.set(analyzedDocsSummaryAtom, [fetchedDoc]);
+
+      // Update the document status to analyzing
+      const currentDocs = store.get(analyzedDocsSummaryAtom);
+      const updatedDocs = currentDocs.map((doc) =>
+        doc.docId === "doc-transition"
+          ? { ...doc, status: "analyzing" as const }
+          : doc
+      );
+      store.set(analyzedDocsSummaryAtom, updatedDocs);
+
+      const docs = store.get(analyzedDocsSummaryAtom);
+      expect(docs).toHaveLength(1);
+      expect(docs[0]?.status).toBe("analyzing");
+      expect(docs[0]?.docId).toBe("doc-transition");
+    });
+
+    it("should handle error status for documents that fail to fetch", () => {
+      const errorUpdate = JSON.stringify({
+        type: "ERROR",
+        stage: "FETCHING_DOCUMENTS",
+        message: "Failed to retrieve document failed-doc-1: Network timeout",
+        data: {
+          docId: "failed-doc-1",
+          status: "error",
+          errorMessage: "Network timeout",
+          timestamp: "2024-01-01T00:00:00Z",
+        },
+      });
+
+      const update = JSON.parse(errorUpdate) as ResearchUpdate;
+      const docData = update.data as Partial<ClientAnalyzedDoc>;
+
+      const errorDoc = {
+        docId: docData.docId || "",
+        status: docData.status || "error",
+        errorMessage: docData.errorMessage || "Unknown error",
+        timestamp: docData.timestamp || new Date().toISOString(),
+      } as ClientAnalyzedDoc;
+
+      store.set(analyzedDocsSummaryAtom, [errorDoc]);
+
+      const docs = store.get(analyzedDocsSummaryAtom);
+      expect(docs).toHaveLength(1);
+      expect(docs[0]).toMatchObject({
+        docId: "failed-doc-1",
+        status: "error",
+        errorMessage: "Network timeout",
+      });
+    });
+  });
+
+  describe("Integration with Existing Document Analysis Flow", () => {
+    it("should update existing fetched documents when analysis data arrives", async () => {
+      // Start with a fetched document
+      const fetchedDoc: ClientAnalyzedDoc = {
+        docId: "doc-to-analyze",
+        title: "Contract Law Case",
+        url: "https://example.com/case",
+        source: "Westlaw",
+        status: "fetched",
+        timestamp: "2024-01-01T00:00:00Z",
+      };
+
+      store.set(analyzedDocsSummaryAtom, [fetchedDoc]);
+
+      // Simulate analysis completion with ANALYZING_DOCUMENTS update
+      const analysisUpdate = JSON.stringify({
+        type: "DATA",
+        stage: "ANALYZING_DOCUMENTS",
+        data: {
+          docId: "doc-to-analyze",
+          title: "Contract Law Case",
+          url: "https://example.com/case",
+          relevanceScore: 8,
+          confidenceScore: 9,
+          summarySnippet: "This case discusses force majeure clauses...",
+          keyArguments: [
+            "Force majeure requires unforeseeable events",
+            "Contract terms must be explicit",
+          ],
+          extractedEntities: [
+            {
+              name: "Supreme Court",
+              type: "Organization",
+              details: "Highest court",
+            },
+          ],
+          analysisReasoning: {
+            analyzeLegalQuestionSummary: "Analysis complete",
+            considerRelevantPrinciplesSummary: "Principles identified",
+          },
+        },
+        message: "Analysis complete for: Contract Law Case",
+        currentProcessedDoc: 1,
+        totalDocsToProcess: 1,
+      });
+
+      // Update the document with analysis data
+      const currentDocs = store.get(analyzedDocsSummaryAtom);
+      const analysisData = JSON.parse(analysisUpdate)
+        .data as Partial<ClientAnalyzedDoc>;
+
+      const updatedDocs = currentDocs.map((doc) =>
+        doc.docId === analysisData.docId
+          ? {
+              ...doc,
+              ...analysisData,
+              status: "analyzed" as const,
+            }
+          : doc
+      );
+      store.set(analyzedDocsSummaryAtom, updatedDocs);
+
+      const docs = store.get(analyzedDocsSummaryAtom);
+      expect(docs).toHaveLength(1);
+      expect(docs[0]).toMatchObject({
+        docId: "doc-to-analyze",
+        title: "Contract Law Case",
+        status: "analyzed",
+        relevanceScore: 8,
+        summarySnippet: "This case discusses force majeure clauses...",
+        keyArguments: expect.arrayContaining([
+          "Force majeure requires unforeseeable events",
+          "Contract terms must be explicit",
+        ]),
+      });
+    });
+
+    it("should maintain document order based on fetching sequence", async () => {
+      // Add documents in fetching order
+      const docs: ClientAnalyzedDoc[] = [
+        {
+          docId: "doc-first",
+          title: "First Document",
+          status: "fetched",
+          timestamp: "2024-01-01T00:00:00Z",
+        },
+        {
+          docId: "doc-second",
+          title: "Second Document",
+          status: "fetched",
+          timestamp: "2024-01-01T00:01:00Z", // Later timestamp
+        },
+        {
+          docId: "doc-third",
+          title: "Third Document",
+          status: "fetched",
+          timestamp: "2024-01-01T00:02:00Z", // Latest timestamp
+        },
+      ];
+
+      store.set(analyzedDocsSummaryAtom, docs);
+
+      const storedDocs = store.get(analyzedDocsSummaryAtom);
+      expect(storedDocs).toHaveLength(3);
+
+      // Verify order is maintained
+      expect(storedDocs[0]?.docId).toBe("doc-first");
+      expect(storedDocs[1]?.docId).toBe("doc-second");
+      expect(storedDocs[2]?.docId).toBe("doc-third");
+
+      // Verify all have fetched status
+      expect(storedDocs.every((doc) => doc.status === "fetched")).toBe(true);
+    });
+  });
+});

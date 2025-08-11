@@ -1,6 +1,8 @@
-import { describe, expect, test, beforeAll, afterAll, mock } from "bun:test";
-import { Elysia } from "elysia";
-import type { ResearchUpdate, ResearchPipelineStage } from "../../types/streaming";
+import { afterAll, beforeAll, describe, expect, mock, test } from "bun:test";
+import type {
+  ResearchPipelineStage,
+  ResearchUpdate,
+} from "../../types/streaming";
 
 // Mock the config module
 mock.module("../../config", () => ({
@@ -25,6 +27,7 @@ mock.module("../../utils/exaSearch", () => ({
         title: "SSE Test Document",
         source_name: "example.com",
         full_text: "Test content for SSE streaming...",
+        retrieval_date: new Date().toISOString(),
       },
     ])
   ),
@@ -33,7 +36,7 @@ mock.module("../../utils/exaSearch", () => ({
 // Mock BAML client with simplified responses for SSE testing
 mock.module("../../../baml_client", () => ({
   b: {
-    GenerateLegalSearchQueries: mock((legalQuestion: string) => {
+    GenerateLegalSearchQueries: mock((_legalQuestion: string) => {
       return Promise.resolve({
         search_queries: [
           {
@@ -45,12 +48,17 @@ mock.module("../../../baml_client", () => ({
           analyze_legal_question: {
             summary: "Generated queries for SSE test",
           },
+          consider_relevant_legal_principles: { summary: "Considered legal principles" },
+          formulate_search_queries_strategy: { summary: "Formulated search strategy" },
+          specify_expected_information_strategy: { summary: "Specified information strategy" },
+          ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
         },
       });
     }),
     AnalyzeSingleDocument: mock(() => {
       return Promise.resolve({
         id: "test-doc-sse-1",
+        search_result_id: "test-doc-sse-1",
         relevance_score: 8,
         confidence_score: 9,
         summary: "SSE test document analysis",
@@ -62,6 +70,10 @@ mock.module("../../../baml_client", () => ({
           analyze_legal_question: {
             summary: "Document analyzed for SSE test",
           },
+          consider_relevant_legal_principles: { summary: "Considered legal principles" },
+          formulate_search_queries_strategy: { summary: "Formulated search strategy" },
+          specify_expected_information_strategy: { summary: "Specified information strategy" },
+          ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
         },
       });
     }),
@@ -81,6 +93,10 @@ mock.module("../../../baml_client", () => ({
           analyze_legal_question: {
             summary: "Synthesis for SSE test",
           },
+          consider_relevant_legal_principles: { summary: "Considered legal principles" },
+          formulate_search_queries_strategy: { summary: "Formulated search strategy" },
+          specify_expected_information_strategy: { summary: "Specified information strategy" },
+          ensure_comprehensive_coverage_strategy: { summary: "Ensured comprehensive coverage" },
         },
       });
     }),
@@ -111,7 +127,7 @@ mock.module("../../../baml_client", () => ({
 }));
 
 describe("SSE Research Streaming Endpoint", () => {
-  let app: Elysia;
+  let app: any; // Use any type to avoid Elysia prefix type conflicts with exactOptionalPropertyTypes
 
   beforeAll(async () => {
     // Import the app after mocks are set up
@@ -210,7 +226,7 @@ describe("SSE Research Streaming Endpoint", () => {
 
         // Extract and parse the first ResearchUpdate - handle multiline JSON
         const dataMatch = eventsText.match(/data: (\{[\s\S]*?\})\n/);
-        if (dataMatch) {
+        if (dataMatch && dataMatch[1]) {
           try {
             const updateData = JSON.parse(dataMatch[1]);
             const update = updateData as ResearchUpdate;
@@ -220,22 +236,27 @@ describe("SSE Research Streaming Endpoint", () => {
             expect(update).toHaveProperty("type");
             expect(update).toHaveProperty("message");
             expect(update).toHaveProperty("timestamp");
-            
+
             // Verify stage is valid
             const validStages: ResearchPipelineStage[] = [
               "INITIALIZING",
-              "GENERATING_QUERIES", 
+              "GENERATING_QUERIES",
               "FETCHING_DOCUMENTS",
               "ANALYZING_DOCUMENTS",
               "SYNTHESIZING_FINDINGS",
               "ASSESSING_RESEARCH",
               "GENERATING_REPORT",
               "COMPLETED",
-              "ERROR"
+              "ERROR",
             ];
             expect(validStages).toContain(update.stage);
           } catch (parseError) {
-            console.error("JSON parse error:", parseError, "Raw data:", dataMatch[1]);
+            console.error(
+              "JSON parse error:",
+              parseError,
+              "Raw data:",
+              dataMatch[1]
+            );
             throw parseError;
           }
         }
@@ -250,7 +271,9 @@ describe("SSE Research Streaming Endpoint", () => {
         new Request("http://localhost/api/research/stream", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ legalQuestion: "How does progress streaming work?" }),
+          body: JSON.stringify({
+            legalQuestion: "How does progress streaming work?",
+          }),
         })
       );
 
@@ -273,14 +296,14 @@ describe("SSE Research Streaming Endpoint", () => {
           // Look for progress updates
           if (chunk.includes('"type":"PROGRESS"')) {
             foundProgressUpdate = true;
-            
+
             // Parse the progress update
             const dataMatch = chunk.match(/data: (\{[\s\S]*?\})\n/);
-            if (dataMatch) {
+            if (dataMatch && dataMatch[1]) {
               try {
                 const updateData = JSON.parse(dataMatch[1]);
                 const update = updateData as ResearchUpdate;
-              
+
                 expect(update.type).toBe("PROGRESS");
                 expect(update.data).toHaveProperty("progress");
                 expect(update.data?.progress).toHaveProperty("current");
@@ -304,7 +327,9 @@ describe("SSE Research Streaming Endpoint", () => {
         new Request("http://localhost/api/research/stream", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ legalQuestion: "Test data streaming for each stage" }),
+          body: JSON.stringify({
+            legalQuestion: "Test data streaming for each stage",
+          }),
         })
       );
 
@@ -327,25 +352,33 @@ describe("SSE Research Streaming Endpoint", () => {
           // Parse stages from events
           const dataMatches = chunk.matchAll(/data: (\{.*?\})/g);
           for (const match of dataMatches) {
-            try {
-              const updateData = JSON.parse(match[1]);
-              const update = updateData as ResearchUpdate;
-              if (update.stage) {
-                foundStages.add(update.stage);
+            if (match[1]) {
+              try {
+                const updateData = JSON.parse(match[1]);
+                const update = updateData as ResearchUpdate;
+                if (update.stage) {
+                  foundStages.add(update.stage);
+                }
+              } catch (error) {
+                // Skip parsing errors
               }
-            } catch (error) {
-              // Skip parsing errors
             }
           }
         }
 
         // Should have seen multiple pipeline stages
         expect(foundStages.size).toBeGreaterThan(2);
-        
+
         // Should include key stages
-        expect(Array.from(foundStages).some(stage => 
-          ["GENERATING_QUERIES", "FETCHING_DOCUMENTS", "ANALYZING_DOCUMENTS"].includes(stage)
-        )).toBe(true);
+        expect(
+          Array.from(foundStages).some((stage) =>
+            [
+              "GENERATING_QUERIES",
+              "FETCHING_DOCUMENTS",
+              "ANALYZING_DOCUMENTS",
+            ].includes(stage)
+          )
+        ).toBe(true);
 
         reader.releaseLock();
       }
@@ -360,7 +393,9 @@ describe("SSE Research Streaming Endpoint", () => {
         new Request("http://localhost/api/research/stream", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ legalQuestion: "Test error handling in SSE context" }),
+          body: JSON.stringify({
+            legalQuestion: "Test error handling in SSE context",
+          }),
         })
       );
 
@@ -382,7 +417,10 @@ describe("SSE Research Streaming Endpoint", () => {
 
           // For this test, we'll verify that the SSE stream is properly established
           // and can handle initialization (error handling is working if stream starts)
-          if (chunk.includes('"stage":"INITIALIZING"') || chunk.includes('"stage":"GENERATING_QUERIES"')) {
+          if (
+            chunk.includes('"stage":"INITIALIZING"') ||
+            chunk.includes('"stage":"GENERATING_QUERIES"')
+          ) {
             foundInitialization = true;
           }
         }
@@ -416,7 +454,7 @@ describe("SSE Research Streaming Endpoint", () => {
 
         while (eventCount < maxEvents && !streamEnded) {
           const { done, value } = await reader.read();
-          
+
           if (done) {
             streamEnded = true;
             break;
