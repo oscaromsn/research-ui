@@ -13,6 +13,14 @@ import type {
   SSEStreamConfig,
 } from "../types/streaming";
 
+import type {
+  EnhancedErrorInfo,
+  ErrorClassification,
+} from "../../../packages/shared-types/src/sse-events";
+
+// Re-export for use by other modules
+export type { ErrorClassification };
+
 /**
  * Default SSE stream configuration
  */
@@ -57,21 +65,65 @@ export function createKeepAliveEvent(): string {
 }
 
 /**
- * Creates an SSE error event
+ * Creates user-friendly error messages based on error classification
+ */
+function getErrorDisplayMessage(error: Error, classification: ErrorClassification): string {
+  switch (classification) {
+    case 'RATE_LIMIT':
+      return 'API rate limit exceeded. Please wait a few minutes before trying again.';
+    case 'AUTHENTICATION':
+      return 'Authentication failed. Please check your API credentials.';
+    case 'CONFIGURATION':
+      return 'Configuration error detected. Please check your settings.';
+    case 'NETWORK':
+      return 'Network connection error. Retrying automatically...';
+    default:
+      return `Error occurred: ${error.message}`;
+  }
+}
+
+/**
+ * Gets recommended user action based on error classification
+ */
+function getErrorAction(classification: ErrorClassification): string {
+  switch (classification) {
+    case 'RATE_LIMIT':
+      return 'WAIT_AND_RETRY_LATER';
+    case 'AUTHENTICATION':
+      return 'CHECK_CREDENTIALS';
+    case 'CONFIGURATION':
+      return 'CHECK_SETTINGS';
+    case 'NETWORK':
+      return 'AUTOMATIC_RETRY';
+    default:
+      return 'MANUAL_RETRY';
+  }
+}
+
+/**
+ * Creates an SSE error event with enhanced error classification
  */
 export function createErrorEvent(
   error: Error,
   stage?: ResearchPipelineStage
 ): string {
+  const classification = classifyError(error);
+  const isRecoverable = !isNonRecoverableError(error);
+  const displayMessage = getErrorDisplayMessage(error, classification);
+  
+  // Create enhanced message that includes error classification info
+  const enhancedMessage = `${displayMessage} [Classification: ${classification}, Recoverable: ${isRecoverable ? 'yes' : 'no'}, Action: ${getErrorAction(classification)}]`;
+  
   const errorUpdate: ResearchUpdate = {
     stage: stage || "ERROR",
     type: "ERROR",
-    message: `Error occurred: ${error.message}`,
+    message: enhancedMessage,
     data: {
       error: {
         message: error.message,
+        code: classification, // Use classification as the error code
         ...(stage !== undefined && { stage }),
-        recoverable: !isNonRecoverableError(error),
+        recoverable: isRecoverable,
       },
     },
     timestamp: new Date().toISOString(),
@@ -366,23 +418,87 @@ function generateEventId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
 
+
+/**
+ * Classifies errors into specific categories for targeted handling
+ */
+export function classifyError(error: Error): ErrorClassification {
+  const errorMessage = error.message.toLowerCase();
+
+  // Rate limiting and quota errors
+  const rateLimitPatterns = [
+    "tokens per day limit exceeded",
+    "token_quota_exceeded",
+    "too many requests", 
+    "rate limit",
+    "quota exceeded",
+    "limit exceeded",
+    "quota limit",
+    "daily limit",
+    "monthly limit", 
+    "usage limit",
+    "429",
+  ];
+
+  // Authentication and authorization errors
+  const authPatterns = [
+    "authentication",
+    "authorization",
+    "api key",
+    "permission denied", 
+    "unauthorized",
+    "forbidden",
+    "401",
+    "403",
+  ];
+
+  // Configuration errors
+  const configPatterns = [
+    "invalid configuration",
+    "misconfigured",
+    "invalid api key",
+    "missing configuration",
+  ];
+
+  // Network connectivity errors
+  const networkPatterns = [
+    "network error",
+    "connection failed",
+    "timeout",
+    "unreachable",
+    "dns",
+    "connect econnrefused",
+    "socket hang up",
+  ];
+
+  if (rateLimitPatterns.some(pattern => errorMessage.includes(pattern))) {
+    return 'RATE_LIMIT';
+  }
+  
+  if (authPatterns.some(pattern => errorMessage.includes(pattern))) {
+    return 'AUTHENTICATION';
+  }
+  
+  if (configPatterns.some(pattern => errorMessage.includes(pattern))) {
+    return 'CONFIGURATION';
+  }
+  
+  if (networkPatterns.some(pattern => errorMessage.includes(pattern))) {
+    return 'NETWORK';
+  }
+
+  return 'UNKNOWN';
+}
+
 /**
  * Determines if an error is non-recoverable (should abort the research)
  */
 function isNonRecoverableError(error: Error): boolean {
-  const nonRecoverablePatterns = [
-    "authentication",
-    "authorization",
-    "api key",
-    "permission denied",
-    "quota exceeded",
-    "invalid configuration",
-  ];
-
-  const errorMessage = error.message.toLowerCase();
-  return nonRecoverablePatterns.some((pattern) =>
-    errorMessage.includes(pattern)
-  );
+  const classification = classifyError(error);
+  
+  // Rate limits, auth issues, and config errors are non-recoverable
+  // Network errors are recoverable (should retry)
+  return ['RATE_LIMIT', 'AUTHENTICATION', 'CONFIGURATION'].includes(classification);
 }
 
 /**

@@ -5,6 +5,7 @@
  */
 
 import { bamlRequestThrottler } from './requestThrottler';
+import { classifyError, type ErrorClassification } from './sseUtils';
 
 export interface CircuitBreakerConfig {
   failureThreshold: number; // Number of failures before opening circuit
@@ -104,24 +105,43 @@ export class CircuitBreaker {
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
         
-        // Check if this is a rate limiting error
-        if (this.isRateLimitError(lastError)) {
-          console.warn(`⚠️  Rate limit detected for ${context}:`, lastError.message);
-          
-          // For rate limiting, wait longer on each retry
-          if (attempt < this.config.maxRetries - 1) {
-            const rateLimitBackoff = Math.min(
-              this.config.initialBackoffMs * Math.pow(3, attempt + 1), // More aggressive backoff for rate limits
-              this.config.maxBackoffMs * 2 // Allow longer waits for rate limits
-            );
-            console.log(`⏳ Rate limit backoff: ${rateLimitBackoff}ms`);
-            await this.delay(rateLimitBackoff);
-          }
+        // Classify the error to determine retry strategy
+        const errorClassification = classifyError(lastError);
+        
+        // Rate limit and quota errors: fail fast (no retries)
+        if (errorClassification === 'RATE_LIMIT') {
+          console.warn(`🚨 Rate limit/quota exceeded for ${context}: ${lastError.message}`);
+          console.warn(`⚡ Fast-failing without retries to preserve quota`);
+          break; // Skip all retries for rate limit errors
         }
         
-        // For non-rate-limit errors, don't retry as aggressively
-        else if (!this.isRetryableError(lastError)) {
-          break; // Don't retry non-retryable errors
+        // Authentication/configuration errors: also fail fast
+        if (['AUTHENTICATION', 'CONFIGURATION'].includes(errorClassification)) {
+          console.warn(`🚫 Non-recoverable error for ${context}: ${lastError.message}`);
+          break; // Skip retries for auth/config errors
+        }
+        
+        // Legacy rate limit detection (for additional safety)
+        if (this.isRateLimitError(lastError)) {
+          console.warn(`⚠️  Legacy rate limit detection for ${context}:`, lastError.message);
+          console.warn(`⚡ Fast-failing to prevent quota waste`);
+          break; // Skip retries
+        }
+        
+        // Network errors: retry with exponential backoff
+        if (errorClassification === 'NETWORK' || this.isRetryableError(lastError)) {
+          if (attempt < this.config.maxRetries - 1) {
+            const backoffTime = Math.min(
+              this.config.initialBackoffMs * Math.pow(2, attempt),
+              this.config.maxBackoffMs
+            );
+            console.log(`🔄 Network error retry ${attempt + 1}/${this.config.maxRetries} for ${context} after ${backoffTime}ms`);
+            await this.delay(backoffTime);
+          }
+        } else {
+          // Unknown errors: don't retry by default
+          console.warn(`❓ Unknown error type for ${context}, not retrying: ${lastError.message}`);
+          break;
         }
       }
     }
@@ -254,8 +274,8 @@ export class CircuitBreakerError extends Error {
 // Global circuit breaker instance for BAML operations
 export const bamlCircuitBreaker = new CircuitBreaker({
   failureThreshold: 3, // Open circuit after 3 failures
-  recoveryTimeout: 30000, // Try recovery after 30 seconds
-  maxRetries: 2, // Max 2 retries per request
-  initialBackoffMs: 2000, // Start with 2 second backoff
-  maxBackoffMs: 60000, // Max 60 second backoff for rate limits
+  recoveryTimeout: 15000, // Try recovery after 15 seconds (was 30s)
+  maxRetries: 3, // Max 3 retries per request (was 2)
+  initialBackoffMs: 1500, // Start with 1.5 second backoff (was 2s)
+  maxBackoffMs: 45000, // Max 45 second backoff for rate limits (was 60s)
 });
