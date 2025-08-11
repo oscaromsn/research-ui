@@ -1,0 +1,31 @@
+{
+  "name": "@jurisconsulta/shared-types",
+  "version": "0.1.0",
+  "description": "Shared TypeScript types and Zod schemas for JurisConsulta SSE communication",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./sse-events": {
+      "import": "./dist/sse-events.js",
+      "types": "./dist/sse-events.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.25.7"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "zod": ">=3.20.0"
+  }
+}
