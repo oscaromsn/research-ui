@@ -10,20 +10,18 @@ client<llm> QueryGeneration {
 }
 
 client<llm> DocumentAnalysis {
-  provider "openai-generic"
+  provider openai
   options {
-    base_url "https://api.cerebras.ai/v1"
-    model "llama-4-scout-17b-16e-instruct"
-    api_key env.CEREBRAS_API_KEY
+    model "gpt-5-nano-2025-08-07"
+    api_key env.OPENAI_API_KEY
   }
 }
 
 client<llm> FindingsSynthetizing {
-  provider "openai-generic"
+  provider openai
   options {
-    base_url "https://api.cerebras.ai/v1"
-    model "llama-4-scout-17b-16e-instruct"
-    api_key env.CEREBRAS_API_KEY
+    model "gpt-5-nano-2025-08-07"
+    api_key env.OPENAI_API_KEY
   }
 }
 
