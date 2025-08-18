@@ -40,7 +40,7 @@ export namespace partial_types {
       search_result_id?: string | null
       relevance_score?: number | null
       confidence_score?: number | null
-      summary?: string | null
+      summary?: StreamState<string | null>
       key_arguments_and_reasoning: string[]
       extracted_entities: LegalEntity[]
       extracted_quotes: string[]
@@ -114,7 +114,7 @@ export namespace partial_types {
     }
     export interface SynthesizedTopic {
       topic_title?: string | null
-      synthesis?: string | null
+      synthesis?: StreamState<string | null>
       supporting_document_ids: string[]
       confidence_score?: number | null
     }
