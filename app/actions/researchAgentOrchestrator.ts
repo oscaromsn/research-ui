@@ -419,32 +419,96 @@ async function generateQueriesStage(
     throw new Error("Orchestrator timeout during query generation");
   }
 
-  const queryAnalysis = await b.GenerateLegalSearchQueries(legalQuestion);
+  try {
+    // Use streaming BAML call
+    const queryAnalysisStream =
+      b.stream.GenerateLegalSearchQueries(legalQuestion);
 
-  await sendUpdate(writer, encoder, {
-    type: "DATA",
-    stage: "GENERATING_QUERIES",
-    data: {
-      queries: queryAnalysis.search_queries.map((q) => ({
-        query_string: q.query_string,
-        expected_information_summary: smartTruncate(
-          q.expected_information.join(" "),
-          100
-        ),
-      })),
-      reasoningEntryPoints: {
-        analyzeLegalQuestionSummary: smartTruncate(
-          queryAnalysis.reasoning.analyze_legal_question.summary || "",
-          150
-        ),
-        totalStepsAnalyzed: 5,
+    // Process the stream of partial results
+    for await (const partialQueryAnalysis of queryAnalysisStream) {
+      if (partialQueryAnalysis && typeof partialQueryAnalysis === "object") {
+        // Send partial updates to client
+        await sendUpdate(writer, encoder, {
+          type: "DATA",
+          stage: "GENERATING_QUERIES",
+          data: {
+            reasoning: partialQueryAnalysis.reasoning,
+            queries:
+              partialQueryAnalysis.search_queries?.map((q) => ({
+                query_string: q?.query_string || "",
+                expected_information_summary: q?.expected_information
+                  ? smartTruncate(q.expected_information.join(" "), 100)
+                  : "",
+              })) || [],
+          },
+          message: "Streaming query generation...",
+          isFieldComplete: false,
+        });
+      }
+    }
+
+    // Get the final, validated object for the next pipeline stage
+    const finalQueryAnalysis = await queryAnalysisStream.getFinalResponse();
+
+    await sendUpdate(writer, encoder, {
+      type: "DATA",
+      stage: "GENERATING_QUERIES",
+      data: {
+        queries: finalQueryAnalysis.search_queries.map((q) => ({
+          query_string: q.query_string,
+          expected_information_summary: smartTruncate(
+            q.expected_information.join(" "),
+            100
+          ),
+        })),
+        reasoningEntryPoints: {
+          analyzeLegalQuestionSummary: smartTruncate(
+            finalQueryAnalysis.reasoning.analyze_legal_question.summary || "",
+            150
+          ),
+          totalStepsAnalyzed: 5,
+        },
       },
-    },
-    message: `${queryAnalysis.search_queries.length} initial queries generated.`,
-    isFinalForStage: true,
-  });
+      message: `${finalQueryAnalysis.search_queries.length} initial queries generated.`,
+      isFinalForStage: true,
+      isFieldComplete: true,
+    });
 
-  return queryAnalysis;
+    return finalQueryAnalysis;
+  } catch (streamError) {
+    // Fallback to non-streaming call if streaming fails
+    console.warn(
+      "Streaming failed for query generation, falling back to non-streaming:",
+      streamError
+    );
+
+    const queryAnalysis = await b.GenerateLegalSearchQueries(legalQuestion);
+
+    await sendUpdate(writer, encoder, {
+      type: "DATA",
+      stage: "GENERATING_QUERIES",
+      data: {
+        queries: queryAnalysis.search_queries.map((q) => ({
+          query_string: q.query_string,
+          expected_information_summary: smartTruncate(
+            q.expected_information.join(" "),
+            100
+          ),
+        })),
+        reasoningEntryPoints: {
+          analyzeLegalQuestionSummary: smartTruncate(
+            queryAnalysis.reasoning.analyze_legal_question.summary || "",
+            150
+          ),
+          totalStepsAnalyzed: 5,
+        },
+      },
+      message: `${queryAnalysis.search_queries.length} initial queries generated.`,
+      isFinalForStage: true,
+    });
+
+    return queryAnalysis;
+  }
 }
 
 async function fetchDocumentsStage(
@@ -689,27 +753,94 @@ async function processDocument(
   await sendAnalysisStartUpdate(context, doc);
 
   try {
-    const analysis: AnalyzedDocument = await b.AnalyzeSingleDocument(
+    // Use streaming BAML call
+    const analysisStream = b.stream.AnalyzeSingleDocument(
       doc,
       context.legalQuestion
     );
 
-    await sendAnalysisSuccessUpdate(context, doc, analysis, index, totalCount);
-    return analysis;
-  } catch (analysisError: unknown) {
-    const errorMessage =
-      analysisError instanceof Error
-        ? analysisError.message
-        : String(analysisError);
+    // Process the stream of partial results
+    for await (const partialAnalysis of analysisStream) {
+      if (partialAnalysis && typeof partialAnalysis === "object") {
+        // Create a DATA update for the client with the partial, streaming data
+        await sendUpdate(context.writer, context.encoder, {
+          type: "DATA",
+          stage: "ANALYZING_DOCUMENTS",
+          data: {
+            docId: doc.id,
+            title: doc.title,
+            url: doc.url,
+            status: "streaming",
+            // Merge partial data with document info
+            summary: partialAnalysis.summary || "",
+            relevanceScore: partialAnalysis.relevance_score,
+            confidenceScore: partialAnalysis.confidence_score,
+            keyArguments: partialAnalysis.key_arguments_and_reasoning || [],
+            extractedEntities:
+              partialAnalysis.extracted_entities?.map((entity) => ({
+                name: entity.name,
+                type: entity.type,
+                details: entity.details,
+              })) || [],
+            extractedQuotes: partialAnalysis.extracted_quotes || [],
+            counterArguments:
+              partialAnalysis.counter_arguments_or_nuances || [],
+          },
+          message: `Analyzing document: ${doc.title ? truncateForBrief(doc.title) : "Untitled"}`,
+          currentProcessedDoc: index + 1,
+          totalDocsToProcess: totalCount,
+          isFieldComplete: false,
+        });
+      }
+    }
 
-    await sendAnalysisErrorUpdate(
+    // Get the final, validated object for the next pipeline stage
+    const finalAnalysis = await analysisStream.getFinalResponse();
+
+    await sendAnalysisSuccessUpdate(
       context,
       doc,
-      errorMessage,
+      finalAnalysis,
       index,
       totalCount
     );
-    return null;
+    return finalAnalysis;
+  } catch (analysisError: unknown) {
+    // Fallback to non-streaming call if streaming fails
+    console.warn(
+      "Streaming failed for document analysis, falling back to non-streaming:",
+      analysisError
+    );
+
+    try {
+      const analysis: AnalyzedDocument = await b.AnalyzeSingleDocument(
+        doc,
+        context.legalQuestion
+      );
+
+      await sendAnalysisSuccessUpdate(
+        context,
+        doc,
+        analysis,
+        index,
+        totalCount
+      );
+      return analysis;
+    } catch (fallbackError: unknown) {
+      const errorMessage =
+        fallbackError instanceof Error
+          ? fallbackError.message
+          : String(fallbackError);
+
+      await sendAnalysisErrorUpdate(
+        context,
+        doc,
+        errorMessage,
+        index,
+        totalCount
+      );
+      return null;
+    }
   }
 }
 
@@ -842,30 +973,107 @@ async function synthesizeFindingsStage(
     throw new Error("Orchestrator timeout during findings synthesis");
   }
 
-  const synthesis = await b.SynthesizeAllFindings(analyzedDocs, legalQuestion);
+  try {
+    // Use streaming BAML call
+    const synthesisStream = b.stream.SynthesizeAllFindings(
+      analyzedDocs,
+      legalQuestion
+    );
 
-  await sendUpdate(writer, encoder, {
-    type: "DATA",
-    stage: "SYNTHESIZING_FINDINGS",
-    data: {
-      topics: synthesis.key_synthesized_topics.map((t) => ({
-        title: t.topic_title,
-        synthesisSnippet: smartTruncate(t.synthesis, 250),
-        confidence: t.confidence_score,
-        docIds: t.supporting_document_ids,
-      })),
-      unansweredAspects: synthesis.unanswered_aspects || [],
-      emergingQuestions: synthesis.emerging_questions || [],
-      reasoningSummary: smartTruncate(
-        synthesis.reasoning.analyze_legal_question.summary || "",
-        150
-      ),
-    },
-    message: "Overall synthesis complete.",
-    isFinalForStage: true,
-  });
+    // Process the stream of partial results
+    for await (const partialSynthesis of synthesisStream) {
+      if (partialSynthesis && typeof partialSynthesis === "object") {
+        // Send partial updates to client
+        await sendUpdate(writer, encoder, {
+          type: "DATA",
+          stage: "SYNTHESIZING_FINDINGS",
+          data: {
+            topics:
+              partialSynthesis.key_synthesized_topics?.map((t) => ({
+                title: t?.topic_title || "",
+                synthesisSnippet:
+                  t?.synthesis &&
+                  typeof t.synthesis === "object" &&
+                  "value" in t.synthesis &&
+                  t.synthesis.value
+                    ? smartTruncate(t.synthesis.value, 250)
+                    : t?.synthesis && typeof t.synthesis === "string"
+                      ? smartTruncate(t.synthesis, 250)
+                      : "",
+                confidence: t?.confidence_score,
+                docIds: t?.supporting_document_ids || [],
+              })) || [],
+            unansweredAspects: partialSynthesis.unanswered_aspects || [],
+            emergingQuestions: partialSynthesis.emerging_questions || [],
+            reasoning: partialSynthesis.reasoning,
+          },
+          message: "Streaming synthesis...",
+          isFieldComplete: false,
+        });
+      }
+    }
 
-  return synthesis;
+    // Get the final, validated object for the next pipeline stage
+    const finalSynthesis = await synthesisStream.getFinalResponse();
+
+    await sendUpdate(writer, encoder, {
+      type: "DATA",
+      stage: "SYNTHESIZING_FINDINGS",
+      data: {
+        topics: finalSynthesis.key_synthesized_topics.map((t) => ({
+          title: t.topic_title,
+          synthesisSnippet: smartTruncate(t.synthesis, 250),
+          confidence: t.confidence_score,
+          docIds: t.supporting_document_ids,
+        })),
+        unansweredAspects: finalSynthesis.unanswered_aspects || [],
+        emergingQuestions: finalSynthesis.emerging_questions || [],
+        reasoningSummary: smartTruncate(
+          finalSynthesis.reasoning.analyze_legal_question.summary || "",
+          150
+        ),
+      },
+      message: "Overall synthesis complete.",
+      isFinalForStage: true,
+      isFieldComplete: true,
+    });
+
+    return finalSynthesis;
+  } catch (streamError) {
+    // Fallback to non-streaming call if streaming fails
+    console.warn(
+      "Streaming failed for synthesis, falling back to non-streaming:",
+      streamError
+    );
+
+    const synthesis = await b.SynthesizeAllFindings(
+      analyzedDocs,
+      legalQuestion
+    );
+
+    await sendUpdate(writer, encoder, {
+      type: "DATA",
+      stage: "SYNTHESIZING_FINDINGS",
+      data: {
+        topics: synthesis.key_synthesized_topics.map((t) => ({
+          title: t.topic_title,
+          synthesisSnippet: smartTruncate(t.synthesis, 250),
+          confidence: t.confidence_score,
+          docIds: t.supporting_document_ids,
+        })),
+        unansweredAspects: synthesis.unanswered_aspects || [],
+        emergingQuestions: synthesis.emerging_questions || [],
+        reasoningSummary: smartTruncate(
+          synthesis.reasoning.analyze_legal_question.summary || "",
+          150
+        ),
+      },
+      message: "Overall synthesis complete.",
+      isFinalForStage: true,
+    });
+
+    return synthesis;
+  }
 }
 
 async function assessResearchStage(
@@ -885,35 +1093,109 @@ async function assessResearchStage(
     throw new Error("Orchestrator timeout during research assessment");
   }
 
-  const assessment = await b.AssessResearchAndPlanNextSteps(
-    legalQuestion,
-    queryAnalysis,
-    synthesis
-  );
+  try {
+    // Use streaming BAML call
+    const assessmentStream = b.stream.AssessResearchAndPlanNextSteps(
+      legalQuestion,
+      queryAnalysis,
+      synthesis
+    );
 
-  await sendUpdate(writer, encoder, {
-    type: "DATA",
-    stage: "ASSESSING_RESEARCH",
-    data: {
-      isSufficient: assessment.is_sufficient,
-      assessmentSummary: assessment.assessment_summary,
-      nextAction: assessment.next_action,
-      identifiedGaps: assessment.identified_gaps || [],
-      suggestedRefinementQueries:
-        assessment.next_action === "REFINE_QUERIES" ||
-        assessment.next_action === "NEW_QUERIES"
-          ? assessment.suggested_queries_for_refinement?.map((q) => ({
-              query_string: q.query_string,
-              expected_information_summary:
-                q.expected_information?.join("; ") || undefined,
-            })) || []
-          : undefined,
-    },
-    message: `Assessment complete. Next action: ${assessment.next_action}.`,
-    isFinalForStage: true,
-  });
+    // Process the stream of partial results
+    for await (const partialAssessment of assessmentStream) {
+      if (partialAssessment && typeof partialAssessment === "object") {
+        // Send partial updates to client
+        await sendUpdate(writer, encoder, {
+          type: "DATA",
+          stage: "ASSESSING_RESEARCH",
+          data: {
+            isSufficient: partialAssessment.is_sufficient,
+            assessmentSummary: partialAssessment.assessment_summary || "",
+            nextAction: partialAssessment.next_action,
+            identifiedGaps: partialAssessment.identified_gaps || [],
+            reasoning: partialAssessment.reasoning,
+            suggestedRefinementQueries:
+              partialAssessment.next_action === "REFINE_QUERIES" ||
+              partialAssessment.next_action === "NEW_QUERIES"
+                ? partialAssessment.suggested_queries_for_refinement?.map(
+                    (q) => ({
+                      query_string: q?.query_string || "",
+                      expected_information_summary:
+                        q?.expected_information?.join("; ") || undefined,
+                    })
+                  ) || []
+                : undefined,
+          },
+          message: "Streaming assessment...",
+          isFieldComplete: false,
+        });
+      }
+    }
 
-  return assessment;
+    // Get the final, validated object for the next pipeline stage
+    const finalAssessment = await assessmentStream.getFinalResponse();
+
+    await sendUpdate(writer, encoder, {
+      type: "DATA",
+      stage: "ASSESSING_RESEARCH",
+      data: {
+        isSufficient: finalAssessment.is_sufficient,
+        assessmentSummary: finalAssessment.assessment_summary,
+        nextAction: finalAssessment.next_action,
+        identifiedGaps: finalAssessment.identified_gaps || [],
+        suggestedRefinementQueries:
+          finalAssessment.next_action === "REFINE_QUERIES" ||
+          finalAssessment.next_action === "NEW_QUERIES"
+            ? finalAssessment.suggested_queries_for_refinement?.map((q) => ({
+                query_string: q.query_string,
+                expected_information_summary:
+                  q.expected_information?.join("; ") || undefined,
+              })) || []
+            : undefined,
+      },
+      message: `Assessment complete. Next action: ${finalAssessment.next_action}.`,
+      isFinalForStage: true,
+      isFieldComplete: true,
+    });
+
+    return finalAssessment;
+  } catch (streamError) {
+    // Fallback to non-streaming call if streaming fails
+    console.warn(
+      "Streaming failed for assessment, falling back to non-streaming:",
+      streamError
+    );
+
+    const assessment = await b.AssessResearchAndPlanNextSteps(
+      legalQuestion,
+      queryAnalysis,
+      synthesis
+    );
+
+    await sendUpdate(writer, encoder, {
+      type: "DATA",
+      stage: "ASSESSING_RESEARCH",
+      data: {
+        isSufficient: assessment.is_sufficient,
+        assessmentSummary: assessment.assessment_summary,
+        nextAction: assessment.next_action,
+        identifiedGaps: assessment.identified_gaps || [],
+        suggestedRefinementQueries:
+          assessment.next_action === "REFINE_QUERIES" ||
+          assessment.next_action === "NEW_QUERIES"
+            ? assessment.suggested_queries_for_refinement?.map((q) => ({
+                query_string: q.query_string,
+                expected_information_summary:
+                  q.expected_information?.join("; ") || undefined,
+              })) || []
+            : undefined,
+      },
+      message: `Assessment complete. Next action: ${assessment.next_action}.`,
+      isFinalForStage: true,
+    });
+
+    return assessment;
+  }
 }
 
 async function handleExecutiveSummaryStream(
