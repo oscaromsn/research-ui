@@ -11,6 +11,7 @@ import type {
   SearchQueryItem,
   SearchResultItem,
 } from "@/baml_client/types";
+import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 
 // Extended SearchResultItem with ordering metadata
 interface OrderedSearchResultItem extends SearchResultItem {
@@ -762,30 +763,47 @@ async function processDocument(
     // Process the stream of partial results
     for await (const partialAnalysis of analysisStream) {
       if (partialAnalysis && typeof partialAnalysis === "object") {
-        // Create a DATA update for the client with the partial, streaming data
+        // Explicitly map BAML partial fields to the client-facing schema
+        const updateData: Partial<ClientAnalyzedDoc> = {
+          docId: doc.id,
+          ...(doc.title && { title: doc.title }),
+          url: doc.url,
+          status: "analyzing", // Ensure status is consistently 'analyzing' during the stream
+
+          // Map BAML `summary` to client's `summarySnippet`
+          // Handle streaming state types properly
+          summarySnippet:
+            typeof partialAnalysis.summary === "string"
+              ? partialAnalysis.summary
+              : partialAnalysis.summary?.value || "",
+
+          // Map other fields as they become available, handling null values
+          ...(partialAnalysis.relevance_score !== null &&
+            partialAnalysis.relevance_score !== undefined && {
+              relevanceScore: partialAnalysis.relevance_score,
+            }),
+          ...(partialAnalysis.confidence_score !== null &&
+            partialAnalysis.confidence_score !== undefined && {
+              confidenceScore: partialAnalysis.confidence_score,
+            }),
+          keyArguments: partialAnalysis.key_arguments_and_reasoning || [],
+          extractedEntities:
+            partialAnalysis.extracted_entities
+              ?.map((entity) => ({
+                name: entity.name || "",
+                type: entity.type || "LegalConcept",
+                details: entity.details || "",
+              }))
+              .filter((entity) => entity.name) || [],
+          extractedQuotes: partialAnalysis.extracted_quotes || [],
+          counterArguments: partialAnalysis.counter_arguments_or_nuances || [],
+        };
+
+        // Create a DATA update for the client with the correctly mapped data
         await sendUpdate(context.writer, context.encoder, {
           type: "DATA",
           stage: "ANALYZING_DOCUMENTS",
-          data: {
-            docId: doc.id,
-            title: doc.title,
-            url: doc.url,
-            status: "streaming",
-            // Merge partial data with document info
-            summary: partialAnalysis.summary || "",
-            relevanceScore: partialAnalysis.relevance_score,
-            confidenceScore: partialAnalysis.confidence_score,
-            keyArguments: partialAnalysis.key_arguments_and_reasoning || [],
-            extractedEntities:
-              partialAnalysis.extracted_entities?.map((entity) => ({
-                name: entity.name,
-                type: entity.type,
-                details: entity.details,
-              })) || [],
-            extractedQuotes: partialAnalysis.extracted_quotes || [],
-            counterArguments:
-              partialAnalysis.counter_arguments_or_nuances || [],
-          },
+          data: updateData,
           message: `Analyzing document: ${doc.title ? truncateForBrief(doc.title) : "Untitled"}`,
           currentProcessedDoc: index + 1,
           totalDocsToProcess: totalCount,
