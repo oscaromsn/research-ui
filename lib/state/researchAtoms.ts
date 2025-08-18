@@ -106,7 +106,7 @@ export interface ClientAnalyzedDoc {
   fetchTimestamp?: string; // ISO timestamp when document was fetched
 }
 
-export interface ClientSynthesisTopic {
+interface ClientSynthesisTopic {
   title: string;
   synthesisSnippet: string; // Potentially streaming
   confidence?: number;
@@ -122,7 +122,7 @@ export interface ClientSynthesis {
   reasoningSummary?: string; // Summarized
 }
 
-export interface ClientReportSection {
+interface ClientReportSection {
   title: string;
   content: string; // Potentially streaming
 }
@@ -182,7 +182,7 @@ export interface ResearchStatus {
  * Auto mode configuration and state for the research process.
  * Controls automatic execution of refinement queries and iterations.
  */
-export interface AutoModeState {
+interface AutoModeState {
   isEnabled: boolean; // Whether auto mode is currently enabled
   maxIterations: number; // Maximum number of iterations before stopping
   currentIteration: number; // Current iteration count

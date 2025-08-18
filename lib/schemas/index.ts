@@ -6,9 +6,7 @@ export {
 } from "./common";
 
 export {
-  type ClientEnv,
   env,
-  type ServerEnv,
 } from "./env";
 
 export { createSchema } from "./utils";
