@@ -51,16 +51,16 @@ test GenerateReportSimpleSynthesis {
   @@assert( {{ this.conclusion | length > 20 }} )
   @@assert( {{ this.sections | length >= 1 }} )
   @@assert( {{ this.sections | length <= 5 }} )
-  
+
   // Section structure validation
   @@assert( {{ this.sections | selectattr("section_title", "defined") | list | length == (this.sections | length) }} )
   @@assert( {{ this.sections | selectattr("content", "defined") | list | length == (this.sections | length) }} )
-  
+
   // Content quality checks
   @@assert( {{ ("statute" in (this.report_title | lower)) or ("limitation" in (this.report_title | lower)) or ("contract" in (this.report_title | lower)) or ("california" in (this.report_title | lower)) }} )
   @@assert( {{ ("4 year" in (this.executive_summary | lower)) or ("four year" in (this.executive_summary | lower)) or ("2 year" in (this.executive_summary | lower)) or ("two year" in (this.executive_summary | lower)) }} )
   @@assert( {{ ("ccp" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("code" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("337" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
-  
+
   // Should have at least one section
   @@assert( {{ this.sections | length >= 1 }} )
 }
@@ -136,16 +136,16 @@ test GenerateReportComplexSynthesis {
   // Complex synthesis should generate multiple sections
   @@assert( {{ this.sections | length >= 3 }} )
   @@assert( {{ this.sections | length <= 8 }} )
-  
+
   // Should cover multiple aspects from synthesis
   @@assert( {{ ("execution" in (this.sections | map(attribute="section_title") | join(" ") | lower)) or ("disclosure" in (this.sections | map(attribute="section_title") | join(" ") | lower)) or ("counsel" in (this.sections | map(attribute="section_title") | join(" ") | lower)) }} )
   @@assert( {{ ("writing" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("signed" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("notary" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
   @@assert( {{ ("disclosure" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("asset" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("financial" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
-  
+
   // Report should address the original question comprehensively
   @@assert( {{ ("prenuptial" in (this.executive_summary | lower)) or ("agreement" in (this.executive_summary | lower)) or ("new york" in (this.executive_summary | lower)) or ("requirement" in (this.executive_summary | lower)) }} )
   @@assert( {{ ("valid" in (this.conclusion | lower)) or ("prenuptial" in (this.conclusion | lower)) or ("new york" in (this.conclusion | lower)) }} )
-  
+
   // Should have multiple sections for well-covered topics
   @@assert( {{ this.sections | length >= 2 }} )
 }
@@ -199,14 +199,14 @@ test GenerateReportWithUnansweredAspects {
   @@assert( {{ this.executive_summary | length > 20 }} )
   @@assert( {{ this.conclusion | length > 20 }} )
   @@assert( {{ this.sections | length >= 1 }} )
-  
+
   // Should acknowledge limitations due to unanswered aspects
   @@assert( {{ ("general" in (this.executive_summary | lower)) or ("varies" in (this.executive_summary | lower)) or ("jurisdiction" in (this.executive_summary | lower)) or ("specific" in (this.executive_summary | lower)) }} )
   @@assert( {{ ("additional" in (this.conclusion | lower)) or ("research" in (this.conclusion | lower)) or ("jurisdiction" in (this.conclusion | lower)) or ("specific" in (this.conclusion | lower)) or ("vary" in (this.conclusion | lower)) }} )
-  
+
   // Should cover what is known while noting limitations
   @@assert( {{ ("open" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("notorious" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("exclusive" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("hostile" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("continuous" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
-  
+
   // Should still provide useful analysis despite gaps
   @@assert( {{ (this.sections | map(attribute="content") | join(" ") | length) > 50 }} )
 }
@@ -257,14 +257,14 @@ test GenerateReportMinimalSynthesis {
   @@assert( {{ this.conclusion | length > 15 }} )
   @@assert( {{ this.sections | length >= 1 }} )
   @@assert( {{ this.sections | length <= 3 }} )
-  
+
   // Should acknowledge limited information available
   @@assert( {{ ("limited" in (this.executive_summary | lower)) or ("additional" in (this.executive_summary | lower)) or ("research" in (this.executive_summary | lower)) or ("complex" in (this.executive_summary | lower)) }} )
   @@assert( {{ ("further" in (this.conclusion | lower)) or ("additional" in (this.conclusion | lower)) or ("research" in (this.conclusion | lower)) or ("analysis" in (this.conclusion | lower)) or ("required" in (this.conclusion | lower)) }} )
-  
+
   // Should still address the question as much as possible
   @@assert( {{ ("insider" in (this.report_title | lower)) or ("trading" in (this.report_title | lower)) or ("securities" in (this.report_title | lower)) or ("penalties" in (this.report_title | lower)) }} )
-  
+
   // Should still provide sections despite limited synthesis
   @@assert( {{ this.sections | length >= 1 }} )
 }
@@ -338,17 +338,17 @@ test GenerateReportExtensiveQueryHistory {
   // Extensive research should produce comprehensive report
   @@assert( {{ this.sections | length >= 3 }} )
   @@assert( {{ this.sections | length <= 10 }} )
-  
+
   // Should reflect the extensive research conducted
   @@assert( {{ ("comprehensive" in (this.executive_summary | lower)) or ("extensive" in (this.executive_summary | lower)) or ("detailed" in (this.executive_summary | lower)) }} )
-  
+
   // Should cover multiple aspects from synthesis
   @@assert( {{ ("property" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("capital" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("gains" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("reporting" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
   @@assert( {{ ("mining" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("trading" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("staking" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("defi" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
-  
+
   // Should have multiple sections due to extensive research
   @@assert( {{ this.sections | length >= 2 }} )
-  
+
   // Should reference the extensive query history appropriately
   @@assert( {{ ("research" in (this.conclusion | lower)) or ("analysis" in (this.conclusion | lower)) or ("comprehensive" in (this.conclusion | lower)) }} )
 }
@@ -416,14 +416,14 @@ test GenerateReportConflictingInformation {
   @@assert( {{ this.executive_summary | length > 25 }} )
   @@assert( {{ this.conclusion | length > 25 }} )
   @@assert( {{ this.sections | length >= 2 }} )
-  
+
   // Should address the complexity and variations
   @@assert( {{ ("federal" in (this.executive_summary | lower)) }} )
   @@assert( {{ ("jurisdiction" in (this.conclusion | lower)) or ("specific" in (this.conclusion | lower)) or ("varies" in (this.conclusion | lower)) or ("depends" in (this.conclusion | lower)) }} )
-  
+
   // @@assert( {{ ("warn" in (this.sections[0].content | lower)) or ("federal" in (this.sections[0].content | lower)) or ("60" in (this.sections[0].content | lower)) }} )
   // @@assert( {{ ("state" in (this.sections[1].content | lower)) or ("at-will" in (this.sections[1].content | lower)) or ("varies" in (this.sections[1].content | lower)) }} )
-  
+
   // @@assert( {{ ("federal" in (this.sections[0].section_title | lower)) or ("state" in (this.sections[1].section_title | lower)) or ("variation" in (this.sections[1].section_title | lower)) }} )
 }
 
@@ -491,11 +491,11 @@ test GenerateLiveEmploymentDiscriminationReport {
   // Should generate comprehensive report for well-researched topic
   @@assert( {{ this.sections | length >= 3 }} )
   @@assert( {{ this.sections | length <= 7 }} )
-  
+
   // Basic content validation - simplified
   @@assert( {{ this.report_title | length > 0 }} )
   @@assert( {{ this.sections | length > 0 }} )
-  
+
   // Basic structure check - simplified for robustness
   @@assert( {{ this.sections | length > 0 }} )
   @@assert( {{ this.appendix_document_ids | length > 0 }} )
@@ -549,20 +549,20 @@ test GenerateLivePatentRequirementsReport {
   // Should generate structured report despite some gaps
   @@assert( {{ this.sections | length >= 2 }} )
   @@assert( {{ this.sections | length <= 5 }} )
-  
+
   // Report should address 35 U.S.C. § 112 and patent requirements
   @@assert( {{ ("patent" in (this.report_title | lower)) and ("112" in (this.report_title | lower)) }} )
   @@assert( {{ ("specification" in (this.executive_summary | lower)) or ("patent application" in (this.executive_summary | lower)) or ("35 u.s.c" in (this.executive_summary | lower)) }} )
-  
+
   // Should cover the four main requirements
   @@assert( {{ ("written description" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("enablement" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("best mode" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("claims" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
-  
+
   // Should acknowledge limitations and need for additional research
   @@assert( {{ ("additional research" in (this.conclusion | lower)) or ("case law" in (this.conclusion | lower)) or ("practical" in (this.conclusion | lower)) or ("further analysis" in (this.conclusion | lower)) }} )
-  
+
   // Should still provide useful statutory guidance
   @@assert( {{ ("section 112" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("patent act" in (this.sections | map(attribute="content") | join(" ") | lower)) or ("specification" in (this.sections | map(attribute="content") | join(" ") | lower)) }} )
-  
+
   // Content should be substantial despite gaps
   @@assert( {{ (this.sections | map(attribute="content") | join(" ") | length) > 100 }} )
 }

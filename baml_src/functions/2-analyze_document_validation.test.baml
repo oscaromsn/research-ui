@@ -14,7 +14,7 @@ test ValidateAnalyzeSingleDocumentRequiredFields {
       metadata {}
     }
   }
-  
+
   // CRITICAL: Test all required fields are present and non-empty
   @@assert( {{ this.search_result_id is not none }} )
   @@assert( {{ this.search_result_id == "validation_test_doc" }} )
@@ -27,25 +27,25 @@ test ValidateAnalyzeSingleDocumentRequiredFields {
   @@assert( {{ this.key_arguments_and_reasoning is not none }} )
   @@assert( {{ this.extracted_entities is not none }} )
   @@assert( {{ this.extracted_quotes is not none }} )
-  
+
   // CRITICAL: Test complete reasoning structure is present
   @@assert( {{ this.reasoning is not none }} )
   @@assert( {{ this.reasoning.analyze_legal_question is not none }} )
   @@assert( {{ this.reasoning.analyze_legal_question.summary is not none }} )
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 0 }} )
-  
+
   @@assert( {{ this.reasoning.consider_relevant_legal_principles is not none }} )
   @@assert( {{ this.reasoning.consider_relevant_legal_principles.summary is not none }} )
   @@assert( {{ this.reasoning.consider_relevant_legal_principles.summary | length > 0 }} )
-  
+
   @@assert( {{ this.reasoning.formulate_search_queries_strategy is not none }} )
   @@assert( {{ this.reasoning.formulate_search_queries_strategy.summary is not none }} )
   @@assert( {{ this.reasoning.formulate_search_queries_strategy.summary | length > 0 }} )
-  
+
   @@assert( {{ this.reasoning.specify_expected_information_strategy is not none }} )
   @@assert( {{ this.reasoning.specify_expected_information_strategy.summary is not none }} )
   @@assert( {{ this.reasoning.specify_expected_information_strategy.summary | length > 0 }} )
-  
+
   @@assert( {{ this.reasoning.ensure_comprehensive_coverage_strategy is not none }} )
   @@assert( {{ this.reasoning.ensure_comprehensive_coverage_strategy.summary is not none }} )
   @@assert( {{ this.reasoning.ensure_comprehensive_coverage_strategy.summary | length > 0 }} )
@@ -67,7 +67,7 @@ test ValidateAnalyzeSingleDocumentMinimalContent {
       metadata {}
     }
   }
-  
+
   // Even with minimal content, all required structure must be present
   @@assert( {{ this.search_result_id == "minimal_doc" }} )
   @@assert( {{ this.reasoning is not none }} )
@@ -106,7 +106,7 @@ test ValidateAnalyzeSingleDocumentComplexContent {
       }
     }
   }
-  
+
   // Complex content should still maintain required structure
   @@assert( {{ this.search_result_id == "complex_doc" }} )
   @@assert( {{ this.relevance_score >= 6 }} ) // Should be highly relevant
@@ -114,14 +114,14 @@ test ValidateAnalyzeSingleDocumentComplexContent {
   @@assert( {{ this.summary | length > 20 }} ) // Should generate substantial summary
   @@assert( {{ this.key_arguments_and_reasoning | length >= 2 }} ) // Multiple arguments expected
   @@assert( {{ this.extracted_entities | length >= 3 }} ) // Should extract multiple entities
-  
+
   // Full reasoning structure validation
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 15 }} )
   @@assert( {{ this.reasoning.consider_relevant_legal_principles.summary | length > 15 }} )
   @@assert( {{ this.reasoning.formulate_search_queries_strategy.summary | length > 10 }} )
   @@assert( {{ this.reasoning.specify_expected_information_strategy.summary | length > 10 }} )
   @@assert( {{ this.reasoning.ensure_comprehensive_coverage_strategy.summary | length > 10 }} )
-  
+
   // Optional fields should be handled properly (can be null or have content)
   @@assert( {{ this.counter_arguments_or_nuances is not none or this.counter_arguments_or_nuances is none }} ) // Either populated or null is fine
 }
