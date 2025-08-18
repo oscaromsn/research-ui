@@ -240,19 +240,34 @@ export function useResearchAgent(): UseResearchAgentReturn {
         const queriesWithTimestamp = queriesData.map((q) => ({
           ...q,
           timestamp,
+          // Ensure the current iteration index is tagged to each new query
+          iterationIndex: autoModeState.currentIteration,
         }));
 
+        // Update the temporary, per-run generatedQueriesAtom by replacing its content.
+        // This atom is used for immediate display of the current generation progress.
         setGeneratedQueries(queriesWithTimestamp);
-        setResearchSession((prev) => ({
-          ...prev,
-          accumulatedQueries: [
-            ...prev.accumulatedQueries,
-            ...queriesWithTimestamp,
-          ],
-        }));
+
+        // Update the persistent researchSessionAtom with a "replace" strategy for the current iteration.
+        setResearchSession((prev) => {
+          // Filter out any queries from the current iteration to avoid duplication.
+          const queriesFromPreviousIterations = prev.accumulatedQueries.filter(
+            (q) => q.iterationIndex !== autoModeState.currentIteration
+          );
+
+          // Return the combined list: historical queries + the latest list for the current iteration.
+          return {
+            ...prev,
+            accumulatedQueries: [
+              ...queriesFromPreviousIterations,
+              ...queriesWithTimestamp,
+            ],
+          };
+        });
       }
     },
-    [setGeneratedQueries, setResearchSession]
+    // Add autoModeState.currentIteration to the dependency array
+    [setGeneratedQueries, setResearchSession, autoModeState.currentIteration]
   );
 
   // Helper function to handle document analysis updates

@@ -5,8 +5,6 @@ export {
   string,
 } from "./common";
 
-export {
-  env,
-} from "./env";
+export { env } from "./env";
 
 export { createSchema } from "./utils";
