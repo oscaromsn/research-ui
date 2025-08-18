@@ -1,7 +1,7 @@
 import { AlertTriangle, CheckCircle, Clock } from "lucide-react";
 
 import type { DetailedReasoning } from "@/baml_client/types";
-import { Modal } from "@/components/ui/modal";
+import { Modal } from "@/components/ui/Modal";
 import type { ClientSynthesis } from "@/lib/state/researchAtoms";
 
 interface SynthesisReasoningModalProps {

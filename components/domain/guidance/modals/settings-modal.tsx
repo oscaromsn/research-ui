@@ -8,7 +8,7 @@ import {
   User,
 } from "lucide-react";
 
-import { Modal } from "@/components/ui/modal";
+import { Modal } from "@/components/ui/Modal";
 
 interface SettingsModalProps {
   isOpen: boolean;

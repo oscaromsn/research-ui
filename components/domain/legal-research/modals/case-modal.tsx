@@ -1,6 +1,6 @@
 import { BookOpen, Brain, Link, Scale } from "lucide-react";
 
-import { Modal } from "@/components/ui/modal";
+import { Modal } from "@/components/ui/Modal";
 import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 
 interface CaseModalProps {
