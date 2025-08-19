@@ -1,11 +1,5 @@
 import { AlertCircle, Brain, Scroll } from "lucide-react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
 
 export interface StatusIndicatorData {
@@ -149,7 +143,6 @@ interface DocumentStatusIndicatorProps {
   onRetry?: () => void;
   onSkip?: () => void;
   errorMessage?: string;
-  details?: string;
 }
 
 export function DocumentStatusIndicator({
@@ -160,11 +153,7 @@ export function DocumentStatusIndicator({
   onRetry,
   onSkip,
   errorMessage,
-  details,
 }: DocumentStatusIndicatorProps) {
-  // Local state for collapsible details
-  const [showDetails, setShowDetails] = useState(false);
-
   const statusIndicator = getStatusIndicator(status, {
     ...(progress !== undefined && { progress }),
     ...(estimatedTime !== undefined && { estimatedTime }),
@@ -172,9 +161,6 @@ export function DocumentStatusIndicator({
     ...(onSkip !== undefined && { onSkip }),
     ...(errorMessage !== undefined && { errorMessage }),
   });
-
-  // Use provided details or fall back to status details
-  const finalDetails = details || statusIndicator.details;
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -211,17 +197,6 @@ export function DocumentStatusIndicator({
 
       {statusIndicator.progress !== undefined && (
         <Progress value={statusIndicator.progress} className="w-full" />
-      )}
-
-      {finalDetails && (
-        <Collapsible open={showDetails} onOpenChange={setShowDetails}>
-          <CollapsibleTrigger className="text-muted-foreground text-xs hover:text-foreground">
-            {showDetails ? "Hide details" : "Show details"}
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-1 text-muted-foreground text-xs">
-            {finalDetails}
-          </CollapsibleContent>
-        </Collapsible>
       )}
     </div>
   );
