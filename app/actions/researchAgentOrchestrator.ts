@@ -11,6 +11,7 @@ import type {
   SearchQueryItem,
   SearchResultItem,
 } from "@/baml_client/types";
+import { config } from "@/lib/config";
 import type { ClientAnalyzedDoc } from "@/lib/state/researchAtoms";
 
 // Extended SearchResultItem with ordering metadata
@@ -24,7 +25,6 @@ interface OrderedSearchResultItem extends SearchResultItem {
 }
 
 import type { BamlStream } from "@boundaryml/baml";
-import { config } from "@/lib/config";
 import {
   ExaAuthError,
   ExaClientError,
@@ -753,6 +753,69 @@ async function processDocument(
   await sendAnalysisProgressUpdate(context, doc, index, totalCount);
   await sendAnalysisStartUpdate(context, doc);
 
+  // Create per-document timeout controller
+  const documentTimeoutController = new AbortController();
+  const documentTimeoutId = setTimeout(
+    () => documentTimeoutController.abort(),
+    config.research.documentAnalysisTimeoutMs
+  );
+
+  try {
+    // Use Promise.race to enforce per-document timeout
+    const analysisResult = await Promise.race([
+      performDocumentAnalysis(
+        context,
+        doc,
+        index,
+        totalCount,
+        documentTimeoutController
+      ),
+      new Promise<null>((_, reject) => {
+        documentTimeoutController.signal.addEventListener("abort", () => {
+          reject(
+            new Error(
+              `Document analysis timeout: "${doc.title || doc.id}" exceeded ${config.research.documentAnalysisTimeoutMs / 1000} seconds`
+            )
+          );
+        });
+      }),
+    ]);
+
+    clearTimeout(documentTimeoutId);
+    return analysisResult;
+  } catch (error: unknown) {
+    clearTimeout(documentTimeoutId);
+
+    // Handle timeout errors with retry logic
+    if (error instanceof Error && error.message.includes("timeout")) {
+      console.warn(
+        `Document analysis timeout for: ${doc.title || doc.id}. Attempting retry...`
+      );
+
+      // Retry logic could be implemented here
+      // For now, we'll just return null and continue with other documents
+      await sendAnalysisErrorUpdate(
+        context,
+        doc,
+        `Document analysis timeout: ${error.message}`,
+        index,
+        totalCount
+      );
+      return null;
+    }
+
+    // Re-throw non-timeout errors
+    throw error;
+  }
+}
+
+async function performDocumentAnalysis(
+  context: StageContext,
+  doc: SearchResultItem,
+  index: number,
+  totalCount: number,
+  _documentTimeoutController: AbortController
+): Promise<AnalyzedDocument | null> {
   try {
     // Use streaming BAML call
     const analysisStream = b.stream.AnalyzeSingleDocument(

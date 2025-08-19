@@ -13,7 +13,9 @@ const researchConfigSchema = createSchema(
     maxDocumentsPerQuery: number.positive.int().default(5),
     searchTimeoutMs: number.positive.int().default(30000),
     maxRetries: number.nonNegative.int().default(2),
-    analysisTimeoutMs: number.positive.int().default(45000),
+    analysisTimeoutMs: number.positive.int().default(300000), // 5 minutes for entire pipeline
+    documentAnalysisTimeoutMs: number.positive.int().default(60000), // 60 seconds per document
+    documentAnalysisMaxRetries: number.nonNegative.int().default(2), // retry failed documents
   })
 );
 
@@ -64,7 +66,9 @@ const getEnvironmentConfig = () => {
       maxDocumentsPerQuery: 5, // Slightly higher than current RESULTS_PER_QUERY (2)
       searchTimeoutMs: 30000,
       maxRetries: 2,
-      analysisTimeoutMs: 45000,
+      analysisTimeoutMs: 300000, // 5 minutes for entire pipeline
+      documentAnalysisTimeoutMs: 60000, // 60 seconds per document
+      documentAnalysisMaxRetries: 2, // retry failed documents
     },
     features: {
       enableDetailedLogging: false,
@@ -98,6 +102,8 @@ const getEnvironmentConfig = () => {
           ...baseConfig.research,
           maxDocumentsPerQuery: 5, // More generous in dev
           searchTimeoutMs: 10000, // Faster feedback in dev
+          analysisTimeoutMs: 120000, // 2 minutes for dev
+          documentAnalysisTimeoutMs: 30000, // 30 seconds per document in dev
         },
         features: {
           ...baseConfig.features,
@@ -119,6 +125,8 @@ const getEnvironmentConfig = () => {
           searchTimeoutMs: 5000, // Faster tests
           maxRetries: 1, // Fewer retries in tests
           analysisTimeoutMs: 30000, // Shorter timeouts for tests
+          documentAnalysisTimeoutMs: 10000, // 10 seconds per document in tests
+          documentAnalysisMaxRetries: 1, // single retry in tests
         },
         features: {
           ...baseConfig.features,

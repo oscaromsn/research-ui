@@ -16,7 +16,9 @@ vi.mock("@/lib/config", () => ({
       maxDocumentsPerQuery: 5,
       searchTimeoutMs: 30000,
       maxRetries: 2,
-      analysisTimeoutMs: 45000,
+      analysisTimeoutMs: 300000,
+      documentAnalysisTimeoutMs: 60000,
+      documentAnalysisMaxRetries: 2,
     },
     features: {
       enableDetailedLogging: true,
@@ -48,7 +50,9 @@ describe("Configuration System - Mock Validation", () => {
     expect(config.research.maxDocumentsPerQuery).toBe(5);
     expect(config.research.searchTimeoutMs).toBe(30000);
     expect(config.research.maxRetries).toBe(2);
-    expect(config.research.analysisTimeoutMs).toBe(45000);
+    expect(config.research.analysisTimeoutMs).toBe(300000);
+    expect(config.research.documentAnalysisTimeoutMs).toBe(60000);
+    expect(config.research.documentAnalysisMaxRetries).toBe(2);
   });
 
   it("should provide access to feature flags", async () => {
@@ -72,6 +76,8 @@ describe("Configuration System - Mock Validation", () => {
     expect(typeof config.research.searchTimeoutMs).toBe("number");
     expect(typeof config.research.maxRetries).toBe("number");
     expect(typeof config.research.analysisTimeoutMs).toBe("number");
+    expect(typeof config.research.documentAnalysisTimeoutMs).toBe("number");
+    expect(typeof config.research.documentAnalysisMaxRetries).toBe("number");
     expect(typeof config.features.enableDetailedLogging).toBe("boolean");
     expect(typeof config.features.enableProgressIndicators).toBe("boolean");
     expect(typeof config.features.enableAdvancedRetry).toBe("boolean");
