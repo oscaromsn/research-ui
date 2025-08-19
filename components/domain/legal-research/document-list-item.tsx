@@ -41,11 +41,13 @@ export function DocumentListItem({
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <div className="mb-1 flex items-center gap-2">
-            <h3 className="font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
+          <div className="mb-1 flex items-center justify-between">
+            <h3 className="flex-1 pr-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
               {doc.title || "Untitled Document"}
             </h3>
-            <DocumentStatusIndicator status={doc.status} />
+            <div className="flex-shrink-0">
+              <DocumentStatusIndicator status={doc.status} />
+            </div>
           </div>
           <div className="mb-1 flex items-center text-[#64748b] text-xs dark:text-[#94a3b8]">
             <span>

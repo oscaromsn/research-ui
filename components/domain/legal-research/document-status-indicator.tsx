@@ -124,6 +124,22 @@ export function getStatusIndicator(
   }
 }
 
+function getBackgroundColor(status: string): string {
+  switch (status) {
+    case "fetched":
+      return "bg-blue-50 dark:bg-blue-900/20";
+    case "analyzing":
+      return "bg-yellow-50 dark:bg-yellow-900/20";
+    case "analyzed":
+      return "bg-green-50 dark:bg-green-900/20";
+    case "failed":
+    case "error":
+      return "bg-red-50 dark:bg-red-900/20";
+    default:
+      return "bg-gray-50 dark:bg-gray-900/20";
+  }
+}
+
 interface DocumentStatusIndicatorProps {
   status: string;
   className?: string;
@@ -163,11 +179,15 @@ export function DocumentStatusIndicator({
   return (
     <div className={`space-y-2 ${className}`}>
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
+        <div
+          className={`flex items-center space-x-1.5 rounded-full px-2.5 py-1 text-xs ${getBackgroundColor(status)}`}
+        >
           {statusIndicator.icon}
-          <span className={statusIndicator.color}>{statusIndicator.text}</span>
+          <span className={`font-medium ${statusIndicator.color}`}>
+            {statusIndicator.text}
+          </span>
           {statusIndicator.estimatedTime && (
-            <span className="text-muted-foreground text-sm">
+            <span className="text-muted-foreground text-xs">
               ({statusIndicator.estimatedTime})
             </span>
           )}
