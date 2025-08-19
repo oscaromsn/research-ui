@@ -7,10 +7,7 @@ import type { NextConfig } from "next";
 import "./lib/schemas/env";
 
 const nextConfig: NextConfig = {
-  // Experimental features for debugging
-  experimental: {
-    browserDebugInfoInTerminal: true,
-  },
+  /* config options here */
 };
 
 export default withBaml()(nextConfig);
