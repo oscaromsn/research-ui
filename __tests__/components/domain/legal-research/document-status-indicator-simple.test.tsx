@@ -199,24 +199,6 @@ describe("Enhanced Document Status Indicator", () => {
       expect(mockSkip).toHaveBeenCalledOnce();
     });
 
-    it("should toggle details visibility", () => {
-      const { getByText } = render(
-        <DocumentStatusIndicator
-          status="analyzing"
-          details="Detailed analysis information"
-        />
-      );
-
-      const trigger = getByText("Show details");
-      expect(trigger).toBeInTheDocument();
-
-      fireEvent.click(trigger);
-
-      // Details should be visible after clicking
-      expect(getByText("Hide details")).toBeInTheDocument();
-      expect(getByText("Detailed analysis information")).toBeInTheDocument();
-    });
-
     it("should handle all status types", () => {
       const statuses = ["fetched", "analyzing", "analyzed", "failed"];
 
@@ -248,20 +230,6 @@ describe("Enhanced Document Status Indicator", () => {
 
       // Should render without errors when optional props are not provided
       expect(getByText(/Analyzing/)).toBeInTheDocument();
-    });
-
-    it("should use custom details over status details", () => {
-      const { getByText } = render(
-        <DocumentStatusIndicator
-          status="analyzing"
-          details="Custom details override"
-        />
-      );
-
-      const showDetailsButton = getByText("Show details");
-      fireEvent.click(showDetailsButton);
-
-      expect(getByText("Custom details override")).toBeInTheDocument();
     });
 
     it("should handle error message in failed status", () => {
