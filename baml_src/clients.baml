@@ -4,24 +4,26 @@ client<llm> QueryGeneration {
   provider "openai-generic"
   options {
     base_url "https://api.cerebras.ai/v1"
-    model "llama-4-scout-17b-16e-instruct"
+    model "gpt-oss-120b"
     api_key env.CEREBRAS_API_KEY
   }
 }
 
 client<llm> DocumentAnalysis {
-  provider openai
+  provider "openai-generic"
   options {
-    model "gpt-5-nano-2025-08-07"
-    api_key env.OPENAI_API_KEY
+    base_url "https://api.cerebras.ai/v1"
+    model "gpt-oss-120b"
+    api_key env.CEREBRAS_API_KEY
   }
 }
 
 client<llm> FindingsSynthetizing {
-  provider openai
+  provider "openai-generic"
   options {
-    model "gpt-5-nano-2025-08-07"
-    api_key env.OPENAI_API_KEY
+    base_url "https://api.cerebras.ai/v1"
+    model "gpt-oss-120b"
+    api_key env.CEREBRAS_API_KEY
   }
 }
 
@@ -29,7 +31,7 @@ client<llm> DecidesNextStep {
   provider "openai-generic"
   options {
     base_url "https://api.cerebras.ai/v1"
-    model "llama-4-scout-17b-16e-instruct"
+    model "gpt-oss-120b"
     api_key env.CEREBRAS_API_KEY
   }
 }
@@ -38,7 +40,7 @@ client<llm> GenerateFinalReport {
   provider "openai-generic"
   options {
     base_url "https://api.cerebras.ai/v1"
-    model "llama-4-scout-17b-16e-instruct"
+    model "gpt-oss-120b"
     api_key env.CEREBRAS_API_KEY
   }
 }
@@ -47,7 +49,7 @@ client<llm> CustomCerebras {
   provider "openai-generic"
   options {
     base_url "https://api.cerebras.ai/v1"
-    model "llama-4-scout-17b-16e-instruct"
+    model "gpt-oss-120b"
     api_key env.CEREBRAS_API_KEY
   }
 }
