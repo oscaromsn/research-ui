@@ -3,6 +3,7 @@
 # *.log
 # tmp/
 docs/**
+*.md
 
 .gemini/**
 **.svg
@@ -10,3 +11,4 @@ docs/**
 repomix.config.json
 **/todo.md
 tests/fixtures/test-data
+**/baml_client/**
