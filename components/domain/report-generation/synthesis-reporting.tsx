@@ -32,21 +32,21 @@ export function SynthesisReporting() {
 
   const getConfidenceLabel = (confidence?: number): string => {
     if (!confidence) {
-      return "Unknown";
+      return "Desconhecida";
     }
     if (confidence >= 80) {
-      return `High (${confidence}%)`;
+      return `Alta (${confidence}%)`;
     }
     if (confidence >= 60) {
-      return `Medium (${confidence}%)`;
+      return `Média (${confidence}%)`;
     }
-    return `Low (${confidence}%)`;
+    return `Baixa (${confidence}%)`;
   };
   return (
     <div className="w-full overflow-y-auto bg-[#f8f9fa] p-4 md:w-1/3 dark:bg-[#171c2c]">
       <div className="mb-4">
         <h2 className="mb-4 font-semibold text-[#1a1f2e] text-lg dark:text-white">
-          Synthesis & Reporting
+          Síntese e Relatórios
         </h2>
         <div className="mb-4 flex border-[#e1e5eb] border-b dark:border-[#2a3148]">
           <button
@@ -54,14 +54,14 @@ export function SynthesisReporting() {
             className={`px-4 py-2 font-medium text-sm transition-colors ${activeTab === "synthesis" ? "border-[#3a7bb7] border-b-2 text-[#3a7bb7]" : "text-[#64748b] hover:text-[#4a5568] dark:text-[#94a3b8] dark:hover:text-[#e2e8f0]"}`}
             onClick={() => setActiveTab("synthesis")}
           >
-            Synthesis Studio
+            Estúdio de Síntese
           </button>
           <button
             type="button"
             className={`px-4 py-2 font-medium text-sm transition-colors ${activeTab === "report" ? "border-[#3a7bb7] border-b-2 text-[#3a7bb7]" : "text-[#64748b] hover:text-[#4a5568] dark:text-[#94a3b8] dark:hover:text-[#e2e8f0]"}`}
             onClick={() => setActiveTab("report")}
           >
-            Report Drafter
+            Editor de Relatório
           </button>
         </div>
       </div>
@@ -70,7 +70,7 @@ export function SynthesisReporting() {
           <div className="mb-3">
             <div className="mb-2 flex cursor-pointer items-center justify-between">
               <h3 className="font-medium text-[#4a5568] text-sm dark:text-[#a0aec0]">
-                Synthesized Topics{" "}
+                Tópicos Sintetizados{" "}
                 {researchSession.accumulatedTopics.length > 0 &&
                   `(${sortedTopics.length} total)`}
               </h3>
@@ -118,7 +118,7 @@ export function SynthesisReporting() {
                   )}
                   <div className="flex items-center text-xs">
                     <span className="mr-1 text-[#4a5568] dark:text-[#a0aec0]">
-                      Confidence:
+                      Confiança:
                     </span>
                     <span className="font-medium text-[#3a7bb7]">
                       {getConfidenceLabel(topic.confidence)}
@@ -129,15 +129,15 @@ export function SynthesisReporting() {
             ) : (
               <div className="mb-3 rounded-lg border border-[#e1e5eb] bg-white p-4 dark:border-[#2a3148] dark:bg-[#1e2436]">
                 <p className="text-[#4a5568] text-xs dark:text-[#a0aec0]">
-                  No synthesis topics available yet. Topics will appear here as
-                  analysis progresses.
+                  Nenhum tópico de síntese disponível ainda. Os tópicos
+                  aparecerão aqui conforme a análise progride.
                 </p>
               </div>
             )}
           </div>
           <div className="mb-4">
             <h3 className="mb-2 font-medium text-[#4a5568] text-sm dark:text-[#a0aec0]">
-              Unanswered Aspects:
+              Aspectos Não Respondidos:
             </h3>
             <div className="rounded-lg border border-[#e1e5eb] bg-white p-3 dark:border-[#2a3148] dark:bg-[#1e2436]">
               {synthesis.unansweredAspects &&
@@ -158,7 +158,7 @@ export function SynthesisReporting() {
                 </ul>
               ) : (
                 <p className="text-[#4a5568] text-xs dark:text-[#a0aec0]">
-                  No unanswered aspects identified yet.
+                  Nenhum aspecto não respondido identificado ainda.
                 </p>
               )}
             </div>
@@ -169,7 +169,7 @@ export function SynthesisReporting() {
             onClick={() => setShowSynthesisReasoning(true)}
           >
             <Brain size={12} className="mr-1" />
-            View Synthesis Reasoning
+            Ver Raciocínio da Síntese
           </button>
         </div>
       ) : (

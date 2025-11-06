@@ -20,7 +20,7 @@ export function DocumentDetails({
           {selectedDocument?.fullText ? (
             <div className="space-y-3">
               <h3 className="font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
-                Document Content
+                Conteúdo do Documento
               </h3>
               <div className="text-[#4a5568] text-xs leading-relaxed dark:text-[#a0aec0]">
                 {selectedDocument.fullText.split("\n").map((paragraph, idx) => (
@@ -35,7 +35,7 @@ export function DocumentDetails({
             </div>
           ) : (
             <div className="text-[#64748b] italic dark:text-[#94a3b8]">
-              No document content available.
+              Nenhum conteúdo de documento disponível.
             </div>
           )}
         </div>
@@ -45,7 +45,7 @@ export function DocumentDetails({
               <div className="mb-3">
                 <div className="mb-1 flex items-center justify-between">
                   <span className="font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
-                    Relevance
+                    Relevância
                   </span>
                   <span className="text-[#3a7bb7] text-xs">
                     {selectedDocument.relevanceScore}/10
@@ -63,19 +63,19 @@ export function DocumentDetails({
             )}
           <div className="mb-3">
             <p className="mb-1 font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
-              Summary:
+              Resumo:
             </p>
             <p className="text-[#4a5568] text-xs dark:text-[#a0aec0]">
               {selectedDocument?.status === "fetched"
-                ? "Document retrieved, analysis pending..."
+                ? "Documento recuperado, análise pendente..."
                 : selectedDocument?.status === "analyzing"
                   ? selectedDocument?.summarySnippet ||
-                    "Analysis in progress..."
+                    "Análise em andamento..."
                   : selectedDocument?.status === "error"
                     ? selectedDocument?.errorMessage ||
-                      "Failed to analyze document"
+                      "Falha ao analisar o documento"
                     : selectedDocument?.summarySnippet ||
-                      "No analysis available for this document."}
+                      "Nenhuma análise disponível para este documento."}
               {selectedDocument?.status === "analyzing" && (
                 <span
                   className="ml-0.5 inline-block h-3 w-0.5 animate-caret-blink bg-[#4a5568] dark:bg-[#a0aec0]"
@@ -87,7 +87,7 @@ export function DocumentDetails({
           {selectedDocument?.status === "analyzed" && (
             <div className="mb-3">
               <p className="mb-1 font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
-                Key Arguments:
+                Argumentos Principais:
               </p>
               <ul className="list-disc space-y-1 pl-4 text-xs">
                 {selectedDocument?.keyArguments?.length ? (
@@ -101,7 +101,7 @@ export function DocumentDetails({
                   ))
                 ) : (
                   <li className="text-[#64748b] italic dark:text-[#94a3b8]">
-                    No key arguments identified.
+                    Nenhum argumento principal identificado.
                   </li>
                 )}
               </ul>
@@ -110,7 +110,7 @@ export function DocumentDetails({
           {selectedDocument?.status === "analyzed" && (
             <div className="mb-3">
               <p className="mb-1 font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
-                Extracted Entities:
+                Entidades Extraídas:
               </p>
               <div className="flex flex-wrap gap-1">
                 {selectedDocument?.extractedEntities?.length ? (
@@ -122,7 +122,7 @@ export function DocumentDetails({
                   ))
                 ) : (
                   <span className="text-[#64748b] text-xs italic dark:text-[#94a3b8]">
-                    No entities extracted.
+                    Nenhuma entidade extraída.
                   </span>
                 )}
               </div>
@@ -136,25 +136,25 @@ export function DocumentDetails({
                 onClick={onViewAnalysis}
               >
                 <Brain size={12} className="mr-1" />
-                View Analysis Reasoning
+                Ver Raciocínio da Análise
               </button>
             )}
           {selectedDocument?.status === "fetched" && (
             <div className="flex items-center text-[#64748b] text-xs">
               <Loader2 size={12} className="mr-1" />
-              Waiting for analysis...
+              Aguardando análise...
             </div>
           )}
           {selectedDocument?.status === "analyzing" && (
             <div className="flex items-center text-[#f59e0b] text-xs">
               <Loader2 size={12} className="mr-1 animate-spin" />
-              Analysis in progress...
+              Análise em andamento...
             </div>
           )}
           {selectedDocument?.status === "error" && (
             <div className="flex items-center text-[#dc2626] text-xs">
               <AlertCircle size={12} className="mr-1" />
-              Analysis failed
+              Análise falhou
             </div>
           )}
         </div>

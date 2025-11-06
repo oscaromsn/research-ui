@@ -36,14 +36,14 @@ export function DocumentListItem({
       } ${doc.status === "error" ? "cursor-not-allowed opacity-50" : ""}`}
       onClick={() => doc.status !== "error" && onDocumentClick(doc)}
       onKeyUp={(e) => doc.status !== "error" && onDocumentKeyUp(doc, e)}
-      aria-label={`Select document: ${doc.title || "Untitled Document"}`}
+      aria-label={`Selecionar documento: ${doc.title || "Documento sem Título"}`}
       aria-disabled={doc.status === "error"}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="mb-1 flex items-center justify-between">
             <h3 className="flex-1 pr-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
-              {doc.title || "Untitled Document"}
+              {doc.title || "Documento sem Título"}
             </h3>
             <div className="flex-shrink-0">
               <DocumentStatusIndicator status={doc.status} />
@@ -52,12 +52,12 @@ export function DocumentListItem({
           <div className="mb-1 flex items-center text-[#64748b] text-xs dark:text-[#94a3b8]">
             <span>
               {doc.source ||
-                (doc.url ? new URL(doc.url).hostname : "Unknown Source")}
+                (doc.url ? new URL(doc.url).hostname : "Fonte Desconhecida")}
             </span>
             {doc.status === "analyzed" && doc.relevanceScore && (
               <>
                 <span className="mx-1">•</span>
-                <span>Relevance: {doc.relevanceScore}/10</span>
+                <span>Relevância: {doc.relevanceScore}/10</span>
               </>
             )}
             {doc.timestamp && (
@@ -74,12 +74,12 @@ export function DocumentListItem({
           </div>
           <p className="text-[#4a5568] text-xs dark:text-[#a0aec0]">
             {doc.status === "error"
-              ? doc.errorMessage || "Failed to process document"
+              ? doc.errorMessage || "Falha ao processar o documento"
               : doc.status === "fetched"
-                ? "Document retrieved, analysis pending..."
+                ? "Documento recuperado, análise pendente..."
                 : doc.status === "analyzing"
-                  ? doc.summarySnippet || "Analysis in progress..."
-                  : doc.summarySnippet || "No summary available."}
+                  ? doc.summarySnippet || "Análise em andamento..."
+                  : doc.summarySnippet || "Nenhum resumo disponível."}
           </p>
         </div>
         <div className="mt-1 ml-2 flex flex-col items-center gap-1">

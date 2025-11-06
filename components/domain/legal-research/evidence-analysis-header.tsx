@@ -11,13 +11,13 @@ export function EvidenceAnalysisHeader({
     >
       <div className="mb-2 flex items-center justify-between">
         <h2 className="font-semibold text-[#1a1f2e] text-lg dark:text-white">
-          Evidence & Analysis
+          Evidências e Análise
         </h2>
         <div className="flex space-x-2">
           <button
             type="button"
             className="rounded p-1 hover:bg-[#f1f5f9] dark:hover:bg-[#242a3d]"
-            aria-label="Menu options"
+            aria-label="Opções do menu"
           >
             <svg
               width="16"

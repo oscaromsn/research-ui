@@ -34,9 +34,9 @@ export function getStatusIndicator(
     case "fetched":
       return {
         icon: <Scroll size={12} className="text-blue-500" />,
-        text: "Retrieved",
+        text: "Recuperado",
         color: "text-blue-600",
-        details: "Document successfully retrieved from search",
+        details: "Documento recuperado com sucesso da busca",
         // Legacy compatibility
         bgColor: "bg-blue-50 dark:bg-blue-900/20",
         borderColor: "border-blue-200 dark:border-blue-800",
@@ -44,13 +44,13 @@ export function getStatusIndicator(
     case "analyzing":
       return {
         icon: <Brain size={12} className="animate-pulse text-blue-600" />,
-        text: "Analyzing document content...",
+        text: "Analisando conteúdo...",
         color: "text-blue-600",
         ...(metadata.progress !== undefined && { progress: metadata.progress }),
         ...(metadata.estimatedTime !== undefined && {
           estimatedTime: metadata.estimatedTime,
         }),
-        details: "Processing document analysis with AI model",
+        details: "Processando análise do documento com modelo de IA",
         // Legacy compatibility
         bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
         borderColor: "border-yellow-200 dark:border-yellow-800",
@@ -58,9 +58,9 @@ export function getStatusIndicator(
     case "analyzed":
       return {
         icon: <Brain size={12} className="text-green-500" />,
-        text: "Analyzed",
+        text: "Analisado",
         color: "text-green-600",
-        details: "Document analysis completed successfully",
+        details: "Análise do documento concluída com sucesso",
         // Legacy compatibility
         bgColor: "bg-green-50 dark:bg-green-900/20",
         borderColor: "border-green-200 dark:border-green-800",
@@ -68,11 +68,11 @@ export function getStatusIndicator(
     case "failed":
       return {
         icon: <AlertCircle size={12} className="text-red-500" />,
-        text: "Analysis failed",
+        text: "Análise falhou",
         color: "text-red-600",
         actions: [
           {
-            label: "Retry",
+            label: "Tentar Novamente",
             onClick:
               metadata.onRetry ||
               (() => {
@@ -81,7 +81,7 @@ export function getStatusIndicator(
             variant: "primary",
           },
           {
-            label: "Skip",
+            label: "Pular",
             onClick:
               metadata.onSkip ||
               (() => {
@@ -90,7 +90,7 @@ export function getStatusIndicator(
             variant: "secondary",
           },
         ],
-        details: metadata.errorMessage || "Analysis failed due to an error",
+        details: metadata.errorMessage || "Análise falhou devido a um erro",
         // Legacy compatibility
         bgColor: "bg-red-50 dark:bg-red-900/20",
         borderColor: "border-red-200 dark:border-red-800",
@@ -98,9 +98,9 @@ export function getStatusIndicator(
     case "error":
       return {
         icon: <AlertCircle size={12} className="text-red-500" />,
-        text: "Error",
+        text: "Erro",
         color: "text-red-600",
-        details: metadata.errorMessage || "An error occurred",
+        details: metadata.errorMessage || "Ocorreu um erro",
         // Legacy compatibility
         bgColor: "bg-red-50 dark:bg-red-900/20",
         borderColor: "border-red-200 dark:border-red-800",
@@ -108,9 +108,9 @@ export function getStatusIndicator(
     default:
       return {
         icon: <Scroll size={12} className="text-gray-500" />,
-        text: "Unknown",
+        text: "Desconhecido",
         color: "text-gray-600",
-        details: "Status information not available",
+        details: "Informação de status não disponível",
         // Legacy compatibility
         bgColor: "bg-gray-50 dark:bg-gray-900/20",
         borderColor: "border-gray-200 dark:border-gray-800",

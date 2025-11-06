@@ -1,11 +1,11 @@
 import {
-  Bell,
-  Globe,
-  LogOut,
-  Moon,
-  Settings,
-  Shield,
-  User,
+    Bell,
+    Globe,
+    LogOut,
+    Moon,
+    Settings,
+    Shield,
+    User,
 } from "lucide-react";
 
 import { Modal } from "@/components/ui/Modal";
@@ -17,7 +17,7 @@ interface SettingsModalProps {
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Settings" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title="Configurações" size="md">
       <div className="space-y-6">
         <div className="flex items-center space-x-4 rounded-lg bg-[#f8fafc] p-4 dark:bg-[#1e2436]">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#4a90e2]">
@@ -25,13 +25,13 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           </div>
           <div>
             <h4 className="font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
-              Sarah Chen
+              João Silva
             </h4>
             <p className="text-[#64748b] text-xs dark:text-[#94a3b8]">
-              sarah.chen@example.com
+              joao@biglaw.com.br
             </p>
             <span className="mt-1 inline-block rounded bg-[#dbeafe] px-2 py-0.5 text-[#2563eb] text-[10px] dark:bg-[#1e3a8a] dark:text-[#93c5fd]">
-              Premium Plan
+              Plano Premium
             </span>
           </div>
         </div>
@@ -39,22 +39,22 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           {[
             {
               icon: Settings,
-              label: "General Preferences",
+              label: "Preferências Gerais",
               badge: null,
             },
             {
               icon: Bell,
-              label: "Notifications",
+              label: "Notificações",
               badge: "3",
             },
             {
               icon: Globe,
-              label: "Language & Region",
+              label: "Idioma e Região",
               badge: null,
             },
             {
               icon: Shield,
-              label: "Privacy & Security",
+              label: "Privacidade e Segurança",
               badge: null,
             },
           ].map((item) => (
@@ -78,7 +78,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         <div className="flex items-center justify-between p-3 text-[#4a5568] text-sm dark:text-[#a0aec0]">
           <div className="flex items-center">
             <Moon size={16} className="mr-3" />
-            Dark Mode
+            Modo Escuro
           </div>
           <button
             type="button"
@@ -93,7 +93,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             className="flex w-full items-center justify-center rounded-lg p-2 text-[#ef4444] text-sm transition-colors hover:bg-[#fef2f2] dark:hover:bg-[#451a1a]"
           >
             <LogOut size={16} className="mr-2" />
-            Sign Out
+            Sair
           </button>
         </div>
       </div>

@@ -7,8 +7,8 @@ config();
 // Assuming BAML-generated types are available.
 // You might need to adjust the import path based on your `generators.baml` output_dir.
 import type {
-  SearchResultItem as BamlSearchResultItem,
-  SearchQueryItem,
+    SearchResultItem as BamlSearchResultItem,
+    SearchQueryItem,
 } from "@/baml_client/types";
 
 // Import validated environment
@@ -17,19 +17,19 @@ import { env } from "@/lib/schemas";
 import { createSearchContext, SearchCircuitBreaker } from "./errorRecovery";
 // Import enhanced error handler
 import {
-  analyzeExaError,
-  executeWithRetry,
-  shouldAbortResearch,
+    analyzeExaError,
+    executeWithRetry,
+    shouldAbortResearch,
 } from "./exaErrorHandler";
 // Import custom error types
 import {
-  ExaAuthError,
-  ExaClientError,
-  ExaConfigError,
-  ExaNetworkError,
-  ExaParsingError,
-  ExaRateLimitError,
-  ExaServerError,
+    ExaAuthError,
+    ExaClientError,
+    ExaConfigError,
+    ExaNetworkError,
+    ExaParsingError,
+    ExaRateLimitError,
+    ExaServerError,
 } from "./exaSearchErrors";
 import { defaultRecoveryStrategies } from "./recoveryStrategies";
 
@@ -481,7 +481,7 @@ function mapExaResultToBaml(
     id: exaRes.url,
     url: exaRes.url,
     title: exaRes.title ?? null,
-    source_name: "Exa Search",
+    source_name: "Internet",
     snippet: snippet,
     full_text: exaRes.text ?? null,
     published_date: exaRes.publishedDate ?? null,

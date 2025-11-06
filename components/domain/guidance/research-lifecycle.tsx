@@ -2,13 +2,13 @@
 
 import { useAtomValue } from "jotai";
 import {
-  Brain,
-  CheckSquare,
-  Compass,
-  Lightbulb,
-  Loader2,
-  Pen,
-  Search,
+    Brain,
+    CheckSquare,
+    Compass,
+    Lightbulb,
+    Loader2,
+    Pen,
+    Search,
 } from "lucide-react";
 import type { ReactElement } from "react";
 import { useMemo } from "react";
@@ -36,18 +36,18 @@ const CONNECTOR_STYLES = {
 
 // Mapping from orchestrator stages to lifecycle display stages
 const STAGE_MAPPING: Record<ResearchStage | "IDLE", string> = {
-  IDLE: "Ideate",
-  INITIALIZING: "Ideate",
-  GENERATING_QUERIES: "Plan",
-  FETCHING_DOCUMENTS: "Research",
-  ANALYZING_DOCUMENTS: "Analyze",
-  SYNTHESIZING_FINDINGS: "Review",
-  ASSESSING_RESEARCH: "Review",
-  GENERATING_REPORT: "Draft",
-  COMPLETED: "Draft",
-  ERROR: "Ideate",
-  HUMAN_REVIEW_REQUESTED: "Review",
-  ITERATION_PAUSED: "Review",
+  IDLE: "Idealizar",
+  INITIALIZING: "Idealizar",
+  GENERATING_QUERIES: "Planejar",
+  FETCHING_DOCUMENTS: "Pesquisar",
+  ANALYZING_DOCUMENTS: "Analisar",
+  SYNTHESIZING_FINDINGS: "Revisar",
+  ASSESSING_RESEARCH: "Revisar",
+  GENERATING_REPORT: "Rascunhar",
+  COMPLETED: "Rascunhar",
+  ERROR: "Idealizar",
+  HUMAN_REVIEW_REQUESTED: "Revisar",
+  ITERATION_PAUSED: "Revisar",
 };
 
 type StageStatus = "completed" | "active" | "pending";
@@ -60,9 +60,9 @@ interface StageInfo {
 
 const researchStageToLifecycleName = (stage: ResearchStage | null): string => {
   if (!stage) {
-    return "Ideate";
+    return "Idealizar";
   }
-  return STAGE_MAPPING[stage] || "Ideate";
+  return STAGE_MAPPING[stage] || "Idealizar";
 };
 
 const getStageStatus = (
@@ -103,12 +103,12 @@ export function ResearchLifecycle() {
     { name: string; icon: ReactElement }
   > = useMemo(
     () => ({
-      Ideate: { name: "Ideate", icon: <Lightbulb size={16} /> },
-      Plan: { name: "Plan", icon: <Compass size={16} /> },
-      Research: { name: "Research", icon: <Search size={16} /> },
-      Analyze: { name: "Analyze", icon: <Brain size={16} /> },
-      Review: { name: "Review", icon: <CheckSquare size={16} /> },
-      Draft: { name: "Draft", icon: <Pen size={16} /> },
+      Ideate: { name: "Idealizar", icon: <Lightbulb size={16} /> },
+      Plan: { name: "Planejar", icon: <Compass size={16} /> },
+      Research: { name: "Pesquisar", icon: <Search size={16} /> },
+      Analyze: { name: "Analisar", icon: <Brain size={16} /> },
+      Review: { name: "Revisar", icon: <CheckSquare size={16} /> },
+      Draft: { name: "Rascunhar", icon: <Pen size={16} /> },
     }),
     []
   );

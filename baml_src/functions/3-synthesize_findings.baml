@@ -3,55 +3,55 @@
 function SynthesizeAllFindings(analyzed_docs: AnalyzedDocument[], original_legal_question: string) -> OverallSynthesis {
   client FindingsSynthetizing
   prompt #"
-You are a senior legal researcher tasked with synthesizing analyses of multiple documents related to a legal question. Your goal is to create a coherent understanding of the information provided.
+Você é um pesquisador jurídico sênior encarregado de sintetizar análises de múltiplos documentos relacionados a uma questão jurídica. Seu objetivo é criar uma compreensão coerente das informações fornecidas.
 
-Here is the original legal question:
+Aqui está a questão jurídica original:
 <legal_question>
 {{ original_legal_question }}
 </legal_question>
 
-Here are the analyzed documents, including summaries and key points:
+Aqui estão os documentos analisados, incluindo resumos e pontos-chave:
 <analyzed_documents>
     {% for doc in analyzed_docs %}
     --- Document ID: {{ doc.search_result_id }} ---
-    Relevance: {{ doc.relevance_score }}/10
-    // If doc.summary is potentially long, and you need to ensure it's concise for this synthesis step,
-    // it might be better to have the AnalyzeSingleDocument produce a very brief version,
-    // or pre-process it in your application code before passing to this synthesis function.
-    Summary: {{ doc.summary }}
-    Key Arguments:
+    Relevância: {{ doc.relevance_score }}/10
+    // Se doc.summary for potencialmente longo, e você precisar garantir que seja conciso para esta etapa de síntese,
+    // pode ser melhor que a função AnalyzeSingleDocument produza uma versão bem breve,
+    // ou pré-processe-o no código da sua aplicação antes de passar para esta função de síntese.
+    Resumo: {{ doc.summary }}
+    Argumentos Chave:
     {% for arg in doc.key_arguments_and_reasoning %}
     - {{ arg }}
     {% endfor %}
-    Key Entities:
+    Entidades Chave:
     {% for entity in doc.extracted_entities %}
     - {{ entity.name }} ({{ entity.type }})
     {% endfor %}
     {% endfor %}
 </analyzed_documents>
 
-Your task is to synthesize these findings into a comprehensive analysis. Follow these steps:
+Sua tarefa é sintetizar essas descobertas em uma análise abrangente. Siga estes passos:
 
-1. Identify 3-5 overarching legal themes, principles, or topics that emerge from the analyzed documents.
-2. For each theme/topic, provide a synthesis that explains convergences, divergences, and key takeaways, referencing the supporting document IDs.
-3. Identify any aspects of the original legal question that remain unanswered or poorly addressed.
-4. List any new questions or research avenues that have emerged.
-5. Provide your detailed reasoning for this synthesis.
+1. Identifique de 3 a 5 temas, princípios ou tópicos jurídicos abrangentes que emergem dos documentos analisados.
+2. Para cada tema/tópico, forneça uma síntese que explique convergências, divergências e principais conclusões, referenciando os IDs dos documentos de apoio.
+3. Identifique quaisquer aspectos da questão jurídica original que permaneçam sem resposta ou mal abordados.
+4. Liste quaisquer novas questões ou caminhos de pesquisa que tenham surgido.
+5. Forneça seu raciocínio detalhado para esta síntese.
 
-Important guidance:
-- Each topic should address a different aspect or facet of the legal question
-- Look for both convergent themes (where documents agree) and divergent perspectives
-- Consider creating separate topics for different legal elements, jurisdictions, or principles
-- When assigning confidence scores for synthesized topics:
-  * If most supporting documents have low relevance scores (below 5/10), the confidence should be low (1-4)
-  * If supporting documents have mixed relevance, confidence should be moderate (4-7)
-  * Only assign high confidence (8-10) when supporting documents are highly relevant (7+/10)
-  * Consider the quality and completeness of information when determining confidence
+Orientações importantes:
+- Cada tópico deve abordar um aspecto ou faceta diferente da questão jurídica.
+- Procure por temas convergentes (onde os documentos concordam) e perspectivas divergentes.
+- Considere criar tópicos separados para diferentes elementos jurídicos, jurisdições ou princípios.
+- Ao atribuir pontuações de confiança para tópicos sintetizados:
+  * Se a maioria dos documentos de apoio tiver pontuações de relevância baixas (abaixo de 5/10), a confiança deve ser baixa (1-4).
+  * Se os documentos de apoio tiverem relevância mista, a confiança deve ser moderada (4-7).
+  * Atribua alta confiança (8-10) apenas quando os documentos de apoio forem altamente relevantes (7+/10).
+  * Considere a qualidade e a completude das informações ao determinar a confiança.
 
-Your answer should be in JSON format, following this schema:
+Sua resposta deve estar em formato JSON, seguindo este esquema:
 
 {{ ctx.output_format }}
 
-Your final output should consist of only the JSON object described above, without any additional text or explanation.
+Sua saída final deve consistir apenas no objeto JSON descrito acima, sem nenhum texto ou explicação adicional.
   "#
 }

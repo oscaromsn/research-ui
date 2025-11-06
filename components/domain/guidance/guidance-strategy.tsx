@@ -2,29 +2,29 @@
 
 import { useAtomValue } from "jotai";
 import {
-  AlertTriangle,
-  Brain,
-  ChevronDown,
-  ChevronRight,
-  FileText,
-  Pause,
-  Play,
+    AlertTriangle,
+    Brain,
+    ChevronDown,
+    ChevronRight,
+    FileText,
+    Pause,
+    Play,
 } from "lucide-react";
 import { useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
 import { useResearchAgent } from "@/lib/hooks/useResearchAgent";
 import {
-  generatedQueriesAtom,
-  researchAssessmentAtom,
-  researchLogAtom,
-  researchSessionAtom,
+    generatedQueriesAtom,
+    researchAssessmentAtom,
+    researchLogAtom,
+    researchSessionAtom,
 } from "@/lib/state/researchAtoms";
 
 interface ResearchLogSectionProps {
@@ -52,7 +52,7 @@ function ResearchLogSection({ researchLogs }: ResearchLogSectionProps) {
                 className="mr-2 text-[#4a5568] dark:text-[#a0aec0]"
               />
               <span className="font-medium text-[#4a5568] text-sm dark:text-[#a0aec0]">
-                Research Logs ({researchLogs.length})
+                Logs de pesquisa [DEBUG ENABLED] ({researchLogs.length})
               </span>
             </div>
             <ChevronDown
@@ -102,10 +102,10 @@ function ResearchControlsSection({
       <div className="mb-4 flex items-center justify-between rounded-md border border-[#e1e5eb] bg-white p-3 dark:border-[#2a3148] dark:bg-[#1e2436]">
         <div className="flex flex-col">
           <span className="font-medium text-[#1a1f2e] text-sm dark:text-white">
-            Auto Mode
+            Modo Automático
           </span>
           <span className="text-[#4a5568] text-xs dark:text-[#a0aec0]">
-            Automatically refine queries and continue research
+            Refinar consultas e continuar a pesquisa automaticamente
           </span>
         </div>
         <Switch
@@ -116,7 +116,7 @@ function ResearchControlsSection({
       </div>
 
       <TextareaAutosize
-        placeholder="Enter Legal Question or Research Topic"
+        placeholder="Digite a Questão Jurídica ou Tópico de Pesquisa"
         value={legalQuestion}
         onChange={(e) => onLegalQuestionChange(e.target.value)}
         disabled={agent.isLoading}
@@ -127,10 +127,10 @@ function ResearchControlsSection({
 
       <div className="mb-4 flex flex-wrap gap-2">
         <span className="rounded-md bg-[#edf2f7] px-2 py-1 text-[#4a5568] text-xs dark:bg-[#242a3d] dark:text-[#a0aec0]">
-          Jurisdiction: Federal
+          Justiça: Comum
         </span>
         <span className="rounded-md bg-[#edf2f7] px-2 py-1 text-[#4a5568] text-xs dark:bg-[#242a3d] dark:text-[#a0aec0]">
-          Jurisdiction: California
+          Foro: São Paulo
         </span>
       </div>
 
@@ -146,7 +146,7 @@ function ResearchControlsSection({
 
       {agent.error && (
         <div className="mt-2 rounded border border-red-300 bg-red-100 p-2 text-red-800 text-sm dark:border-red-700 dark:bg-red-900 dark:text-red-200">
-          Error: {agent.error}
+          Erro: {agent.error}
         </div>
       )}
     </>
@@ -178,7 +178,7 @@ function ResearchControlButtons({
         disabled={!legalQuestion.trim()}
         className="w-full rounded-md bg-[#3a7bb7] py-2 text-sm text-white transition-colors hover:bg-[#2c5d8a] disabled:cursor-not-allowed disabled:bg-gray-400"
       >
-        Start Research
+        Iniciar Pesquisa
       </button>
     );
   }
@@ -191,7 +191,7 @@ function ResearchControlButtons({
         className="flex w-full items-center justify-center rounded-md bg-green-600 py-2 text-sm text-white transition-colors hover:bg-green-700"
       >
         <Play size={16} className="mr-1" />
-        Resume Research
+        Retomar Pesquisa
       </button>
     );
   }
@@ -200,7 +200,7 @@ function ResearchControlButtons({
     return (
       <div className="space-y-2">
         <div className="rounded-md bg-[#e2e8f0] px-3 py-2 text-[#4a5568] text-sm dark:bg-[#2a3148] dark:text-[#a0aec0]">
-          {agent.autoModeEnabled && "Auto Mode: "}Processing:{" "}
+          {agent.autoModeEnabled && "Modo Automático: "}Processando:{" "}
           {agent.currentStage}
           {agent.currentMessage && ` - ${agent.currentMessage}`}
         </div>
@@ -213,7 +213,7 @@ function ResearchControlButtons({
             className="flex flex-1 items-center justify-center rounded-md bg-orange-600 py-2 text-sm text-white transition-colors hover:bg-orange-700 disabled:cursor-not-allowed disabled:bg-gray-400"
           >
             <Pause size={16} className="mr-1" />
-            Pause
+            Pausar
           </button>
 
           <button
@@ -221,7 +221,7 @@ function ResearchControlButtons({
             onClick={onAbortResearch}
             className="flex-1 rounded-md bg-red-600 py-2 text-sm text-white transition-colors hover:bg-red-700"
           >
-            Abort
+            Abortar
           </button>
         </div>
       </div>
@@ -254,7 +254,7 @@ function GeneratedQueriesSection({
     <div className="mb-6">
       <div className="mb-2 flex items-center justify-between">
         <h3 className="font-medium text-[#4a5568] text-sm dark:text-[#a0aec0]">
-          Generated Search Queries{" "}
+          Termos de Busca Gerados{" "}
           {totalQueries > 0 && `(${totalQueries} total)`}
         </h3>
         <ChevronRight size={16} className="text-[#a0aec0]" />
@@ -280,7 +280,7 @@ function GeneratedQueriesSection({
           {query.expected_information_summary && (
             <div className="mt-3">
               <p className="mb-1 font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
-                Expected Information:
+                Informação Esperada:
               </p>
               <p className="text-[#4a5568] text-xs dark:text-[#a0aec0]">
                 {query.expected_information_summary}
@@ -329,7 +329,7 @@ function AssessmentSection({ assessment }: AssessmentSectionProps) {
             />
             <div className="flex-1">
               <h3 className="text-left font-medium text-sm">
-                Agent Assessment{" "}
+                Avaliação do Agente{" "}
                 <span
                   className={
                     assessment.isSufficient
@@ -338,8 +338,8 @@ function AssessmentSection({ assessment }: AssessmentSectionProps) {
                   }
                 >
                   {assessment.isSufficient
-                    ? "Research Sufficient ✓"
-                    : "Further Action Needed ⚠️"}
+                    ? "Pesquisa Suficiente ✓"
+                    : "Ação Adicional Necessária ⚠️"}
                 </span>
               </h3>
             </div>
@@ -379,7 +379,7 @@ function AssessmentDetails({ assessment }: AssessmentDetailsProps) {
         {assessment.identifiedGaps && assessment.identifiedGaps.length > 0 && (
           <div>
             <h4 className="mb-2 font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
-              Identified Gaps:
+              Lacunas Identificadas:
             </h4>
             <ul className="space-y-2 text-[#4a5568] text-xs dark:text-[#a0aec0]">
               {assessment.identifiedGaps.map((gap, index) => (
@@ -399,7 +399,7 @@ function AssessmentDetails({ assessment }: AssessmentDetailsProps) {
           assessment.suggestedRefinementQueries.length > 0 && (
             <div>
               <h4 className="mb-2 font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
-                Suggested Query Refinements:
+                Refinamentos de Consulta Sugeridos:
               </h4>
               <div className="space-y-3">
                 {assessment.suggestedRefinementQueries.map((query, index) => (
@@ -416,7 +416,7 @@ function AssessmentDetails({ assessment }: AssessmentDetailsProps) {
                     {query.expected_information_summary && (
                       <div className="ml-3.5">
                         <p className="mb-1 font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
-                          Expected Information:
+                          Informação Esperada:
                         </p>
                         <p className="text-[#4a5568] text-xs dark:text-[#a0aec0]">
                           {query.expected_information_summary}
@@ -431,7 +431,7 @@ function AssessmentDetails({ assessment }: AssessmentDetailsProps) {
 
         <div>
           <h4 className="mb-2 font-medium text-[#4a5568] text-xs dark:text-[#a0aec0]">
-            Next Action: {assessment.nextAction.replace(/_/g, " ")}
+            Próxima Ação: {assessment.nextAction.replace(/_/g, " ")}
           </h4>
         </div>
 
@@ -441,7 +441,7 @@ function AssessmentDetails({ assessment }: AssessmentDetailsProps) {
             className="flex items-center text-[#3a7bb7] text-xs hover:text-[#2c5d8a]"
           >
             <Brain size={12} className="mr-1" />
-            View Assessment Reasoning
+            Ver Raciocínio da Avaliação
           </button>
         )}
       </div>
@@ -492,7 +492,7 @@ export function GuidanceStrategy() {
     <div className="w-full overflow-y-auto border-[#e1e5eb] border-r bg-[#f8f9fa] p-4 md:w-1/3 dark:border-[#2a3148] dark:bg-[#171c2c]">
       <div className="mb-4">
         <h2 className="mb-4 flex items-center font-semibold text-[#1a1f2e] text-lg dark:text-white">
-          <span className="mr-2">Guidance & Strategy</span>
+          <span className="mr-2">Orientação e Estratégia</span>
         </h2>
         <div className="mb-6">
           <ResearchLogSection researchLogs={researchLogs} />

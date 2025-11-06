@@ -1,9 +1,9 @@
 class ResearchAssessment {
-  is_sufficient bool @description("True if the current information is deemed sufficient to answer the legal question comprehensively.")
-  assessment_summary string @description("Brief summary of why the research is or isn't sufficient.") @stream.with_state
-  identified_gaps string[]? @description("Specific information gaps if research is insufficient.")
-  next_action NextActionType @description("The recommended next action for the agent.")
-  suggested_queries_for_refinement SearchQueryItem[]? @description("If next_action is REFINE_QUERIES or NEW_QUERIES, provide new/refined queries.")
-  document_ids_for_deeper_analysis string[]? @description("If DEEPER_ANALYSIS, list IDs of SearchResultItem to re-analyze.")
-  reasoning DetailedReasoning @description("LLM's thought process for this assessment.")
+  is_sufficient bool @description("Verdadeiro se as informações atuais forem consideradas suficientes para responder à questão jurídica de forma abrangente.")
+  assessment_summary string @description("Breve resumo do motivo pelo qual a pesquisa é ou não suficiente.") @stream.with_state
+  identified_gaps string[]? @description("Lacunas de informação específicas se a pesquisa for insuficiente.")
+  next_action NextActionType @description("A próxima ação recomendada para o agente.")
+  suggested_queries_for_refinement SearchQueryItem[]? @description("Se next_action for REFINE_QUERIES ou NEW_QUERIES, forneça consultas novas/refinadas.")
+  document_ids_for_deeper_analysis string[]? @description("Se for DEEPER_ANALYSIS, liste os IDs de SearchResultItem para reanalisar.")
+  reasoning DetailedReasoning @description("Processo de pensamento do LLM para esta avaliação.")
 }

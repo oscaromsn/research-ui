@@ -17,7 +17,7 @@ export function CaseModal({
 }: CaseModalProps) {
   const formatDate = (dateString?: string) => {
     if (!dateString) {
-      return "Date not available";
+      return "Data não disponível";
     }
     try {
       return new Date(dateString).toLocaleDateString();
@@ -28,33 +28,33 @@ export function CaseModal({
 
   const getDocumentType = (title?: string) => {
     if (!title) {
-      return "Document";
+      return "Documento";
     }
     const titleLower = title.toLowerCase();
     if (titleLower.includes("case") || titleLower.includes("v.")) {
-      return "Case";
+      return "Caso";
     }
     if (titleLower.includes("statute")) {
-      return "Statute";
+      return "Estatuto";
     }
     if (titleLower.includes("regulation")) {
-      return "Regulation";
+      return "Regulamento";
     }
-    return "Document";
+    return "Documento";
   };
 
   const getJurisdiction = () => {
     const jurisdictionEntity = documentData?.extractedEntities?.find(
       (entity) => entity.type === "Jurisdiction"
     );
-    return jurisdictionEntity?.name || "Jurisdiction not specified";
+    return jurisdictionEntity?.name || "Jurisdição não especificada";
   };
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={documentData?.title || "Document Details"}
+      title={documentData?.title || "Detalhes do Documento"}
       size="xl"
     >
       <div className="space-y-6">
@@ -70,7 +70,7 @@ export function CaseModal({
           <span>{formatDate(documentData?.timestamp)}</span>
           {documentData?.relevanceScore && (
             <span className="text-[#3a7bb7]">
-              Relevance: {Math.round(documentData.relevanceScore * 10)}%
+              Relevância: {Math.round(documentData.relevanceScore * 10)}%
             </span>
           )}
         </div>
@@ -79,7 +79,7 @@ export function CaseModal({
             documentData.keyArguments.length > 0 && (
               <div className="rounded-lg bg-[#f8fafc] p-4 dark:bg-[#1e2436]">
                 <h4 className="mb-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
-                  Key Arguments & Reasoning
+                  Argumentos Principais e Raciocínio
                 </h4>
                 <ul className="list-disc space-y-2 pl-4 text-[#4a5568] text-sm dark:text-[#a0aec0]">
                   {documentData.keyArguments.map((argument) => (
@@ -93,7 +93,7 @@ export function CaseModal({
             documentData.extractedQuotes.length > 0 && (
               <div className="rounded-lg bg-[#f8fafc] p-4 dark:bg-[#1e2436]">
                 <h4 className="mb-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
-                  Key Quotes
+                  Citações Principais
                 </h4>
                 <div className="space-y-2">
                   {documentData.extractedQuotes.map((quote) => (
@@ -110,7 +110,7 @@ export function CaseModal({
           {(documentData?.summarySnippet || documentData?.fullText) && (
             <div>
               <h4 className="mb-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
-                {documentData?.summarySnippet ? "Summary" : "Full Text"}
+                {documentData?.summarySnippet ? "Resumo" : "Texto Completo"}
               </h4>
               <div className="max-h-96 space-y-4 overflow-y-auto text-[#4a5568] text-sm dark:text-[#a0aec0]">
                 <p className="whitespace-pre-line">
@@ -124,7 +124,7 @@ export function CaseModal({
             documentData.counterArguments.length > 0 && (
               <div className="rounded-lg bg-[#fef2f2] p-4 dark:bg-[#2d1b1b]">
                 <h4 className="mb-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
-                  Counter Arguments & Nuances
+                  Contra-argumentos e nuances
                 </h4>
                 <ul className="list-disc space-y-2 pl-4 text-[#4a5568] text-sm dark:text-[#a0aec0]">
                   {documentData.counterArguments.map((counterArg) => (
@@ -141,7 +141,7 @@ export function CaseModal({
                 className="flex items-center text-[#3a7bb7] text-xs transition-colors hover:text-[#2c5d8a]"
               >
                 <Brain size={12} className="mr-1" />
-                View AI Analysis
+                Ver Análise da IA
               </button>
             )}
             {documentData?.url && (
@@ -152,7 +152,7 @@ export function CaseModal({
                 className="flex items-center text-[#3a7bb7] text-xs transition-colors hover:text-[#2c5d8a]"
               >
                 <Link size={12} className="mr-1" />
-                View Original Source
+                Ver Fonte Original
               </a>
             )}
           </div>

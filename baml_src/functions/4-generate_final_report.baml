@@ -7,63 +7,63 @@ function GenerateFinalLegalReport(
 ) -> FinalLegalReport {
   client GenerateFinalReport // A powerful model for high-quality writing
   prompt #"
-You are a senior legal analyst tasked with drafting a legal research report. You will be provided with the original legal question, a synthesis of findings, and the history of query generation. Your task is to construct a report based on this information that is proportionate to the available research.
+Você é um analista jurídico sênior encarregado de redigir um relatório de pesquisa jurídica. Você receberá a questão jurídica original, uma síntese das descobertas e o histórico de geração de consultas. Sua tarefa é construir um relatório com base nessas informações que seja proporcional à pesquisa disponível.
 
-First, review the following information:
+Primeiro, revise as seguintes informações:
 
-1. Original Legal Question:
+1. Questão Jurídica Original:
 <original_question>
 {{ original_legal_question }}
 </original_question>
 
-2. Overall Synthesis of Findings:
+2. Síntese Geral das Descobertas:
 <synthesis>
-    Key Synthesized Topics:
+    Tópicos Chave Sintetizados:
     {% for topic in synthesis.key_synthesized_topics %}
-    - {{ topic.topic_title }}: {{ topic.synthesis }} (Supporting IDs: {{ topic.supporting_document_ids | join(", ") }})
+    - {{ topic.topic_title }}: {{ topic.synthesis }} (IDs de Apoio: {{ topic.supporting_document_ids | join(", ") }})
     {% endfor %}
-    Unanswered Aspects: {{ synthesis.unanswered_aspects | default(["None."]) | join("; ") }}
-    Emerging Questions: {{ synthesis.emerging_questions | default(["None."]) | join("; ") }}
+    Aspectos não respondidos: {{ synthesis.unanswered_aspects | default(["Nenhum."]) | join("; ") }}
+    Questões Emergentes: {{ synthesis.emerging_questions | default(["Nenhum."]) | join("; ") }}
 </synthesis>
 
-3. Query Generation History:
+3. Histórico de Geração de Consultas:
 <query_history>
     {% for query_analysis in query_history %}
-      Round {{ loop.index }}:
+      Rodada {{ loop.index }}:
       {{ query_analysis.reasoning }}
-      Queries:
+      Consultas:
       {% for query in query_analysis.search_queries %}
-      - "{{ query.query_string }}" expecting: {{ query.expected_information | join(", ") }}
+      - "{{ query.query_string }}" esperando: {{ query.expected_information | join(", ") }}
       {% endfor %}
     {% endfor %}
 </query_history>
 
-Now, use this information to create a legal research report that is proportionate to the available information. Follow these guidelines:
+Agora, use essas informações para criar um relatório de pesquisa jurídica que seja proporcional às informações disponíveis. Siga estas diretrizes:
 
-**Report Scope Guidelines:**
-- If synthesis contains 1-2 topics with limited supporting documents: Create a concise report with 1-3 sections focusing on what can be definitively established
-- If synthesis contains 3+ topics with extensive supporting documents: Create a comprehensive report with 3-6 sections providing detailed analysis
-- Always acknowledge limitations when research is minimal or incomplete
+**Diretrizes de Escopo do Relatório:**
+- Se a síntese contiver 1-2 tópicos com documentos de apoio limitados: Crie um relatório conciso com 1-3 seções focando no que pode ser estabelecido definitivamente.
+- Se a síntese contiver 3+ tópicos com extensos documentos de apoio: Crie um relatório abrangente com 3-6 seções fornecendo uma análise detalhada.
+- Sempre reconheça as limitações quando a pesquisa for mínima ou incompleta.
 
-**Report Structure:**
-1. Create a fitting report title that encapsulates the main topic of the research.
+**Estrutura do Relatório:**
+1. Crie um título de relatório adequado que encapsule o tópico principal da pesquisa.
 
-2. Write an executive summary that reflects the scope of available findings (use words like "limited", "additional research needed", or "complex" when synthesis is minimal).
+2. Escreva um resumo executivo que reflita o escopo das descobertas disponíveis (use palavras como "limitado", "pesquisa adicional necessária" ou "complexo" quando a síntese for mínima).
 
-3. Structure the main findings into logical sections proportionate to available information. Ensure proper citation using document IDs or case names if available from the synthesis.
+3. Estruture as principais descobertas em seções lógicas proporcionais às informações disponíveis. Garanta a citação adequada usando IDs de documentos ou nomes de casos, se disponíveis na síntese.
 
-4. Formulate a conclusion that acknowledges the completeness of the research (use words like "further", "additional", "research", "analysis", or "required" when gaps exist).
+4. Formule uma conclusão que reconheça a completude da pesquisa (use palavras como "mais", "adicional", "pesquisa", "análise" ou "necessário" quando houver lacunas).
 
-5. Include limitations of the research or caveats to the findings, especially when source material is limited.
+5. Inclua limitações da pesquisa ou ressalvas às descobertas, especialmente quando o material de origem for limitado.
 
-6. List key appendix document IDs if applicable.
+6. Liste os IDs dos principais documentos do apêndice, se aplicável.
 
-Your report should be well-reasoned and written in a professional legal tone, but scaled appropriately to match the depth and breadth of available research information.
+Seu relatório deve ser bem fundamentado e escrito em um tom jurídico profissional, mas dimensionado apropriadamente para corresponder à profundidade e amplitude das informações de pesquisa disponíveis.
 
-Present your report in JSON format using the following schema:
+Apresente seu relatório em formato JSON usando o seguinte esquema:
 
     {{ ctx.output_format }}
 
-Your final output should consist of only the JSON-formatted report. Do not include any additional commentary or explanations outside of this JSON structure.
+Sua saída final deve consistir apenas no relatório formatado em JSON. Não inclua nenhum comentário ou explicação adicional fora desta estrutura JSON.
   "#
 }

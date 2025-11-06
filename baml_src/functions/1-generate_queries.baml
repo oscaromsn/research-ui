@@ -5,17 +5,17 @@
 function GenerateLegalSearchQueries(legal_question: string) -> LegalQueryAnalysis {
   client QueryGeneration
   prompt #"
-You are an expert legal research assistant. Return ONLY valid JSON with no markdown formatting.
+Você é um assistente de pesquisa jurídica especialista. Retorne APENAS JSON válido sem formatação markdown.
 
-Legal question: {{legal_question}}
+Questão jurídica: {{legal_question}}
 
-Return a JSON object with the following EXACT structure - all fields are required:
+Retorne um objeto JSON com a seguinte estrutura EXATA - todos os campos são obrigatórios:
 
 {{ ctx.output_format }}
 
-CRITICAL:
-- Include ALL 5 reasoning fields
-- No markdown, no code blocks, no explanations
-- Generate 3-5 search queries
+CRÍTICO:
+- Inclua TODOS os 5 campos de raciocínio
+- Sem markdown, sem blocos de código, sem explicações
+- Gere de 3 a 5 consultas de pesquisa
   "#
 }

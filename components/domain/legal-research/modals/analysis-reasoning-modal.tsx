@@ -20,41 +20,41 @@ export function AnalysisReasoningModal({
     <Modal
       isOpen={isOpen}
       onClose={onCloseAction}
-      title={`Analysis Reasoning: ${documentTitle || "Document"}`}
+      title={`Raciocínio da Análise: ${documentTitle || "Documento"}`}
       size="xl"
     >
       <div className="p-6">
         <div className="space-y-6">
           <div>
             <h3 className="mb-2 font-medium text-[#2d3748] dark:text-[#e2e8f0]">
-              Legal Question Analysis
+              Análise da Questão Jurídica
             </h3>
             <p
               data-testid="legal-question-summary"
               className="rounded bg-[#f8fafc] p-3 text-[#4a5568] text-sm leading-relaxed dark:bg-[#1e2436] dark:text-[#a0aec0]"
             >
               {reasoning?.analyzeLegalQuestionSummary ||
-                "No reasoning available for the legal question analysis."}
+                "Nenhum raciocínio disponível para a análise da questão jurídica."}
             </p>
           </div>
 
           <div>
             <h3 className="mb-2 font-medium text-[#2d3748] dark:text-[#e2e8f0]">
-              Relevant Legal Principles
+              Princípios Jurídicos Relevantes
             </h3>
             <p
               data-testid="relevant-principles-summary"
               className="rounded bg-[#f8fafc] p-3 text-[#4a5568] text-sm leading-relaxed dark:bg-[#1e2436] dark:text-[#a0aec0]"
             >
               {reasoning?.considerRelevantPrinciplesSummary ||
-                "No reasoning available for legal principles consideration."}
+                "Nenhum raciocínio disponível para a consideração dos princípios jurídicos."}
             </p>
           </div>
 
           {reasoning?.formulateSearchQueriesSummary && (
             <div>
               <h3 className="mb-2 font-medium text-[#2d3748] dark:text-[#e2e8f0]">
-                Search Query Strategy
+                Estratégia de Consulta de Busca
               </h3>
               <p className="rounded bg-[#f8fafc] p-3 text-[#4a5568] text-sm leading-relaxed dark:bg-[#1e2436] dark:text-[#a0aec0]">
                 {reasoning.formulateSearchQueriesSummary}
@@ -65,7 +65,7 @@ export function AnalysisReasoningModal({
           {reasoning?.specifyExpectedInfoSummary && (
             <div>
               <h3 className="mb-2 font-medium text-[#2d3748] dark:text-[#e2e8f0]">
-                Expected Information Strategy
+                Estratégia de Informação Esperada
               </h3>
               <p className="rounded bg-[#f8fafc] p-3 text-[#4a5568] text-sm leading-relaxed dark:bg-[#1e2436] dark:text-[#a0aec0]">
                 {reasoning.specifyExpectedInfoSummary}
@@ -76,7 +76,7 @@ export function AnalysisReasoningModal({
           {reasoning?.ensureComprehensiveCoverageSummary && (
             <div>
               <h3 className="mb-2 font-medium text-[#2d3748] dark:text-[#e2e8f0]">
-                Comprehensive Coverage Strategy
+                Estratégia de Cobertura Abrangente
               </h3>
               <p className="rounded bg-[#f8fafc] p-3 text-[#4a5568] text-sm leading-relaxed dark:bg-[#1e2436] dark:text-[#a0aec0]">
                 {reasoning.ensureComprehensiveCoverageSummary}
@@ -91,7 +91,7 @@ export function AnalysisReasoningModal({
             onClick={onCloseAction}
             className="rounded bg-[#3a7bb7] px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-[#2c5d8a]"
           >
-            Close
+            Fechar
           </button>
         </div>
       </div>

@@ -10,16 +10,16 @@ export function ReportDrafter() {
   const report = useAtomValue(finalReportContentAtom);
   const setReport = useSetAtom(finalReportContentAtom);
   const [editableTitle, setEditableTitle] = useState(
-    report.title || "Untitled Report"
+    report.title || "Relatório Sem Título"
   );
 
   // Define default sections that we expect in reports
   const defaultSections = [
-    "Executive Summary",
-    "Background",
-    "Legal Analysis",
-    "Recommendations",
-    "Conclusion",
+    "Sumário Executivo",
+    "Contexto",
+    "Análise Jurídica",
+    "Recomendações",
+    "Conclusão",
   ];
 
   const handleTitleChange = (newTitle: string) => {
@@ -30,12 +30,12 @@ export function ReportDrafter() {
   const getSectionCompletion = (sectionTitle: string): boolean => {
     // Check if section exists in report and has content
     const section = report.sections.find((s) => s.title === sectionTitle);
-    if (sectionTitle === "Executive Summary") {
+    if (sectionTitle === "Sumário Executivo") {
       return Boolean(
         report.executiveSummary && report.executiveSummary.trim().length > 0
       );
     }
-    if (sectionTitle === "Conclusion") {
+    if (sectionTitle === "Conclusão") {
       return Boolean(report.conclusion && report.conclusion.trim().length > 0);
     }
     return Boolean(section?.content && section.content.trim().length > 0);
@@ -76,7 +76,7 @@ export function ReportDrafter() {
       <div className="flex space-x-4">
         <div className="w-64 flex-shrink-0 rounded-lg border border-[#e1e5eb] bg-white p-4 dark:border-[#2a3148] dark:bg-[#1e2436]">
           <h3 className="mb-3 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
-            Document Structure
+            Estrutura do Documento
           </h3>
           <div className="space-y-2">
             {defaultSections.map((sectionTitle) => {
@@ -103,7 +103,7 @@ export function ReportDrafter() {
           <div className="dark:prose-invert prose prose-sm max-w-none">
             {report.executiveSummary && (
               <>
-                <h2>Executive Summary</h2>
+                <h2>Sumário Executivo</h2>
                 <p>
                   {report.executiveSummary}
                   <span
@@ -117,8 +117,8 @@ export function ReportDrafter() {
             {report.sections
               .filter(
                 (section) =>
-                  section.title !== "Executive Summary" &&
-                  section.title !== "Conclusion"
+                  section.title !== "Sumário Executivo" &&
+                  section.title !== "Conclusão"
               )
               .map((section, index) => (
                 <div key={section.title || `section-content-${index}`}>
@@ -137,7 +137,7 @@ export function ReportDrafter() {
 
             {report.conclusion && (
               <>
-                <h2>Conclusion</h2>
+                <h2>Conclusão</h2>
                 <p>
                   {report.conclusion}
                   <span
@@ -153,7 +153,8 @@ export function ReportDrafter() {
               !report.conclusion && (
                 <div className="py-8 text-center text-[#64748b] dark:text-[#94a3b8]">
                   <p>
-                    Report content will appear here as analysis progresses...
+                    O conteúdo do relatório aparecerá aqui conforme a análise
+                    progride...
                   </p>
                 </div>
               )}

@@ -10,13 +10,13 @@ export function Header() {
     <header className="flex items-center justify-between border-[#2a3148] border-b bg-[#1a1f2e] px-4 py-3 text-white">
       <div className="flex items-center">
         <div className="mr-4 flex items-center">
-          <span className="mr-1 font-bold text-2xl">LS</span>
-          <span className="font-medium text-lg">LexiSynth</span>
+          <span className="mr-1 font-bold text-2xl">LN</span>
+          <span className="font-medium text-lg">JurisConsulta</span>
         </div>
         <div className="relative ml-4">
           <input
             type="text"
-            defaultValue="Research: Maritime Salvage Rights - The 'Oceanic' Case"
+            defaultValue="Responsabilidade criminal do engenheiro agrônomo"
             className="w-[340px] rounded border border-[#3a4055] bg-[#242a3d] px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#4a90e2]"
           />
         </div>

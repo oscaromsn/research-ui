@@ -38,8 +38,8 @@ describe("Header Component", () => {
     render(<Header />);
 
     // Check logo and brand
-    expect(screen.getByText("LS")).toBeInTheDocument();
-    expect(screen.getByText("LexiSynth")).toBeInTheDocument();
+    expect(screen.getByText("LN")).toBeInTheDocument();
+    expect(screen.getByText("JurisConsulta")).toBeInTheDocument();
 
     // Check research title input
     expect(

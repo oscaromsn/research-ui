@@ -33,14 +33,14 @@ export function SynthesisReasoningModal({
         status: "complete" as const,
         text:
           reasoning.analyze_legal_question?.summary ||
-          "Analyzed legal question",
+          "Analisou a questão jurídica",
         details: reasoning.analyze_legal_question?.items_considered,
       },
       {
         status: "complete" as const,
         text:
           reasoning.consider_relevant_legal_principles?.summary ||
-          "Considered relevant legal principles",
+          "Considerou os princípios jurídicos relevantes",
         details: reasoning.consider_relevant_legal_principles?.items_considered,
       },
     ];
@@ -80,7 +80,7 @@ export function SynthesisReasoningModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Synthesis Reasoning"
+      title="Raciocínio da Síntese"
       size="lg"
     >
       <div className="space-y-6">
@@ -88,13 +88,13 @@ export function SynthesisReasoningModal({
           <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
           <p>
             {synthesisData?.reasoningSummary ||
-              "This synthesis is based on the analyzed documents and AI reasoning. Please review for accuracy."}
+              "Esta síntese é baseada nos documentos analisados e no raciocínio da IA. Por favor, revise para garantir a precisão."}
           </p>
         </div>
         <div className="space-y-4">
           <div className="rounded-lg bg-[#f8fafc] p-4 dark:bg-[#1e2436]">
             <h4 className="mb-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
-              Reasoning Chain
+              Cadeia de Raciocínio
             </h4>
             <div className="space-y-3">
               {reasoningSteps.length > 0 ? (
@@ -138,14 +138,14 @@ export function SynthesisReasoningModal({
                 ))
               ) : (
                 <p className="py-4 text-center text-[#64748b] text-sm dark:text-[#94a3b8]">
-                  No detailed reasoning steps available.
+                  Nenhum passo de raciocínio detalhado disponível.
                 </p>
               )}
             </div>
           </div>
           <div>
             <h4 className="mb-2 font-medium text-[#2d3748] text-sm dark:text-[#e2e8f0]">
-              Sources Used
+              Fontes Utilizadas
             </h4>
             <div className="space-y-2">
               {sourcesUsed.length > 0 ? (
@@ -181,7 +181,7 @@ export function SynthesisReasoningModal({
                 ))
               ) : (
                 <p className="py-4 text-center text-[#64748b] text-sm dark:text-[#94a3b8]">
-                  No source information available.
+                  Nenhuma informação de fonte disponível.
                 </p>
               )}
             </div>
@@ -190,7 +190,7 @@ export function SynthesisReasoningModal({
               synthesisData.unansweredAspects.length > 0 && (
                 <div className="mt-4 rounded-lg bg-[#fef2f2] p-3 dark:bg-[#2d1b1b]">
                   <h5 className="mb-2 font-medium text-[#991b1b] text-sm dark:text-[#fca5a5]">
-                    Unanswered Aspects
+                    Aspectos Não Respondidos
                   </h5>
                   <ul className="ml-4 list-disc space-y-1 text-[#7f1d1d] text-xs dark:text-[#fecaca]">
                     {synthesisData.unansweredAspects.map(
@@ -210,7 +210,7 @@ export function SynthesisReasoningModal({
               synthesisData.emergingQuestions.length > 0 && (
                 <div className="mt-4 rounded-lg bg-[#eff6ff] p-3 dark:bg-[#1e2946]">
                   <h5 className="mb-2 font-medium text-[#1e40af] text-sm dark:text-[#93c5fd]">
-                    Emerging Questions
+                    Questões Emergentes
                   </h5>
                   <ul className="ml-4 list-disc space-y-1 text-[#1e3a8a] text-xs dark:text-[#bfdbfe]">
                     {synthesisData.emergingQuestions.map(

@@ -3,47 +3,47 @@
 function AnalyzeSingleDocument(document: SearchResultItem, original_legal_question: string) -> AnalyzedDocument {
   client DocumentAnalysis
   prompt #"
-You are a legal analyst tasked with analyzing a document in relation to a specific legal question. Your goal is to provide a comprehensive analysis following a structured approach. Here are your instructions:
+Você é um analista jurídico encarregado de analisar um documento em relação a uma questão jurídica específica. Seu objetivo é fornecer uma análise abrangente seguindo uma abordagem estruturada. Aqui estão suas instruções:
 
-1. First, carefully read the following legal question:
+1. Primeiro, leia atentamente a seguinte questão jurídica:
 
 <legal_question>
 {{ original_legal_question }}
 </legal_question>
 
-2. Now, carefully read the document to be analyzed:
+2. Agora, leia atentamente o documento a ser analisado:
 
 <document>
     Document ID: {{ document.id }}
     Title: {{ document.title }}
     Source: {{ document.source_name }}
     Snippet: {{ document.snippet | default('N/A') }}
-    // NB: If document.full_text is very long, consider truncating it in your application code
-    // before passing it to this BAML function, or ensure your LLM can handle the full length.
-    // For example, you might pass a pre-truncated version: document.processed_full_text
-    Full Text: {{ document.full_text | default('No full text available') }}
+    // NB: Se document.full_text for muito longo, considere truncá-lo no código da sua aplicação
+    // antes de passá-lo para esta função BAML, ou garanta que seu LLM possa lidar com o comprimento total.
+    // Por exemplo, você pode passar uma versão pré-truncada: document.processed_full_text
+    Full Text: {{ document.full_text | default('Nenhum texto completo disponível') }}
     Metadata: {{ document.metadata | default({}) }}
 </document>
 
-3. Perform a detailed analysis of the document in relation to the legal question. Follow these steps:
+3. Realize uma análise detalhada do documento em relação à questão jurídica. Siga estes passos:
 
-   a) Assess the relevance of the document to the legal question on a scale of 1 to 10.
-   b) Provide a confidence score for your relevance assessment on a scale of 1 to 10.
-   c) Summarize key findings or holdings pertinent to the question.
-   d) Extract key legal arguments, judicial reasoning, or statutory interpretations.
-   e) Identify and list key legal entities (cases, statutes, persons, organizations, concepts).
-   f) Extract direct quotes that are highly relevant.
-   g) Note any counter-arguments or important nuances.
-   h) Provide your detailed reasoning for this analysis, following the 5-step process outlined in the schema.
+   a) Avalie a relevância do documento para a questão jurídica em uma escala de 1 a 10.
+   b) Forneça uma pontuação de confiança para sua avaliação de relevância em uma escala de 1 a 10.
+   c) Resuma as principais conclusões ou decisões pertinentes à questão.
+   d) Extraia os principais argumentos jurídicos, raciocínios judiciais ou interpretações estatutárias.
+   e) Identifique e liste as principais entidades jurídicas (casos, estatutos, pessoas, organizações, conceitos).
+   f) Extraia citações diretas que sejam altamente relevantes.
+   g) Anote quaisquer contra-argumentos ou nuances importantes.
+   h) Forneça seu raciocínio detalhado para esta análise, seguindo o processo de 5 etapas descrito no esquema.
 
-4. Present your analysis in JSON format using the following schema:
+4. Apresente sua análise em formato JSON usando o seguinte esquema:
 
     {{ ctx.output_format }}
 
-5. It is crucial that you follow the 5-step reasoning process in detail, providing comprehensive summaries and specific items considered for each step.
+5. É crucial que você siga o processo de raciocínio de 5 etapas em detalhes, fornecendo resumos abrangentes e itens específicos considerados para cada etapa.
 
-IMPORTANT: You must set the search_result_id field to exactly: {{ document.id }}
+IMPORTANTE: Você deve definir o campo search_result_id para exatamente: {{ document.id }}
 
-Your final output should consist of only the JSON object containing your analysis. Do not include any additional text or explanations outside of the JSON structure.
+Sua saída final deve consistir apenas no objeto JSON contendo sua análise. Não inclua nenhum texto adicional ou explicações fora da estrutura JSON.
   "#
 }
