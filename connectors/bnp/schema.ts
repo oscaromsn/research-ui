@@ -25,15 +25,14 @@ export const PrecedentSearchFilter = Schema.Struct({
       "Numérica Descendente"
     )
   ).pipe(Schema.withConstructorDefault(() => "Textual" as const)),
-  orgaos: Schema.optional(Schema.Array(Schema.String)).pipe(
-    Schema.withConstructorDefault(() => [])
-  ),
+  // Array fields: DO NOT send empty arrays to API (causes HTTP 400)
+  // These should be omitted entirely when empty, not sent as []
+  orgaos: Schema.optional(Schema.Array(Schema.String)),
   pagina: Schema.optional(Schema.Int.pipe(Schema.positive())).pipe(
     Schema.withConstructorDefault(() => 1)
   ),
-  tipos: Schema.optional(Schema.Array(Schema.String)).pipe(
-    Schema.withConstructorDefault(() => [])
-  ),
+  // Array fields: DO NOT send empty arrays to API (causes HTTP 400)
+  tipos: Schema.optional(Schema.Array(Schema.String)),
   // Truly optional fields
   todasPalavras: Schema.optional(Schema.String),
   quaisquerPalavras: Schema.optional(Schema.String),

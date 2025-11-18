@@ -4,7 +4,6 @@
  */
 
 import {
-  FetchHttpClient,
   HttpBody,
   HttpClient,
   HttpClientRequest,
@@ -25,10 +24,11 @@ import {
  * This service provides access to the BNP (Banco Nacional de Precedentes) API
  * for retrieving legal precedents from Brazilian courts.
  *
- * Uses the dependencies + scoped pattern to properly erase HttpClient from the R channel
+ * Uses the scoped pattern to properly erase HttpClient from the R channel.
+ * The HttpClient dependency is provided by service.impl.ts (HttpClientWithoutCacheLayer)
+ * to avoid cache key generation issues with POST requests.
  */
 export class BnpService extends Effect.Service<BnpService>()("app/BnpService", {
-  dependencies: [FetchHttpClient.layer],
   scoped: Effect.gen(function* () {
     const httpClient = yield* HttpClient.HttpClient;
 
@@ -51,12 +51,16 @@ export class BnpService extends Effect.Service<BnpService>()("app/BnpService", {
           };
 
           // Make the HTTP request with proper headers and body
+          // Note: We explicitly disable caching because Effect's HttpClient cache key generation
+          // fails for POST requests with complex bodies. This bypasses the caching layer entirely.
           const request = HttpClientRequest.post(url).pipe(
             HttpClientRequest.setHeader("Content-Type", "application/json"),
             HttpClientRequest.setHeader(
               "Accept",
               "application/json, text/plain, */*"
             ),
+            HttpClientRequest.setHeader("Cache-Control", "no-cache, no-store"),
+            HttpClientRequest.setHeader("Pragma", "no-cache"),
             HttpClientRequest.setHeader(
               "Origin",
               "https://pangeabnp.pdpj.jus.br"

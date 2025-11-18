@@ -3,17 +3,23 @@
  * Layer that provides the BNP Service with its HTTP client dependency
  */
 
-import { FetchHttpClient } from "@effect/platform";
 import { Layer } from "effect";
+import { HttpClientWithoutCacheLayer } from "./httpClientWithoutCache";
 import { BnpService } from "./service";
 
 /**
- * Live implementation of BnpService with HttpClient dependency
+ * Live implementation of BnpService with custom HttpClient dependency
  *
- * This layer wraps BnpService.Default and provides FetchHttpClient.layer to erase
- * the HttpClient dependency from the public API. This is the "Local Dependency Erasure"
- * pattern - the service layer handles its own dependencies so consumers don't need to.
+ * We use a custom HttpClient implementation (HttpClientWithoutCacheLayer) instead of
+ * the standard FetchHttpClient.layer because Effect's default caching mechanism fails
+ * for POST requests with complex bodies (like PrecedentSearchFilter).
+ *
+ * The standard FetchHttpClient.layer attempts to serialize the request body to generate
+ * a cache key, which throws: "Failed to generate cache key for URL"
+ *
+ * Our custom implementation uses fetch directly without any caching layer, which
+ * resolves the issue while maintaining full HttpClient compatibility.
  */
 export const BnpServiceLive = BnpService.Default.pipe(
-  Layer.provide(FetchHttpClient.layer)
+  Layer.provide(HttpClientWithoutCacheLayer)
 );
