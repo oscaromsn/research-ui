@@ -115,6 +115,8 @@
   "dependencies": {
     "@boundaryml/baml": "^0.205.0",
     "@boundaryml/baml-nextjs-plugin": "^0.1.0",
+    "@effect/platform-bun": "^0.83.0",
+    "@effect/platform-node": "^0.100.0",
     "@next/env": "15.4.0-canary.51",
     "@radix-ui/react-collapsible": "^1.1.11",
     "@radix-ui/react-progress": "^1.1.7",
