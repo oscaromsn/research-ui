@@ -1,3 +1,22 @@
+if (
+  typeof localStorage === "undefined" ||
+  typeof localStorage.getItem !== "function"
+) {
+  const mockStorage = {
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {},
+    clear: () => {},
+    length: 0,
+    key: () => null,
+  } as Storage;
+
+  // @ts-ignore
+  global.localStorage = mockStorage;
+  // @ts-ignore
+  global.sessionStorage = mockStorage;
+}
+
 import { withBaml } from "@boundaryml/baml-nextjs-plugin";
 import type { NextConfig } from "next";
 
