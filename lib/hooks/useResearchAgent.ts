@@ -6,7 +6,7 @@ import type {
   ResearchStage,
   ResearchUpdate,
 } from "@/app/actions/researchAgentOrchestrator";
-import { conductResearch } from "@/app/actions/researchAgentOrchestrator";
+import { conductResearchWithEffect } from "@/app/actions/conductResearchWithEffect";
 import type {
   ClientAnalyzedDoc,
   ClientFinalReport,
@@ -932,15 +932,7 @@ export function useResearchAgent(): UseResearchAgentReturn {
       setAbortController(controller);
 
       try {
-        const stream = await conductResearch(
-          legalQuestion,
-          {
-            isEnabled: autoModeState.isEnabled,
-            maxIterations: autoModeState.maxIterations,
-            currentIteration: autoModeState.currentIteration,
-          },
-          researchSession.accumulatedDocuments
-        );
+        const stream = await conductResearchWithEffect(legalQuestion);
 
         await processResearchStream(stream, controller);
       } catch (error) {
@@ -986,16 +978,9 @@ export function useResearchAgent(): UseResearchAgentReturn {
     setAbortController(controller);
 
     try {
-      const stream = await conductResearch(
-        autoModeState.originalQuestion,
-        {
-          isEnabled: autoModeState.isEnabled,
-          maxIterations: autoModeState.maxIterations,
-          currentIteration: autoModeState.currentIteration,
-        },
-        researchSession.accumulatedDocuments
+      const stream = await conductResearchWithEffect(
+        autoModeState.originalQuestion
       );
-
       await processResearchStream(stream, controller);
     } catch (error) {
       if (controller.signal.aborted) {
