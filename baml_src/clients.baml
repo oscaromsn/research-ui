@@ -9,12 +9,12 @@ client<llm> QueryGeneration {
   }
 }
 
+// https://docs.boundaryml.com/docs/snippets/clients/fallback
 client<llm> DocumentAnalysis {
-  provider "openai-generic"
+  provider fallback
   options {
-    base_url "https://api.cerebras.ai/v1"
-    model "gpt-oss-120b"
-    api_key env.CEREBRAS_API_KEY
+    // This will try the clients in order until one succeeds
+    strategy [CustomCerebras, GptNano]
   }
 }
 
@@ -54,10 +54,10 @@ client<llm> CustomCerebras {
   }
 }
 
-client<llm> GptMini {
+client<llm> GptNano {
   provider openai
   options {
-    model "gpt-4.1-mini"
+    model "gpt-5-nano"
     api_key env.OPENAI_API_KEY
   }
 }
@@ -97,14 +97,6 @@ client<llm> CustomFast {
   }
 }
 
-// https://docs.boundaryml.com/docs/snippets/clients/fallback
-client<llm> OpenaiFallback {
-  provider fallback
-  options {
-    // This will try the clients in order until one succeeds
-    strategy [CustomGPT4oMini, CustomGPT4oMini]
-  }
-}
 
 // https://docs.boundaryml.com/docs/snippets/clients/retry
 retry_policy Constant {
