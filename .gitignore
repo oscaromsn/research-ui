@@ -74,3 +74,6 @@ baml_client
 
 # dev
 docs/dev/**
+
+# Claude Code agent files
+.agent/
