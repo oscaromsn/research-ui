@@ -1,9 +1,9 @@
-// ----- Comprehensive Test Cases for GenerateLegalSearchQueries -----
+// ----- Testes Abrangentes para GenerateLegalSearchQueries - Contexto Jurídico Brasileiro -----
 
-test SimpleLegalQuestion {
+test PerguntaJuridicaSimples {
   functions [GenerateLegalSearchQueries]
   args {
-    legal_question "What is the statute of limitations for breach of contract in California?"
+    legal_question "Qual é o prazo prescricional para ação de inadimplemento contratual no direito brasileiro?"
   }
   // Assert on structure of DetailedReasoning
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 10 }} )
@@ -19,26 +19,25 @@ test SimpleLegalQuestion {
   @@assert( {{ this.search_queries[0].expected_information | length > 0 }} )
 }
 
-test ComplexLegalQuestion {
+test PerguntaJuridicaComplexa {
   functions [GenerateLegalSearchQueries]
   args {
-    legal_question "In a multi-state corporate merger involving Delaware and New York entities, what are the fiduciary duties of directors during negotiations, considering both state laws and federal securities regulations, particularly regarding disclosure obligations to minority shareholders?"
+    legal_question "Em uma operação de fusão societária entre empresas sediadas em São Paulo e Rio de Janeiro, quais são os deveres fiduciários dos administradores durante as negociações, considerando a Lei das S.A. (Lei 6.404/76), a regulamentação da CVM e as obrigações de divulgação aos acionistas minoritários, incluindo o direito de recesso previsto no artigo 137?"
   }
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 20 }} )
   @@assert( {{ this.reasoning.consider_relevant_legal_principles.summary | length > 20 }} )
   // Complex questions should generate more queries to cover different aspects
   @@assert( {{ this.search_queries | length >= 5 }} )
   @@assert( {{ this.search_queries | length <= 12 }} )
-  // Should cover multiple jurisdictions and legal areas
   // Should cover multiple jurisdictions and legal areas - check first few queries
   @@assert( {{ this.search_queries[0].query_string | length > 5 }} )
   @@assert( {{ this.search_queries[1].query_string | length > 5 }} )
 }
 
-test AmbiguousLegalQuestion {
+test PerguntaJuridicaAmbigua {
   functions [GenerateLegalSearchQueries]
   args {
-    legal_question "What are my rights in this situation?"
+    legal_question "Quais são meus direitos nessa situação?"
   }
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 10 }} )
   // Should still generate queries despite ambiguity
@@ -48,19 +47,19 @@ test AmbiguousLegalQuestion {
   @@assert( {{ this.search_queries[0].query_string | length > 0 }} )
 }
 
-test JurisdictionSpecificQuestion {
+test PerguntaEspecificaDeJurisdicao {
   functions [GenerateLegalSearchQueries]
   args {
-    legal_question "What are the requirements for adverse possession in Texas?"
+    legal_question "Quais são os requisitos para usucapião extraordinária de imóvel urbano em São Paulo, conforme o Código Civil brasileiro?"
   }
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 10 }} )
   @@assert( {{ this.search_queries | length >= 3 }} )
-  // Should include Texas-specific searches
+  // Should include São Paulo and usucapião specific searches
   @@assert( {{ this.search_queries[0].query_string | length > 5 }} )
   @@assert( {{ this.search_queries[0].expected_information | length > 0 }} )
 }
 
-test BrazilianLegalQuestion {
+test PerguntaDireitoConsumidor {
   functions [GenerateLegalSearchQueries]
   args {
     legal_question "Qual o valor de danos morais comumente arbitrado pelos tribunais em casos que o consumidor ficou aproximadamente 72 horas sem energia elétrica?"
@@ -74,10 +73,10 @@ test BrazilianLegalQuestion {
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 10 }} )
 }
 
-test CriminalLawQuestion {
+test PerguntaDireitoPenal {
   functions [GenerateLegalSearchQueries]
   args {
-    legal_question "What are the elements of first-degree murder in federal jurisdiction?"
+    legal_question "Quais são os elementos e qualificadoras do crime de homicídio qualificado segundo o artigo 121, §2º do Código Penal brasileiro?"
   }
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 10 }} )
   @@assert( {{ this.search_queries | length >= 3 }} )

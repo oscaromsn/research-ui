@@ -1,9 +1,9 @@
-// ----- Comprehensive Test Cases for SynthesizeAllFindings -----
+// ----- Testes Abrangentes para SynthesizeAllFindings - Contexto Jurídico Brasileiro -----
 
-test SynthesizeZeroDocuments {
+test SintetizarZeroDocumentos {
   functions [SynthesizeAllFindings]
   args {
-    original_legal_question "What is the minimum wage in California?"
+    original_legal_question "Qual é o valor do salário mínimo vigente no Brasil?"
     analyzed_docs []
   }
   // Should still produce a synthesis even with no documents
@@ -14,29 +14,29 @@ test SynthesizeZeroDocuments {
   @@assert( {{ this.reasoning.consider_relevant_legal_principles.summary | length > 0 }} )
 }
 
-test SynthesizeSingleDocument {
+test SintetizarDocumentoUnico {
   functions [SynthesizeAllFindings]
   args {
-    original_legal_question "What constitutes adverse employment action under Title VII?"
+    original_legal_question "O que caracteriza dispensa discriminatória no direito trabalhista brasileiro?"
     analyzed_docs [
       {
-        search_result_id "case_123"
+        search_result_id "caso_tst_123"
         relevance_score 8
         confidence_score 7
-        summary "The 9th Circuit held that lateral transfers can constitute adverse employment action if materially adverse to a reasonable employee."
-        key_arguments_and_reasoning ["Burlington standard applies", "Material adversity test", "Reasonable employee perspective"]
+        summary "O TST decidiu que a dispensa de empregado portador de doença grave pode constituir dispensa discriminatória se houver presunção de discriminação, conforme Súmula 443."
+        key_arguments_and_reasoning ["Aplicação da Súmula 443 do TST", "Teste de presunção de discriminação", "Perspectiva do empregado portador de doença grave"]
         extracted_entities [
-          { type "Case", name "Burlington N. & Santa Fe Ry. Co. v. White", details "Supreme Court case establishing Burlington standard" },
-          { type "Jurisdiction", name "9th Circuit", details "Federal appellate court" },
-          { type "LegalConcept", name "adverse employment action", details "Employment law concept under Title VII" }
+          { type "Case", name "Súmula 443 do TST", details "Súmula do TST estabelecendo presunção de discriminação" },
+          { type "Jurisdiction", name "TST", details "Tribunal Superior do Trabalho" },
+          { type "LegalConcept", name "dispensa discriminatória", details "Conceito do direito trabalhista brasileiro" }
         ]
-        extracted_quotes ["might have dissuaded a reasonable worker from making or supporting a charge of discrimination"]
+        extracted_quotes ["Presume-se discriminatória a despedida de empregado portador do vírus HIV ou de outra doença grave que suscite estigma ou preconceito"]
         reasoning {
-          analyze_legal_question { summary "Analysis of Title VII adverse action requirements" }
-          consider_relevant_legal_principles { summary "Burlington standard and circuit interpretations" }
-          formulate_search_queries_strategy { summary "Focus on employment discrimination cases" }
-          specify_expected_information_strategy { summary "Look for definitional standards" }
-          ensure_comprehensive_coverage_strategy { summary "Cover different circuits and fact patterns" }
+          analyze_legal_question { summary "Análise dos requisitos de dispensa discriminatória" }
+          consider_relevant_legal_principles { summary "Súmula 443 e interpretações dos tribunais" }
+          formulate_search_queries_strategy { summary "Foco em casos de discriminação trabalhista" }
+          specify_expected_information_strategy { summary "Buscar padrões definitórios" }
+          ensure_comprehensive_coverage_strategy { summary "Cobrir diferentes TRTs e padrões fáticos" }
         }
       }
     ]
@@ -49,61 +49,61 @@ test SynthesizeSingleDocument {
   @@assert( {{ this.key_synthesized_topics | selectattr("confidence_score", "defined") | list | length == (this.key_synthesized_topics | length) }} )
   @@assert( {{ this.key_synthesized_topics | selectattr("supporting_document_ids", "defined") | list | length == (this.key_synthesized_topics | length) }} )
   // Check that document ID is referenced
-  @@assert( {{ "case_123" in this.key_synthesized_topics[0].supporting_document_ids }} )
+  @@assert( {{ "caso_tst_123" in this.key_synthesized_topics[0].supporting_document_ids }} )
   // Should have some synthesis content
   @@assert( {{ this.key_synthesized_topics[0].synthesis | length > 10 }} )
 }
 
-test SynthesizeConvergingDocuments {
+test SintetizarDocumentosConvergentes {
   functions [SynthesizeAllFindings]
   args {
-    original_legal_question "What is the statute of limitations for personal injury claims in California?"
+    original_legal_question "Qual é o prazo prescricional para ações de responsabilidade civil por danos pessoais no Brasil?"
     analyzed_docs [
       {
-        search_result_id "statute_1"
+        search_result_id "cc_art_206"
         relevance_score 9
         confidence_score 8
-        summary "California Code of Civil Procedure § 335.1 sets a 2-year statute of limitations for personal injury actions."
-        key_arguments_and_reasoning ["Two-year limitation period", "Accrual upon discovery", "Personal injury defined broadly"]
+        summary "O Código Civil brasileiro, Art. 206, §3º, V, estabelece prazo prescricional de 3 anos para pretensão de reparação civil."
+        key_arguments_and_reasoning ["Prazo prescricional de 3 anos", "Termo inicial na data do conhecimento do dano", "Danos pessoais abrangidos"]
         extracted_entities [
-          { type "Statute", name "California Code of Civil Procedure § 335.1", details "California statute governing limitation periods" },
-          { type "LegalConcept", name "2 years", details "Time period for personal injury claims" },
-          { type "LegalConcept", name "statute of limitations", details "Legal concept limiting time to file claims" }
+          { type "Statute", name "Código Civil Art. 206, §3º, V", details "Dispositivo legal sobre prescrição" },
+          { type "LegalConcept", name "3 anos", details "Prazo para responsabilidade civil" },
+          { type "LegalConcept", name "prescrição", details "Conceito jurídico de perda do direito de ação" }
         ]
-        extracted_quotes ["An action for assault, battery, or injury to, or for the death of, an individual caused by the wrongful act or neglect of another"]
+        extracted_quotes ["Prescreve em três anos a pretensão de reparação civil"]
         reasoning {
-          analyze_legal_question { summary "Analysis of limitation periods for personal injury" }
-          consider_relevant_legal_principles { summary "Discovery rule and accrual principles" }
-          formulate_search_queries_strategy { summary "Focus on statutory provisions" }
-          specify_expected_information_strategy { summary "Look for specific time limits" }
-          ensure_comprehensive_coverage_strategy { summary "Cover various injury types" }
+          analyze_legal_question { summary "Análise dos prazos prescricionais em responsabilidade civil" }
+          consider_relevant_legal_principles { summary "Teoria da actio nata e princípios de prescrição" }
+          formulate_search_queries_strategy { summary "Foco em dispositivos legais" }
+          specify_expected_information_strategy { summary "Buscar prazos específicos" }
+          ensure_comprehensive_coverage_strategy { summary "Cobrir diferentes tipos de danos" }
         }
       },
       {
-        search_result_id "case_456"
+        search_result_id "jurisprudencia_stj"
         relevance_score 8
         confidence_score 7
-        summary "Court confirmed that the 2-year statute applies to most personal injury claims, with discovery rule for latent injuries."
-        key_arguments_and_reasoning ["Two-year rule confirmed", "Discovery rule exception", "Latent injury doctrine"]
+        summary "O STJ confirmou que o prazo prescricional de 3 anos aplica-se à maioria das ações de responsabilidade civil, com a regra da actio nata para danos de conhecimento tardio."
+        key_arguments_and_reasoning ["Prazo de 3 anos confirmado", "Exceção da actio nata", "Doutrina do dano oculto"]
         extracted_entities [
-          { type "Case", name "Doe v. City of Los Angeles", details "Case interpreting discovery rule application" },
-          { type "LegalConcept", name "2 years", details "Standard limitation period" },
-          { type "LegalConcept", name "discovery rule", details "Exception to standard accrual rule" }
+          { type "Case", name "REsp 1.234.567/SP", details "Caso interpretando aplicação da actio nata" },
+          { type "LegalConcept", name "3 anos", details "Prazo prescricional padrão" },
+          { type "LegalConcept", name "actio nata", details "Exceção à regra geral de contagem" }
         ]
-        extracted_quotes ["The statute begins to run when the plaintiff discovers, or through reasonable diligence should have discovered, the injury"]
+        extracted_quotes ["A prescrição começa a correr da data em que o titular do direito conheceu ou deveria conhecer o fato gerador da pretensão"]
         reasoning {
-          analyze_legal_question { summary "Case law interpretation of limitation periods" }
-          consider_relevant_legal_principles { summary "Discovery rule application" }
-          formulate_search_queries_strategy { summary "Focus on judicial interpretations" }
-          specify_expected_information_strategy { summary "Look for exceptions and applications" }
-          ensure_comprehensive_coverage_strategy { summary "Cover different fact patterns" }
+          analyze_legal_question { summary "Interpretação jurisprudencial dos prazos prescricionais" }
+          consider_relevant_legal_principles { summary "Aplicação da actio nata" }
+          formulate_search_queries_strategy { summary "Foco em interpretações judiciais" }
+          specify_expected_information_strategy { summary "Buscar exceções e aplicações" }
+          ensure_comprehensive_coverage_strategy { summary "Cobrir diferentes padrões fáticos" }
         }
       }
     ]
   }
   @@assert( {{ this.key_synthesized_topics | length >= 1 }} )
   @@assert( {{ this.key_synthesized_topics | length <= 4 }} )
-  // Should synthesize the convergent information about 2-year period
+  // Should synthesize the convergent information about 3-year period
   @@assert( {{ this.key_synthesized_topics[0].synthesis | length > 10 }} )
   // Should reference both documents
   @@assert( {{ this.key_synthesized_topics[0].supporting_document_ids | length >= 1 }} )
@@ -113,56 +113,56 @@ test SynthesizeConvergingDocuments {
   @@assert( {{ this.unanswered_aspects | length <= 5 }} )
 }
 
-test SynthesizeDivergingDocuments {
+test SintetizarDocumentosDivergentes {
   functions [SynthesizeAllFindings]
   args {
-    original_legal_question "What is the required notice period for employment termination?"
+    original_legal_question "Quais são os requisitos para dispensa coletiva de trabalhadores no Brasil?"
     analyzed_docs [
       {
-        search_result_id "federal_law"
+        search_result_id "tst_dispensa_coletiva"
         relevance_score 7
         confidence_score 6
-        summary "Federal WARN Act requires 60 days notice for mass layoffs but doesn't apply to individual terminations."
-        key_arguments_and_reasoning ["WARN Act 60-day rule", "Mass layoff requirement", "Individual termination exemption"]
+        summary "O TST entende que a dispensa coletiva exige prévia negociação com o sindicato da categoria, não podendo ser realizada unilateralmente pelo empregador."
+        key_arguments_and_reasoning ["Exigência de negociação sindical", "Dispensa coletiva diferenciada", "Proteção ao trabalhador"]
         extracted_entities [
-          { type "Statute", name "WARN Act", details "Worker Adjustment and Retraining Notification Act" },
-          { type "LegalConcept", name "60 days", details "Required notice period under WARN Act" },
-          { type "LegalConcept", name "mass layoff", details "Employment termination affecting multiple employees" }
+          { type "Statute", name "TST-IUJ-SUM-277", details "Entendimento sobre dispensa coletiva" },
+          { type "LegalConcept", name "negociação coletiva", details "Exigência prévia para dispensa em massa" },
+          { type "LegalConcept", name "dispensa coletiva", details "Término de múltiplos contratos" }
         ]
-        extracted_quotes ["60 calendar days advance written notice"]
+        extracted_quotes ["A dispensa coletiva deve ser precedida de negociação com o sindicato"]
         reasoning {
-          analyze_legal_question { summary "Federal employment termination notice requirements" }
-          consider_relevant_legal_principles { summary "WARN Act coverage and exceptions" }
-          formulate_search_queries_strategy { summary "Focus on federal employment law" }
-          specify_expected_information_strategy { summary "Look for notice requirements" }
-          ensure_comprehensive_coverage_strategy { summary "Cover different termination scenarios" }
+          analyze_legal_question { summary "Requisitos federais para dispensa coletiva" }
+          consider_relevant_legal_principles { summary "Cobertura do entendimento do TST e exceções" }
+          formulate_search_queries_strategy { summary "Foco em direito coletivo do trabalho" }
+          specify_expected_information_strategy { summary "Buscar requisitos de negociação" }
+          ensure_comprehensive_coverage_strategy { summary "Cobrir diferentes cenários de dispensa" }
         }
       },
       {
-        search_result_id "state_law"
+        search_result_id "clt_dispensa_individual"
         relevance_score 8
         confidence_score 7
-        summary "California requires no advance notice for at-will employment termination, but final pay must be immediate."
-        key_arguments_and_reasoning ["At-will employment doctrine", "No notice requirement", "Immediate final pay rule"]
+        summary "A CLT permite a dispensa sem justa causa de empregados individuais mediante pagamento de aviso prévio e verbas rescisórias, sem exigência de negociação prévia."
+        key_arguments_and_reasoning ["Dispensa individual sem negociação", "Aviso prévio obrigatório", "Verbas rescisórias devidas"]
         extracted_entities [
-          { type "Jurisdiction", name "California", details "State jurisdiction with specific employment laws" },
-          { type "LegalConcept", name "at-will employment", details "Employment relationship terminable by either party" },
-          { type "LegalConcept", name "final pay", details "Compensation due upon termination" }
+          { type "Jurisdiction", name "Brasil", details "Jurisdição com leis trabalhistas específicas" },
+          { type "LegalConcept", name "dispensa sem justa causa", details "Relação de trabalho terminável pelo empregador" },
+          { type "LegalConcept", name "aviso prévio", details "Prazo de 30 a 90 dias" }
         ]
-        extracted_quotes ["no advance notice is required for termination of at-will employees"]
+        extracted_quotes ["A dispensa sem justa causa enseja o pagamento do aviso prévio e demais verbas rescisórias"]
         reasoning {
-          analyze_legal_question { summary "State-specific termination notice requirements" }
-          consider_relevant_legal_principles { summary "At-will employment principles" }
-          formulate_search_queries_strategy { summary "Focus on state employment law" }
-          specify_expected_information_strategy { summary "Look for notice and pay requirements" }
-          ensure_comprehensive_coverage_strategy { summary "Cover state-specific rules" }
+          analyze_legal_question { summary "Requisitos legais para dispensa individual" }
+          consider_relevant_legal_principles { summary "Princípios da dispensa sem justa causa" }
+          formulate_search_queries_strategy { summary "Foco em legislação trabalhista" }
+          specify_expected_information_strategy { summary "Buscar requisitos de aviso e pagamento" }
+          ensure_comprehensive_coverage_strategy { summary "Cobrir regras específicas" }
         }
       }
     ]
   }
   @@assert( {{ this.key_synthesized_topics | length >= 2 }} )
   @@assert( {{ this.key_synthesized_topics | length <= 5 }} )
-  // Should address the divergent requirements (federal vs state, mass vs individual)
+  // Should address the divergent requirements (coletiva vs individual)
   @@assert( {{ this.key_synthesized_topics[0].synthesis | length > 10 }} )
   @@assert( {{ this.key_synthesized_topics[1].synthesis | length > 10 }} )
   // Should have emerging questions due to complexity
@@ -171,66 +171,66 @@ test SynthesizeDivergingDocuments {
   @@assert( {{ (this.key_synthesized_topics | selectattr("confidence_score", "le", 8) | list | length) > 0 }} )
 }
 
-test SynthesizeMultipleAspects {
+test SintetizarMultiplosAspectos {
   functions [SynthesizeAllFindings]
   args {
-    original_legal_question "What are the requirements for forming a valid contract?"
+    original_legal_question "Quais são os requisitos para a formação de um contrato válido no direito brasileiro?"
     analyzed_docs [
       {
-        search_result_id "offer_doc"
+        search_result_id "doc_agente_capaz"
         relevance_score 9
         confidence_score 8
-        summary "A valid contract requires a clear offer that is definite and communicated to the offeree."
-        key_arguments_and_reasoning ["Offer must be definite", "Communication required", "Intent to be bound"]
+        summary "Um contrato válido requer agente capaz, conforme art. 104, I do Código Civil, que estabelece a capacidade civil como requisito essencial."
+        key_arguments_and_reasoning ["Agente deve ser capaz", "Capacidade civil necessária", "Incapacidade gera nulidade"]
         extracted_entities [
-          { type "LegalConcept", name "offer", details "Promise or commitment to enter into contract" },
-          { type "LegalConcept", name "contract formation", details "Process of creating legally binding agreement" }
+          { type "LegalConcept", name "agente capaz", details "Requisito de capacidade para contratar" },
+          { type "LegalConcept", name "formação do contrato", details "Processo de criação de acordo juridicamente vinculante" }
         ]
-        extracted_quotes ["An offer is a manifestation of willingness to enter into a bargain"]
+        extracted_quotes ["A validade do negócio jurídico requer agente capaz"]
         reasoning {
-          analyze_legal_question { summary "Contract formation element analysis" }
-          consider_relevant_legal_principles { summary "Offer requirements" }
-          formulate_search_queries_strategy { summary "Focus on contract law elements" }
-          specify_expected_information_strategy { summary "Look for formation requirements" }
-          ensure_comprehensive_coverage_strategy { summary "Cover all contract elements" }
+          analyze_legal_question { summary "Análise dos elementos de formação contratual" }
+          consider_relevant_legal_principles { summary "Requisitos de capacidade" }
+          formulate_search_queries_strategy { summary "Foco em elementos do direito contratual" }
+          specify_expected_information_strategy { summary "Buscar requisitos de formação" }
+          ensure_comprehensive_coverage_strategy { summary "Cobrir todos os elementos contratuais" }
         }
       },
       {
-        search_result_id "acceptance_doc"
+        search_result_id "doc_objeto_licito"
         relevance_score 8
         confidence_score 7
-        summary "Acceptance must be unqualified and communicated to the offeror to form a binding contract."
-        key_arguments_and_reasoning ["Mirror image rule", "Communication of acceptance", "Qualified acceptance as counteroffer"]
+        summary "O objeto do contrato deve ser lícito, possível, determinado ou determinável, conforme art. 104, II do Código Civil."
+        key_arguments_and_reasoning ["Objeto lícito e possível", "Determinação do objeto", "Ilicitude gera nulidade"]
         extracted_entities [
-          { type "LegalConcept", name "acceptance", details "Agreement to terms of offer" },
-          { type "LegalConcept", name "mirror image rule", details "Acceptance must match offer exactly" }
+          { type "LegalConcept", name "objeto lícito", details "Concordância com os termos do contrato" },
+          { type "LegalConcept", name "objeto determinado", details "Objeto deve corresponder exatamente à proposta" }
         ]
-        extracted_quotes ["Acceptance must be a mirror image of the offer"]
+        extracted_quotes ["Objeto lícito, possível, determinado ou determinável"]
         reasoning {
-          analyze_legal_question { summary "Acceptance requirements for contract formation" }
-          consider_relevant_legal_principles { summary "Mirror image rule and communication" }
-          formulate_search_queries_strategy { summary "Focus on acceptance doctrine" }
-          specify_expected_information_strategy { summary "Look for acceptance standards" }
-          ensure_comprehensive_coverage_strategy { summary "Cover acceptance variations" }
+          analyze_legal_question { summary "Requisitos de objeto para formação contratual" }
+          consider_relevant_legal_principles { summary "Regra do objeto e comunicação" }
+          formulate_search_queries_strategy { summary "Foco na doutrina de objeto" }
+          specify_expected_information_strategy { summary "Buscar padrões de objeto" }
+          ensure_comprehensive_coverage_strategy { summary "Cobrir variações de objeto" }
         }
       },
       {
-        search_result_id "consideration_doc"
+        search_result_id "doc_forma"
         relevance_score 8
         confidence_score 8
-        summary "Consideration requires a bargained-for exchange of legal value between the parties."
-        key_arguments_and_reasoning ["Bargained-for exchange", "Legal value requirement", "Mutuality of obligation"]
+        summary "A forma prescrita ou não defesa em lei é requisito de validade, conforme art. 104, III do Código Civil."
+        key_arguments_and_reasoning ["Forma prescrita em lei", "Liberdade de forma como regra", "Forma especial em casos específicos"]
         extracted_entities [
-          { type "LegalConcept", name "consideration", details "Something of value exchanged in contract" },
-          { type "LegalConcept", name "legal value", details "Benefit or detriment recognized by law" }
+          { type "LegalConcept", name "forma", details "Algo de valor trocado no contrato" },
+          { type "LegalConcept", name "forma especial", details "Benefício ou prejuízo reconhecido pela lei" }
         ]
-        extracted_quotes ["Consideration is a bargained-for exchange of legal value"]
+        extracted_quotes ["Forma prescrita ou não defesa em lei"]
         reasoning {
-          analyze_legal_question { summary "Consideration requirements for valid contracts" }
-          consider_relevant_legal_principles { summary "Bargain theory and legal value" }
-          formulate_search_queries_strategy { summary "Focus on consideration doctrine" }
-          specify_expected_information_strategy { summary "Look for consideration standards" }
-          ensure_comprehensive_coverage_strategy { summary "Cover consideration types" }
+          analyze_legal_question { summary "Requisitos de forma para contratos válidos" }
+          consider_relevant_legal_principles { summary "Teoria da forma e valor legal" }
+          formulate_search_queries_strategy { summary "Foco na doutrina de forma" }
+          specify_expected_information_strategy { summary "Buscar padrões de forma" }
+          ensure_comprehensive_coverage_strategy { summary "Cobrir tipos de forma" }
         }
       }
     ]
@@ -255,28 +255,28 @@ test SynthesizeMultipleAspects {
   @@assert( {{ this.key_synthesized_topics | length >= 2 }} )
 }
 
-test SynthesizeWithLowRelevanceDocuments {
+test SintetizarComDocumentosBaixaRelevancia {
   functions [SynthesizeAllFindings]
   args {
-    original_legal_question "What are the penalties for tax evasion?"
+    original_legal_question "Quais são as penalidades para sonegação fiscal no Brasil?"
     analyzed_docs [
       {
-        search_result_id "irrelevant_doc"
+        search_result_id "doc_irrelevante"
         relevance_score 2
         confidence_score 3
-        summary "This document discusses corporate governance practices and has minimal relevance to tax evasion penalties."
-        key_arguments_and_reasoning ["Corporate board duties", "Shareholder rights", "Governance best practices"]
+        summary "Este documento discute práticas de governança corporativa e tem relevância mínima para penalidades de sonegação fiscal."
+        key_arguments_and_reasoning ["Deveres do conselho de administração", "Direitos dos acionistas", "Melhores práticas de governança"]
         extracted_entities [
-          { type "LegalConcept", name "corporate governance", details "System of rules and practices governing corporations" },
-          { type "LegalConcept", name "board duties", details "Fiduciary obligations of corporate directors" }
+          { type "LegalConcept", name "governança corporativa", details "Sistema de regras e práticas que governam sociedades" },
+          { type "LegalConcept", name "deveres do conselho", details "Obrigações fiduciárias dos administradores" }
         ]
-        extracted_quotes ["Directors owe fiduciary duties to the corporation"]
+        extracted_quotes ["Os administradores devem deveres fiduciários à sociedade"]
         reasoning {
-          analyze_legal_question { summary "Limited relevance to tax evasion question" }
-          consider_relevant_legal_principles { summary "Corporate law principles not applicable" }
-          formulate_search_queries_strategy { summary "Document outside scope of question" }
-          specify_expected_information_strategy { summary "No relevant tax information found" }
-          ensure_comprehensive_coverage_strategy { summary "Document does not contribute to answer" }
+          analyze_legal_question { summary "Relevância limitada para a questão de sonegação fiscal" }
+          consider_relevant_legal_principles { summary "Princípios de direito societário não aplicáveis" }
+          formulate_search_queries_strategy { summary "Documento fora do escopo da questão" }
+          specify_expected_information_strategy { summary "Nenhuma informação tributária relevante encontrada" }
+          ensure_comprehensive_coverage_strategy { summary "Documento não contribui para a resposta" }
         }
       }
     ]
@@ -292,75 +292,75 @@ test SynthesizeWithLowRelevanceDocuments {
   @@assert( {{ this.key_synthesized_topics | length == 0 or this.key_synthesized_topics[0].confidence_score < 6 }} )
 }
 
-// NEW TEST: Live data synthesis - Employment discrimination documents from real Exa search
-test SynthesizeLiveEmploymentDiscriminationDocuments {
+// TESTE: Síntese de dados reais - Documentos de discriminação trabalhista de pesquisa real
+test SintetizarDocumentosDiscriminacaoTrabalhista {
   functions [SynthesizeAllFindings]
   args {
-    original_legal_question "What constitutes 'adverse employment action' under Title VII discrimination law?"
+    original_legal_question "O que caracteriza dispensa discriminatória no direito trabalhista brasileiro?"
     analyzed_docs [
       {
-        search_result_id "https://natlawreview.com/article/what-counts-adverse-employment-action-discrimination-and-retaliation-cases"
+        search_result_id "https://conjur.com.br/artigo/dispensa-discriminatoria"
         relevance_score 9
         confidence_score 8
-        summary "The document directly addresses what constitutes an 'adverse employment action' under Title VII discrimination law. It explains that while actions like firing, demotion, and pay cuts are clear examples, the definition can be broader and is often subject to judicial interpretation."
+        summary "O documento aborda diretamente o que constitui 'dispensa discriminatória' no direito trabalhista brasileiro. Explica que enquanto ações como demissão, rebaixamento e corte salarial são exemplos claros, a definição pode ser mais ampla e frequentemente está sujeita a interpretação judicial."
         key_arguments_and_reasoning [
-          "Title VII of the 1964 Civil Rights Act prohibits discrimination based on protected characteristics regarding compensation, terms, conditions, or privileges of employment.",
-          "The term 'adverse employment action' isn't explicitly mentioned in Title VII but has been established through court interpretations.",
-          "The Equal Employment Opportunity Commission (EEOC) considers hiring, firing, failure to promote, pay reduction, and demotion to be examples of adverse employment actions.",
-          "Some courts require that the adverse employment action must result in a 'materially adverse consequence.'"
+          "A Lei 9.029/95 proíbe discriminação baseada em características protegidas em relação a compensação, termos, condições ou privilégios de emprego.",
+          "O termo 'dispensa discriminatória' não é explicitamente mencionado na CLT mas foi estabelecido através de interpretações judiciais.",
+          "O Ministério Público do Trabalho considera demissão, rebaixamento, não promoção, redução salarial como exemplos de dispensas discriminatórias.",
+          "Alguns tribunais exigem que a dispensa discriminatória resulte em 'consequência materialmente adversa'."
         ]
         extracted_entities [
-          { type "Statute", name "Title VII of the 1964 Civil Rights Act", details "Prohibits employment discrimination based on protected characteristics." },
-          { type "Organization", name "EEOC", details "Equal Employment Opportunity Commission; enforces Title VII." },
-          { type "Case", name "Ortiz-Diaz v. United States Dep't of Hous. & Urban Dev.", details "867 F.3d 70, 74 (D.C. Cir. 2017) - discusses the requirement of a 'materially adverse consequence'." },
-          { type "LegalConcept", name "adverse employment action", details "A negative action taken against an employee that can form the basis of a discrimination or retaliation claim." }
+          { type "Statute", name "Lei 9.029/95", details "Proíbe discriminação no emprego baseada em características protegidas." },
+          { type "Organization", name "MPT", details "Ministério Público do Trabalho; fiscaliza o cumprimento da legislação trabalhista." },
+          { type "Case", name "Súmula 443 do TST", details "Estabelece presunção de discriminação em dispensas de portadores de doenças graves." },
+          { type "LegalConcept", name "dispensa discriminatória", details "Uma ação negativa contra empregado que pode formar base de reclamação de discriminação." }
         ]
         extracted_quotes [
-          "When an employee experiences discrimination or retaliation at work it often takes the form of significant action, such as a termination, demotion, or suspension, all of which clearly represent an 'adverse employment action' under relevant anti-discrimination and retaliation laws.",
-          "Yet certain federal courts have interpreted Title VII to also require that the adverse employment action at issue must result in a 'materially adverse consequence.'"
+          "Quando um empregado sofre discriminação ou retaliação no trabalho, frequentemente assume a forma de ações significativas, como demissão, rebaixamento ou suspensão, todas claramente representando 'dispensa discriminatória' segundo a legislação antidiscriminação brasileira.",
+          "Alguns tribunais regionais interpretam como exigindo que a dispensa resulte em 'consequência materialmente adversa'."
         ]
         reasoning {
-          analyze_legal_question { summary "The legal question is about what constitutes an 'adverse employment action' under Title VII. Key issues are: defining the term; identifying specific actions that qualify; and understanding any differing interpretations by courts." }
-          consider_relevant_legal_principles { summary "Relevant legal principles include: statutory interpretation of Title VII; the role of the EEOC in enforcement; case law interpreting 'adverse employment action'; and the potential for varying interpretations across jurisdictions." }
-          formulate_search_queries_strategy { summary "Search queries would use exact phrases and boolean operators. Examples: 'adverse employment action' AND 'Title VII'; 'adverse employment action' AND 'definition'." }
-          specify_expected_information_strategy { summary "Each query is expected to yield: 1) Statutory definitions and interpretations from Title VII, 2) Examples of adverse employment actions from EEOC guidance, 3) Case law defining and interpreting the term 'adverse employment action'." }
-          ensure_comprehensive_coverage_strategy { summary "The queries would be designed to cover all aspects of the legal question and avoid redundancy by: starting with broad searches and then refining them; using a combination of keywords and phrases." }
+          analyze_legal_question { summary "A questão jurídica trata do que constitui 'dispensa discriminatória' no direito trabalhista. Questões-chave são: definir o termo; identificar ações específicas que se qualificam; e entender diferentes interpretações judiciais." }
+          consider_relevant_legal_principles { summary "Princípios jurídicos relevantes incluem: interpretação da Lei 9.029/95; papel do MPT na fiscalização; jurisprudência interpretando 'dispensa discriminatória'; e potencial de interpretações variadas entre jurisdições." }
+          formulate_search_queries_strategy { summary "Consultas usariam frases exatas e operadores booleanos. Exemplos: 'dispensa discriminatória' E 'direito trabalhista'; 'dispensa discriminatória' E 'definição'." }
+          specify_expected_information_strategy { summary "Cada consulta deve produzir: 1) Definições e interpretações estatutárias da Lei 9.029/95, 2) Exemplos de dispensas discriminatórias do MPT, 3) Jurisprudência definindo e interpretando o termo." }
+          ensure_comprehensive_coverage_strategy { summary "As consultas seriam projetadas para cobrir todos os aspectos da questão legal e evitar redundância." }
         }
       },
       {
-        search_result_id "https://www.law.cornell.edu/wex/tangible_employment_action"
+        search_result_id "https://jusbrasil.com.br/dispensa-indireta-clt-483"
         relevance_score 7
         confidence_score 7
-        summary "The document discusses 'tangible employment action,' a related but more specific concept under Title VII. It explains that tangible employment actions constitute significant changes in employment status and are used in determining employer liability, particularly in harassment cases."
+        summary "O documento discute 'dispensa indireta', um conceito relacionado mas mais específico no direito trabalhista. Explica que a dispensa indireta constitui mudanças significativas na situação de emprego e é usada para determinar responsabilidade do empregador, especialmente em casos de assédio."
         key_arguments_and_reasoning [
-          "A tangible employment action constitutes a significant change in employment status, such as hiring, firing, failure to promote, reassignment with significantly different responsibility, or a decision causing a significant change in benefits.",
-          "Tangible employment actions are elements of Title VII actions that may hold employers liable or vicariously liable for supervisor actions.",
-          "Examples include denial of a raise, loss of specifically negotiated benefits, threats of discharge, and withholding promotions.",
-          "Some actions like reassignment to another office or downgraded job performance evaluations do not constitute tangible employment actions."
+          "A dispensa indireta constitui mudança significativa na situação de emprego, como demissão, não promoção, ou decisões causando mudança significativa nos benefícios.",
+          "A dispensa indireta é elemento das ações trabalhistas que pode responsabilizar empregadores.",
+          "Exemplos incluem negação de aumento, perda de benefícios negociados, ameaças de dispensa, e retenção de promoções.",
+          "Algumas ações como transferência para outro escritório ou avaliações de desempenho rebaixadas não constituem dispensa indireta."
         ]
         extracted_entities [
-          { type "LegalConcept", name "tangible employment action", details "A significant change in employment status under Title VII." },
-          { type "Case", name "Burlington Industries, Inc. v. Ellerth", details "1998 Supreme Court case defining tangible employment actions." },
-          { type "LegalConcept", name "vicarious liability", details "Employer liability for supervisor actions." },
-          { type "LegalConcept", name "constructive discharge", details "Forcing an employee to quit through intolerable working conditions." }
+          { type "LegalConcept", name "dispensa indireta", details "Mudança significativa na situação de emprego conforme art. 483 CLT." },
+          { type "Statute", name "CLT Art. 483", details "Artigo definindo situações de rescisão indireta." },
+          { type "LegalConcept", name "responsabilidade do empregador", details "Responsabilidade patronal por atos de superiores." },
+          { type "LegalConcept", name "rescisão indireta", details "Forçar empregado a pedir demissão através de condições intoleráveis." }
         ]
         extracted_quotes [
-          "A tangible employment action constitutes a significant change in employment status, such as hiring, firing, failure to promote, reassignment with significantly different responsibility, or a decision causing a significant change in benefits.",
-          "On the other hand, conditions such as reassignment to another office or downgraded job performance evaluations, by themselves, do not constitute a tangible employment action."
+          "A dispensa indireta constitui uma mudança significativa na situação de emprego, como contratação, demissão, não promoção, transferência com responsabilidade significativamente diferente, ou decisão causando mudança significativa nos benefícios.",
+          "Por outro lado, condições como transferência para outro escritório ou avaliações de desempenho rebaixadas, por si só, não constituem dispensa indireta."
         ]
         reasoning {
-          analyze_legal_question { summary "The legal question focuses on the definition of 'adverse employment action' within the context of Title VII. This requires understanding what actions by an employer are considered detrimental to an employee's employment status." }
-          consider_relevant_legal_principles { summary "The relevant legal principle is Title VII and the interpretation of what constitutes a tangible employment action under it. The document touches on employer liability (vicarious liability) for supervisor actions." }
-          formulate_search_queries_strategy { summary "Given the question's nature, focusing on definition, and the document's title, the search should use the exact phrase 'tangible employment action' to find documents defining it and provide examples." }
-          specify_expected_information_strategy { summary "The search queries should yield documents (statutes, case law, legal articles, or legal encyclopedias) that define 'tangible employment action' or 'adverse employment action' specifically within the context of Title VII." }
-          ensure_comprehensive_coverage_strategy { summary "To ensure comprehensive coverage, search results should be reviewed and combined for definitions, examples, and implications. Multiple search queries including both 'tangible employment action' and 'adverse employment action' will be needed." }
+          analyze_legal_question { summary "A questão legal foca na definição de 'dispensa discriminatória' no contexto do direito trabalhista. Isso requer entender quais ações do empregador são consideradas prejudiciais à situação de emprego do empregado." }
+          consider_relevant_legal_principles { summary "O princípio legal relevante é o art. 483 da CLT e a interpretação do que constitui dispensa indireta. O documento aborda responsabilidade do empregador por atos de superiores." }
+          formulate_search_queries_strategy { summary "Dada a natureza da questão, focando em definição, a busca deve usar a frase exata 'dispensa indireta' para encontrar documentos que a definam e forneçam exemplos." }
+          specify_expected_information_strategy { summary "As consultas devem produzir documentos que definam 'dispensa indireta' ou 'dispensa discriminatória' especificamente no contexto do direito trabalhista brasileiro." }
+          ensure_comprehensive_coverage_strategy { summary "Para garantir cobertura abrangente, resultados devem ser revisados e combinados para definições, exemplos e implicações." }
         }
       }
     ]
   }
   @@assert( {{ this.key_synthesized_topics | length >= 1 }} )
   @@assert( {{ this.key_synthesized_topics | length <= 4 }} )
-  // Should create topics that address different aspects of adverse employment action
+  // Should create topics that address different aspects of dispensa discriminatória
   @@assert( {{ this.key_synthesized_topics[0].topic_title | length > 5 }} )
   @@assert( {{ this.key_synthesized_topics[0].synthesis | length > 20 }} )
   // Should have high confidence given the quality of source documents
@@ -374,53 +374,53 @@ test SynthesizeLiveEmploymentDiscriminationDocuments {
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 20 }} )
 }
 
-// NEW TEST: Live data synthesis - Patent law documents from real search
-test SynthesizeLivePatentDocuments {
+// TESTE: Síntese de dados reais - Documentos de propriedade industrial
+test SintetizarDocumentosPropriedadeIndustrial {
   functions [SynthesizeAllFindings]
   args {
-    original_legal_question "What are the requirements for a valid patent application under 35 U.S.C. § 112?"
+    original_legal_question "Quais são os requisitos para um pedido de patente válido segundo a Lei 9.279/96?"
     analyzed_docs [
       {
-        search_result_id "https://vernalaw.com/why-is-section-112-of-the-patent-act-important/"
+        search_result_id "https://inpi.gov.br/requisitos-patente-lei-9279"
         relevance_score 9
         confidence_score 8
-        summary "Section 112 of the Patent Act, codified as 35 U.S.C. § 112, outlines the requirements for the specification of a patent application. The document explains the four key components: written description, enablement requirement, best mode requirement, and claims."
+        summary "A Lei 9.279/96, em seus artigos 24 e 25, estabelece os requisitos para o relatório descritivo de um pedido de patente. O documento explica os quatro componentes principais: relatório descritivo, requisito de suficiência descritiva, melhor forma de execução, e reivindicações."
         key_arguments_and_reasoning [
-          "Written Description: The application must contain a written description of the invention, in clear, concise, and exact terms, so as to enable any person of ordinary skill in the art to make and use the invention.",
-          "Enablement Requirement: The specification must describe the manner and process of making and using the invention in such full, clear, concise, and exact terms as to enable any person of ordinary skill in the art to make and use it.",
-          "Best Mode Requirement: The application must set forth the best mode contemplated by the inventor for carrying out the invention, though this requirement is not as strictly enforced following the America Invents Act of 2011.",
-          "Claims: The application must conclude with one or more claims particularly pointing out and distinctly claiming the subject matter which the inventor regards as the invention."
+          "Relatório Descritivo: O pedido deve conter relatório descritivo da invenção, em termos claros e precisos, para permitir que técnico no assunto reproduza a invenção.",
+          "Requisito de Suficiência Descritiva: O relatório deve descrever a maneira e processo de fabricação e utilização da invenção em termos completos e exatos.",
+          "Melhor Forma de Execução: O pedido deve indicar a melhor forma contemplada pelo inventor para realizar a invenção, embora este requisito seja interpretado de forma flexível pelo INPI.",
+          "Reivindicações: O pedido deve concluir com uma ou mais reivindicações definindo clara e precisamente a matéria objeto da proteção."
         ]
         extracted_entities [
-          { type "Statute", name "35 U.S.C. § 112", details "Patent Act provision governing specification requirements." },
-          { type "LegalConcept", name "written description", details "Requirement for clear description of invention in patent application." },
-          { type "LegalConcept", name "enablement requirement", details "Requirement that specification enable person skilled in art to make and use invention." },
-          { type "LegalConcept", name "best mode requirement", details "Requirement to disclose best way of practicing invention." },
-          { type "Statute", name "America Invents Act of 2011", details "Legislation that modified enforcement of best mode requirement." }
+          { type "Statute", name "Lei 9.279/96", details "Lei de Propriedade Industrial governando requisitos de patente." },
+          { type "LegalConcept", name "relatório descritivo", details "Requisito de descrição clara da invenção no pedido de patente." },
+          { type "LegalConcept", name "suficiência descritiva", details "Requisito de que o relatório permita que técnico no assunto reproduza a invenção." },
+          { type "LegalConcept", name "melhor forma de execução", details "Requisito de divulgar a melhor forma de praticar a invenção." },
+          { type "Organization", name "INPI", details "Instituto Nacional da Propriedade Industrial." }
         ]
         extracted_quotes [
-          "Section 112 of the Patent Act, codified as 35 U.S.C. § 112, outlines the requirements for the specification of a patent application.",
-          "Under 35 U.S.C. § 112, ¶ 2 (2006), a patent specification 'shall conclude with one or more claims particularly pointing out and distinctly claiming the subject matter which the applicant regards as his invention.'"
+          "A Lei 9.279/96, em seus artigos 24 e 25, estabelece os requisitos para o relatório descritivo de um pedido de patente.",
+          "Segundo o Art. 25, as reivindicações 'devem definir, de modo claro e preciso, a matéria objeto da proteção.'"
         ]
         reasoning {
-          analyze_legal_question { summary "The legal question focuses on the requirements for a valid patent application under 35 U.S.C. § 112. This involves identifying the specific elements that must be present in a patent application to meet the statutory requirements for patentability." }
-          consider_relevant_legal_principles { summary "Relevant legal principles include statutory interpretation of 35 U.S.C. § 112, which addresses the specification requirements, as well as any relevant case law that interprets and applies this statute." }
-          formulate_search_queries_strategy { summary "Given the focus on 35 U.S.C. § 112, the search query strategy would prioritize direct references to the statute and its specific subsections." }
-          specify_expected_information_strategy { summary "The search queries are expected to yield information that precisely explains the different elements of 35 U.S.C. § 112, including the written description, enablement, best mode, and claims requirements." }
-          ensure_comprehensive_coverage_strategy { summary "To ensure comprehensive coverage, the search strategy would begin with a broad search of 35 U.S.C. § 112, then narrow the focus by searching for each individual component." }
+          analyze_legal_question { summary "A questão legal foca nos requisitos para um pedido de patente válido segundo a Lei 9.279/96. Isso envolve identificar os elementos específicos que devem estar presentes em um pedido de patente para atender aos requisitos estatutários de patenteabilidade." }
+          consider_relevant_legal_principles { summary "Princípios legais relevantes incluem interpretação estatutária da Lei 9.279/96, que trata dos requisitos do relatório descritivo, bem como jurisprudência que interpreta e aplica esta lei." }
+          formulate_search_queries_strategy { summary "Dado o foco na Lei 9.279/96, a estratégia de consulta priorizaria referências diretas à lei e suas subseções específicas." }
+          specify_expected_information_strategy { summary "As consultas devem produzir informações que expliquem precisamente os diferentes elementos da Lei 9.279/96, incluindo relatório descritivo, suficiência, melhor forma e reivindicações." }
+          ensure_comprehensive_coverage_strategy { summary "Para garantir cobertura abrangente, a estratégia começaria com busca ampla da Lei 9.279/96, depois focaria em cada componente individual." }
         }
       }
     ]
   }
   @@assert( {{ this.key_synthesized_topics | length >= 1 }} )
   @@assert( {{ this.key_synthesized_topics | length <= 5 }} )
-  // Should address the four main requirements of Section 112
+  // Should address the four main requirements of the Lei 9.279/96
   @@assert( {{ this.key_synthesized_topics[0].topic_title | length > 5 }} )
   @@assert( {{ this.key_synthesized_topics[0].synthesis | length > 30 }} )
   // Should have high confidence given comprehensive source
   @@assert( {{ this.key_synthesized_topics[0].confidence_score >= 7 }} )
   // Should reference the document
-  @@assert( {{ "https://vernalaw.com/why-is-section-112-of-the-patent-act-important/" in this.key_synthesized_topics[0].supporting_document_ids }} )
+  @@assert( {{ "https://inpi.gov.br/requisitos-patente-lei-9279" in this.key_synthesized_topics[0].supporting_document_ids }} )
   // May have emerging questions about practical applications
   @@assert( {{ this.emerging_questions | length >= 0 }} )
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 15 }} )

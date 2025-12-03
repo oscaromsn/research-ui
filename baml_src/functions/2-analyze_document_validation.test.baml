@@ -1,23 +1,23 @@
-// Validation test specifically to catch BamlValidationError for missing required fields
-test ValidateAnalyzeSingleDocumentRequiredFields {
+// Teste de validação específico para capturar BamlValidationError para campos obrigatórios ausentes
+test ValidarCamposObrigatoriosAnalyzeSingleDocument {
   functions [AnalyzeSingleDocument]
   args {
-    original_legal_question "What constitutes 'adverse employment action' under Title VII in the 9th Circuit?"
+    original_legal_question "O que caracteriza dispensa discriminatória segundo a Súmula 443 do TST?"
     document {
-      id "validation_test_doc"
-      url "https://example.com/test-validation"
-      source_name "Test Source"
-      title "Test Document for Validation"
-      snippet "Test snippet for validation purposes"
-      full_text "This is a test document to ensure all required fields are properly returned by the AnalyzeSingleDocument function."
+      id "doc_teste_validacao"
+      url "https://exemplo.com/teste-validacao"
+      source_name "Fonte de Teste"
+      title "Documento de Teste para Validação"
+      snippet "Trecho de teste para fins de validação"
+      full_text "Este é um documento de teste para garantir que todos os campos obrigatórios são retornados corretamente pela função AnalyzeSingleDocument."
       retrieval_date "2024-07-16T10:00:00Z"
       metadata {}
     }
   }
 
-  // CRITICAL: Test all required fields are present and non-empty
+  // CRÍTICO: Testar que todos os campos obrigatórios estão presentes e não vazios
   @@assert( {{ this.search_result_id is not none }} )
-  @@assert( {{ this.search_result_id == "validation_test_doc" }} )
+  @@assert( {{ this.search_result_id == "doc_teste_validacao" }} )
   @@assert( {{ this.relevance_score is not none }} )
   @@assert( {{ this.relevance_score >= 1 and this.relevance_score <= 10 }} )
   @@assert( {{ this.confidence_score is not none }} )
@@ -28,7 +28,7 @@ test ValidateAnalyzeSingleDocumentRequiredFields {
   @@assert( {{ this.extracted_entities is not none }} )
   @@assert( {{ this.extracted_quotes is not none }} )
 
-  // CRITICAL: Test complete reasoning structure is present
+  // CRÍTICO: Testar que a estrutura completa de reasoning está presente
   @@assert( {{ this.reasoning is not none }} )
   @@assert( {{ this.reasoning.analyze_legal_question is not none }} )
   @@assert( {{ this.reasoning.analyze_legal_question.summary is not none }} )
@@ -51,25 +51,25 @@ test ValidateAnalyzeSingleDocumentRequiredFields {
   @@assert( {{ this.reasoning.ensure_comprehensive_coverage_strategy.summary | length > 0 }} )
 }
 
-// Test with minimal document content to ensure robust handling
-test ValidateAnalyzeSingleDocumentMinimalContent {
+// Teste com conteúdo mínimo do documento para garantir tratamento robusto
+test ValidarConteudoMinimoAnalyzeSingleDocument {
   functions [AnalyzeSingleDocument]
   args {
-    original_legal_question "What is consideration in contract law?"
+    original_legal_question "Quais são os requisitos de validade do contrato segundo o art. 104 do Código Civil?"
     document {
-      id "minimal_doc"
-      url "https://example.com/minimal"
-      source_name "Minimal Source"
-      title "Minimal Document"
-      snippet "Brief snippet"
-      full_text "Very brief content about contracts."
+      id "doc_minimo"
+      url "https://exemplo.com/minimo"
+      source_name "Fonte Mínima"
+      title "Documento Mínimo"
+      snippet "Trecho breve"
+      full_text "Conteúdo muito breve sobre contratos no direito brasileiro."
       retrieval_date "2024-07-16T10:00:00Z"
       metadata {}
     }
   }
 
-  // Even with minimal content, all required structure must be present
-  @@assert( {{ this.search_result_id == "minimal_doc" }} )
+  // Mesmo com conteúdo mínimo, toda a estrutura obrigatória deve estar presente
+  @@assert( {{ this.search_result_id == "doc_minimo" }} )
   @@assert( {{ this.reasoning is not none }} )
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 0 }} )
   @@assert( {{ this.reasoning.consider_relevant_legal_principles.summary | length > 0 }} )
@@ -78,50 +78,52 @@ test ValidateAnalyzeSingleDocumentMinimalContent {
   @@assert( {{ this.reasoning.ensure_comprehensive_coverage_strategy.summary | length > 0 }} )
 }
 
-// Test with complex document to ensure structure remains consistent
-test ValidateAnalyzeSingleDocumentComplexContent {
+// Teste com documento complexo para garantir consistência da estrutura
+test ValidarConteudoComplexoAnalyzeSingleDocument {
   functions [AnalyzeSingleDocument]
   args {
-    original_legal_question "What are the requirements for establishing a prima facie case of employment discrimination under Title VII?"
+    original_legal_question "Quais são os requisitos para estabelecer caso prima facie de discriminação trabalhista no direito brasileiro?"
     document {
-      id "complex_doc"
-      url "https://example.com/complex-employment-case"
-      source_name "Federal Courts Database"
-      title "McDonnell Douglas Corp. v. Green Analysis and Modern Applications"
-      snippet "Comprehensive analysis of the McDonnell Douglas framework for establishing prima facie cases of employment discrimination, including modern circuit court applications and variations."
+      id "doc_complexo"
+      url "https://exemplo.com/caso-discriminacao-complexo"
+      source_name "Base de Jurisprudência Trabalhista"
+      title "Análise do Framework Brasileiro de Prova em Discriminação Trabalhista e Aplicações Modernas"
+      snippet "Análise abrangente do framework brasileiro para estabelecer casos prima facie de discriminação trabalhista, incluindo aplicações modernas da jurisprudência do TST e variações nos TRTs."
       full_text #"
-        The McDonnell Douglas Corp. v. Green framework, established by the Supreme Court in 1973, provides the foundational structure for analyzing employment discrimination claims under Title VII. This seminal case established a burden-shifting framework that remains the cornerstone of discrimination jurisprudence.
+        O framework brasileiro para análise de discriminação trabalhista, estabelecido pela jurisprudência do TST e consolidado na Súmula 443, fornece a estrutura fundamental para analisar reclamações de discriminação no emprego. Este entendimento estabeleceu um framework de distribuição do ônus da prova que permanece como pedra angular da jurisprudência trabalhista.
 
-        Under McDonnell Douglas, a plaintiff must establish a prima facie case by showing: (1) membership in a protected class; (2) qualification for the position in question; (3) an adverse employment action; and (4) circumstances giving rise to an inference of discrimination.
+        Segundo o entendimento consolidado, o reclamante deve estabelecer um caso prima facie demonstrando: (1) pertencimento a um grupo protegido; (2) qualificação para o cargo em questão; (3) uma ação prejudicial no emprego; e (4) circunstâncias que deem origem a uma inferência de discriminação.
 
-        The circuits have developed various approaches to the fourth element, with some requiring but-for causation and others applying a motivating factor test. The Civil Rights Act of 1991 further complicated this analysis by establishing mixed-motive provisions.
+        Os Tribunais Regionais do Trabalho desenvolveram diferentes abordagens para o quarto elemento, com alguns exigindo nexo causal direto e outros aplicando um teste de fator motivador. A Lei 9.029/95 complicou ainda mais esta análise ao estabelecer proibições específicas.
 
-        Recent circuit decisions have refined the analysis particularly regarding the scope of adverse employment actions and the level of specificity required for circumstantial evidence of discrimination.
+        Decisões recentes dos TRTs refinaram a análise particularmente em relação ao escopo das ações prejudiciais no emprego e ao nível de especificidade requerido para prova circunstancial de discriminação.
+
+        A inversão do ônus da prova, conforme art. 818 da CLT e entendimento do TST, é fundamental na análise destes casos, especialmente quando há indícios de discriminação.
       "#
       retrieval_date "2024-07-16T10:00:00Z"
       metadata {
-        court "Supreme Court"
-        citation "411 U.S. 792 (1973)"
-        jurisdiction "Federal"
+        court "TST"
+        citation "Súmula 443"
+        jurisdiction "Brasil"
       }
     }
   }
 
-  // Complex content should still maintain required structure
-  @@assert( {{ this.search_result_id == "complex_doc" }} )
+  // Conteúdo complexo deve manter a estrutura obrigatória
+  @@assert( {{ this.search_result_id == "doc_complexo" }} )
   @@assert( {{ this.relevance_score >= 6 }} ) // Should be highly relevant
   @@assert( {{ this.confidence_score >= 6 }} ) // Should be confident given quality source
   @@assert( {{ this.summary | length > 20 }} ) // Should generate substantial summary
   @@assert( {{ this.key_arguments_and_reasoning | length >= 2 }} ) // Multiple arguments expected
   @@assert( {{ this.extracted_entities | length >= 3 }} ) // Should extract multiple entities
 
-  // Full reasoning structure validation
+  // Validação completa da estrutura de reasoning
   @@assert( {{ this.reasoning.analyze_legal_question.summary | length > 15 }} )
   @@assert( {{ this.reasoning.consider_relevant_legal_principles.summary | length > 15 }} )
   @@assert( {{ this.reasoning.formulate_search_queries_strategy.summary | length > 10 }} )
   @@assert( {{ this.reasoning.specify_expected_information_strategy.summary | length > 10 }} )
   @@assert( {{ this.reasoning.ensure_comprehensive_coverage_strategy.summary | length > 10 }} )
 
-  // Optional fields should be handled properly (can be null or have content)
+  // Campos opcionais devem ser tratados adequadamente (podem ser null ou ter conteúdo)
   @@assert( {{ this.counter_arguments_or_nuances is not none or this.counter_arguments_or_nuances is none }} ) // Either populated or null is fine
 }
